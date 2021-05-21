@@ -1,48 +1,52 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+## R Shiny App for Management Data Input 
+## Field Observatory
 
 library(shiny)
 
-# Define UI for application that draws a histogram
+# read the csv file containing the sites 
+sites <- read.csv(file = 'data/FOsites.csv')$site
+
+# what are the possible activities that can be submitted?
+possible_activities <- c("planting", "fertilizer", "irrigation", "tillage", "organic_material", "harvest", "bed_prep", "inorg_mulch", "Inorg_mul_rem", "chemicals", "mowing", "observation", "weeding", "puddling", "flood_level", "other")
+
+# Define UI for the application
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Old Faithful Geyser Data"),
+    titlePanel("Input Management Data"),
 
-    # Sidebar with a slider input for number of bins 
+    # create a sidebar layout
     sidebarLayout(
+        
+        # the sidebar contains the selectors for the farm, activity type and date
         sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+            
+            # adding "" to the choices makes the default choice empty
+            selectInput("site", label = "Select the site:", choices = c("", sites)),
+            
+            selectInput("block", label = "Select the block:", choice = c("", "0", "1")),
+            
+            selectInput("activity", label = "Select the activity:", choices = c("", possible_activities)),
+            
+            dateInput("date", label = "Select the date when the activity was performed:"),
+            
+            textAreaInput("notes", label = "Notes (optional):", placeholder = "Anything related to the event, e.g. yield amount, seeding or tillage depth, products spread, machine type, etc."),
+            
+            submitButton(text = "Save")
         ),
 
-        # Show a plot of the generated distribution
+        # the main panel will in the future contain the options to input more precise data
         mainPanel(
-           plotOutput("distPlot")
-        )
+           
+        ),
     )
 )
 
-# Define server logic required to draw a histogram
+
+# Define server logic TODO
 server <- function(input, output) {
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    })
+    
 }
 
 # Run the application 
