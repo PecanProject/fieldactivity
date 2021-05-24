@@ -4,17 +4,19 @@
 
 library(shiny)
 library(jsonlite)
+library(shinyjs) # shinyjs is used for e.g. disabling action buttons
 
 # make helper functions available
 source("display_name_helpers.R")
 source("json_file_helpers.R")
 
 # read the csv file containing the sites 
-sites <- read.csv(file = "data/FOsites.csv")$site
+sites <- read.csv(file = "data/FOsites.csv")
 
 # Define UI for the application
 ui <- fluidPage(
-
+    useShinyjs(),  # enable shinyjs
+    
     # Application title
     titlePanel("Input Management Data"),
 
@@ -26,7 +28,7 @@ ui <- fluidPage(
             
             # adding "" to the choices makes the default choice empty
             selectInput("site", label = "Select the site:", 
-                        choices = c("", sites)),
+                        choices = c("", sites$site)),
             
             selectInput("block", label = "Select the block:", 
                         choice = c("", "0", "1")),
@@ -109,6 +111,15 @@ server <- function(input, output, session) {
         # expression run, which reads the latest data from the json file
         # and updates the table
         tabledata$events <- NULL
+    })
+    
+    # disable the save button if not all necessary info has been filled
+    observe({
+        if (input$site == "" | input$block == "" | input$activity == "") {
+            shinyjs::disable("submit")
+        } else {
+            shinyjs::enable("submit")
+        }
     })
     
     # the following is only for testing
