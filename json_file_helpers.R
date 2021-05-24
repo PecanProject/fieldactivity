@@ -1,8 +1,6 @@
 # Helper functions for the management data input app
 # Otto Kuusela 2021
 
-# TODO: a lot of error handling
-
 # missing value in the ICASA standard
 missingval <- "-99.0"
 # relative path to json file folder

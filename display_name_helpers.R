@@ -10,7 +10,7 @@ get_category_display_names <- function(category1) {
   return(subset(display_names_dict, category == category1)$display_name)
 }
 
-# get the variable name corresponding to a display name
+# get the code name corresponding to a display name
 get_code_name <- function(display_name1) {
   return(subset(display_names_dict, display_name == display_name1)$code_name)
 }

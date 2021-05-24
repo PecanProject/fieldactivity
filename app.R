@@ -33,8 +33,27 @@ ui <- fluidPage(
             selectInput("block", label = "Select the block:", 
                         choice = c("", "0", "1")),
             
-            selectInput("activity", label = "Select the activity:", 
+            selectInput("activity", 
+                        label = "Select the activity (hint: choose planting):", 
                         choices = c("", get_category_display_names("activity_type"))),
+            
+            # show a detailed options panel for planting (experimental)
+            conditionalPanel(
+                condition = "input.activity == 'planting'",
+                
+                hr(style = "border-top: 1px solid #c8c8c8;"),
+                
+                helpText(paste("Here could be further selections for the",
+                               "planting activity type, for example")),
+                
+                selectInput("plantedPlant", label = "Planted:",
+                            choices = c("Barley", "Wheat")),
+                
+                checkboxGroupInput("things", label = "Choose the options that apply:",
+                                   choices = c("this", "that", "the other thing")),
+                
+                hr(style = "border-top: 1px solid #c8c8c8;")
+            ),
             
             # setting max disallows inputting future events
             dateInput("date", format = "dd/mm/yyyy", 
@@ -50,17 +69,13 @@ ui <- fluidPage(
             actionButton("submit", label = "Save")
         ),
 
-        # the main panel will in the future enable the input of more precise data
-        # as well as seeing previous submissions
+        # the main panel displays previously saved events
         mainPanel(
-            
-            # text for testing purposes
-            # textOutput("test_text"),
             
             # table for showing already supplied information
             dataTableOutput("mgmt_events_table")
             
-        ),
+        )
     )
 )
 
@@ -122,10 +137,6 @@ server <- function(input, output, session) {
         }
     })
     
-    # the following is only for testing
-    # output$test_text <- renderText({
-    #     as.character(input$date)
-    # })
 }
 
 # Run the application 
