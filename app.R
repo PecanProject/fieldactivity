@@ -40,13 +40,15 @@ ui <- fluidPage(
             selectInput("activity", label = "Select the activity:", 
                         choices = c("", possible_activities)),
             
+            # setting max disallows inputting future events
             dateInput("date", format = "dd/mm/yyyy", 
-                      label = "Select the date when the activity was performed:"),
+                      label = "Select the date when the activity was performed:",
+                      max = Sys.Date()),
             
             textAreaInput("notes", label = "Notes (optional):", 
                           placeholder = paste("Anything related to the event,",
                           "e.g. yield amount, seeding or tillage depth,", 
-                          "products spread, machine type, etc.", sep = ""), 
+                          "products spread, machine type, etc."), 
                           resize = "vertical"),
             
             actionButton("submit", label = "Save")

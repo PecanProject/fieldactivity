@@ -6,10 +6,16 @@
 # missing value in the ICASA standard
 missingval <- "-99.0"
 # relative path to json file folder
-json_file_folder <- "data/management_events/"
+json_file_folder <- "data/management_events"
 
 
 create_json_file <- function(file_path) {
+  
+  # if the events directory (stored in json_file_folder) doesn't exist,
+  # create it
+  if (!file.exists(json_file_folder)) {
+    dir.create(json_file_folder, recursive = TRUE)
+  }
   
   # create structure with no events
   experiment <- list()
@@ -24,10 +30,9 @@ create_json_file <- function(file_path) {
   
 append_to_json_file <- function(site_name, block, date, activity, notes) {
   
-  # corresponding file name
+  # corresponding file name: "sitename_blocknumber_events.json"
   file_name <- paste(site_name, block, "events.json", sep = "_")
-  file_path <- paste0(json_file_folder, file_name)
-  
+  file_path <- file.path(json_file_folder, file_name)
   
   # if file doesn't exist, create it
   if (!file.exists(file_path)) {
@@ -57,9 +62,9 @@ append_to_json_file <- function(site_name, block, date, activity, notes) {
 
 retrieve_json_info <- function(site_name, block) {
   
-  # corresponding file name
+  # corresponding file name: "sitename_blocknumber_events.json"
   file_name <- paste(site_name, block, "events.json", sep = "_")
-  file_path <- paste0(json_file_folder, file_name)
+  file_path <- file.path(json_file_folder, file_name)
   
   # if file doesn't exist or given names are empty, can't read it
   if (!file.exists(file_path) | site_name == "" | block == "") {
