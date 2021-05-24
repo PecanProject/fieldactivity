@@ -6,17 +6,11 @@ library(shiny)
 library(jsonlite)
 
 # make helper functions available
+source("display_name_helpers.R")
 source("json_file_helpers.R")
 
 # read the csv file containing the sites 
-sites <- read.csv(file = 'data/FOsites.csv')$site
-
-# what are the possible activities that can be submitted?
-possible_activities <- c("planting", "fertilizer", "irrigation", "tillage", 
-                         "organic_material", "harvest", "bed_prep", 
-                         "inorg_mulch", "Inorg_mul_rem", "chemicals", "mowing",
-                         "observation", "weeding", "puddling", "flood_level", 
-                         "other")
+sites <- read.csv(file = "data/FOsites.csv")$site
 
 # Define UI for the application
 ui <- fluidPage(
@@ -38,7 +32,7 @@ ui <- fluidPage(
                         choice = c("", "0", "1")),
             
             selectInput("activity", label = "Select the activity:", 
-                        choices = c("", possible_activities)),
+                        choices = c("", get_category_display_names("activity_type"))),
             
             # setting max disallows inputting future events
             dateInput("date", format = "dd/mm/yyyy", 
@@ -103,7 +97,7 @@ server <- function(input, output, session) {
         
         # this saves the data to the json file.
         append_to_json_file(input$site, input$block, formatted_date,
-                            input$activity, input$notes)
+                            get_code_name(input$activity), input$notes)
         
         # clear the selected activity and notes
         updateSelectInput(session, "activity", selected = "")

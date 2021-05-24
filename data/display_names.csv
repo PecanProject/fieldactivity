@@ -1,0 +1,20 @@
+category,code_name,display_name
+activity_type,planting,planting
+activity_type,fertilizer,fertilizer application
+activity_type,irrigation,irrigation application
+activity_type,tillage,tillage application
+activity_type,organic_material,organic material application
+activity_type,harvest,harvest
+activity_type,bed_prep,raised bed preparation
+activity_type,inorg_mulch,placement of inorganic mulch
+activity_type,Inorg_mul_rem,removal of inorganic mulch
+activity_type,chemicals,chemicals application
+activity_type,mowing,mowing
+activity_type,observation,observation
+activity_type,weeding,mechanical extraction of weeds
+activity_type,puddling,paddy system preparation (puddling)
+activity_type,flood_level,paddy system flood level control
+activity_type,other,other
+table_col_name,mgmt_operations_event,Event
+table_col_name,mgmt_event_date,Date
+table_col_name,mgmt_event_notes,Notes

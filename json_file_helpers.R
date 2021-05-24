@@ -76,6 +76,21 @@ retrieve_json_info <- function(site_name, block) {
   # add a 4th column for ordering by date (this will be hidden in the table)
   events$date_ordering <- as.Date(events$mgmt_event_date, format = "%d/%m/%Y")
   
+  # swap code names for display names
+  # the get_disp_name function is defined in display_name_helpers.R
+  events$mgmt_operations_event <- 
+    sapply(events$mgmt_operations_event, FUN = get_disp_name)
+  
+  # replace missingvals with ""
+  events$mgmt_event_notes <- 
+    sapply(events$mgmt_event_notes, function(x) ifelse(x == missingval, "", x))
+  
+  # make column names pretty
+  # the last "date_ordering" is for the hidden column intended for ordering
+  # the table chronologically
+  colnames(events) <- c(get_category_display_names("table_col_name"),
+                        "date_ordering")
+  
   return(events)
   
 }
