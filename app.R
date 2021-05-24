@@ -54,7 +54,13 @@ ui <- fluidPage(
         # the main panel will in the future enable the input of more precise data
         # as well as seeing previous submissions
         mainPanel(
-           
+            
+            # text for testing purposes
+            # textOutput("test_text"),
+            
+            # table for showing already supplied information
+            dataTableOutput("mgmt_events_table")
+            
         ),
     )
 )
@@ -63,19 +69,43 @@ ui <- fluidPage(
 # Define server logic incl. save button action
 server <- function(input, output) {
     
+    # this is where we access the data to display in the data table.
+    # initially NULL because reactive expressions aren't allowed here.
+    # we store the data in a reactiveValues object so that if the data is 
+    # updated when the button is clicked, the data table automatically updates
+    tabledata <- reactiveValues(events = NULL)
+    
+    output$mgmt_events_table <- renderDataTable({
+        # when input$site or input$block changes, update.
+        # this is also updated if tabledata$events changes, which happens
+        # when the submit button is pressed
+        tabledata$events <- retrieve_json_info(input$site, input$block) 
+        tabledata$events
+    })
+    
     # save input to a file
     observeEvent(input$submit, {
         
-        # TODO: fix weird date picker problem ("18977")
-        
-        append_to_json_file(input$site, input$block, input$date,
+        # this saves the data to the json file.
+        # as.character is used with date to make it correctly convert to 
+        # a character string (otherwise dates may be displayed as the number
+        # of days since 1970-01-01)
+        append_to_json_file(input$site, input$block, as.character(input$date),
                             input$activity, input$notes)
         
         # TODO: clear some of the fields?
         
         showNotification("Data saved!", type = "message")
+        
+        # set tabledata$events to NULL. This makes the renderDataTable 
+        # expression run, which reads the latest data from the json file
+        tabledata$events <- NULL
     })
     
+    # the following is only for testing
+    # output$test_text <- renderText({
+    #     as.character(input$date)
+    # })
 }
 
 # Run the application 

@@ -35,6 +35,12 @@ append_to_json_file <- function(site_name, block, date, activity, notes) {
   
   experiment <- jsonlite::fromJSON(file_path)
   
+  # if the notes are not supplied, replace with missing value
+  # trimws removes whitespace around the string
+  if (trimws(notes) == "") {
+    notes <- missingval
+  }
+  
   # create a new “row” to be added to experiment$management$events
   new_event <- data.frame(mgmt_operations_event = activity,
                           mgmt_event_date = date,
@@ -46,4 +52,19 @@ append_to_json_file <- function(site_name, block, date, activity, notes) {
   # save changes
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
                        null = 'null', auto_unbox = TRUE)
+}
+
+retrieve_json_info <- function(site_name, block) {
+  # corresponding file name
+  file_name <- paste(site_name, block, "events.json", sep = "_")
+  file_path <- paste0(json_file_folder, file_name)
+  
+  # if file doesn't exist or given names are empty, can't read it
+  if (!file.exists(file_path) | site_name == "" | block == "") {
+    return(data.frame())
+  }
+  
+  events <- jsonlite::fromJSON(file_path)$management$events
+  
+  return(events)
 }
