@@ -40,7 +40,8 @@ ui <- fluidPage(
             selectInput("activity", label = "Select the activity:", 
                         choices = c("", possible_activities)),
             
-            dateInput("date", label = "Select the date when the activity was performed:"),
+            dateInput("date", format = "dd/mm/yyyy", 
+                      label = "Select the date when the activity was performed:"),
             
             textAreaInput("notes", label = "Notes (optional):", 
                           placeholder = paste("Anything related to the event,",
@@ -76,21 +77,30 @@ server <- function(input, output) {
     tabledata <- reactiveValues(events = NULL)
     
     output$mgmt_events_table <- renderDataTable({
+        
         # when input$site or input$block changes, update.
         # this is also updated if tabledata$events changes, which happens
         # when the submit button is pressed
         tabledata$events <- retrieve_json_info(input$site, input$block) 
         tabledata$events
-    })
+
+    },
+    # order by date in descending order 
+    # we have dates for ordering in the 4th (hidden) column, so the index
+    # is 3
+    options = list(order = list(3, 'desc'), 
+                   columnDefs = list(list(visible=FALSE, targets=c(3))))
+    )
     
     # save input to a file
     observeEvent(input$submit, {
         
+        # format the date to be displayed nicely (otherwise will use default
+        # yyyy-mm-dd formatting of the Date object)
+        formatted_date <- format(input$date, "%d/%m/%Y")
+        
         # this saves the data to the json file.
-        # as.character is used with date to make it correctly convert to 
-        # a character string (otherwise dates may be displayed as the number
-        # of days since 1970-01-01)
-        append_to_json_file(input$site, input$block, as.character(input$date),
+        append_to_json_file(input$site, input$block, formatted_date,
                             input$activity, input$notes)
         
         # TODO: clear some of the fields?
@@ -99,6 +109,7 @@ server <- function(input, output) {
         
         # set tabledata$events to NULL. This makes the renderDataTable 
         # expression run, which reads the latest data from the json file
+        # and updates the table
         tabledata$events <- NULL
     })
     

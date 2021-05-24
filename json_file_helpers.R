@@ -8,6 +8,7 @@ missingval <- "-99.0"
 # relative path to json file folder
 json_file_folder <- "data/management_events/"
 
+
 create_json_file <- function(file_path) {
   
   # create structure with no events
@@ -55,6 +56,7 @@ append_to_json_file <- function(site_name, block, date, activity, notes) {
 }
 
 retrieve_json_info <- function(site_name, block) {
+  
   # corresponding file name
   file_name <- paste(site_name, block, "events.json", sep = "_")
   file_path <- paste0(json_file_folder, file_name)
@@ -66,5 +68,9 @@ retrieve_json_info <- function(site_name, block) {
   
   events <- jsonlite::fromJSON(file_path)$management$events
   
+  # add a 4th column for ordering by date (this will be hidden in the table)
+  events$date_ordering <- as.Date(events$mgmt_event_date, format = "%d/%m/%Y")
+  
   return(events)
+  
 }
