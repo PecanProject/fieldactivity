@@ -70,7 +70,7 @@ ui <- fluidPage(
 
 
 # Define server logic incl. save button action
-server <- function(input, output) {
+server <- function(input, output, session) {
     
     # this is where we access the data to display in the data table.
     # initially NULL because reactive expressions aren't allowed here.
@@ -105,7 +105,9 @@ server <- function(input, output) {
         append_to_json_file(input$site, input$block, formatted_date,
                             input$activity, input$notes)
         
-        # TODO: clear some of the fields?
+        # clear the selected activity and notes
+        updateSelectInput(session, "activity", selected = "")
+        updateTextAreaInput(session, "notes", value = "")
         
         showNotification("Data saved!", type = "message")
         
