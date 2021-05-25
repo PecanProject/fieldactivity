@@ -2,7 +2,8 @@
 # Otto Kuusela 2021
 
 # read the csv file containing the display names
-display_names_dict <- read.csv(file = "data/display_names.csv")
+display_name_dict_path <- "data/display_names.csv"
+display_names_dict <- read.csv(display_name_dict_path)
 
 # find all display names belonging to a certain category
 # e.g. find all activity types

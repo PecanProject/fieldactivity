@@ -9,9 +9,10 @@ library(shinyjs) # shinyjs is used for e.g. disabling action buttons
 # make helper functions available
 source("display_name_helpers.R")
 source("json_file_helpers.R")
+source("activity_option_builder.R")
 
 # read the csv file containing the sites 
-sites <- read.csv(file = "data/FOsites.csv")
+sites <- read.csv("data/FOsites.csv")
 
 # Define UI for the application
 ui <- fluidPage(
@@ -38,22 +39,8 @@ ui <- fluidPage(
                         choices = c("", get_category_display_names("activity_type"))),
             
             # show a detailed options panel for planting (experimental)
-            conditionalPanel(
-                condition = "input.activity == 'planting'",
-                
-                hr(style = "border-top: 1px solid #c8c8c8;"),
-                
-                helpText(paste("Here could be further selections for the",
-                               "planting activity type, for example")),
-                
-                selectInput("plantedPlant", label = "Planted:",
-                            choices = c("Barley", "Wheat")),
-                
-                checkboxGroupInput("things", label = "Choose the options that apply:",
-                                   choices = c("this", "that", "the other thing")),
-                
-                hr(style = "border-top: 1px solid #c8c8c8;")
-            ),
+            # planting_options is defined in activity_option_builder.R
+            create_ui(planting_options),
             
             # setting max disallows inputting future events
             dateInput("date", format = "dd/mm/yyyy", 
