@@ -4,17 +4,23 @@
 
 structure_file_path <- "data/activity_option_structure.json"
 structure <- jsonlite::fromJSON(structure_file_path)
+activity_options <- structure$activities
 
-# currently implemented for planting, in the future for all activity types
-planting_options <- structure$activities$planting
-
-# creates the ui for a list of elements in the structure file
-create_ui <- function(input_list) {
-  complete_panel <- wellPanel(lapply(input_list, create_element))
+# creates the ui for a list of elements in the structure file.
+# create_border specifies whether a border should be drawn around the 
+# elements in the input_list. It is typically set to false when calling
+# create_ui for the entire structure$activities, and true otherwise
+create_ui <- function(input_list, create_border) {
+  new_elements <- lapply(input_list, create_element)
   
+  if (create_border) {
+    new_elements <- wellPanel(new_elements)
+  }
+  
+  # if there is a visibility condition, apply it
   if (!is.null(input_list$condition)) {
-    complete_panel <- conditionalPanel(
-      condition = input_list$condition, complete_panel)
+    new_elements <- conditionalPanel(
+      condition = input_list$condition, new_elements)
   }
 
   return(complete_panel)
@@ -27,6 +33,12 @@ create_element <- function(element) {
     # it has already been handled in create_ui
     if (!is.list(element)) {
       return()
+    }
+  
+    # element is a list of elements, because it is doesn't have the type
+    # attribute. In that case we want to create all of the elements
+    if (is.null(element$type)) {
+      return(create_ui(element, create_border = TRUE))
     }
         
     new_element <- NULL
@@ -44,7 +56,7 @@ create_element <- function(element) {
     
     # if there are sub-elements to create, do that
     if (!is.null(element$sub_elements)) {
-      return(list(new_panel, create_ui(element$sub_elements)))
+      return(list(new_panel, create_ui(element$sub_elements, create_border = TRUE)))
     }
     
     return(new_panel)

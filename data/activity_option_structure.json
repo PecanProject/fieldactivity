@@ -3,32 +3,35 @@
     "planting": {
       "condition": "input.activity == 'planting'",
       "planting_help_text" : {
-	"condition": "input.activity == 'planting'",
-	"text" : "Here you can have specific input types for the planting activity.",
-	"type" : "helpText"
+	"type" : "helpText",
+	"text" : "Here you can have specific input types for the planting activity."
       },
       "planting_option_1": {
-        "condition": "input.activity == 'planting'",
         "code_name": "planting_option_1",
-        "label": "Did you do x?",
         "type": "checkboxInput",
+        "label": "Did you do x?",
         "sub_elements": {
-          "condition": "input.activity == 'planting' && input.planting_option_1 == '1'",
+          "condition": "input.planting_option_1 == '1'",
           "planting_option_11": {
-            "condition": "input.activity == 'planting' && input.planting_option_1 == '1'",
             "code_name": "planting_option_11",
-            "label": "Further choices:",
             "type": "selectInput",
+            "label": "Further choices:",
             "choices": ["Alternative 1", "Alternative 2"]
           }
         }
       },
       "plant_species": {
-        "condition": "input.activity == 'planting'",
         "code_name" : "plant_species",
-        "label": "Choose the species:",
         "type": "selectInput",
+        "label": "Choose the species:",
         "choices": ["barley", "wheat", "rye"]
+      }
+    },
+    "harvest": {
+      "condition": "input.activity == 'harvest'",
+      "harvest_help_text" : {
+	"type" : "helpText",
+	"text" : "Here you can have specific input types for the harvest activity."
       }
     }
   }

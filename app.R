@@ -40,7 +40,7 @@ ui <- fluidPage(
             
             # show a detailed options panel for planting (experimental)
             # planting_options is defined in activity_option_builder.R
-            create_ui(planting_options),
+            create_ui(activity_options, create_border = FALSE),
             
             # setting max disallows inputting future events
             dateInput("date", format = "dd/mm/yyyy", 
