@@ -76,8 +76,9 @@ retrieve_json_info <- function(site_name, block) {
   
   # swap code names for display names
   # the get_disp_name function is defined in display_name_helpers.R
-  events$mgmt_operations_event <- 
-    sapply(events$mgmt_operations_event, FUN = get_disp_name)
+  # TODO: re-implement
+  #events$mgmt_operations_event <- 
+  #  sapply(events$mgmt_operations_event, FUN = get_disp_name)
   
   # replace missingvals with ""
   events$mgmt_event_notes <- 
@@ -86,8 +87,9 @@ retrieve_json_info <- function(site_name, block) {
   # make column names pretty
   # the last "date_ordering" is for the hidden column intended for ordering
   # the table chronologically
-  colnames(events) <- c(get_category_display_names("table_col_name"),
-                        "date_ordering")
+  # TODO: re-implement
+  #colnames(events) <- c(get_category_display_names("table_col_name"),
+  #                      "date_ordering")
   
   return(events)
   

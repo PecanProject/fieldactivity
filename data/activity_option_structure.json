@@ -1,37 +1,43 @@
 {
-  "activities": {
-    "planting": {
-      "condition": "input.activity == 'planting'",
-      "planting_help_text" : {
-	"type" : "helpText",
-	"text" : "Here you can have specific input types for the planting activity."
-      },
-      "planting_option_1": {
-        "code_name": "planting_option_1",
-        "type": "checkboxInput",
-        "label": "Did you do x?",
-        "sub_elements": {
-          "condition": "input.planting_option_1 == '1'",
-          "planting_option_11": {
-            "code_name": "planting_option_11",
-            "type": "selectInput",
-            "label": "Further choices:",
-            "choices": ["Alternative 1", "Alternative 2"]
+  "activity": {
+    "code_name": "activity",
+    "type" : "selectInput",
+    "label" : "activity_label",
+    "choices": ["planting", "fertilizer", "irrigation", "tillage", "organic_material", "harvest", "bed_prep", "inorg_mulch", "Inorg_mul_rem", "chemicals", "mowing", "observation", "weeding", "puddling", "flood_level", "other"],
+    "sub_elements": {
+      "planting": {
+        "condition": "input.activity == 'planting'",
+        "planting_help_text" : {
+	    "type" : "helpText",
+	    "text" : "Here you can have specific input types for the planting activity."
+        },
+        "planting_option_1": {
+          "code_name": "planting_option_1",
+          "type": "checkboxInput",
+          "label": "Did you do x?",
+          "sub_elements": {
+            "condition": "input.planting_option_1 == '1'",
+            "planting_option_11": {
+              "code_name": "planting_option_11",
+              "type": "selectInput",
+              "label": "planting_option_11_label",
+              "choices": ["alt1", "alt2"]
+            }
           }
+        },
+        "plant_species": {
+          "code_name" : "plant_species",
+          "type": "selectInput",
+          "label": "plant_species_label",
+          "choices": ["spc_barley", "spc_wheat", "spc_rye"]
         }
       },
-      "plant_species": {
-        "code_name" : "plant_species",
-        "type": "selectInput",
-        "label": "Choose the species:",
-        "choices": ["barley", "wheat", "rye"]
-      }
-    },
-    "harvest": {
-      "condition": "input.activity == 'harvest'",
-      "harvest_help_text" : {
-	"type" : "helpText",
-	"text" : "Here you can have specific input types for the harvest activity."
+      "harvest": {
+        "condition": "input.activity == 'harvest'",
+        "harvest_help_text" : {
+	    "type" : "helpText",
+	    "text" : "Here you can have specific input types for the harvest activity."
+        }
       }
     }
   }

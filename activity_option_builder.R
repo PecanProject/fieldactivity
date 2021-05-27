@@ -4,14 +4,14 @@
 
 structure_file_path <- "data/activity_option_structure.json"
 structure <- jsonlite::fromJSON(structure_file_path)
-activity_options <- structure$activities
+activity_options <- structure$activity$sub_elements
 
 # creates the ui for a list of elements in the structure file.
 # create_border specifies whether a border should be drawn around the 
 # elements in the input_list. It is typically set to false when calling
 # create_ui for the entire structure$activities, and true otherwise
-create_ui <- function(input_list, create_border) {
-  new_elements <- lapply(input_list, create_element)
+create_ui <- function(input_list, language, create_border) {
+  new_elements <- lapply(input_list, create_element, language = language)
   
   if (create_border) {
     new_elements <- wellPanel(new_elements)
@@ -23,11 +23,11 @@ create_ui <- function(input_list, create_border) {
       condition = input_list$condition, new_elements)
   }
 
-  return(complete_panel)
+  return(new_elements)
 }
 
 # creates the individual elements
-create_element <- function(element) {
+create_element <- function(element, language) {
   
     # element is a string, i.e. a visibility condition for a element set
     # it has already been handled in create_ui
@@ -38,7 +38,7 @@ create_element <- function(element) {
     # element is a list of elements, because it is doesn't have the type
     # attribute. In that case we want to create all of the elements
     if (is.null(element$type)) {
-      return(create_ui(element, create_border = TRUE))
+      return(create_ui(element, language = language, create_border = TRUE))
     }
         
     new_element <- NULL
@@ -60,4 +60,47 @@ create_element <- function(element) {
     }
     
     return(new_panel)
+}
+
+
+
+
+code_name_checker <- function(x, code_name) {
+  if (is.null(x$code_name)) {
+    return(NULL)
+  }
+  
+  if (x$code_name == code_name) {
+    return(x)
+  } else {
+    return(NULL)
+  }
+}
+
+# function which recursively applies a function to the elements of a list that
+# are themselves lists
+rlapply <- function(x, fun, ...) {
+  
+  for (element in x) {
+    
+    if (!is.list(element)) {
+      next
+    }
+
+    # x is a list, so let's test it
+    result <- fun(element, ...)
+      
+    if (!is.null(result)) {
+      return(result)
+    }
+    
+    # didn't get a result this time, but it might lurk on lower levels
+    # of the list. So let's investigate those
+    result <- rlapply(element, fun, ...)
+    
+    if (!is.null(result)) {
+      return(result)
+    }
+  }
+  
 }
