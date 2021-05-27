@@ -12,7 +12,12 @@ source("json_file_helpers.R")
 source("activity_option_builder.R")
 
 # read the csv file containing the sites 
-sites <- read.csv("data/FOsites.csv")
+sites_file_path <- "data/FOsites.csv"
+sites <- read.csv(sites_file_path)
+
+# converts block info from csv (e.g. "[0;1]") to vectors of strings ("0" "1")
+blocks_to_vector <- function(x) strsplit(substr(x, start = 2, stop = nchar(x)-1), ";")
+sites$blocks <- sapply(sites$blocks, blocks_to_vector)
 
 # options for UI languages
 # language_codes match the name of columns in display_names.csv
@@ -28,8 +33,11 @@ ui <- fluidPage(
     
     selectInput("language", choices = language_codes, label = ""),
     
-    # Application title
-    titlePanel("Input Management Data"),
+    # set web page title
+    titlePanel("", windowTitle = "Field Observatory"),
+    
+    # title to be displayed on the page
+    h1(textOutput("window_title")),
     
     # create a sidebar layout
     sidebarLayout(
@@ -50,7 +58,7 @@ ui <- fluidPage(
                 label = "Select the activity (hint: choose planting):",
                 choices = c(
                     "",
-                    get_category_display_names("activity_type", language_codes[1])
+                    get_category_names("activity_choice", language_codes[1])
                 )
             ),
             
@@ -156,6 +164,24 @@ server <- function(input, output, session) {
         }
     })
     
+    # change available blocks depending on the site
+    observeEvent(input$site, {
+        if (is.null(input$site) | input$site == "") {
+            shinyjs::disable("block")
+        } else {
+            shinyjs::enable("block")
+            block_choices <- subset(sites, site == input$site)$blocks[[1]]
+            updateSelectInput(session, 
+                              "block", 
+                              choices = c("", block_choices))
+        }
+    })
+    
+    # change window title when language is changed
+    output$window_title <- renderText({
+        get_disp_name("window_title", input$language)
+    })
+    
     # change language when user requests it
     observeEvent(input$language, {
         
@@ -169,44 +195,93 @@ server <- function(input, output, session) {
             # going through the structure like this for each element
             # is inefficient, but since the structure will never be very
             # large, it should not be an issue
-            element_structure <- rlapply(
+            element <- rlapply(
                 structure,
                 code_name_checker,
                 code_name = code_name)
             
-            element_type <- element_structure$type
+            if (is.null(element$type)) next
             
-            if (is.null(element_type)) next
-            
-            if (element_type == "selectInput") {
+            if (element$type == "selectInput") {
                 
-                # the label for the selectInput component is stored under
-                # code name stored under label
-                label_code_name <- element_structure$label
+                # the code name for the label is stored in label
+                label_code_name <- element$label
                 
-                # the choices for the selectInput component are stored¨
-                # under the category with the same beginning and ending
-                # with _choice
-                choice_category_name <- paste(code_name, "choice", sep = "_")
-                selector_choices <- c("", get_category_display_names(
-                    choice_category_name, language = input$language
-                ))
+                # the choices for a selectInput element can be stored in
+                # three ways: 
+                # 1) the code names of the choices are given as a vector
+                # 2) for site and block selectors, there is IGNORE:
+                # this means that the choices should not be updated here
+                # 3) the category name for the choices is given
+                # in the following if-statement, these are handled
+                # in this same order
+                selector_choices <- NULL
+                ignore_choices <- FALSE
+                
+                if (length(element$choices) > 1) {
+                    selector_choices <- c("", element$choices)
+                    names(selector_choices) <- c("", get_disp_name(
+                        element$choices,
+                        language = input$language))
+                    
+                } else if (element$choices == "IGNORE") {
+                    ignore_choices = TRUE
+                } else {
+                    # get_category_names returns both display names and 
+                    # code names
+                    selector_choices <- c(
+                        "",
+                        get_category_names(element$choices,
+                                                   language = input$language)
+                    )
+                }
+                
                 
                 current_value <- isolate(input[[code_name]])
                 
-                updateSelectInput(session, code_name,
-                                  label = get_disp_name(
-                                      label_code_name, input$language),
-                                  choices = selector_choices,
-                                  selected = current_value)
+                if (ignore_choices) {
+                    updateSelectInput(session, 
+                                      code_name,
+                                      label = get_disp_name(
+                                          label_code_name, input$language),
+                                      selected = current_value) 
+                } else {
+                    updateSelectInput(session, 
+                                      code_name,
+                                      label = get_disp_name(
+                                          label_code_name, input$language),
+                                      choices = selector_choices,
+                                      selected = current_value)
+                }
                 
-            } 
+                
+            } else if (element$type == "dateInput") {
+                updateDateInput(session, 
+                                code_name, 
+                                label = get_disp_name(element$label,
+                                                      input$language))
+            } else if (element$type == "textArea") {
+                updateTextAreaInput(session,
+                                    code_name,
+                                    label = get_disp_name(element$label,
+                                                          input$language),
+                                    placeholder = 
+                                        get_disp_name(
+                                            element$placeholder, 
+                                            input$language))
+            } else if (element$type == "actionButton") {
+                updateActionButton(session,
+                                   code_name,
+                                   label = get_disp_name(element$label,
+                                                         input$language))
+            } else if (element$type == "checkboxInput") {
+                updateCheckboxInput(session,
+                                    code_name,
+                                    label = get_disp_name(element$label,
+                                                          input$language))
+            }
 
         }
-        
-        # example:
-        #updateSelectInput(session, "site", 
-        #                  label = get_disp_name("site_label", input$language))
         
     })
     

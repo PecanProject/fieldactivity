@@ -18,10 +18,17 @@ activity_choice,other,other,fin16
 table_col_name,mgmt_operations_event,Event,fin17
 table_col_name,mgmt_event_date,Date,fin18
 table_col_name,mgmt_event_notes,Notes,fin19
+element_label,window_title,Input Management Data,Syötä tapahtumia
 element_label,site_label,Select the site:,Valitse sijainti:
+element_label,block_label,Select the block:,Valitse lohko:
 element_label,activity_label,Select the activity:,Valitse tapahtuma:
+element_label,planting_option_1_label,Did you do x?,Teitkö x:n?
 element_label,planting_option_11_label,Further choices:,Lisää valintoja:
 element_label,plant_species_label,Choose the species:,Valitse laji:
+element_label,date_label,Select the date when the activity was performed:,Valitse päivä jolloin tapahtuma tapahtui:
+element_label,notes_label,Notes (optional):,Muistiinpanot (vapaaehtoinen):
+element_label,notes_placeholder,Placeholder,Aputeksti
+element_label,save_label,Save,Tallenna
 planting_option_11_choice,alt1,Alternative 1,Vaihtoehto 1
 planting_option_11_choice,alt2,Alternative 2,Vaihtoehto 2
 plant_species_choice,spc_barley,barley,kaura

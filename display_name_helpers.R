@@ -5,14 +5,13 @@
 display_name_dict_path <- "data/display_names.csv"
 display_names_dict <- read.csv(display_name_dict_path)
 
-# find all display names belonging to a certain category
-# e.g. find all activity types
-# TODO: update documentation
-get_category_display_names <- function(category1, language) {
+# find all code names and display names belonging to a given category
+# display names are set as the names, code names are the values
+get_category_names <- function(category1, language) {
   
-  if (is.null(language)) {
-    return("Could not find display names")
-  }
+  #if (is.null(language)) {
+  #  return("Could not find display names")
+  #}
   
   category_names <- subset(display_names_dict, category == category1)
   
@@ -23,13 +22,15 @@ get_category_display_names <- function(category1, language) {
   return(code_names)
 }
 
-# get the display name corresponding to a code name
+# get the display name(s) corresponding to a code name (/names)
 get_disp_name <- function(code_name1, language) {
   
   # if language_column is null, it means our UI has not initialised yet
-  if (is.null(language)) {
-    return("Could not find display name")
-  }
+  #if (is.null(language)) {
+  #  return("Could not find display name")
+  #}
   
-  return(subset(display_names_dict, code_name == code_name1)[[language]])
+  row_indexes <- match(code_name1, display_names_dict$code_name)
+  
+  return(display_names_dict[row_indexes, language])
 }
