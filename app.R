@@ -9,7 +9,7 @@ library(shinyjs) # shinyjs is used for e.g. disabling action buttons
 # make helper functions available
 source("display_name_helpers.R")
 source("json_file_helpers.R")
-source("activity_option_builder.R")
+source("ui_builder.R")
 
 # read the csv file containing the sites 
 sites_file_path <- "data/FOsites.csv"
@@ -22,16 +22,18 @@ sites$blocks <- sapply(sites$blocks, blocks_to_vector)
 # options for UI languages
 # language_codes match the name of columns in display_names.csv
 # when you give a named vector as the choices for selectInput, the names
-# will be displayed
+# rather than the values will be displayed
 languages <- c("English 🇬🇧", "Finnish 🇫🇮")
 language_codes <- c("disp_name_eng", "disp_name_fin")
 names(language_codes) <- languages
 
 # Define UI for the application
+# some of the UI (esp. additional options for activities) will be generated
+# by create_ui in activit
 ui <- fluidPage(
     useShinyjs(),  # enable shinyjs
     
-    selectInput("language", choices = language_codes, label = ""),
+    selectInput("language", choices = language_codes, label = "", width = "120px"),
     
     # set web page title
     titlePanel("", windowTitle = "Field Observatory"),
@@ -63,7 +65,7 @@ ui <- fluidPage(
             ),
             
             # show a detailed options panel for the different activities
-            # activity_options is defined in activity_option_builder.R
+            # activity_options is defined in ui_builder.R
             create_ui(activity_options, language = language_codes[1], 
                       create_border = FALSE),
             
@@ -72,7 +74,8 @@ ui <- fluidPage(
                 "date",
                 format = "dd/mm/yyyy",
                 label = "Select the date when the activity was performed:",
-                max = Sys.Date()
+                max = Sys.Date(),
+                value = Sys.Date()
             ),
             
             
@@ -114,7 +117,7 @@ server <- function(input, output, session) {
         # this is also updated if tabledata$events changes, which happens
         # when the save button is pressed
         tabledata$events <-
-            retrieve_json_info(input$site, input$block)
+            retrieve_json_info(input$site, input$block, input$language)
         tabledata$events
         
     },
@@ -177,13 +180,18 @@ server <- function(input, output, session) {
         }
     })
     
-    # change window title when language is changed
-    output$window_title <- renderText({
-        get_disp_name("window_title", input$language)
-    })
+
     
     # change language when user requests it
     observeEvent(input$language, {
+        
+        # change textOutputs when the language is changed
+        # one has to use lapply here, for loop does not work! See
+        # https://community.rstudio.com/t/how-do-i-use-for-loop-in-rendering-outputs/35761/2
+        lapply(text_output_code_names, function(text_output_code_name) {
+            output[[text_output_code_name]] <- 
+                renderText(get_disp_name(text_output_code_name, input$language))
+        })
         
         # get a list of all input elements which we have to relabel
         input_element_names <- names(isolate(reactiveValuesToList(input)))

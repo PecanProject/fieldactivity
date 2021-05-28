@@ -1,4 +1,4 @@
-# Helper functions for the management data input app
+# Functions for creating and reading the json data files containing the events
 # Otto Kuusela 2021
 
 # missing value in the ICASA standard
@@ -25,10 +25,10 @@ create_json_file <- function(file_path) {
                        null = 'null', auto_unbox = TRUE)
   
 }
-  
+
 append_to_json_file <- function(site_name, block, date, activity, notes) {
   
-  # corresponding file name: "sitename_blocknumber_events.json"
+  # corresponding file name: "sitename_block_events.json"
   file_name <- paste(site_name, block, "events.json", sep = "_")
   file_path <- file.path(json_file_folder, file_name)
   
@@ -58,9 +58,9 @@ append_to_json_file <- function(site_name, block, date, activity, notes) {
                        null = 'null', auto_unbox = TRUE)
 }
 
-retrieve_json_info <- function(site_name, block) {
+retrieve_json_info <- function(site_name, block, language) {
   
-  # corresponding file name: "sitename_blocknumber_events.json"
+  # corresponding file name: "sitename_block_events.json"
   file_name <- paste(site_name, block, "events.json", sep = "_")
   file_path <- file.path(json_file_folder, file_name)
   
@@ -74,11 +74,10 @@ retrieve_json_info <- function(site_name, block) {
   # add a 4th column for ordering by date (this will be hidden in the table)
   events$date_ordering <- as.Date(events$mgmt_event_date, format = "%d/%m/%Y")
   
-  # swap code names for display names
+  # swap code names for display names in activity types
   # the get_disp_name function is defined in display_name_helpers.R
-  # TODO: re-implement
-  #events$mgmt_operations_event <- 
-  #  sapply(events$mgmt_operations_event, FUN = get_disp_name)
+  events$mgmt_operations_event <- 
+    sapply(events$mgmt_operations_event, FUN = get_disp_name, language = language)
   
   # replace missingvals with ""
   events$mgmt_event_notes <- 
@@ -87,10 +86,9 @@ retrieve_json_info <- function(site_name, block) {
   # make column names pretty
   # the last "date_ordering" is for the hidden column intended for ordering
   # the table chronologically
-  # TODO: re-implement
-  #colnames(events) <- c(get_category_display_names("table_col_name"),
-  #                      "date_ordering")
-  
+  colnames(events) <- c(names(get_category_display_names("table_col_name", 
+                                                   language = language)),
+                        "date_ordering")
   return(events)
   
 }

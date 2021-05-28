@@ -1,4 +1,5 @@
-# Helper functions to go from code names to pretty display names
+# Helper functions to go from code names to pretty display names in the
+# correct language
 # Otto Kuusela 2021
 
 # read the csv file containing the display names
@@ -23,6 +24,7 @@ get_category_names <- function(category1, language) {
 }
 
 # get the display name(s) corresponding to a code name (/names)
+# returns the display names(s) as a value
 get_disp_name <- function(code_name1, language) {
   
   # if language_column is null, it means our UI has not initialised yet

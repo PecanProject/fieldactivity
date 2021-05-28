@@ -22,10 +22,12 @@
       
       "planting": {
         "condition": "input.activity == 'planting'",
-        "planting_help_text" : {
-	    "type" : "helpText",
-	    "text" : "Here you can have specific input types for the planting activity."
+
+        "planting_text_output" : {
+          "code_name": "planting_text_output",
+          "type" : "textOutput"
         },
+
         "planting_option_1": {
           "code_name": "planting_option_1",
           "type": "checkboxInput",
@@ -39,6 +41,7 @@
               "choices": ["alt1", "alt2"]
             }
           }
+
         },
         "plant_species": {
           "code_name" : "plant_species",
@@ -50,9 +53,9 @@
       
       "harvest": {
         "condition": "input.activity == 'harvest'",
-        "harvest_help_text" : {
-	    "type" : "helpText",
-	    "text" : "Here you can have specific input types for the harvest activity."
+        "harvest_text_output" : {
+          "code_name": "harvest_text_output",
+          "type" : "textOutput"
         }
       }
 
