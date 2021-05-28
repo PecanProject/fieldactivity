@@ -86,7 +86,7 @@ retrieve_json_info <- function(site_name, block, language) {
   # make column names pretty
   # the last "date_ordering" is for the hidden column intended for ordering
   # the table chronologically
-  colnames(events) <- c(names(get_category_display_names("table_col_name", 
+  colnames(events) <- c(names(get_category_names("table_col_name", 
                                                    language = language)),
                         "date_ordering")
   return(events)
