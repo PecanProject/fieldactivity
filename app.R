@@ -181,7 +181,9 @@ ui <- fluidPage(theme = shinytheme("lumen"),
                 resize = "vertical"
             ),
             
-            actionButton("save", label = "Save")
+            actionButton("save", label = "Save"),
+            
+            shinyjs::hidden(actionButton("cancel", label = "Cancel"))
         ),
         
         mainPanel(
@@ -209,7 +211,7 @@ ui <- secure_app(ui,
 server <- function(input, output, session) {
 
     # initialise in the normal (non-edit) mode
-    session$userData$edit_mode = FALSE
+    session$userData$edit_mode <- FALSE
     
     # check_credentials returns a function to authenticate users
     # might have to use the hand-typed passphrase option for now when deploying
@@ -287,7 +289,8 @@ server <- function(input, output, session) {
                 # no rows selected anymore, 
                 # so clear the fields and set edit mode off
                 print("Clearing fields")
-                session$userData$edit_mode = FALSE
+                session$userData$edit_mode <- FALSE
+                shinyjs::hide("cancel")
             }
             
             return()
@@ -312,7 +315,13 @@ server <- function(input, output, session) {
         }
         
         # set edit mode on
-        session$userData$edit_mode = TRUE
+        session$userData$edit_mode <- TRUE
+        shinyjs::show("cancel")
+    })
+    
+    DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
+    observeEvent(input$cancel,{
+        DT::selectRows(DTproxy, NULL)
     })
     
     # call the server part of shinymanager
@@ -361,9 +370,14 @@ server <- function(input, output, session) {
     # save input to a file when save button is pressed
     observeEvent(input$save, {
         
+        if (session$userData$edit_mode) {
+            print("TODO: edit data")
+            return()
+        }
+        
         # format the date to be displayed nicely (otherwise will use default
         # yyyy-mm-dd formatting of the Date object)
-        formatted_date <- format(input$date, date_format)
+        formatted_date <- format(input$mgmt_event_date, date_format)
         
         # this saves the data to the json file.
         append_to_json_file(input$site, input$block, formatted_date,
