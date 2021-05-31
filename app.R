@@ -8,6 +8,7 @@ library(shinyjs) # shinyjs is used for e.g. disabling action buttons
 library(shinymanager) # for user authentication
 library(shinythemes) # change theme for login UI (and possibly rest of app)
 library(keyring) # for interacting with system credential store to store db key
+library(DT) # fancier data table
 
 #### AUTHENTICATION STUFF
 
@@ -127,7 +128,9 @@ ui <- fluidPage(theme = shinytheme("lumen"),
         mainPanel(
             
             # table for showing already supplied information
-            dataTableOutput("mgmt_events_table")
+            DT::dataTableOutput("mgmt_events_table"),
+            
+            
             
         )
     )
@@ -212,6 +215,15 @@ server <- function(input, output, session) {
         
     })
     
+    # enable editing of old entires
+    observeEvent(input$mgmt_events_table_rows_selected, {
+        row_index <- input$mgmt_events_table_rows_selected
+        
+        # populate the input controls with the values corresponding to the row
+        
+        #print(tabledata$events[row_index,])
+    })
+    
     # call the server part of shinymanager
     # weird observation: this has to be after the previous observeEvent block
     # which observes the auth_result$user. If it isn't the site selectInput
@@ -224,24 +236,36 @@ server <- function(input, output, session) {
     # updated when the button is clicked, the data table automatically updates
     tabledata <- reactiveValues(events = NULL)
     
-    output$mgmt_events_table <- renderDataTable({
+    output$mgmt_events_table <- DT::renderDataTable({
         # when input$site, input$block or input$language changes, update.
         # this is also updated if tabledata$events changes, which happens
         # when the save button is pressed
         
-        tabledata$events <-
-            retrieve_json_info(input$site, input$block, input$language)
-        tabledata$events
+        tabledata$events <- retrieve_json_info(input$site,
+                                               input$block,
+                                               input$language)
+        n_cols <- ncol(tabledata$events)
+        datatable(tabledata$events, selection = "single", 
+                  rownames = FALSE, # hide row numbers
+                  colnames = c(names(
+                      get_category_names("table_col_name",
+                                         language = input$language)), "date_ordering"),
+                  options = list(dom = 't', # hide unnecessary controls
+                                 # TODO: check whether a long list is entirely
+                                 # visible
+                                 # order chronologically by hidden column
+                                 # autoWidth = TRUE,
+                                 order = list(n_cols - 1, 'desc'), 
+                                 columnDefs = list(
+                                     # hide date_ordering column
+                                     list(visible = FALSE, targets = 
+                                              c(n_cols - 1)),
+                                     # hide sorting arrows
+                                     list(orderable = FALSE, targets = 
+                                              0:(n_cols - 2)))
+                                 ))
         
-    },
-    
-    # order by date in descending order
-    # we have dates for ordering in the 4th (hidden) column, so the index
-    # is 3
-    options = list(order = list(3, 'desc'),
-                   columnDefs = list(list(
-                       visible = FALSE, targets = c(3)
-                   ))))
+    })
     
     # save input to a file when save button is pressed
     observeEvent(input$save, {

@@ -71,7 +71,7 @@ retrieve_json_info <- function(site_name, block, language) {
   
   events <- jsonlite::fromJSON(file_path)$management$events
   
-  # add a 4th column for ordering by date (this will be hidden in the table)
+  # add a new column for ordering by date (this will be hidden in the table)
   events$date_ordering <- as.Date(events$mgmt_event_date, format = "%d/%m/%Y")
   
   # swap code names for display names in activity types
@@ -86,9 +86,9 @@ retrieve_json_info <- function(site_name, block, language) {
   # make column names pretty
   # the last "date_ordering" is for the hidden column intended for ordering
   # the table chronologically
-  colnames(events) <- c(names(get_category_names("table_col_name", 
-                                                   language = language)),
-                        "date_ordering")
+  #colnames(events) <- c(names(get_category_names("table_col_name", 
+  #                                                 language = language)),
+  #                      "date_ordering")
   return(events)
   
 }
