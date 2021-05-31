@@ -5,6 +5,42 @@
 library(shiny)
 library(jsonlite)
 library(shinyjs) # shinyjs is used for e.g. disabling action buttons
+library(shinymanager) # for user authentication
+library(shinythemes) # change theme for login UI (and possibly rest of app)
+library(keyring) # for interacting with system credential store to store db key
+
+#### AUTHENTICATION STUFF
+
+# failsafe: ask for the db key only if we really want to. Has to be set by hand
+set_db_key <- FALSE
+# if the database encryption key is not found and we want to set the key,
+# we ask the user to define it
+if (nrow(key_list("FO-mgmt-events-key")) == 0) {
+    # throw exception if there is no key and we don't want to define it
+    stopifnot(set_db_key)
+    
+    key_set("FO-mgmt-events-key", "FO-mgmt-events-user") 
+}
+
+# define some credentials
+#credentials <- data.frame(
+#    user = c("shiny", "shinymanager"), # mandatory
+#    password = c("azerty", "12345"), # mandatory
+#    admin = c(FALSE, TRUE),
+#    comment = "Simple and secure authentification mechanism 
+#    for single ‘Shiny’ applications.",
+#    stringsAsFactors = FALSE
+#)
+
+# Init the database
+#create_db(
+#    credentials_data = credentials,
+#    sqlite_path = "data/database.sqlite", # will be created
+#    passphrase = key_get("FO-mgmt-events-key", "FO-mgmt-events-user")
+#    # passphrase = "passphrase_wihtout_keyring"
+#)
+
+#### / AUTHENTICATION STUFF
 
 # make helper functions available
 source("display_name_helpers.R")
@@ -20,20 +56,19 @@ blocks_to_vector <- function(x) strsplit(substr(x, start = 2, stop = nchar(x)-1)
 sites$blocks <- sapply(sites$blocks, blocks_to_vector)
 
 # options for UI languages
-# language_codes match the name of columns in display_names.csv
+# languages match the names of columns in display_names.csv
 # when you give a named vector as the choices for selectInput, the names
 # rather than the values will be displayed
-languages <- c("English 🇬🇧", "Finnish 🇫🇮")
-language_codes <- c("disp_name_eng", "disp_name_fin")
-names(language_codes) <- languages
+languages <- c("English 🇬🇧" = "disp_name_eng",
+               "suomi 🇫🇮" = "disp_name_fin")
 
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
-# by create_ui in activit
-ui <- fluidPage(
+# by create_ui in ui_builder.R
+ui <- fluidPage(theme = shinytheme("lumen"),
     useShinyjs(),  # enable shinyjs
     
-    selectInput("language", choices = language_codes, label = "", width = "120px"),
+    selectInput("language", choices = languages, width = "120px", label = ""),
     
     # set web page title
     titlePanel("", windowTitle = "Field Observatory"),
@@ -52,21 +87,22 @@ ui <- fluidPage(
                 choices = c("", sites$site)
             ),
             
+            # in general the choices don't have to be defined for selectInputs,
+            # as they will be populated when the language is changed (which
+            # also happens when the app starts)
+            
             selectInput("block", label = "Select the block:",
-                        choice = c("", "0", "1")),
+                        choice = c("")),
             
             selectInput(
                 "activity",
                 label = "Select the activity (hint: choose planting):",
-                choices = c(
-                    "",
-                    get_category_names("activity_choice", language_codes[1])
-                )
+                choices = c("")
             ),
             
             # show a detailed options panel for the different activities
             # activity_options is defined in ui_builder.R
-            create_ui(activity_options, language = language_codes[1], 
+            create_ui(activity_options, language = default_language, 
                       create_border = FALSE),
             
             # setting max disallows inputting future events
@@ -78,15 +114,10 @@ ui <- fluidPage(
                 value = Sys.Date()
             ),
             
-            
             textAreaInput(
                 "notes",
                 label = "Notes (optional):",
-                placeholder = paste(
-                    "Anything related to the event,",
-                    "e.g. yield amount, seeding or tillage depth,",
-                    "products spread, machine type, etc."
-                ),
+                placeholder = "",
                 resize = "vertical"
             ),
             
@@ -102,9 +133,90 @@ ui <- fluidPage(
     )
 )
 
+# Wrap your UI with secure_app
+ui <- secure_app(ui, 
+                 # language selector for login page
+                 tags_bottom = selectInput("login_language", 
+                                           label = "" , 
+                                           choices = languages),
+                 tags_top = tagList(
+                     p("EXAMPLE USER site: ruukki, password: Ruukki1"),
+                     p("ADMIN site: shinymanager, password: 12345")),
+                 theme = shinytheme("lumen"),
+                 enable_admin = TRUE)
 
 # Define server logic incl. save button action
 server <- function(input, output, session) {
+
+    # check_credentials returns a function to authenticate users
+    # might have to use the hand-typed passphrase option for now when deploying
+    # to shinyapps.io
+    credential_checker <- check_credentials(
+        "data/database.sqlite",
+        passphrase = key_get("FO-mgmt-events-key", "FO-mgmt-events-user")
+        # passphrase = "salasana"
+    )
+    
+    observeEvent(input$login_language, {
+
+        # yes we are overwriting the English language. This is by far
+        # the simplest method
+        
+        if (input$login_language == "disp_name_fin") {
+            set_labels(
+                language = "en",
+                "Please authenticate" = "Kirjaudu syöttääksesi tapahtumia",
+                "Username:" = "Sijainti",
+                "Password:" = "Salasana",
+                "Login" = "Kirjaudu",
+                "Logout" = "Kirjaudu ulos"
+            )
+        } else if (input$login_language == "disp_name_eng") {
+            set_labels(
+                language = "en",
+                "Please authenticate" = "Log in to enter management events",
+                "Username:" = "Site",
+                "Password:" = "Password",
+                "Login" = "Login",
+                "Logout" = "Logout"
+            )
+        }
+        
+        # TODO: make the language setting communicate to main app
+        # PROBLEM: session userData doesn't seem to be saved after
+        # logging in is complete
+        
+        # change the value of the session-specific variable default_language to
+        # match the login language selector
+        # session$userData$default_language <- input$login_language
+        
+        # showNotification(paste("From input$login_language", session$userData$default_language))
+        
+        # this seems to refresh the authentication UI
+        auth_result <- secure_server(check_credentials = credential_checker)
+        
+    })
+    
+    # runs when logged in
+    observeEvent(auth_result$user, {
+        
+        if (auth_result$admin == "FALSE") {
+            updateSelectInput(session, "site", selected = auth_result$user)
+            shinyjs::disable("site")
+        } else {
+            shinyjs::enable("site")
+        }
+
+        # here would be good to somehow fetch the language selection from
+        # login UI, but it's difficult
+        
+    })
+    
+    # call the server part of shinymanager
+    # weird observation: this has to be after the previous observeEvent block
+    # which observes the auth_result$user. If it isn't the site selectInput
+    # selection is not updated to match the username.
+    auth_result <- secure_server(check_credentials = credential_checker)
     
     # this is where we access the data to display in the data table.
     # initially NULL because reactive expressions aren't allowed here.
@@ -113,14 +225,16 @@ server <- function(input, output, session) {
     tabledata <- reactiveValues(events = NULL)
     
     output$mgmt_events_table <- renderDataTable({
-        # when input$site or input$block changes, update.
+        # when input$site, input$block or input$language changes, update.
         # this is also updated if tabledata$events changes, which happens
         # when the save button is pressed
+        
         tabledata$events <-
             retrieve_json_info(input$site, input$block, input$language)
         tabledata$events
         
     },
+    
     # order by date in descending order
     # we have dates for ordering in the 4th (hidden) column, so the index
     # is 3
@@ -154,17 +268,15 @@ server <- function(input, output, session) {
     
     # disable the save button if not all necessary info has been filled
     observe({
-        
-        # if the UI has not been initialised yet, skip
-        #if (is.null(input$site)) {
-        #    return()
-        #}
-        
-        if (input$site == "" | input$block == "" | input$activity == "") {
+
+        # is.Truthy essentially checks whether input$site is empty or null        
+        if (!isTruthy(input$site) | !isTruthy(input$block) | 
+            !isTruthy(input$activity)) {
             shinyjs::disable("save")
         } else {
             shinyjs::enable("save")
         }
+        
     })
     
     # change available blocks depending on the site
@@ -185,13 +297,19 @@ server <- function(input, output, session) {
     # change language when user requests it
     observeEvent(input$language, {
         
+        # we have to handle input and output elements in different ways
+        
+        # OUTPUT ELEMENTS:
+        
         # change textOutputs when the language is changed
-        # one has to use lapply here, for loop does not work! See
+        # one has to use lapply here, for-loop does not work! See
         # https://community.rstudio.com/t/how-do-i-use-for-loop-in-rendering-outputs/35761/2
         lapply(text_output_code_names, function(text_output_code_name) {
             output[[text_output_code_name]] <- 
                 renderText(get_disp_name(text_output_code_name, input$language))
         })
+        
+        # INPUT ELEMENTS:
         
         # get a list of all input elements which we have to relabel
         input_element_names <- names(isolate(reactiveValuesToList(input)))
@@ -199,15 +317,19 @@ server <- function(input, output, session) {
         for (code_name in input_element_names) {
             
             # rlapply, structure and code_name_checker are defined in
-            # activity_option_builder.R
+            # ui_builder.R
             # going through the structure like this for each element
             # is inefficient, but since the structure will never be very
-            # large, it should not be an issue
+            # large, it should not be an issue 
+            # (and we are not reading the json file each time)
             element <- rlapply(
                 structure,
                 code_name_checker,
                 code_name = code_name)
             
+            # didn't find the element corresponding to code_name
+            # this should not happen if the element is in 
+            # sidebar_ui_structure.json
             if (is.null(element$type)) next
             
             if (element$type == "selectInput") {
@@ -220,7 +342,7 @@ server <- function(input, output, session) {
                 # 1) the code names of the choices are given as a vector
                 # 2) for site and block selectors, there is IGNORE:
                 # this means that the choices should not be updated here
-                # 3) the category name for the choices is given
+                # 3) the category name for the choices is given.
                 # in the following if-statement, these are handled
                 # in this same order
                 selector_choices <- NULL
@@ -244,7 +366,7 @@ server <- function(input, output, session) {
                     )
                 }
                 
-                
+                # make sure we don't change the selected value
                 current_value <- isolate(input[[code_name]])
                 
                 if (ignore_choices) {
