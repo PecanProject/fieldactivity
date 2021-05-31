@@ -13,15 +13,15 @@
     "choices": "IGNORE"
   },
   
-  "activity": {
-    "code_name": "activity",
+  "mgmt_operations_event": {
+    "code_name": "mgmt_operations_event",
     "type" : "selectInput",
-    "label" : "activity_label",
-    "choices": "activity_choice",
+    "label" : "mgmt_operations_event_label",
+    "choices": "mgmt_operations_event_choice",
     "sub_elements": {
       
       "planting": {
-        "condition": "input.activity == 'planting'",
+        "condition": "input.mgmt_operations_event == 'planting'",
 
         "planting_text_output" : {
           "code_name": "planting_text_output",
@@ -52,7 +52,7 @@
       },
       
       "harvest": {
-        "condition": "input.activity == 'harvest'",
+        "condition": "input.mgmt_operations_event == 'harvest'",
         "harvest_text_output" : {
           "code_name": "harvest_text_output",
           "type" : "textOutput"
@@ -62,17 +62,17 @@
     }
   },
 
-  "date" : {
-    "code_name": "date",
+  "mgmt_event_date" : {
+    "code_name": "mgmt_event_date",
     "type" : "dateInput",
-    "label" : "date_label"
+    "label" : "mgmt_event_date_label"
   },
 
-  "notes" : {
-    "code_name" : "notes",
-    "type" : "textArea",
-    "label" : "notes_label",
-    "placeholder" : "notes_placeholder"
+  "mgmt_event_notes" : {
+    "code_name" : "mgmt_event_notes",
+    "type" : "textAreaInput",
+    "label" : "mgmt_event_notes_label",
+    "placeholder" : "mgmt_event_notes_placeholder"
   },
 
   "save" : {

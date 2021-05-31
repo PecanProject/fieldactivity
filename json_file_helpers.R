@@ -6,6 +6,7 @@ missingval <- "-99.0"
 # relative path to json file folder
 json_file_folder <- "data/management_events"
 
+date_format <- "%d/%m/%Y"
 
 create_json_file <- function(file_path) {
   
@@ -58,6 +59,8 @@ append_to_json_file <- function(site_name, block, date, activity, notes) {
                        null = 'null', auto_unbox = TRUE)
 }
 
+# retrieve the events of a specific site and block and return as a data frame
+# if language is set to NULL, code_names will be displayed
 retrieve_json_info <- function(site_name, block, language) {
   
   # corresponding file name: "sitename_block_events.json"
@@ -72,23 +75,21 @@ retrieve_json_info <- function(site_name, block, language) {
   events <- jsonlite::fromJSON(file_path)$management$events
   
   # add a new column for ordering by date (this will be hidden in the table)
-  events$date_ordering <- as.Date(events$mgmt_event_date, format = "%d/%m/%Y")
+  events$date_ordering <- as.Date(events$mgmt_event_date, format = date_format)
   
   # swap code names for display names in activity types
   # the get_disp_name function is defined in display_name_helpers.R
-  events$mgmt_operations_event <- 
-    sapply(events$mgmt_operations_event, FUN = get_disp_name, language = language)
+  if (!is.null(language)) {
+    events$mgmt_operations_event <- 
+      sapply(events$mgmt_operations_event, 
+             FUN = get_disp_name, 
+             language = language)
+  }
   
   # replace missingvals with ""
   events$mgmt_event_notes <- 
     sapply(events$mgmt_event_notes, function(x) ifelse(x == missingval, "", x))
   
-  # make column names pretty
-  # the last "date_ordering" is for the hidden column intended for ordering
-  # the table chronologically
-  #colnames(events) <- c(names(get_category_names("table_col_name", 
-  #                                                 language = language)),
-  #                      "date_ordering")
   return(events)
   
 }

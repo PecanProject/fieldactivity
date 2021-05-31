@@ -43,6 +43,8 @@ if (nrow(key_list("FO-mgmt-events-key")) == 0) {
 
 #### / AUTHENTICATION STUFF
 
+date_format <- "%d/%m/%Y"
+
 # make helper functions available
 source("display_name_helpers.R")
 source("json_file_helpers.R")
@@ -62,6 +64,63 @@ sites$blocks <- sapply(sites$blocks, blocks_to_vector)
 # rather than the values will be displayed
 languages <- c("English 🇬🇧" = "disp_name_eng",
                "suomi 🇫🇮" = "disp_name_fin")
+
+# function for updating a UI element when its type is not determined
+# TODO: move to an appropriate file
+update_ui_element <- function(session, code_name, value, ...) {
+    # find the element from the UI json file
+    # rlapply, structure and code_name_checker are defined in
+    # ui_builder.R
+    # going through the structure like this for each element
+    # is inefficient, but since the structure will never be very
+    # large, it should not be an issue 
+    # (and we are not reading the json file each time)
+    element <- rlapply(
+        structure,
+        code_name_checker,
+        code_name = code_name)
+    
+    # didn't find the element corresponding to code_name
+    # this should not happen if the element is in 
+    # sidebar_ui_structure.json
+    if (is.null(element$type)) return()
+    
+    if (element$type == "selectInput") {
+        updateSelectInput(session, code_name, selected = value,  ...)
+    } else if (element$type == "dateInput") {
+        updateDateInput(session, code_name, 
+                        value = as.Date(value, format = date_format), ...)
+    } else if (element$type == "textAreaInput") {
+        updateTextAreaInput(session, code_name, value = value,  ...)
+    } else if (element$type == "checkboxInput") {
+        updateCheckboxInput(session, code_name, value = value, ...)
+    } else if (element$type == "actionButton") {
+        updateActionButton(session, code_name, ...)
+    }
+}
+
+# element is the list returned by rlapply
+get_selectInput_choices <- function(code_name, element) {
+    selector_choices <- NULL
+    
+    if (length(element$choices) > 1) {
+        selector_choices <- c("", element$choices)
+        names(selector_choices) <- c("", get_disp_name(
+            element$choices,
+            language = input$language))
+        
+    } else if (element$choices == "IGNORE") {
+        selector_choices <- NULL
+    } else {
+        # get_category_names returns both display names and 
+        # code names
+        selector_choices <- c(
+            "",
+            get_category_names(element$choices,
+                               language = input$language)
+        )
+    }
+}
 
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
@@ -96,7 +155,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
                         choice = c("")),
             
             selectInput(
-                "activity",
+                "mgmt_operations_event",
                 label = "Select the activity (hint: choose planting):",
                 choices = c("")
             ),
@@ -108,7 +167,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             
             # setting max disallows inputting future events
             dateInput(
-                "date",
+                "mgmt_event_date",
                 format = "dd/mm/yyyy",
                 label = "Select the date when the activity was performed:",
                 max = Sys.Date(),
@@ -116,7 +175,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             ),
             
             textAreaInput(
-                "notes",
+                "mgmt_event_notes",
                 label = "Notes (optional):",
                 placeholder = "",
                 resize = "vertical"
@@ -128,9 +187,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
         mainPanel(
             
             # table for showing already supplied information
-            DT::dataTableOutput("mgmt_events_table"),
-            
-            
+            DT::dataTableOutput("mgmt_events_table")
             
         )
     )
@@ -151,6 +208,9 @@ ui <- secure_app(ui,
 # Define server logic incl. save button action
 server <- function(input, output, session) {
 
+    # initialise in the normal (non-edit) mode
+    session$userData$edit_mode = FALSE
+    
     # check_credentials returns a function to authenticate users
     # might have to use the hand-typed passphrase option for now when deploying
     # to shinyapps.io
@@ -215,13 +275,44 @@ server <- function(input, output, session) {
         
     })
     
-    # enable editing of old entires
-    observeEvent(input$mgmt_events_table_rows_selected, {
+    # enable editing of old entries
+    # TODO: don't clear fields if row selected and language changed
+    observe({
+        
         row_index <- input$mgmt_events_table_rows_selected
+        
+        if (is.null(row_index)) {
+            
+            if (session$userData$edit_mode) {
+                # no rows selected anymore, 
+                # so clear the fields and set edit mode off
+                print("Clearing fields")
+                session$userData$edit_mode = FALSE
+            }
+            
+            return()
+        } 
+        
+        # we have selected a row. Let's fetch the table with code names
+        data_with_code_names <- retrieve_json_info(input$site, 
+                                                   input$block,
+                                                   language = NULL)
+        selected_data <- data_with_code_names[row_index,]
         
         # populate the input controls with the values corresponding to the row
         
-        #print(tabledata$events[row_index,])
+        for (col_name in names(selected_data)) {
+            
+            # try updating the element corresponding to column name with the
+            # value in that column. If no element is found corresponding to 
+            # that name, update_ui_element does nothing
+            update_ui_element(session, col_name,
+                              value = selected_data[1, col_name])
+            
+        }
+        
+        # set edit mode on
+        session$userData$edit_mode = TRUE
     })
     
     # call the server part of shinymanager
@@ -240,7 +331,6 @@ server <- function(input, output, session) {
         # when input$site, input$block or input$language changes, update.
         # this is also updated if tabledata$events changes, which happens
         # when the save button is pressed
-        
         tabledata$events <- retrieve_json_info(input$site,
                                                input$block,
                                                input$language)
@@ -249,7 +339,8 @@ server <- function(input, output, session) {
                   rownames = FALSE, # hide row numbers
                   colnames = c(names(
                       get_category_names("table_col_name",
-                                         language = input$language)), "date_ordering"),
+                                         language = input$language)), 
+                      "date_ordering"),
                   options = list(dom = 't', # hide unnecessary controls
                                  # TODO: check whether a long list is entirely
                                  # visible
@@ -272,15 +363,15 @@ server <- function(input, output, session) {
         
         # format the date to be displayed nicely (otherwise will use default
         # yyyy-mm-dd formatting of the Date object)
-        formatted_date <- format(input$date, "%d/%m/%Y")
+        formatted_date <- format(input$date, date_format)
         
         # this saves the data to the json file.
         append_to_json_file(input$site, input$block, formatted_date,
-                            input$activity, input$notes)
+                            input$mgmt_operations_event, input$mgmt_event_notes)
         
         # clear the selected activity and notes
-        updateSelectInput(session, "activity", selected = "")
-        updateTextAreaInput(session, "notes", value = "")
+        updateSelectInput(session, "mgmt_operations_event", selected = "")
+        updateTextAreaInput(session, "mgmt_event_notes", value = "")
         
         showNotification("Data saved!", type = "message")
         
@@ -295,7 +386,7 @@ server <- function(input, output, session) {
 
         # is.Truthy essentially checks whether input$site is empty or null        
         if (!isTruthy(input$site) | !isTruthy(input$block) | 
-            !isTruthy(input$activity)) {
+            !isTruthy(input$mgmt_operations_event)) {
             shinyjs::disable("save")
         } else {
             shinyjs::enable("save")
@@ -340,6 +431,8 @@ server <- function(input, output, session) {
         
         for (code_name in input_element_names) {
             
+            # TODO: update to use the update_ui_element function
+            
             # rlapply, structure and code_name_checker are defined in
             # ui_builder.R
             # going through the structure like this for each element
@@ -370,7 +463,6 @@ server <- function(input, output, session) {
                 # in the following if-statement, these are handled
                 # in this same order
                 selector_choices <- NULL
-                ignore_choices <- FALSE
                 
                 if (length(element$choices) > 1) {
                     selector_choices <- c("", element$choices)
@@ -379,7 +471,7 @@ server <- function(input, output, session) {
                         language = input$language))
                     
                 } else if (element$choices == "IGNORE") {
-                    ignore_choices = TRUE
+                    selector_choices <- NULL
                 } else {
                     # get_category_names returns both display names and 
                     # code names
@@ -393,7 +485,7 @@ server <- function(input, output, session) {
                 # make sure we don't change the selected value
                 current_value <- isolate(input[[code_name]])
                 
-                if (ignore_choices) {
+                if (is.null(selector_choices)) {
                     updateSelectInput(session, 
                                       code_name,
                                       label = get_disp_name(
@@ -414,7 +506,7 @@ server <- function(input, output, session) {
                                 code_name, 
                                 label = get_disp_name(element$label,
                                                       input$language))
-            } else if (element$type == "textArea") {
+            } else if (element$type == "textAreaInput") {
                 updateTextAreaInput(session,
                                     code_name,
                                     label = get_disp_name(element$label,

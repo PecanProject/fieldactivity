@@ -1,33 +1,33 @@
 category,code_name,disp_name_eng,disp_name_fin
-activity_choice,planting,planting,kylvö
-activity_choice,fertilizer,fertilizer application,lannoitteen levitys
-activity_choice,irrigation,irrigation application,kastelu
-activity_choice,tillage,tillage application,maanmuokkaus
-activity_choice,organic_material,organic material application,orgaanisen aineen levitys
-activity_choice,harvest,harvest,sadonkorjuu
-activity_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
-activity_choice,inorg_mulch,placement of inorganic mulch,epäorgaanisen katteen levitys
-activity_choice,Inorg_mul_rem,removal of inorganic mulch,epäorgaanisen katteen poisto
-activity_choice,chemicals,chemicals application,kemikaalin levitys
-activity_choice,mowing,mowing,ruohonleikkuu
-activity_choice,observation,observation,havainto
-activity_choice,weeding,mechanical extraction of weeds,rikkaruohojen kitkeminen
-activity_choice,puddling,paddy system preparation (puddling),riisipellon valmistelu
-activity_choice,flood_level,paddy system flood level control,riisipellon tulvatason hallinta
-activity_choice,other,other,muu
+mgmt_operations_event_choice,planting,planting,kylvö
+mgmt_operations_event_choice,fertilizer,fertilizer application,lannoitteen levitys
+mgmt_operations_event_choice,irrigation,irrigation application,kastelu
+mgmt_operations_event_choice,tillage,tillage application,maanmuokkaus
+mgmt_operations_event_choice,organic_material,organic material application,orgaanisen aineen levitys
+mgmt_operations_event_choice,harvest,harvest,sadonkorjuu
+mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
+mgmt_operations_event_choice,inorg_mulch,placement of inorganic mulch,epäorgaanisen katteen levitys
+mgmt_operations_event_choice,Inorg_mul_rem,removal of inorganic mulch,epäorgaanisen katteen poisto
+mgmt_operations_event_choice,chemicals,chemicals application,kemikaalin levitys
+mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
+mgmt_operations_event_choice,observation,observation,havainto
+mgmt_operations_event_choice,weeding,mechanical extraction of weeds,rikkaruohojen kitkeminen
+mgmt_operations_event_choice,puddling,paddy system preparation (puddling),riisipellon valmistelu
+mgmt_operations_event_choice,flood_level,paddy system flood level control,riisipellon tulvatason hallinta
+mgmt_operations_event_choice,other,other,muu
 table_col_name,mgmt_operations_event,Event,Tapahtuma
 table_col_name,mgmt_event_date,Date,Päivä
 table_col_name,mgmt_event_notes,Notes,Muistiinpanot
 element_label,window_title,Input Management Data,Syötä tapahtumia
 element_label,site_label,Select the site:,Valitse sijainti:
 element_label,block_label,Select the block:,Valitse lohko:
-element_label,activity_label,Select the activity:,Valitse tapahtuma:
+element_label,mgmt_operations_event_label,Select the activity:,Valitse tapahtuma:
 element_label,planting_option_1_label,Did you do x?,Teitkö x:n?
 element_label,planting_option_11_label,Further choices:,Lisää valintoja:
 element_label,plant_species_label,Choose the species:,Valitse laji:
-element_label,date_label,Select the date when the activity was performed:,Valitse päivä jolloin tapahtuma tapahtui:
-element_label,notes_label,Notes (optional):,Muistiinpanot (vapaaehtoinen):
-element_label,notes_placeholder,"Anything related to the event, e.g. yield amount, seeding or tillage depth, products spread, machine type, etc.","Mitä tahansa tapahtumaan liittyvää, kuten sadon määrä, kylvön tai kynnön syvyys, levitetty aine, konetyyppi jne."
+element_label,mgmt_event_date_label,Select the date when the activity was performed:,Valitse päivä jolloin tapahtuma tapahtui:
+element_label,mgmt_event_notes_label,Notes (optional):,Muistiinpanot (vapaaehtoinen):
+element_label,mgmt_event_notes_placeholder,"Anything related to the event, e.g. yield amount, seeding or tillage depth, products spread, machine type, etc.","Mitä tahansa tapahtumaan liittyvää, kuten sadon määrä, kylvön tai kynnön syvyys, levitetty aine, konetyyppi jne."
 element_label,save_label,Save,Tallenna
 element_label,planting_text_output,Here you can have specific options for the planting activity type,Tässä voi olla lisävalintoja kylvötapahtumalle.
 element_label,harvest_text_output,Here you can have specific options for the harvest activity type,Tässä voi olla lisävalintoja sadonkorjuutapahtumalle.

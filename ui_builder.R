@@ -4,7 +4,7 @@
 
 structure_file_path <- "data/sidebar_ui_structure.json"
 structure <- jsonlite::fromJSON(structure_file_path)
-activity_options <- structure$activity$sub_elements
+activity_options <- structure$mgmt_operations_event$sub_elements
 
 # help texts (technically textOutputs) have a different method of updating
 # when the language is changed because they are outputs rather than inputs,
