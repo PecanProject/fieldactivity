@@ -12,14 +12,14 @@
     "label": "block_label",
     "choices": "IGNORE"
   },
-  
+
   "mgmt_operations_event": {
     "code_name": "mgmt_operations_event",
     "type" : "selectInput",
     "label" : "mgmt_operations_event_label",
     "choices": "mgmt_operations_event_choice",
     "sub_elements": {
-      
+
       "planting": {
         "condition": "input.mgmt_operations_event == 'planting'",
 
@@ -50,7 +50,7 @@
           "choices": ["spc_barley", "spc_wheat", "spc_rye"]
         }
       },
-      
+
       "harvest": {
         "condition": "input.mgmt_operations_event == 'harvest'",
         "harvest_text_output" : {
@@ -79,5 +79,11 @@
     "code_name" : "save",
     "type" : "actionButton",
     "label": "save_label"
+  },
+
+  "cancel" : {
+    "code_name" : "cancel",
+    "type" : "actionButton",
+    "label": "cancel_label"
   }
 }

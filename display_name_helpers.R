@@ -25,6 +25,7 @@ get_category_names <- function(category1, language) {
 
 # get the display name(s) corresponding to a code name (/names)
 # returns the display names(s) as a value
+# if display name is not found, the code name is returned
 get_disp_name <- function(code_name1, language) {
   
   # if language_column is null, it means our UI has not initialised yet
@@ -33,6 +34,10 @@ get_disp_name <- function(code_name1, language) {
   #}
   
   row_indexes <- match(code_name1, display_names_dict$code_name)
+  display_name <- display_names_dict[row_indexes, language]
   
-  return(display_names_dict[row_indexes, language])
+  # replace missing display names with the corresponding code names
+  display_name[is.na(display_name)] <- code_name1[is.na(display_name)]
+  
+  return(display_name)
 }

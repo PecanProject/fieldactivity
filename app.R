@@ -47,8 +47,8 @@ date_format <- "%d/%m/%Y"
 
 # make helper functions available
 source("display_name_helpers.R")
-source("json_file_helpers.R")
 source("ui_builder.R")
+source("json_file_helpers.R")
 
 # read the csv file containing the sites 
 sites_file_path <- "data/FOsites.csv"
@@ -100,27 +100,27 @@ update_ui_element <- function(session, code_name, value, ...) {
 }
 
 # element is the list returned by rlapply
-get_selectInput_choices <- function(code_name, element) {
-    selector_choices <- NULL
-    
-    if (length(element$choices) > 1) {
-        selector_choices <- c("", element$choices)
-        names(selector_choices) <- c("", get_disp_name(
-            element$choices,
-            language = input$language))
-        
-    } else if (element$choices == "IGNORE") {
-        selector_choices <- NULL
-    } else {
+#get_selectInput_choices <- function(code_name, element) {
+#    selector_choices <- NULL
+#    
+#    if (length(element$choices) > 1) {
+#        selector_choices <- c("", element$choices)
+#        names(selector_choices) <- c("", get_disp_name(
+#            element$choices,
+#            language = input$language))
+#        
+#    } else if (element$choices == "IGNORE") {
+#        selector_choices <- NULL
+#    } else {
         # get_category_names returns both display names and 
         # code names
-        selector_choices <- c(
-            "",
-            get_category_names(element$choices,
-                               language = input$language)
-        )
-    }
-}
+#        selector_choices <- c(
+#            "",
+#            get_category_names(element$choices,
+#                               language = input$language)
+#        )
+#    }
+#}
 
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
@@ -222,6 +222,7 @@ server <- function(input, output, session) {
         # passphrase = "salasana"
     )
     
+    # change login form language when requested
     observeEvent(input$login_language, {
 
         # yes we are overwriting the English language. This is by far
@@ -289,18 +290,22 @@ server <- function(input, output, session) {
                 # no rows selected anymore, 
                 # so clear the fields and set edit mode off
                 print("Clearing fields")
+                
                 session$userData$edit_mode <- FALSE
+                session$userData$events_with_code_names <- NULL
                 shinyjs::hide("cancel")
+                shinyjs::enable("block")
             }
             
             return()
         } 
         
         # we have selected a row. Let's fetch the table with code names
-        data_with_code_names <- retrieve_json_info(input$site, 
-                                                   input$block,
-                                                   language = NULL)
-        selected_data <- data_with_code_names[row_index,]
+        session$userData$events_with_code_names <- retrieve_json_info(
+            input$site, 
+            input$block,
+            language = NULL)
+        selected_data <- session$userData$events_with_code_names[row_index,]
         
         # populate the input controls with the values corresponding to the row
         
@@ -317,9 +322,11 @@ server <- function(input, output, session) {
         # set edit mode on
         session$userData$edit_mode <- TRUE
         shinyjs::show("cancel")
+        shinyjs::disable("block") # TODO: remove
     })
     
     DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
+    # canceling editing is equivalent to deselecting the selected row
     observeEvent(input$cancel,{
         DT::selectRows(DTproxy, NULL)
     })
@@ -347,7 +354,7 @@ server <- function(input, output, session) {
         datatable(tabledata$events, selection = "single", 
                   rownames = FALSE, # hide row numbers
                   colnames = c(names(
-                      get_category_names("table_col_name",
+                      get_category_names("variable_name",
                                          language = input$language)), 
                       "date_ordering"),
                   options = list(dom = 't', # hide unnecessary controls
@@ -370,8 +377,59 @@ server <- function(input, output, session) {
     # save input to a file when save button is pressed
     observeEvent(input$save, {
         
+        # if we were editing, save new information
         if (session$userData$edit_mode) {
-            print("TODO: edit data")
+            
+            selected_row <- input$mgmt_events_table_rows_selected
+            
+            # get a list of all input elements
+            input_element_names <- names(isolate(reactiveValuesToList(input)))
+            
+            # go through all of them and see whether they correspond to
+            # a column in our events table
+            for (code_name in input_element_names) {
+                if (code_name %in% 
+                    names(session$userData$events_with_code_names)) {
+
+                    value_to_save <- isolate(input[[code_name]])
+                    
+                    # format value if it is a date
+                    if (class(value_to_save) == "Date") {
+                        value_to_save <- format(value_to_save, date_format)
+                    }
+                    
+                    #print(paste("Saving data", value_to_save, 
+                    #            "to row", selected_row, "and col", code_name))
+
+                    session$userData$events_with_code_names[selected_row,
+                                                            code_name] <- 
+                        value_to_save
+                }
+            }
+            
+            write_json_file(isolate(input$site), isolate(input$block),
+                            session$userData$events_with_code_names)
+            
+            showNotification("Modifications saved!", type = "message")
+            
+            # clear table data, which causes a reread from the json file
+            # this also clears the row selection so we will also exit the edit
+            # mode
+            # tabledata$events <- NULL
+            
+            
+            # better way: update data table and clear selection
+            new_data_to_display <- replace_with_display_names(
+                session$userData$events_with_code_names, isolate(input$language)
+            )
+            # add a new column for ordering by date
+            new_data_to_display$date_ordering <- as.Date(
+                new_data_to_display$mgmt_event_date, 
+                format = date_format)
+            DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+            
+            # clear row selection to exit edit mode
+            #DT::selectRows(DTproxy, NULL)
             return()
         }
         
@@ -420,8 +478,6 @@ server <- function(input, output, session) {
                               choices = c("", block_choices))
         }
     })
-    
-
     
     # change language when user requests it
     observeEvent(input$language, {
