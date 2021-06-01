@@ -88,8 +88,13 @@ update_ui_element <- function(session, code_name, value, ...) {
     if (element$type == "selectInput") {
         updateSelectInput(session, code_name, selected = value,  ...)
     } else if (element$type == "dateInput") {
+        if (value == "") {
+            formatted_date <- Sys.Date()
+        } else {
+            formatted_date <- as.Date(value, format = date_format)
+        }
         updateDateInput(session, code_name, 
-                        value = as.Date(value, format = date_format), ...)
+                        value = formatted_date, ...)
     } else if (element$type == "textAreaInput") {
         updateTextAreaInput(session, code_name, value = value,  ...)
     } else if (element$type == "checkboxInput") {
@@ -97,6 +102,43 @@ update_ui_element <- function(session, code_name, value, ...) {
     } else if (element$type == "actionButton") {
         updateActionButton(session, code_name, ...)
     }
+}
+
+get_input_element_names <- function(input) {
+    # get a list of all input elements
+    input_element_names <- names(reactiveValuesToList(input))
+    
+    for (code_name in input_element_names) {
+        
+        element <- rlapply(
+            structure,
+            code_name_checker,
+            code_name = code_name)
+        
+        # didn't find the element corresponding to code_name, so this
+        # is not an input element we care about
+        if (is.null(element$type)) {
+            input_element_names <- 
+                input_element_names[which(!input_element_names == code_name)]
+        }
+        
+    }
+    
+    return(input_element_names)
+}
+
+clear_input_fields <- function(session, fields_to_clear) {
+    
+    exceptions <- c("site", "block")
+    
+    for (code_name in fields_to_clear) {
+        
+        if (code_name %in% exceptions) next
+        
+        update_ui_element(session, code_name, value = "")
+        
+    }
+    
 }
 
 # element is the list returned by rlapply
@@ -289,7 +331,7 @@ server <- function(input, output, session) {
             if (session$userData$edit_mode) {
                 # no rows selected anymore, 
                 # so clear the fields and set edit mode off
-                print("Clearing fields")
+                clear_input_fields(session, get_input_element_names(input))
                 
                 session$userData$edit_mode <- FALSE
                 session$userData$events_with_code_names <- NULL
@@ -412,13 +454,7 @@ server <- function(input, output, session) {
             
             showNotification("Modifications saved!", type = "message")
             
-            # clear table data, which causes a reread from the json file
-            # this also clears the row selection so we will also exit the edit
-            # mode
-            # tabledata$events <- NULL
-            
-            
-            # better way: update data table and clear selection
+            # update data table
             new_data_to_display <- replace_with_display_names(
                 session$userData$events_with_code_names, isolate(input$language)
             )
@@ -427,9 +463,9 @@ server <- function(input, output, session) {
                 new_data_to_display$mgmt_event_date, 
                 format = date_format)
             DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+            # replacing the data clears the selection, which in turn exits
+            # the edit mode, so we are ready
             
-            # clear row selection to exit edit mode
-            #DT::selectRows(DTproxy, NULL)
             return()
         }
         
@@ -442,6 +478,8 @@ server <- function(input, output, session) {
                             input$mgmt_operations_event, input$mgmt_event_notes)
         
         # clear the selected activity and notes
+        # TODO: change to using clear fields function
+        # although do consider date
         updateSelectInput(session, "mgmt_operations_event", selected = "")
         updateTextAreaInput(session, "mgmt_event_notes", value = "")
         
