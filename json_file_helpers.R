@@ -102,6 +102,11 @@ retrieve_json_info <- function(site_name, block, language) {
   
   events <- jsonlite::fromJSON(file_path)$management$events
   
+  # if there are no rows, return an empty data frame
+  if (is.null(nrow(events))) {
+    return(data.frame())
+  }
+  
   # if requested, add display names and ordering by date column
   if (!is.null(language)) {
     

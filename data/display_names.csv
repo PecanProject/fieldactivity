@@ -30,6 +30,7 @@ element_label,mgmt_event_notes_label,Notes (optional):,Muistiinpanot (vapaaehtoi
 element_label,mgmt_event_notes_placeholder,"Anything related to the event, e.g. yield amount, seeding or tillage depth, products spread, machine type, etc.","Mitä tahansa tapahtumaan liittyvää, kuten sadon määrä, kylvön tai kynnön syvyys, levitetty aine, konetyyppi jne."
 element_label,save_label,Save,Tallenna
 element_label,cancel_label,Cancel,Peruuta
+element_label,delete_label,Delete,Poista
 element_label,planting_text_output,Here you can have specific options for the planting activity type,Tässä voi olla lisävalintoja kylvötapahtumalle.
 element_label,harvest_text_output,Here you can have specific options for the harvest activity type,Tässä voi olla lisävalintoja sadonkorjuutapahtumalle.
 planting_option_11_choice,alt1,Alternative 1,Vaihtoehto 1

@@ -225,7 +225,10 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             
             actionButton("save", label = "Save"),
             
-            shinyjs::hidden(actionButton("cancel", label = "Cancel"))
+            shinyjs::hidden(actionButton("cancel", label = "Cancel")),
+            
+            shinyjs::hidden(actionButton("delete", label = "Delete", 
+                                         class = "btn-warning"))
         ),
         
         mainPanel(
@@ -336,6 +339,7 @@ server <- function(input, output, session) {
                 session$userData$edit_mode <- FALSE
                 session$userData$events_with_code_names <- NULL
                 shinyjs::hide("cancel")
+                shinyjs::hide("delete")
                 shinyjs::enable("block")
             }
             
@@ -364,6 +368,7 @@ server <- function(input, output, session) {
         # set edit mode on
         session$userData$edit_mode <- TRUE
         shinyjs::show("cancel")
+        shinyjs::show("delete")
         shinyjs::disable("block") # TODO: remove
     })
     
@@ -462,6 +467,7 @@ server <- function(input, output, session) {
             new_data_to_display$date_ordering <- as.Date(
                 new_data_to_display$mgmt_event_date, 
                 format = date_format)
+            
             DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
             # replacing the data clears the selection, which in turn exits
             # the edit mode, so we are ready
@@ -489,6 +495,42 @@ server <- function(input, output, session) {
         # expression run, which reads the latest data from the json file
         # and updates the table
         tabledata$events <- NULL
+    })
+    
+    # delete entry when delete button is pressed
+    observeEvent(input$delete, {
+      
+        selected_row <- input$mgmt_events_table_rows_selected
+        
+        # delete row 
+        session$userData$events_with_code_names <-
+            session$userData$events_with_code_names[-selected_row,]
+        
+        # write to json
+        write_json_file(isolate(input$site), isolate(input$block),
+                        session$userData$events_with_code_names)
+        
+        showNotification("Entry deleted!", type = "message")
+        
+        # if no entries are left, we have to clear data table a different route
+        if (nrow(session$userData$events_with_code_names) == 0) {
+            tabledata$events <- NULL
+            return()
+        }
+        
+        # update data table
+        new_data_to_display <- replace_with_display_names(
+            session$userData$events_with_code_names, isolate(input$language)
+        )
+        # add a new column for ordering by date
+        new_data_to_display$date_ordering <- as.Date(
+            new_data_to_display$mgmt_event_date, 
+            format = date_format)
+        
+        DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+        # replacing the data clears the selection, which in turn exits
+        # the edit mode, so we are ready
+        
     })
     
     # disable the save button if not all necessary info has been filled

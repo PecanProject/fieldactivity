@@ -85,5 +85,11 @@
     "code_name" : "cancel",
     "type" : "actionButton",
     "label": "cancel_label"
+  },
+
+  "delete" : {
+    "code_name" : "delete",
+    "type" : "actionButton",
+    "label" : "delete_label"
   }
 }
