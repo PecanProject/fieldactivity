@@ -3,7 +3,7 @@
     "code_name" : "edit_mode_title",
     "type" : "textOutput"
   },
-   
+
   "site": {
     "code_name": "site",
     "type": "selectInput",
@@ -58,9 +58,59 @@
 
       "harvest": {
         "condition": "input.mgmt_operations_event == 'harvest'",
-        "harvest_text_output" : {
-          "code_name": "harvest_text_output",
-          "type" : "textOutput"
+        "harvest_notes" : {
+          "code_name": "harvest_notes",
+          "type" : "textInput",
+          "label" : "harvest_notes_label"
+        },
+
+        "harvest_comments" : {
+          "code_name" : "harvest_comments",
+          "type" : "textAreaInput",
+          "label" : "harvest_comments_label"
+        },
+
+        "harvest_crop" : {
+          "code_name" : "harvest_crop",
+          "type" : "selectInput",
+          "choices" : "CRID",
+          "label" : "harvest_crop_label",
+          "multiple" : "TRUE"
+        },
+
+        "harvest_operat_component" : {
+          "code_name" : "harvest_operat_component",
+          "type" : "selectInput",
+          "choices" : "HACOM",
+          "label" : "harvest_operat_component_label"
+        },
+
+        "harvest_area" : {
+          "code_name" : "harvest_area",
+          "type" : "numericInput",
+          "label" : "harvest_area_label",
+          "min" : "0"
+        },
+
+        "harvest_method" : {
+          "code_name" : "harvest_method",
+          "type" : "selectInput",
+          "label" : "harvest_method_label",
+          "choices" : "HARM"
+        },
+
+        "harv_operat_size_categor" : {
+          "code_name" : "har_operat_size_categor",
+          "type" : "selectInput",
+          "label" : "harv_operat_size_categor_label",
+          "choices" : "HASIZ"
+        },
+
+        "harvest_cut_height" : {
+          "code_name" : "harvest_cut_height",
+          "type" : "numericInput",
+          "label" : "harvest_cut_height_label",
+          "min" : "0"
         }
       }
 

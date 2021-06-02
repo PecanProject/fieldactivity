@@ -31,12 +31,40 @@ element_label,mgmt_event_notes_placeholder,"Anything related to the event, e.g. 
 element_label,save_label,Save,Tallenna
 element_label,cancel_label,Cancel,Peruuta
 element_label,delete_label,Delete,Poista
-element_label,planting_text_output,Here you can have specific options for the planting activity type,Tässä voi olla lisävalintoja kylvötapahtumalle.
 element_label,harvest_text_output,Here you can have specific options for the harvest activity type,Tässä voi olla lisävalintoja sadonkorjuutapahtumalle.
 element_label,edit_mode_title,Edit event,Muokkaa tapahtumaa
+element_label,harvest_notes_label,Short notes:,Lyhyet muistiinpanot:
+element_label,harvest_comments_label,Extended comments:, Pidemmät kommentit:
+element_label,harvest_crop_label,Crop harvested:,Korjattu laji:
+element_label,harvest_operat_component_label,Crop component harvested:,Kerätty osa:
+element_label,harvest_area_label,Harvest area (ha):,Pinta-ala (ha):
+element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
+element_label,harv_operat_size_categor_label,Harvest operation size category:,Korjuukokokategoria:
+element_label,harvest_cut_height_label,Height of cut (cm):,Leikkuukorkeus (cm):
 planting_option_11_choice,alt1,Alternative 1,Vaihtoehto 1
 planting_option_11_choice,alt2,Alternative 2,Vaihtoehto 2
 plant_species_choice,spc_barley,barley,kaura
 plant_species_choice,spc_wheat,wheat,vehnä
 plant_species_choice,spc_rye,rye,ruis
-
+CRID,FRG,Timothy (Phleum pratense),Timotei (Phleum pratense)
+CRID,WHT,Wheat (Triticum spp.), Vehnä (Triticum spp.)
+HACOM,canopy,Canopy,Latvusto
+HACOM,leaf,Leaves,Lehdet
+HACOM,grain,"Grain, legume seeds","Jyvä, palkokasvin siemen"
+HACOM,silage,Silage,Säilörehu
+HACOM,tuber,"Tuber, root, etc.","Mukula, juuri, yms."
+HACOM,fruit,Fruit,Hedelmä
+HACOM,fiber,Fiber,Kuitu
+HACOM,seed_cotton,"Cotton boil, including lint","Puuvillakeite, myös nukka"
+HACOM,stem,Stem,Varsi
+HARM,HM001,Combined,Leikkuupuimuri
+HARM,HM002,"Hand cut, machine threshed","Leikattu käsin, puitu koneella"
+HARM,HM003,"Hand cut, hand threshed","Leikattu käsin, puitu käsin"
+HARM,HM004,"Hand picked, no further processing","Poimittu käsin, ei muuta prosessointia"
+HARM,HM005,"Hand picked, machine processing","Poimittu käsin, prosessoitu koneella"
+HARM,HM006,Cotton stripper,Puuvillakone
+HARM,HM999,Method unknown/not given,Tapa ei tiedossa
+HASIZ,A,All,Kaikki
+HASIZ,S,Small - less than 1/3 full size,Pieni - alle 1/3 täydestä koosta
+HASIZ,M,Medium - from 1/3 to 2/3 full size,Keskikokoinen - 1/3 - 2/3 täydestä koosta
+HASIZ,L,Large - greater than 2/3 full size, Suuri - enemmän kuin 2/3 täydestä koosta

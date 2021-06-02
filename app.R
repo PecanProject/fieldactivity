@@ -7,7 +7,7 @@ library(jsonlite)
 library(shinyjs) # shinyjs is used for e.g. disabling action buttons
 library(shinymanager) # for user authentication
 library(shinythemes) # change theme for login UI (and possibly rest of app)
-library(keyring) # for interacting with system credential store to store db key
+#library(keyring) # for interacting with system credential store to store db key
 library(DT) # fancier data table
 
 #### AUTHENTICATION STUFF
@@ -16,12 +16,12 @@ library(DT) # fancier data table
 set_db_key <- FALSE
 # if the database encryption key is not found and we want to set the key,
 # we ask the user to define it
-if (nrow(key_list("FO-mgmt-events-key")) == 0) {
-    # throw exception if there is no key and we don't want to define it
-    stopifnot(set_db_key)
-    
-    key_set("FO-mgmt-events-key", "FO-mgmt-events-user") 
-}
+#if (nrow(key_list("FO-mgmt-events-key")) == 0) {
+#    # throw exception if there is no key and we don't want to define it
+#    stopifnot(set_db_key)
+#    
+#    key_set("FO-mgmt-events-key", "FO-mgmt-events-user") 
+#}
 
 # define some credentials
 #credentials <- data.frame(
@@ -257,8 +257,8 @@ server <- function(input, output, session) {
     # to shinyapps.io
     credential_checker <- check_credentials(
         "data/database.sqlite",
-        passphrase = key_get("FO-mgmt-events-key", "FO-mgmt-events-user")
-        # passphrase = "salasana"
+        # passphrase = key_get("FO-mgmt-events-key", "FO-mgmt-events-user")
+        passphrase = "salasana"
     )
     
     # change login form language when requested
@@ -657,6 +657,8 @@ server <- function(input, output, session) {
             # sidebar_ui_structure.json
             if (is.null(element$type)) next
             
+            
+            
             if (element$type == "selectInput") {
                 
                 # the code name for the label is stored in label
@@ -733,6 +735,16 @@ server <- function(input, output, session) {
                                     code_name,
                                     label = get_disp_name(element$label,
                                                           input$language))
+            } else if (element$type == "textInput") {
+                updateTextInput(session, 
+                                code_name, 
+                                label = get_disp_name(element$label, 
+                                                      input$language))
+            } else if (element$type == "numericInput") {
+                updateNumericInput(session,
+                                   code_name,
+                                   label = get_disp_name(element$label, 
+                                                         input$language))
             }
 
         }

@@ -56,9 +56,11 @@ create_element <- function(element, language) {
     if (element$type == "checkboxInput") {
       new_element <- checkboxInput(element$code_name, element$label)
     } else if (element$type == "selectInput") {
+      # if multiple is defined (=TRUE) then pass that to selectInput
+      multiple <- ifelse(is.null(element$multiple), FALSE, TRUE)
       # we don't enter choices yet, that will be handled by the server
       new_element <- selectInput(element$code_name, element$label, 
-                                 choices = c(""))
+                                 choices = c(""), multiple = multiple)
     } else if (element$type == "textOutput") {
       # these are inteded to look like helpTexts so make text gray
       new_element <- span(textOutput(element$code_name), style = "color:gray")
@@ -66,6 +68,17 @@ create_element <- function(element, language) {
       # the <<- operator assigns to the global environment
       # maybe not the best programming technique, but it works
       text_output_code_names <<- c(text_output_code_names, element$code_name)
+    } else if (element$type == "textInput") {
+      new_element <- textInput(element$code_name, element$label)
+    } else if (element$type == "numericInput") {
+      new_element <- numericInput(element$code_name, 
+                                  element$label, 
+                                  min = element$min,
+                                  value = 0)
+    } else if (element$type == "textAreaInput") {
+      new_element <- textAreaInput(element$code_name, 
+                                   element$label,
+                                   resize = "vertical")
     }
     
     # put the new element in a conditionalPanel. If no condition is specified,
