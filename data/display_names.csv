@@ -33,6 +33,7 @@ element_label,cancel_label,Cancel,Peruuta
 element_label,delete_label,Delete,Poista
 element_label,planting_text_output,Here you can have specific options for the planting activity type,Tässä voi olla lisävalintoja kylvötapahtumalle.
 element_label,harvest_text_output,Here you can have specific options for the harvest activity type,Tässä voi olla lisävalintoja sadonkorjuutapahtumalle.
+element_label,edit_mode_title,Edit event,Muokkaa tapahtumaa
 planting_option_11_choice,alt1,Alternative 1,Vaihtoehto 1
 planting_option_11_choice,alt2,Alternative 2,Vaihtoehto 2
 plant_species_choice,spc_barley,barley,kaura

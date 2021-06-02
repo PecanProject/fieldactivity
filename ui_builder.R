@@ -9,7 +9,7 @@ activity_options <- structure$mgmt_operations_event$sub_elements
 # help texts (technically textOutputs) have a different method of updating
 # when the language is changed because they are outputs rather than inputs,
 # and for that we need a list of the code names of these objects. 
-text_output_code_names <- c("window_title")
+text_output_code_names <- c("window_title", "edit_mode_title")
 
 
 # creates the ui for a list of elements in the structure file.

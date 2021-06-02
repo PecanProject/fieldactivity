@@ -86,6 +86,19 @@ write_json_file <- function(site_name, block, new_data_frame) {
                        null = 'null', auto_unbox = TRUE)
 }
 
+generate_empty_data_frame <- function() {
+  variable_names <- get_category_names("variable_name", NULL)
+  new_table <- data.frame()
+  
+  for (variable_name in variable_names) {
+    new_table[[variable_name]] <- character()
+  }
+  
+  names(new_table) <- variable_names
+  
+  return(new_table)
+}
+
 # retrieve the events of a specific site and block and return as a data frame
 # if language is set to NULL, code_names will be displayed and column for
 # ordering by date omitted
@@ -97,14 +110,14 @@ retrieve_json_info <- function(site_name, block, language) {
   
   # if file doesn't exist or given names are empty, can't read it
   if (!file.exists(file_path) | site_name == "" | block == "") {
-    return(data.frame())
+    return(generate_empty_data_frame())
   }
   
   events <- jsonlite::fromJSON(file_path)$management$events
   
   # if there are no rows, return an empty data frame
   if (is.null(nrow(events))) {
-    return(data.frame())
+    return(generate_empty_data_frame())
   }
   
   # if requested, add display names and ordering by date column

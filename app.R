@@ -182,6 +182,10 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     sidebarLayout(
         # the sidebar contains the selectors for the farm, activity type and date
         sidebarPanel(
+            
+            h2(shinyjs::hidden(textOutput("edit_mode_title")),
+               style = "margin-bottom = 0px; margin-top = 0px"),
+            
             # adding "" to the choices makes the default choice empty
             selectInput(
                 "site",
@@ -257,6 +261,11 @@ server <- function(input, output, session) {
 
     # initialise in the normal (non-edit) mode
     session$userData$edit_mode <- FALSE
+    # when in editing mode the block has been changed by the user, we return
+    # it back to its original state. However, this update is “slow” whereas
+    # the value of the edit_mode variable changes quickly. Therefore we need
+    # an additional variable to block an unnecessary table update in this case
+    session$userData$block_table_update <- FALSE
     
     # check_credentials returns a function to authenticate users
     # might have to use the hand-typed passphrase option for now when deploying
@@ -325,33 +334,41 @@ server <- function(input, output, session) {
     
     # enable editing of old entries
     # TODO: don't clear fields if row selected and language changed
-    observe({
+    observeEvent(input$mgmt_events_table_rows_selected, ignoreNULL = FALSE, {
         
         row_index <- input$mgmt_events_table_rows_selected
         
         if (is.null(row_index)) {
             
             if (session$userData$edit_mode) {
+                
                 # no rows selected anymore, 
                 # so clear the fields and set edit mode off
                 clear_input_fields(session, get_input_element_names(input))
                 
-                session$userData$edit_mode <- FALSE
-                session$userData$events_with_code_names <- NULL
+                # if block selector was changed, change it back
+                if (!(session$userData$original_block == input$block)) {
+                    # prevent unnecessary table update
+                    session$userData$block_table_update <- TRUE
+                    
+                    # return block value to original
+                    updateSelectInput(session, "block", selected = 
+                                          session$userData$original_block)
+                }
+                
                 shinyjs::hide("cancel")
                 shinyjs::hide("delete")
-                shinyjs::enable("block")
+                shinyjs::hide("edit_mode_title")
+                
+                session$userData$edit_mode <- FALSE
+                session$userData$original_block <- NULL
+
             }
             
             return()
         } 
         
-        # we have selected a row. Let's fetch the table with code names
-        session$userData$events_with_code_names <- retrieve_json_info(
-            input$site, 
-            input$block,
-            language = NULL)
-        selected_data <- session$userData$events_with_code_names[row_index,]
+        selected_data <- tabledata$events_with_code_names[row_index,]
         
         # populate the input controls with the values corresponding to the row
         
@@ -369,12 +386,16 @@ server <- function(input, output, session) {
         session$userData$edit_mode <- TRUE
         shinyjs::show("cancel")
         shinyjs::show("delete")
-        shinyjs::disable("block") # TODO: remove
+        shinyjs::show("edit_mode_title")
+        
+        # save current block value so we can return to it later
+        session$userData$original_block <- input$block
     })
     
     DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
+    
     # canceling editing is equivalent to deselecting the selected row
-    observeEvent(input$cancel,{
+    observeEvent(input$cancel, {
         DT::selectRows(DTproxy, NULL)
     })
     
@@ -384,41 +405,72 @@ server <- function(input, output, session) {
     # selection is not updated to match the username.
     auth_result <- secure_server(check_credentials = credential_checker)
     
-    # this is where we access the data to display in the data table.
+    # this is where we access the data that is displayd in the data table.
     # initially NULL because reactive expressions aren't allowed here.
-    # we store the data in a reactiveValues object so that if the data is 
-    # updated when the button is clicked, the data table automatically updates
-    tabledata <- reactiveValues(events = NULL)
+    tabledata <- reactiveValues(events_with_code_names = NULL)
     
-    output$mgmt_events_table <- DT::renderDataTable({
-        # when input$site, input$block or input$language changes, update.
-        # this is also updated if tabledata$events changes, which happens
-        # when the save button is pressed
-        tabledata$events <- retrieve_json_info(input$site,
-                                               input$block,
-                                               input$language)
-        n_cols <- ncol(tabledata$events)
-        datatable(tabledata$events, selection = "single", 
-                  rownames = FALSE, # hide row numbers
-                  colnames = c(names(
-                      get_category_names("variable_name",
-                                         language = input$language)), 
-                      "date_ordering"),
-                  options = list(dom = 't', # hide unnecessary controls
-                                 # TODO: check whether a long list is entirely
-                                 # visible
-                                 # order chronologically by hidden column
-                                 # autoWidth = TRUE,
-                                 order = list(n_cols - 1, 'desc'), 
-                                 columnDefs = list(
-                                     # hide date_ordering column
-                                     list(visible = FALSE, targets = 
-                                              c(n_cols - 1)),
-                                     # hide sorting arrows
-                                     list(orderable = FALSE, targets = 
-                                              0:(n_cols - 2)))
-                                 ))
+    # when block changes, update table
+    observeEvent(input$block, {
+    
+        # if we are editing, don't do anything
+        if (session$userData$edit_mode) {
+            return()
+        }
         
+        # the user has changed the block selection during edit mode and now
+        # we want to return it back. We don't however want to update the table
+        # again unnecessarily, so we block this update
+        if (session$userData$block_table_update) {
+            session$userData$block_table_update <- FALSE
+            return()
+        }
+        
+        req(input$site, input$block, input$language)
+        
+        # block changed and we are not editing, so load new data
+        tabledata$events_with_code_names <- retrieve_json_info(
+            input$site, 
+            input$block,
+            language = NULL)
+        
+        # render data table.
+        # this can also run on its own without the entire input$block
+        # observer running. This happens when input$language is changed.
+        output$mgmt_events_table <- DT::renderDataTable({
+
+            # update data table
+            new_data_to_display <- replace_with_display_names(
+                isolate(tabledata$events_with_code_names), input$language
+            )
+            # add a new column for ordering by date
+            new_data_to_display$date_ordering <- as.Date(
+                new_data_to_display$mgmt_event_date, 
+                format = date_format)
+            
+            n_cols <- ncol(new_data_to_display)
+            
+            datatable(new_data_to_display, 
+                      selection = "single", # allow selection of a single row
+                      rownames = FALSE, # hide row numbers
+                      colnames = c(names(
+                          get_category_names("variable_name",
+                                             language = 
+                                                 input$language)), 
+                          "date_ordering"),
+                      options = list(dom = 't', # hide unnecessary controls
+                                     # TODO: check whether a long list is
+                                     # entirely visible
+                                     # order chronologically by hidden column
+                                     order = list(n_cols - 1, 'desc'), 
+                                     columnDefs = list(
+                                         # hide date_ordering column
+                                         list(visible = FALSE, targets = 
+                                                  c(n_cols - 1)),
+                                         # hide sorting arrows
+                                         list(orderable = FALSE, targets = 
+                                                  0:(n_cols - 2)))
+                      ))
+        })
     })
     
     # save input to a file when save button is pressed
@@ -427,41 +479,57 @@ server <- function(input, output, session) {
         # if we were editing, save new information
         if (session$userData$edit_mode) {
             
+            # create an updated row
             selected_row <- input$mgmt_events_table_rows_selected
+            new_row <- tabledata$events_with_code_names[selected_row,]
             
-            # get a list of all input elements
-            input_element_names <- names(isolate(reactiveValuesToList(input)))
-            
+            # get a list of all input elements,
             # go through all of them and see whether they correspond to
             # a column in our events table
+            input_element_names <- names(reactiveValuesToList(input))
             for (code_name in input_element_names) {
-                if (code_name %in% 
-                    names(session$userData$events_with_code_names)) {
+                if (code_name %in% names(new_row)) {
 
-                    value_to_save <- isolate(input[[code_name]])
+                    value_to_save <- input[[code_name]]
                     
                     # format value if it is a date
                     if (class(value_to_save) == "Date") {
                         value_to_save <- format(value_to_save, date_format)
                     }
-                    
-                    #print(paste("Saving data", value_to_save, 
-                    #            "to row", selected_row, "and col", code_name))
 
-                    session$userData$events_with_code_names[selected_row,
-                                                            code_name] <- 
-                        value_to_save
+                    new_row[1, code_name] <- value_to_save
                 }
             }
             
-            write_json_file(isolate(input$site), isolate(input$block),
-                            session$userData$events_with_code_names)
+
+            # if the block has changed, we have to save to a different file
+            if (!(session$userData$original_block == input$block)) {
+                table_to_save <- retrieve_json_info(input$site, 
+                                                    input$block, 
+                                                    NULL)
+                table_to_save <- rbind(table_to_save, new_row)
+                
+                write_json_file(input$site, input$block, table_to_save)
+                
+                # delete from table to be displayed
+                tabledata$events_with_code_names <-
+                    tabledata$events_with_code_names[-selected_row,]
+                
+            } else {
+                # block is the same so just update row
+                tabledata$events_with_code_names[selected_row,] <- new_row
+            }
+            
+            # write changes to file of original block
+            write_json_file(input$site, 
+                            session$userData$original_block, 
+                            tabledata$events_with_code_names)
             
             showNotification("Modifications saved!", type = "message")
             
             # update data table
             new_data_to_display <- replace_with_display_names(
-                session$userData$events_with_code_names, isolate(input$language)
+                tabledata$events_with_code_names, input$language
             )
             # add a new column for ordering by date
             new_data_to_display$date_ordering <- as.Date(
@@ -479,9 +547,32 @@ server <- function(input, output, session) {
         # yyyy-mm-dd formatting of the Date object)
         formatted_date <- format(input$mgmt_event_date, date_format)
         
+        # we are going to create a new row to append to the json file
+        # corresponding to the block
+        # let's find the names of the columns
+        variable_names <- get_category_names("variable_name", NULL)
+        new_row <- generate_empty_data_frame()
+        
+        for (variable_name in variable_names) {
+            value_to_save <- input[[variable_name]]
+            
+            # format value if it is a date
+            if (class(value_to_save) == "Date") {
+                value_to_save <- format(value_to_save, date_format)
+            }
+            
+            new_row[1, variable_name] <- value_to_save
+        }
+        
+        tabledata$events_with_code_names <- rbind(
+            tabledata$events_with_code_names, new_row)
+        
+        write_json_file(input$site, input$block, 
+                        tabledata$events_with_code_names)
+        
         # this saves the data to the json file.
-        append_to_json_file(input$site, input$block, formatted_date,
-                            input$mgmt_operations_event, input$mgmt_event_notes)
+        #append_to_json_file(input$site, input$block, formatted_date,
+        #                    input$mgmt_operations_event, input$mgmt_event_notes)
         
         # clear the selected activity and notes
         # TODO: change to using clear fields function
@@ -491,10 +582,24 @@ server <- function(input, output, session) {
         
         showNotification("Data saved!", type = "message")
         
+        # TODO: update this comment
         # set tabledata$events to NULL. This makes the renderDataTable 
         # expression run, which reads the latest data from the json file
         # and updates the table
-        tabledata$events <- NULL
+        #tabledata$events <- NULL
+        
+        # update data table
+        new_data_to_display <- replace_with_display_names(
+            tabledata$events_with_code_names, input$language
+        )
+        # add a new column for ordering by date
+        new_data_to_display$date_ordering <- as.Date(
+            new_data_to_display$mgmt_event_date, 
+            format = date_format)
+        
+        # this deselects the row which exits the edit mode
+        DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+
     })
     
     # delete entry when delete button is pressed
@@ -503,25 +608,20 @@ server <- function(input, output, session) {
         selected_row <- input$mgmt_events_table_rows_selected
         
         # delete row 
-        session$userData$events_with_code_names <-
-            session$userData$events_with_code_names[-selected_row,]
+        tabledata$events_with_code_names <-
+            tabledata$events_with_code_names[-selected_row,]
         
         # write to json
-        write_json_file(isolate(input$site), isolate(input$block),
-                        session$userData$events_with_code_names)
+        write_json_file(input$site, session$userData$original_block,
+                        tabledata$events_with_code_names)
         
         showNotification("Entry deleted!", type = "message")
         
-        # if no entries are left, we have to clear data table a different route
-        if (nrow(session$userData$events_with_code_names) == 0) {
-            tabledata$events <- NULL
-            return()
-        }
-        
         # update data table
         new_data_to_display <- replace_with_display_names(
-            session$userData$events_with_code_names, isolate(input$language)
+            tabledata$events_with_code_names, isolate(input$language)
         )
+        
         # add a new column for ordering by date
         new_data_to_display$date_ordering <- as.Date(
             new_data_to_display$mgmt_event_date, 
@@ -574,10 +674,22 @@ server <- function(input, output, session) {
                 renderText(get_disp_name(text_output_code_name, input$language))
         })
         
+        # update data table
+        new_data_to_display <- replace_with_display_names(
+            tabledata$events_with_code_names, input$language
+        )
+        
+        # add a new column for ordering by date
+        new_data_to_display$date_ordering <- as.Date(
+            new_data_to_display$mgmt_event_date, 
+            format = date_format)
+        
+        DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+        
         # INPUT ELEMENTS:
         
         # get a list of all input elements which we have to relabel
-        input_element_names <- names(isolate(reactiveValuesToList(input)))
+        input_element_names <- names(reactiveValuesToList(input))
         
         for (code_name in input_element_names) {
             

@@ -8,6 +8,7 @@ display_names_dict <- read.csv(display_name_dict_path)
 
 # find all code names and display names belonging to a given category
 # display names are set as the names, code names are the values
+# if language is NULL, only code names are returned
 get_category_names <- function(category1, language) {
   
   #if (is.null(language)) {
@@ -15,10 +16,12 @@ get_category_names <- function(category1, language) {
   #}
   
   category_names <- subset(display_names_dict, category == category1)
-  
-  disp_names <- category_names[[language]]
   code_names <- category_names$code_name
-  names(code_names) <- disp_names
+  
+  if (!is.null(language)) {
+    disp_names <- category_names[[language]]
+    names(code_names) <- disp_names
+  }
   
   return(code_names)
 }

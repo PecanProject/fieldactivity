@@ -1,4 +1,9 @@
 {
+  "edit_mode_title": {
+    "code_name" : "edit_mode_title",
+    "type" : "textOutput"
+  },
+   
   "site": {
     "code_name": "site",
     "type": "selectInput",
