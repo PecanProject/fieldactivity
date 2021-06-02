@@ -141,28 +141,18 @@ clear_input_fields <- function(session, fields_to_clear) {
     
 }
 
-# element is the list returned by rlapply
-#get_selectInput_choices <- function(code_name, element) {
-#    selector_choices <- NULL
-#    
-#    if (length(element$choices) > 1) {
-#        selector_choices <- c("", element$choices)
-#        names(selector_choices) <- c("", get_disp_name(
-#            element$choices,
-#            language = input$language))
-#        
-#    } else if (element$choices == "IGNORE") {
-#        selector_choices <- NULL
-#    } else {
-        # get_category_names returns both display names and 
-        # code names
-#        selector_choices <- c(
-#            "",
-#            get_category_names(element$choices,
-#                               language = input$language)
-#        )
-#    }
-#}
+get_display_data_table <- function(code_name_data_table, language) {
+    # update data table
+    display_name_data_table <- replace_with_display_names(
+        code_name_data_table, language
+    )
+    # add a new column for ordering by date
+    display_name_data_table$date_ordering <- as.Date(
+        display_name_data_table$mgmt_event_date, 
+        format = date_format)
+    
+    return(display_name_data_table)
+}
 
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
@@ -180,7 +170,8 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     
     # create a sidebar layout
     sidebarLayout(
-        # the sidebar contains the selectors for the farm, activity type and date
+        # the sidebar contains the selectors for entering information
+        # about the event
         sidebarPanel(
             
             h2(shinyjs::hidden(textOutput("edit_mode_title")),
@@ -189,21 +180,25 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             # adding "" to the choices makes the default choice empty
             selectInput(
                 "site",
-                label = "Select the site:",
+                label = "",
                 choices = c("", sites$site)
             ),
             
-            # in general the choices don't have to be defined for selectInputs,
-            # as they will be populated when the language is changed (which
-            # also happens when the app starts)
+            # in general the choices and labels don't have to be defined for
+            # selectInputs, as they will be populated when the language is
+            # changed (which also happens when the app starts)
             
-            selectInput("block", label = "Select the block:",
-                        choice = c("")),
+            selectInput("block", label = "", choice = c("")),
             
-            selectInput(
-                "mgmt_operations_event",
-                label = "Select the activity (hint: choose planting):",
-                choices = c("")
+            selectInput("mgmt_operations_event", label = "", choices = c("")),
+            
+            # setting max disallows inputting future events
+            dateInput(
+                "mgmt_event_date",
+                format = "dd/mm/yyyy",
+                label = "",
+                max = Sys.Date(),
+                value = Sys.Date()
             ),
             
             # show a detailed options panel for the different activities
@@ -211,18 +206,9 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             create_ui(activity_options, language = default_language, 
                       create_border = FALSE),
             
-            # setting max disallows inputting future events
-            dateInput(
-                "mgmt_event_date",
-                format = "dd/mm/yyyy",
-                label = "Select the date when the activity was performed:",
-                max = Sys.Date(),
-                value = Sys.Date()
-            ),
-            
             textAreaInput(
                 "mgmt_event_notes",
-                label = "Notes (optional):",
+                label = "",
                 placeholder = "",
                 resize = "vertical"
             ),
@@ -236,15 +222,14 @@ ui <- fluidPage(theme = shinytheme("lumen"),
         ),
         
         mainPanel(
-            
             # table for showing already supplied information
             DT::dataTableOutput("mgmt_events_table")
-            
         )
     )
 )
 
-# Wrap your UI with secure_app
+# wrap the ui with the secure_app function which hides the app contents
+# until login is successful
 ui <- secure_app(ui, 
                  # language selector for login page
                  tags_bottom = selectInput("login_language", 
@@ -310,16 +295,12 @@ server <- function(input, output, session) {
         # match the login language selector
         # session$userData$default_language <- input$login_language
         
-        # showNotification(paste("From input$login_language", session$userData$default_language))
-        
         # this seems to refresh the authentication UI
         auth_result <- secure_server(check_credentials = credential_checker)
-        
     })
     
     # runs when logged in
     observeEvent(auth_result$user, {
-        
         if (auth_result$admin == "FALSE") {
             updateSelectInput(session, "site", selected = auth_result$user)
             shinyjs::disable("site")
@@ -329,7 +310,6 @@ server <- function(input, output, session) {
 
         # here would be good to somehow fetch the language selection from
         # login UI, but it's difficult
-        
     })
     
     # enable editing of old entries
@@ -400,7 +380,7 @@ server <- function(input, output, session) {
     })
     
     # call the server part of shinymanager
-    # weird observation: this has to be after the previous observeEvent block
+    # weird observation: this has to be after the observeEvent block
     # which observes the auth_result$user. If it isn't the site selectInput
     # selection is not updated to match the username.
     auth_result <- secure_server(check_credentials = credential_checker)
@@ -438,15 +418,9 @@ server <- function(input, output, session) {
         # observer running. This happens when input$language is changed.
         output$mgmt_events_table <- DT::renderDataTable({
 
-            # update data table
-            new_data_to_display <- replace_with_display_names(
+            new_data_to_display <- get_display_data_table(
                 isolate(tabledata$events_with_code_names), input$language
             )
-            # add a new column for ordering by date
-            new_data_to_display$date_ordering <- as.Date(
-                new_data_to_display$mgmt_event_date, 
-                format = date_format)
-            
             n_cols <- ncol(new_data_to_display)
             
             datatable(new_data_to_display, 
@@ -527,21 +501,17 @@ server <- function(input, output, session) {
             
             showNotification("Modifications saved!", type = "message")
             
-            # update data table
-            new_data_to_display <- replace_with_display_names(
+            new_data_to_display <- get_display_data_table(
                 tabledata$events_with_code_names, input$language
             )
-            # add a new column for ordering by date
-            new_data_to_display$date_ordering <- as.Date(
-                new_data_to_display$mgmt_event_date, 
-                format = date_format)
             
             DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
             # replacing the data clears the selection, which in turn exits
             # the edit mode, so we are ready
-            
             return()
         }
+        
+        # add a new event
         
         # format the date to be displayed nicely (otherwise will use default
         # yyyy-mm-dd formatting of the Date object)
@@ -549,11 +519,9 @@ server <- function(input, output, session) {
         
         # we are going to create a new row to append to the json file
         # corresponding to the block
-        # let's find the names of the columns
-        variable_names <- get_category_names("variable_name", NULL)
         new_row <- generate_empty_data_frame()
         
-        for (variable_name in variable_names) {
+        for (variable_name in names(new_row)) {
             value_to_save <- input[[variable_name]]
             
             # format value if it is a date
@@ -570,6 +538,7 @@ server <- function(input, output, session) {
         write_json_file(input$site, input$block, 
                         tabledata$events_with_code_names)
         
+        # TODO: this is the old method.
         # this saves the data to the json file.
         #append_to_json_file(input$site, input$block, formatted_date,
         #                    input$mgmt_operations_event, input$mgmt_event_notes)
@@ -582,20 +551,9 @@ server <- function(input, output, session) {
         
         showNotification("Data saved!", type = "message")
         
-        # TODO: update this comment
-        # set tabledata$events to NULL. This makes the renderDataTable 
-        # expression run, which reads the latest data from the json file
-        # and updates the table
-        #tabledata$events <- NULL
-        
-        # update data table
-        new_data_to_display <- replace_with_display_names(
+        new_data_to_display <- get_display_data_table(
             tabledata$events_with_code_names, input$language
         )
-        # add a new column for ordering by date
-        new_data_to_display$date_ordering <- as.Date(
-            new_data_to_display$mgmt_event_date, 
-            format = date_format)
         
         # this deselects the row which exits the edit mode
         DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
@@ -617,15 +575,9 @@ server <- function(input, output, session) {
         
         showNotification("Entry deleted!", type = "message")
         
-        # update data table
-        new_data_to_display <- replace_with_display_names(
-            tabledata$events_with_code_names, isolate(input$language)
+        new_data_to_display <- get_display_data_table(
+            tabledata$events_with_code_names, input$language
         )
-        
-        # add a new column for ordering by date
-        new_data_to_display$date_ordering <- as.Date(
-            new_data_to_display$mgmt_event_date, 
-            format = date_format)
         
         DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
         # replacing the data clears the selection, which in turn exits
@@ -674,16 +626,10 @@ server <- function(input, output, session) {
                 renderText(get_disp_name(text_output_code_name, input$language))
         })
         
-        # update data table
-        new_data_to_display <- replace_with_display_names(
+        # update data table to the new language
+        new_data_to_display <- get_display_data_table(
             tabledata$events_with_code_names, input$language
         )
-        
-        # add a new column for ordering by date
-        new_data_to_display$date_ordering <- as.Date(
-            new_data_to_display$mgmt_event_date, 
-            format = date_format)
-        
         DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
         
         # INPUT ELEMENTS:
