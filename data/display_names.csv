@@ -18,6 +18,14 @@ mgmt_operations_event_choice,other,other,muu
 variable_name,mgmt_operations_event,Event,Tapahtuma
 variable_name,mgmt_event_date,Date,Päivä
 variable_name,mgmt_event_notes,Notes,Muistiinpanot
+variable_name,harvest_notes,Harvest notes,Sadonkorjuumuistiinpanot
+variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
+variable_name,harvest_crop,Harvest crop,Korjattu laji
+variable_name,harvest_operat_component,Crop component harvested,Kerätty kasvinosa
+variable_name,harvest_area,Harvest area,Pinta-ala
+variable_name,harvest_method,Harvest method,Korjuutapa
+variable_name,harv_operat_size_categor,Harvest operations size category,Sadonkorjuukokokategoria
+variable_name,harvest_cut_height,Height of cut (cm),Leikkuukorkeus (cm)
 element_label,window_title,Input Management Data,Syötä tapahtumia
 element_label,site_label,Select the site:,Valitse sijainti:
 element_label,block_label,Select the block:,Valitse lohko:
@@ -39,7 +47,7 @@ element_label,harvest_crop_label,Crop harvested:,Korjattu laji:
 element_label,harvest_operat_component_label,Crop component harvested:,Kerätty osa:
 element_label,harvest_area_label,Harvest area (ha):,Pinta-ala (ha):
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
-element_label,harv_operat_size_categor_label,Harvest operation size category:,Korjuukokokategoria:
+element_label,harv_operat_size_categor_label,Harvest operation size category:,Sadonkorjuukokokategoria:
 element_label,harvest_cut_height_label,Height of cut (cm):,Leikkuukorkeus (cm):
 planting_option_11_choice,alt1,Alternative 1,Vaihtoehto 1
 planting_option_11_choice,alt2,Alternative 2,Vaihtoehto 2

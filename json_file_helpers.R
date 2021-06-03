@@ -27,35 +27,36 @@ create_json_file <- function(file_path) {
   
 }
 
-append_to_json_file <- function(site_name, block, date, activity, notes) {
-  
-  # corresponding file name: "sitename_block_events.json"
-  file_name <- paste(site_name, block, "events.json", sep = "_")
-  file_path <- file.path(json_file_folder, file_name)
-  
-  # if file doesn't exist, create it
-  if (!file.exists(file_path)) {
-    create_json_file(file_path)
-  }
-  
-  experiment <- jsonlite::fromJSON(file_path)
-  
-  # replaces the notes with missingval if the value is not supplied,
-  # otherwise stays the same
-  notes <- replace_missing_value(notes)
-  
-  # create a new “row” to be added to experiment$management$events
-  new_event <- data.frame(mgmt_operations_event = activity,
-                          mgmt_event_date = date,
-                          mgmt_event_notes = notes)
-  
-  # add new event
-  experiment$management$events <- rbind(experiment$management$events, new_event)
-  
-  # save changes
-  jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-                       null = 'null', auto_unbox = TRUE)
-}
+# TODO: isn't used anymore
+# append_to_json_file <- function(site_name, block, date, activity, notes) {
+#   
+#   # corresponding file name: "sitename_block_events.json"
+#   file_name <- paste(site_name, block, "events.json", sep = "_")
+#   file_path <- file.path(json_file_folder, file_name)
+#   
+#   # if file doesn't exist, create it
+#   if (!file.exists(file_path)) {
+#     create_json_file(file_path)
+#   }
+#   
+#   experiment <- jsonlite::fromJSON(file_path)
+#   
+#   # replaces the notes with missingval if the value is not supplied,
+#   # otherwise stays the same
+#   notes <- replace_missing_value(notes)
+#   
+#   # create a new “row” to be added to experiment$management$events
+#   new_event <- data.frame(mgmt_operations_event = activity,
+#                           mgmt_event_date = date,
+#                           mgmt_event_notes = notes)
+#   
+#   # add new event
+#   experiment$management$events <- rbind(experiment$management$events, new_event)
+#   
+#   # save changes
+#   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
+#                        null = 'null', auto_unbox = TRUE)
+# }
 
 # write a given data frame to a json file, overwriting everything in it
 # this is used when editing previously entered entries
@@ -77,9 +78,9 @@ write_json_file <- function(site_name, block, new_data_frame) {
   experiment$management$events <- new_data_frame
 
   # if the notes are not supplied, replace with missing value
-  experiment$management$events$mgmt_event_notes <- 
-    sapply(experiment$management$events$mgmt_event_notes, 
-           FUN = replace_missing_value)
+  #experiment$management$events$mgmt_event_notes <- 
+  #  sapply(experiment$management$events$mgmt_event_notes, 
+  #         FUN = replace_missing_value)
   
   # create file
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
@@ -87,21 +88,33 @@ write_json_file <- function(site_name, block, new_data_frame) {
 }
 
 generate_empty_data_frame <- function() {
-  variable_names <- get_category_names("variable_name", NULL)
-  new_table <- data.frame()
-  
-  for (variable_name in variable_names) {
-    new_table[[variable_name]] <- character()
-  }
-  
-  names(new_table) <- variable_names
-  
-  return(new_table)
+    variable_names <- get_category_names("variable_name", NULL)
+    new_table <- data.frame()
+    
+    for (variable_name in variable_names) {
+        
+        # check if column should be list or character type
+        # currently list only if multiple is defined on the element in
+        # sidebar_ui_structure.json
+        element <- rlapply(
+            structure,
+            code_name_checker,
+            code_name = variable_name)
+        
+        if (is.null(element$multiple)) {
+            new_table[[variable_name]] <- character()
+        } else {
+            new_table[[variable_name]] <- list()
+        }
+    }
+    
+    return(new_table)
 }
 
 # retrieve the events of a specific site and block and return as a data frame
 # if language is set to NULL, code_names will be displayed and column for
 # ordering by date omitted
+# TODO: is this needed anymore in the display name case
 retrieve_json_info <- function(site_name, block, language) {
   
   # corresponding file name: "sitename_block_events.json"
@@ -138,38 +151,48 @@ retrieve_json_info <- function(site_name, block, language) {
   }
   
   # replace missingvals with ""
-  events$mgmt_event_notes <- 
-    sapply(events$mgmt_event_notes, function(x) ifelse(x == missingval, "", x))
+  #events$mgmt_event_notes <- 
+  #  sapply(events$mgmt_event_notes, function(x) ifelse(x == missingval, "", x))
   
   return(events)
   
 }
 
 # replace code names with display names in an event data frame
-# this only applies to values coming from selectInputs (for now)
-replace_with_display_names <- function(events_with_code_names, language) {
-  
-  events_with_display_names <- events_with_code_names
-  
-  for (variable_name in names(events_with_code_names)) {
-    
-    # determine if variable_name corresponds to a selectInput element
-    element <- rlapply(
-      structure,
-      code_name_checker,
-      code_name = variable_name)
-    
-    if (!element$type == "selectInput") next
-    
-    events_with_display_names[[variable_name]] <- 
-      sapply(events_with_code_names[[variable_name]], 
-             FUN = get_disp_name, 
-             language = language)
-    
-  }
-  
-  return(events_with_display_names)
-}
+# this only applies to values coming from selectInputs and textAreaInpts
+# (for now)
+replace_with_display_names <-
+    function(events_with_code_names, language) {
+        events_with_display_names <- events_with_code_names
+        
+        for (variable_name in names(events_with_code_names)) {
+            # determine if variable_name corresponds to a selectInput element
+            element <- rlapply(structure,
+                               code_name_checker,
+                               code_name = variable_name)
+            
+            if (is.null(element$type)) {
+                stop(paste("Could not find element of name",variable_name,
+                           "in sidebar_ui_structure.json file. Check it!"))
+            }
+            
+            if (element$type == "selectInput") {
+                events_with_display_names[[variable_name]] <-
+                    sapply(events_with_code_names[[variable_name]],
+                           FUN = function(x) {paste(get_disp_name(
+                               x, language = language), 
+                               collapse = ", ")}
+                    )
+            } else if (element$type == "textAreaInput") {
+                events_with_display_names[[variable_name]] <-
+                    sapply(events_with_code_names[[variable_name]],
+                           FUN = function(x) ifelse(x==missingval,"",x))
+            }
+         
+        }
+        
+        return(events_with_display_names)
+    }
 
 # if no value is supplied, replace with missing value
 # trimws removes whitespace around the string

@@ -41,9 +41,11 @@ set_db_key <- FALSE
 #    # passphrase = "passphrase_wihtout_keyring"
 #)
 
-#### / AUTHENTICATION STUFF
-
+# missing value in the ICASA standard
+missingval <- "-99.0"
 date_format <- "%d/%m/%Y"
+
+#### / AUTHENTICATION STUFF
 
 # make helper functions available
 source("display_name_helpers.R")
@@ -86,6 +88,13 @@ update_ui_element <- function(session, code_name, value, ...) {
     if (is.null(element$type)) return()
     
     if (element$type == "selectInput") {
+        
+        # if value is a list (e.g. multiple crops selected in harvest_crop)
+        # turn it into a character vector
+        if (is.list(value)) {
+            value <- as.character(value[[1]])
+        }
+        
         updateSelectInput(session, code_name, selected = value,  ...)
     } else if (element$type == "dateInput") {
         if (value == "") {
@@ -101,9 +110,12 @@ update_ui_element <- function(session, code_name, value, ...) {
         updateCheckboxInput(session, code_name, value = value, ...)
     } else if (element$type == "actionButton") {
         updateActionButton(session, code_name, ...)
+    } else if (element$type == "textInput") {
+        updateTextInput(session, code_name, value = value, ...)
     }
 }
 
+# TODO: is this needed anywhere?
 get_input_element_names <- function(input) {
     # get a list of all input elements
     input_element_names <- names(reactiveValuesToList(input))
@@ -127,9 +139,7 @@ get_input_element_names <- function(input) {
     return(input_element_names)
 }
 
-clear_input_fields <- function(session, fields_to_clear) {
-    
-    exceptions <- c("site", "block")
+clear_input_fields <- function(session, fields_to_clear, exceptions = c("site", "block")) {
     
     for (code_name in fields_to_clear) {
         
@@ -413,6 +423,15 @@ server <- function(input, output, session) {
             input$block,
             language = NULL)
         
+        # add missing columns (with no mentions in json file) to the table
+        # so that it is displayed correctly
+        for (variable_name in get_category_names("variable_name", NULL)) {
+            if (is.null(tabledata$events_with_code_names[[variable_name]])) {
+                # creates a column filled with NAs
+                tabledata$events_with_code_names[[variable_name]] <- NA
+            }
+        }
+        
         # render data table.
         # this can also run on its own without the entire input$block
         # observer running. This happens when input$language is changed.
@@ -437,9 +456,10 @@ server <- function(input, output, session) {
                                      # order chronologically by hidden column
                                      order = list(n_cols - 1, 'desc'), 
                                      columnDefs = list(
-                                         # hide date_ordering column
+                                         # hide all other columns except
+                                         # event, date and notes
                                          list(visible = FALSE, targets = 
-                                                  c(n_cols - 1)),
+                                                  c(3:(n_cols - 1))),
                                          # hide sorting arrows
                                          list(orderable = FALSE, targets = 
                                                   0:(n_cols - 2)))
@@ -449,37 +469,51 @@ server <- function(input, output, session) {
     
     # save input to a file when save button is pressed
     observeEvent(input$save, {
+        # we are either creating a new event or editing an older one
+        # either way, let's create a new data frame row
         
-        # if we were editing, save new information
         if (session$userData$edit_mode) {
-            
             # create an updated row
             selected_row <- input$mgmt_events_table_rows_selected
-            new_row <- tabledata$events_with_code_names[selected_row,]
+            new_row <- tabledata$events_with_code_names[selected_row, ]
+        } else {
+            new_row <- generate_empty_data_frame()
+        }
+        
+        # fill / update information on the row
+        for (variable_name in names(new_row)) {
             
-            # get a list of all input elements,
-            # go through all of them and see whether they correspond to
-            # a column in our events table
-            input_element_names <- names(reactiveValuesToList(input))
-            for (code_name in input_element_names) {
-                if (code_name %in% names(new_row)) {
-
-                    value_to_save <- input[[code_name]]
-                    
-                    # format value if it is a date
-                    if (class(value_to_save) == "Date") {
-                        value_to_save <- format(value_to_save, date_format)
-                    }
-
-                    new_row[1, code_name] <- value_to_save
-                }
+            value_to_save <- input[[variable_name]]
+            
+            # if the value is not defined or empty, replace with missingval
+            if (!isTruthy(value_to_save)) {
+                value_to_save <- missingval
             }
             
+            # format value if it is a date
+            if (class(value_to_save) == "Date") {
+                value_to_save <- format(value_to_save, date_format)
+            }
+            
+            # if value has multiple values (e.g. selectInput with possibility
+            # of selecting multiple values), then make that into a list if
+            # necessary
+            #if (length(value_to_save) > 1) {
+            #    if (typeof(new_row[[variable_name]]) == "character") {
+            #        value_to_save <- list(value_to_save)
+            #    }
+            #}
+            
+            # double brackets allow saving a list (e.g. multiple selections)
+            new_row[[1, variable_name]] <- value_to_save
+        }
 
+        # save new information / edited information
+        if (session$userData$edit_mode) {
             # if the block has changed, we have to save to a different file
             if (!(session$userData$original_block == input$block)) {
-                table_to_save <- retrieve_json_info(input$site, 
-                                                    input$block, 
+                table_to_save <- retrieve_json_info(input$site,
+                                                    input$block,
                                                     NULL)
                 table_to_save <- rbind(table_to_save, new_row)
                 
@@ -487,77 +521,45 @@ server <- function(input, output, session) {
                 
                 # delete from table to be displayed
                 tabledata$events_with_code_names <-
-                    tabledata$events_with_code_names[-selected_row,]
+                    tabledata$events_with_code_names[-selected_row, ]
                 
             } else {
                 # block is the same so just update row
-                tabledata$events_with_code_names[selected_row,] <- new_row
+                tabledata$events_with_code_names[selected_row, ] <-
+                    new_row
             }
             
             # write changes to file of original block
-            write_json_file(input$site, 
-                            session$userData$original_block, 
+            write_json_file(input$site,
+                            session$userData$original_block,
                             tabledata$events_with_code_names)
             
             showNotification("Modifications saved!", type = "message")
             
-            new_data_to_display <- get_display_data_table(
-                tabledata$events_with_code_names, input$language
-            )
+        } else {
             
-            DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
-            # replacing the data clears the selection, which in turn exits
-            # the edit mode, so we are ready
-            return()
+            # add a new event
+            tabledata$events_with_code_names <- rbind(
+                tabledata$events_with_code_names, new_row)
+            
+            write_json_file(input$site,
+                            input$block,
+                            tabledata$events_with_code_names)
+            
+            # clear the selected activity and notes
+            # TODO: change to using clear fields function
+            # although do consider date
+            updateSelectInput(session, "mgmt_operations_event", selected = "")
+            updateTextAreaInput(session, "mgmt_event_notes", value = "")
+            
+            showNotification("Data saved!", type = "message")
         }
-        
-        # add a new event
-        
-        # format the date to be displayed nicely (otherwise will use default
-        # yyyy-mm-dd formatting of the Date object)
-        formatted_date <- format(input$mgmt_event_date, date_format)
-        
-        # we are going to create a new row to append to the json file
-        # corresponding to the block
-        new_row <- generate_empty_data_frame()
-        
-        for (variable_name in names(new_row)) {
-            value_to_save <- input[[variable_name]]
-            
-            # format value if it is a date
-            if (class(value_to_save) == "Date") {
-                value_to_save <- format(value_to_save, date_format)
-            }
-            
-            new_row[1, variable_name] <- value_to_save
-        }
-        
-        tabledata$events_with_code_names <- rbind(
-            tabledata$events_with_code_names, new_row)
-        
-        write_json_file(input$site, input$block, 
-                        tabledata$events_with_code_names)
-        
-        # TODO: this is the old method.
-        # this saves the data to the json file.
-        #append_to_json_file(input$site, input$block, formatted_date,
-        #                    input$mgmt_operations_event, input$mgmt_event_notes)
-        
-        # clear the selected activity and notes
-        # TODO: change to using clear fields function
-        # although do consider date
-        updateSelectInput(session, "mgmt_operations_event", selected = "")
-        updateTextAreaInput(session, "mgmt_event_notes", value = "")
-        
-        showNotification("Data saved!", type = "message")
         
         new_data_to_display <- get_display_data_table(
-            tabledata$events_with_code_names, input$language
-        )
-        
+            tabledata$events_with_code_names, input$language)
         # this deselects the row which exits the edit mode
         DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
-
+        
     })
     
     # delete entry when delete button is pressed

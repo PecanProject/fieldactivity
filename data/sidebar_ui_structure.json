@@ -100,7 +100,7 @@
         },
 
         "harv_operat_size_categor" : {
-          "code_name" : "har_operat_size_categor",
+          "code_name" : "harv_operat_size_categor",
           "type" : "selectInput",
           "label" : "harv_operat_size_categor_label",
           "choices" : "HASIZ"
