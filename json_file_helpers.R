@@ -84,7 +84,8 @@ write_json_file <- function(site_name, block, new_data_frame) {
   
   # create file
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-                       null = 'null', auto_unbox = TRUE)
+                       #null = 'null',
+                       auto_unbox = TRUE)
 }
 
 generate_empty_data_frame <- function() {
@@ -93,18 +94,21 @@ generate_empty_data_frame <- function() {
     
     for (variable_name in variable_names) {
         
-        # check if column should be list or character type
+        # check if column should be list, character or numeric
         # currently list only if multiple is defined on the element in
         # sidebar_ui_structure.json
-        element <- rlapply(
-            structure,
-            code_name_checker,
-            code_name = variable_name)
+        #element <- rlapply(
+        #    structure,
+        #    code_name_checker,
+        #    code_name = variable_name)
+        element <- structure_lookup_list[[variable_name]]
         
-        if (is.null(element$multiple)) {
-            new_table[[variable_name]] <- character()
-        } else {
+        if (element$type == "numericInput") {
+            new_table[[variable_name]] <- numeric()
+        } else if (!is.null(element$multiple)) {
             new_table[[variable_name]] <- list()
+        } else {
+            new_table[[variable_name]] <- character()
         }
     }
     
@@ -112,10 +116,9 @@ generate_empty_data_frame <- function() {
 }
 
 # retrieve the events of a specific site and block and return as a data frame
-# if language is set to NULL, code_names will be displayed and column for
-# ordering by date omitted
-# TODO: is this needed anymore in the display name case
-retrieve_json_info <- function(site_name, block, language) {
+# this retrieves the events in the same "format" as they will be saved back
+# later, i.e. with code names, "-99.0" for missing values etc. 
+retrieve_json_info <- function(site_name, block) {
   
   # corresponding file name: "sitename_block_events.json"
   file_name <- paste(site_name, block, "events.json", sep = "_")
@@ -133,43 +136,45 @@ retrieve_json_info <- function(site_name, block, language) {
     return(generate_empty_data_frame())
   }
   
-  # if requested, add display names and ordering by date column
-  if (!is.null(language)) {
-    
-    events <- replace_with_display_names(events, language)
-    
-    # add a new column for ordering by date (this will be hidden in the table)
-    events$date_ordering <- as.Date(events$mgmt_event_date, format = date_format)
-    
-    # swap code names for display names in activity types
-    # the get_disp_name function is defined in display_name_helpers.R
-    #events$mgmt_operations_event <- 
-    #  sapply(events$mgmt_operations_event, 
-    #         FUN = get_disp_name, 
-    #         language = language)
-  
+  # sometimes the types of the columns in the events data frame is incorrect,
+  # e.g. harvest_crop should be a list() type whereas if only single crops are
+  # reported in the json file, it will have said column as a character type. So
+  # let's convert them
+  for (variable_name in get_category_names("variable_name")) {
+      
+      element <- structure_lookup_list[[variable_name]]
+      
+      # if the data frame doesn't contain this variable already, add it
+      if (is.null(events[[variable_name]])) {
+          events[[variable_name]] <- character(nrow(events))
+      }
+      
+      if (element$type == "numericInput" 
+          && !is.numeric(events[[variable_name]])) {
+          events[[variable_name]] <- as.numeric(events[[variable_name]])
+      } else if (!is.null(element$multiple) 
+                 && !(class(events[[variable_name]]) == "list")) {
+          events[[variable_name]] <- as.list(events[[variable_name]])
+      }
   }
   
-  # replace missingvals with ""
-  #events$mgmt_event_notes <- 
-  #  sapply(events$mgmt_event_notes, function(x) ifelse(x == missingval, "", x))
-  
   return(events)
-  
 }
 
 # replace code names with display names in an event data frame
 # this only applies to values coming from selectInputs and textAreaInpts
 # (for now)
+# TODO: move to display_name_helpers.R
 replace_with_display_names <-
     function(events_with_code_names, language) {
         events_with_display_names <- events_with_code_names
         
         for (variable_name in names(events_with_code_names)) {
             # determine if variable_name corresponds to a selectInput element
-            element <- rlapply(structure,
-                               code_name_checker,
-                               code_name = variable_name)
+            #element <- rlapply(structure,
+            #                   code_name_checker,
+            #                   code_name = variable_name)
+            element <- structure_lookup_list[[variable_name]]
             
             if (is.null(element$type)) {
                 stop(paste("Could not find element of name",variable_name,
@@ -186,7 +191,8 @@ replace_with_display_names <-
             } else if (element$type == "textAreaInput") {
                 events_with_display_names[[variable_name]] <-
                     sapply(events_with_code_names[[variable_name]],
-                           FUN = function(x) ifelse(x==missingval,"",x))
+                           FUN = function(x) {
+                               ifelse(x==missingval,"",x)})
             }
          
         }
@@ -196,6 +202,7 @@ replace_with_display_names <-
 
 # if no value is supplied, replace with missing value
 # trimws removes whitespace around the string
+# TODO: is this used anywhere?
 replace_missing_value <- function(value) {
   if (trimws(value) == "") {
     value <- missingval

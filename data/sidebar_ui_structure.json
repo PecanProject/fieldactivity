@@ -26,34 +26,7 @@
     "sub_elements": {
 
       "planting": {
-        "condition": "input.mgmt_operations_event == 'planting'",
-
-        "planting_text_output" : {
-          "code_name": "planting_text_output",
-          "type" : "textOutput"
-        },
-
-        "planting_option_1": {
-          "code_name": "planting_option_1",
-          "type": "checkboxInput",
-          "label": "planting_option_1_label",
-          "sub_elements": {
-            "condition": "input.planting_option_1 == '1'",
-            "planting_option_11": {
-              "code_name": "planting_option_11",
-              "type": "selectInput",
-              "label": "planting_option_11_label",
-              "choices": ["alt1", "alt2"]
-            }
-          }
-
-        },
-        "plant_species": {
-          "code_name" : "plant_species",
-          "type": "selectInput",
-          "label": "plant_species_label",
-          "choices": ["spc_barley", "spc_wheat", "spc_rye"]
-        }
+        "condition": "input.mgmt_operations_event == 'planting'"
       },
 
       "harvest": {
@@ -111,6 +84,23 @@
           "type" : "numericInput",
           "label" : "harvest_cut_height_label",
           "min" : "0"
+        }
+      },
+
+      "organic_material" : {
+        "condition": "input.mgmt_operations_event == 'organic_material'",
+
+        "org_material_notes" : {
+          "code_name" : "org_material_notes",
+          "type" : "textAreaInput",
+          "label" : "org_material_notes_label"
+        },
+
+        "organic_material" : {
+          "code_name" : "organic_material",
+          "type" : "selectInput",
+          "label" : "organic_material_label",
+          "choices" : "OMCD"
         }
       }
 

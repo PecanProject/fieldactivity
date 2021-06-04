@@ -77,24 +77,28 @@ update_ui_element <- function(session, code_name, value, ...) {
     # is inefficient, but since the structure will never be very
     # large, it should not be an issue 
     # (and we are not reading the json file each time)
-    element <- rlapply(
-        structure,
-        code_name_checker,
-        code_name = code_name)
+    #element <- rlapply(
+    #    structure,
+    #    code_name_checker,
+    #    code_name = code_name)
+    # TODO: update comment
+    element <- structure_lookup_list[[code_name]]
     
     # didn't find the element corresponding to code_name
     # this should not happen if the element is in 
     # sidebar_ui_structure.json
     if (is.null(element$type)) return()
+
+    # replace missingvals with empty strings
+    if (is.na(value) || value == missingval) { value <- "" }
     
     if (element$type == "selectInput") {
-        
         # if value is a list (e.g. multiple crops selected in harvest_crop)
         # turn it into a character vector
         if (is.list(value)) {
-            value <- as.character(value[[1]])
+            value <- value[[1]]
         }
-        
+  
         updateSelectInput(session, code_name, selected = value,  ...)
     } else if (element$type == "dateInput") {
         if (value == "") {
@@ -112,34 +116,44 @@ update_ui_element <- function(session, code_name, value, ...) {
         updateActionButton(session, code_name, ...)
     } else if (element$type == "textInput") {
         updateTextInput(session, code_name, value = value, ...)
+    } else if (element$type == "numericInput") {
+        # if we are given a non-numeric value, we don't want to start converting
+        # it. Most likely value is an empty string "" and we want to make that 0
+        if (!is.numeric(value)) {
+            value <- 0
+        }
+        updateNumericInput(session, code_name, value = value, ...)
     }
 }
 
 # TODO: is this needed anywhere?
-get_input_element_names <- function(input) {
-    # get a list of all input elements
-    input_element_names <- names(reactiveValuesToList(input))
-    
-    for (code_name in input_element_names) {
-        
-        element <- rlapply(
-            structure,
-            code_name_checker,
-            code_name = code_name)
-        
-        # didn't find the element corresponding to code_name, so this
-        # is not an input element we care about
-        if (is.null(element$type)) {
-            input_element_names <- 
-                input_element_names[which(!input_element_names == code_name)]
-        }
-        
-    }
-    
-    return(input_element_names)
-}
+# get_input_element_names <- function(input) {
+#     # get a list of all input elements
+#     input_element_names <- names(reactiveValuesToList(input))
+#     
+#     for (code_name in input_element_names) {
+#         
+#         element <- rlapply(
+#             structure,
+#             code_name_checker,
+#             code_name = code_name)
+#         
+#         # didn't find the element corresponding to code_name, so this
+#         # is not an input element we care about
+#         if (is.null(element$type)) {
+#             input_element_names <- 
+#                 input_element_names[which(!input_element_names == code_name)]
+#         }
+#         
+#     }
+#     
+#     return(input_element_names)
+# }
 
-clear_input_fields <- function(session, fields_to_clear, exceptions = c("site", "block")) {
+clear_input_fields <- function(session, fields_to_clear, exceptions = c("")) {
+    
+    # we never want to clear the site or block
+    exceptions <- c(exceptions, "site", "block")
     
     for (code_name in fields_to_clear) {
         
@@ -334,7 +348,8 @@ server <- function(input, output, session) {
                 
                 # no rows selected anymore, 
                 # so clear the fields and set edit mode off
-                clear_input_fields(session, get_input_element_names(input))
+                clear_input_fields(session, 
+                                   names(tabledata$events_with_code_names))
                 
                 # if block selector was changed, change it back
                 if (!(session$userData$original_block == input$block)) {
@@ -361,15 +376,12 @@ server <- function(input, output, session) {
         selected_data <- tabledata$events_with_code_names[row_index,]
         
         # populate the input controls with the values corresponding to the row
-        
         for (col_name in names(selected_data)) {
-            
             # try updating the element corresponding to column name with the
             # value in that column. If no element is found corresponding to 
             # that name, update_ui_element does nothing
             update_ui_element(session, col_name,
                               value = selected_data[1, col_name])
-            
         }
         
         # set edit mode on
@@ -420,8 +432,7 @@ server <- function(input, output, session) {
         # block changed and we are not editing, so load new data
         tabledata$events_with_code_names <- retrieve_json_info(
             input$site, 
-            input$block,
-            language = NULL)
+            input$block)
         
         # add missing columns (with no mentions in json file) to the table
         # so that it is displayed correctly
@@ -480,8 +491,22 @@ server <- function(input, output, session) {
             new_row <- generate_empty_data_frame()
         }
         
+        # find variables that correspond to the selected activity and save
+        # only those
+        relevant_variables <- unlist(rlapply(
+            activity_options[[input$mgmt_operations_event]],
+            fun = function(x) x$code_name))
+        relevant_variables <- c("mgmt_operations_event",
+                                "mgmt_event_date",
+                                "mgmt_event_notes",
+                                relevant_variables)
+        
         # fill / update information on the row
-        for (variable_name in names(new_row)) {
+        # TODO: currently missing / null values in list type columns will be
+        # written as {} in every activity option, which is annoying.
+        # This should probably be fixed in the jsonlite package, maybe open an
+        # issue?
+        for (variable_name in relevant_variables) {
             
             value_to_save <- input[[variable_name]]
             
@@ -498,23 +523,22 @@ server <- function(input, output, session) {
             # if value has multiple values (e.g. selectInput with possibility
             # of selecting multiple values), then make that into a list if
             # necessary
-            #if (length(value_to_save) > 1) {
-            #    if (typeof(new_row[[variable_name]]) == "character") {
-            #        value_to_save <- list(value_to_save)
-            #    }
-            #}
+            if (length(value_to_save) > 1) {
+                if (typeof(new_row[[variable_name]]) == "character") {
+                    value_to_save <- list(value_to_save)
+                }
+            }
             
             # double brackets allow saving a list (e.g. multiple selections)
             new_row[[1, variable_name]] <- value_to_save
         }
-
+        
         # save new information / edited information
         if (session$userData$edit_mode) {
             # if the block has changed, we have to save to a different file
             if (!(session$userData$original_block == input$block)) {
                 table_to_save <- retrieve_json_info(input$site,
-                                                    input$block,
-                                                    NULL)
+                                                    input$block)
                 table_to_save <- rbind(table_to_save, new_row)
                 
                 write_json_file(input$site, input$block, table_to_save)
@@ -541,16 +565,13 @@ server <- function(input, output, session) {
             # add a new event
             tabledata$events_with_code_names <- rbind(
                 tabledata$events_with_code_names, new_row)
-            
+
             write_json_file(input$site,
                             input$block,
                             tabledata$events_with_code_names)
             
-            # clear the selected activity and notes
-            # TODO: change to using clear fields function
-            # although do consider date
-            updateSelectInput(session, "mgmt_operations_event", selected = "")
-            updateTextAreaInput(session, "mgmt_event_notes", value = "")
+            clear_input_fields(session, names(new_row), 
+                               exceptions = c("mgmt_event_date"))
             
             showNotification("Data saved!", type = "message")
         }
