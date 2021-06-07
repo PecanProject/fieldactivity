@@ -192,11 +192,23 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     # title to be displayed on the page
     h1(textOutput("window_title")),
     
+    # show instructions
+    textOutput("frontpage_text"),
+    
+    fluidRow(
+      column(4,
+             selectInput("frontpage_block", label = "", choices = c(""))), 
+      column(4, style = "margin-top: 25px", 
+             actionButton("add_event", label = ""))),
+    
+    # front page data table
+    DT::dataTableOutput("mgmt_events_table"),
+    
     # create a sidebar layout
     sidebarLayout(
         # the sidebar contains the selectors for entering information
         # about the event
-        sidebarPanel(
+        shinyjs::hidden(div(id = "sidebar", sidebarPanel(
             
             h2(shinyjs::hidden(textOutput("edit_mode_title")),
                style = "margin-bottom = 0px; margin-top = 0px"),
@@ -212,9 +224,9 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             # selectInputs, as they will be populated when the language is
             # changed (which also happens when the app starts)
             
-            selectInput("block", label = "", choice = c("")),
+            selectInput("block", label = "", choices = ""),
             
-            selectInput("mgmt_operations_event", label = "", choices = c("")),
+            selectInput("mgmt_operations_event", label = "", choice = ""),
             
             # setting max disallows inputting future events
             dateInput(
@@ -243,11 +255,11 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             
             shinyjs::hidden(actionButton("delete", label = "Delete", 
                                          class = "btn-warning"))
-        ),
+        ))),
         
         mainPanel(
             # table for showing already supplied information
-            DT::dataTableOutput("mgmt_events_table")
+            DT::dataTableOutput("editing_table")
         )
     )
 )
@@ -364,6 +376,7 @@ server <- function(input, output, session) {
                 shinyjs::hide("cancel")
                 shinyjs::hide("delete")
                 shinyjs::hide("edit_mode_title")
+                shinyjs::hide("sidebar")
                 
                 session$userData$edit_mode <- FALSE
                 session$userData$original_block <- NULL
@@ -389,6 +402,7 @@ server <- function(input, output, session) {
         shinyjs::show("cancel")
         shinyjs::show("delete")
         shinyjs::show("edit_mode_title")
+        shinyjs::show("sidebar")
         
         # save current block value so we can return to it later
         session$userData$original_block <- input$block
@@ -412,7 +426,7 @@ server <- function(input, output, session) {
     tabledata <- reactiveValues(events_with_code_names = NULL)
     
     # when block changes, update table
-    observeEvent(input$block, {
+    observeEvent(input$frontpage_block, {
     
         # if we are editing, don't do anything
         if (session$userData$edit_mode) {
@@ -427,21 +441,21 @@ server <- function(input, output, session) {
             return()
         }
         
-        req(input$site, input$block, input$language)
+        req(input$site, input$frontpage_block, input$language)
         
         # block changed and we are not editing, so load new data
         tabledata$events_with_code_names <- retrieve_json_info(
             input$site, 
-            input$block)
+            input$frontpage_block)
         
         # add missing columns (with no mentions in json file) to the table
         # so that it is displayed correctly
-        for (variable_name in get_category_names("variable_name", NULL)) {
-            if (is.null(tabledata$events_with_code_names[[variable_name]])) {
-                # creates a column filled with NAs
-                tabledata$events_with_code_names[[variable_name]] <- NA
-            }
-        }
+        #for (variable_name in get_category_names("variable_name", NULL)) {
+        #    if (is.null(tabledata$events_with_code_names[[variable_name]])) {
+        #        # creates a column filled with NAs
+        #        tabledata$events_with_code_names[[variable_name]] <- NA
+        #    }
+        #}
         
         # render data table.
         # this can also run on its own without the entire input$block
@@ -478,6 +492,11 @@ server <- function(input, output, session) {
         })
     })
     
+    observeEvent(input$add_event, {
+      shinyjs::show("sidebar")
+      shinyjs::disable("add_event")
+    })
+    
     # save input to a file when save button is pressed
     observeEvent(input$save, {
         # we are either creating a new event or editing an older one
@@ -506,29 +525,36 @@ server <- function(input, output, session) {
         # written as {} in every activity option, which is annoying.
         # This should probably be fixed in the jsonlite package, maybe open an
         # issue?
-        for (variable_name in relevant_variables) {
+        for (variable_name in names(new_row)) {
             
+            if (!(variable_name) %in% relevant_variables) {
+              # TODO: can't do this, harvest_crop
+              # value_to_save <- NA
+              next
+            } 
+          
             value_to_save <- input[[variable_name]]
             
             # if the value is not defined or empty, replace with missingval
             if (!isTruthy(value_to_save)) {
-                value_to_save <- missingval
+              value_to_save <- missingval
             }
             
             # format value if it is a date
             if (class(value_to_save) == "Date") {
-                value_to_save <- format(value_to_save, date_format)
+              value_to_save <- format(value_to_save, date_format)
             }
             
             # if value has multiple values (e.g. selectInput with possibility
             # of selecting multiple values), then make that into a list if
             # necessary
             if (length(value_to_save) > 1) {
-                if (typeof(new_row[[variable_name]]) == "character") {
-                    value_to_save <- list(value_to_save)
-                }
+              if (typeof(new_row[[variable_name]]) == "character") {
+                value_to_save <- list(value_to_save)
+              }
             }
             
+          
             # double brackets allow saving a list (e.g. multiple selections)
             new_row[[1, variable_name]] <- value_to_save
         }
@@ -629,7 +655,7 @@ server <- function(input, output, session) {
             shinyjs::enable("block")
             block_choices <- subset(sites, site == input$site)$blocks[[1]]
             updateSelectInput(session, 
-                              "block", 
+                              "frontpage_block", 
                               choices = c("", block_choices))
         }
     })
@@ -650,10 +676,11 @@ server <- function(input, output, session) {
         })
         
         # update data table to the new language
-        new_data_to_display <- get_display_data_table(
-            tabledata$events_with_code_names, input$language
-        )
-        DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+        # TODO: this is unnecessary, the data table language updates reactively
+        #new_data_to_display <- get_display_data_table(
+        #    tabledata$events_with_code_names, input$language
+        #)
+        #DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
         
         # INPUT ELEMENTS:
         
@@ -670,17 +697,16 @@ server <- function(input, output, session) {
             # is inefficient, but since the structure will never be very
             # large, it should not be an issue 
             # (and we are not reading the json file each time)
-            element <- rlapply(
-                structure,
-                code_name_checker,
-                code_name = code_name)
-            
+            #element <- rlapply(
+            #    structure,
+            #    code_name_checker,
+            #    code_name = code_name)
+            element <- structure_lookup_list[[code_name]]  
+          
             # didn't find the element corresponding to code_name
             # this should not happen if the element is in 
             # sidebar_ui_structure.json
             if (is.null(element$type)) next
-            
-            
             
             if (element$type == "selectInput") {
                 

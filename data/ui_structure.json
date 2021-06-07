@@ -1,0 +1,162 @@
+{
+  "frontpage" : {
+    "frontpage_text" : {
+      "code_name" : "frontpage_text",
+      "type" : "textOutput"
+    },
+
+    "frontpage_block" : {
+      "code_name" : "frontpage_block",
+      "type" : "selectInput",
+      "label" : "frontpage_block_label",
+      "choices" : "IGNORE"
+    },
+
+    "add_event" : {
+      "code_name" : "add_event",
+      "type" : "actionButton",
+      "label" : "add_event_label"
+    }
+  },
+
+  "sidebar" : {
+    "edit_mode_title": {
+      "code_name" : "edit_mode_title",
+      "type" : "textOutput"
+    },
+
+    "site": {
+      "code_name": "site",
+      "type": "selectInput",
+      "label": "site_label",
+      "choices": "IGNORE"
+    },
+
+    "block": {
+      "code_name": "block",
+      "type": "selectInput",
+      "label": "block_label",
+      "choices": "IGNORE"
+    },
+
+    "mgmt_operations_event": {
+      "code_name": "mgmt_operations_event",
+      "type" : "selectInput",
+      "label" : "mgmt_operations_event_label",
+      "choices": "mgmt_operations_event_choice",
+      "sub_elements": {
+
+        "planting": {
+          "condition": "input.mgmt_operations_event == 'planting'"
+        },
+
+        "harvest": {
+          "condition": "input.mgmt_operations_event == 'harvest'",
+          "harvest_notes" : {
+            "code_name": "harvest_notes",
+            "type" : "textInput",
+            "label" : "harvest_notes_label"
+          },
+
+          "harvest_comments" : {
+            "code_name" : "harvest_comments",
+            "type" : "textAreaInput",
+            "label" : "harvest_comments_label"
+          },
+
+          "harvest_crop" : {
+            "code_name" : "harvest_crop",
+            "type" : "selectInput",
+            "choices" : "CRID",
+            "label" : "harvest_crop_label",
+            "multiple" : "TRUE"
+          },
+
+          "harvest_operat_component" : {
+            "code_name" : "harvest_operat_component",
+            "type" : "selectInput",
+            "choices" : "HACOM",
+            "label" : "harvest_operat_component_label"
+          },
+
+          "harvest_area" : {
+            "code_name" : "harvest_area",
+            "type" : "numericInput",
+            "label" : "harvest_area_label",
+            "min" : "0"
+          },
+
+          "harvest_method" : {
+            "code_name" : "harvest_method",
+            "type" : "selectInput",
+            "label" : "harvest_method_label",
+            "choices" : "HARM"
+          },
+
+          "harv_operat_size_categor" : {
+            "code_name" : "harv_operat_size_categor",
+            "type" : "selectInput",
+            "label" : "harv_operat_size_categor_label",
+            "choices" : "HASIZ"
+          },
+
+          "harvest_cut_height" : {
+            "code_name" : "harvest_cut_height",
+            "type" : "numericInput",
+            "label" : "harvest_cut_height_label",
+            "min" : "0"
+          }
+        },
+
+        "organic_material" : {
+          "condition": "input.mgmt_operations_event == 'organic_material'",
+
+          "org_material_notes" : {
+            "code_name" : "org_material_notes",
+            "type" : "textAreaInput",
+            "label" : "org_material_notes_label"
+          },
+
+          "organic_material" : {
+            "code_name" : "organic_material",
+            "type" : "selectInput",
+            "label" : "organic_material_label",
+            "choices" : "OMCD"
+          }
+        }
+
+      }
+    },
+
+    "mgmt_event_date" : {
+      "code_name": "mgmt_event_date",
+      "type" : "dateInput",
+      "label" : "mgmt_event_date_label"
+    },
+
+    "mgmt_event_notes" : {
+      "code_name" : "mgmt_event_notes",
+      "type" : "textAreaInput",
+      "label" : "mgmt_event_notes_label",
+      "placeholder" : "mgmt_event_notes_placeholder"
+    },
+
+    "save" : {
+      "code_name" : "save",
+      "type" : "actionButton",
+      "label": "save_label"
+    },
+
+    "cancel" : {
+      "code_name" : "cancel",
+      "type" : "actionButton",
+      "label": "cancel_label"
+    },
+
+    "delete" : {
+      "code_name" : "delete",
+      "type" : "actionButton",
+      "label" : "delete_label"
+    }
+  }
+}

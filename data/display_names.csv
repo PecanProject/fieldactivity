@@ -29,6 +29,9 @@ variable_name,harvest_cut_height,Height of cut (cm),Leikkuukorkeus (cm)
 variable_name,organic_material,Organic material,Eloperäinen aine
 variable_name,org_material_notes,Organic material notes,Eloperäinen aine -muistiinpanot
 element_label,window_title,Input Management Data,Syötä tapahtumia
+element_label,frontpage_text,Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.,Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä.
+element_label,frontpage_block_label,Choose the block to display events:,Valitse lohko nähdäksesi tapahtumia:
+element_label,add_event_label,Add event,Lisää tapahtuma
 element_label,site_label,Select the site:,Valitse sijainti:
 element_label,block_label,Select the block:,Valitse lohko:
 element_label,mgmt_operations_event_label,Select the activity:,Valitse tapahtuma:

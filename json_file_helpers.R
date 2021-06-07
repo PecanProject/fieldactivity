@@ -84,7 +84,7 @@ write_json_file <- function(site_name, block, new_data_frame) {
   
   # create file
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-                       #null = 'null',
+                       null = "list",
                        auto_unbox = TRUE)
 }
 
@@ -146,14 +146,14 @@ retrieve_json_info <- function(site_name, block) {
       
       # if the data frame doesn't contain this variable already, add it
       if (is.null(events[[variable_name]])) {
-          events[[variable_name]] <- character(nrow(events))
+          events[[variable_name]] <- NA #character(nrow(events))
       }
       
-      if (element$type == "numericInput" 
-          && !is.numeric(events[[variable_name]])) {
+      if (element$type == "numericInput" && 
+          !is.numeric(events[[variable_name]])) {
           events[[variable_name]] <- as.numeric(events[[variable_name]])
-      } else if (!is.null(element$multiple) 
-                 && !(class(events[[variable_name]]) == "list")) {
+      } else if (!is.null(element$multiple) && 
+                 !(class(events[[variable_name]]) == "list")) {
           events[[variable_name]] <- as.list(events[[variable_name]])
       }
   }
