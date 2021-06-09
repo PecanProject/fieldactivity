@@ -46,10 +46,6 @@
       "choices": "mgmt_operations_event_choice",
       "sub_elements": {
 
-        "planting": {
-          "condition": "input.mgmt_operations_event == 'planting'"
-        },
-
         "harvest": {
           "condition": "input.mgmt_operations_event == 'harvest'",
           "harvest_notes" : {

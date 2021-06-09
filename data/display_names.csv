@@ -15,6 +15,8 @@ mgmt_operations_event_choice,weeding,mechanical extraction of weeds,rikkaruohoje
 mgmt_operations_event_choice,puddling,paddy system preparation (puddling),riisipellon valmistelu
 mgmt_operations_event_choice,flood_level,paddy system flood level control,riisipellon tulvatason hallinta
 mgmt_operations_event_choice,other,other,muu
+block_choice,block_choice_all,All,Kaikki
+variable_name,block,Block,Lohko
 variable_name,mgmt_operations_event,Event,Tapahtuma
 variable_name,mgmt_event_date,Date,Päivä
 variable_name,mgmt_event_notes,Notes,Muistiinpanot

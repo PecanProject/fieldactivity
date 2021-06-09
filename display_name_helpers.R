@@ -45,7 +45,7 @@ get_disp_name <- function(code_name1, language, is_variable_name = FALSE) {
       rows_to_check <- subset(display_names_dict, category == "variable_name")
   } else {
       rows_to_check <- subset(display_names_dict, 
-                                !(category == "variable name"))
+                                !(category == "variable_name"))
   }
   
   row_indexes <- match(code_name1, rows_to_check$code_name)
