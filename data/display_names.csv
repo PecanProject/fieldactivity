@@ -32,6 +32,7 @@ variable_name,organic_material,Organic material,Eloperäinen aine
 variable_name,org_material_notes,Organic material notes,Eloperäinen aine -muistiinpanot
 element_label,window_title,Input Management Data,Syötä tapahtumia
 element_label,frontpage_text,Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.,Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä.
+element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
 element_label,frontpage_block_label,Choose the block to display events:,Valitse lohko nähdäksesi tapahtumia:
 element_label,add_event_label,Add event,Lisää tapahtuma
 element_label,site_label,Select the site:,Valitse sijainti:

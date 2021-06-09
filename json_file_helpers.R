@@ -6,8 +6,6 @@ missingval <- "-99.0"
 # relative path to json file folder
 json_file_folder <- "data/management_events"
 
-date_format <- "%d/%m/%Y"
-
 create_json_file <- function(file_path) {
   
   # if the events directory (stored in json_file_folder) doesn't exist,
@@ -26,37 +24,6 @@ create_json_file <- function(file_path) {
                        null = 'null', auto_unbox = TRUE)
   
 }
-
-# TODO: isn't used anymore
-# append_to_json_file <- function(site_name, block, date, activity, notes) {
-#   
-#   # corresponding file name: "sitename_block_events.json"
-#   file_name <- paste(site_name, block, "events.json", sep = "_")
-#   file_path <- file.path(json_file_folder, file_name)
-#   
-#   # if file doesn't exist, create it
-#   if (!file.exists(file_path)) {
-#     create_json_file(file_path)
-#   }
-#   
-#   experiment <- jsonlite::fromJSON(file_path)
-#   
-#   # replaces the notes with missingval if the value is not supplied,
-#   # otherwise stays the same
-#   notes <- replace_missing_value(notes)
-#   
-#   # create a new “row” to be added to experiment$management$events
-#   new_event <- data.frame(mgmt_operations_event = activity,
-#                           mgmt_event_date = date,
-#                           mgmt_event_notes = notes)
-#   
-#   # add new event
-#   experiment$management$events <- rbind(experiment$management$events, new_event)
-#   
-#   # save changes
-#   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-#                        null = 'null', auto_unbox = TRUE)
-# }
 
 # write a given data frame to a json file, overwriting everything in it
 # this is used when editing previously entered entries
@@ -174,53 +141,4 @@ retrieve_json_info <- function(site_name, block) {
     }
     
     return(events)
-}
-
-# replace code names with display names in an event data frame
-# this only applies to values coming from selectInputs and textAreaInpts
-# (for now)
-# TODO: move to display_name_helpers.R
-replace_with_display_names <-
-    function(events_with_code_names, language) {
-        events_with_display_names <- events_with_code_names
-        
-        for (variable_name in names(events_with_code_names)) {
-            # determine if variable_name corresponds to a selectInput element
-            element <- structure_lookup_list[[variable_name]]
-            
-            if (is.null(element$type)) {
-                next
-                #stop(paste("Could not find element of name",variable_name,
-                #           "in sidebar_ui_structure.json file. Check it!"))
-            }
-            
-            if (element$type == "selectInput") {
-                # the pasting is done to ensure we get a nicely formatted name
-                # when x is a character vector
-                events_with_display_names[[variable_name]] <-
-                    sapply(events_with_code_names[[variable_name]],
-                           FUN = function(x) {paste(get_disp_name(
-                               x, language = language), 
-                               collapse = ", ")}
-                    )
-            } else if (element$type == "textAreaInput") {
-                events_with_display_names[[variable_name]] <-
-                    sapply(events_with_code_names[[variable_name]],
-                           FUN = function(x) {
-                               ifelse(x==missingval,"",x)})
-            }
-         
-        }
-        
-        return(events_with_display_names)
-    }
-
-# if no value is supplied, replace with missing value
-# trimws removes whitespace around the string
-# TODO: is this used anywhere?
-replace_missing_value <- function(value) {
-  if (trimws(value) == "") {
-    value <- missingval
-  }
-  return(value)
 }

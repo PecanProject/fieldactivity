@@ -36,11 +36,6 @@ get_category_names <- function(category1, language = NULL) {
 # variable
 get_disp_name <- function(code_name1, language, is_variable_name = FALSE) {
   
-  # if language_column is null, it means our UI has not initialised yet
-  #if (is.null(language)) {
-  #  return("Could not find display name")
-  #}
-  
   if (is_variable_name) {
       rows_to_check <- subset(display_names_dict, category == "variable_name")
   } else {
@@ -53,6 +48,44 @@ get_disp_name <- function(code_name1, language, is_variable_name = FALSE) {
   
   # replace missing display names with the corresponding code names
   display_name[is.na(display_name)] <- code_name1[is.na(display_name)]
+  display_name[display_name == missingval] <- ""
   
   return(display_name)
+}
+
+# replace code names with display names in an event data frame
+# this only applies to values coming from selectInputs, textInputs and
+# textAreaInputs (for now)
+replace_with_display_names <- function(events_with_code_names, language) {
+    events_with_display_names <- events_with_code_names
+    
+    for (variable_name in names(events_with_code_names)) {
+        # determine the type of element the variable corresponds to
+        element <- structure_lookup_list[[variable_name]]
+        
+        if (is.null(element$type)) {
+            next
+            #stop(paste("Could not find element of name",variable_name,
+            #           "in sidebar_ui_structure.json file. Check it!"))
+        }
+        
+        if (element$type == "selectInput") {
+            # the pasting is done to ensure we get a nicely formatted name
+            # when x is a character vector
+            events_with_display_names[[variable_name]] <-
+                sapply(events_with_code_names[[variable_name]],
+                       FUN = function(x) {paste(get_disp_name(
+                           x, language = language), 
+                           collapse = ", ")})
+        } else if (element$type == "textAreaInput" | 
+                   element$type == "textInput") {
+            events_with_display_names[[variable_name]] <-
+                sapply(events_with_code_names[[variable_name]],
+                       FUN = function(x) {
+                           ifelse(x==missingval,"",x)})
+        }
+        
+    }
+    
+    return(events_with_display_names)
 }

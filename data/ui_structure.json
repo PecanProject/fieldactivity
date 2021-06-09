@@ -153,6 +153,15 @@
       "code_name" : "delete",
       "type" : "actionButton",
       "label" : "delete_label"
+    },
+
+    "editing_table_title" : {
+      "code_name" : "editing_table_title",
+      "type" : "textOutput",
+      "dynamic" : {
+        "%mgmt_operations_event%" : "mgmt_operations_event",
+        "%block%" : "block"
+      }
     }
   }
 }

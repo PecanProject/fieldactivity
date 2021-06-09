@@ -141,7 +141,16 @@ get_data_table <- function(events, variable_names) {
     # initialise table
     display_data_table <- data.frame()
     for (variable_name in variable_names) {
-        display_data_table[[variable_name]] <- character()
+        
+        # get corresponding element and determine whether the column type should 
+        # be list or character
+        element <- structure_lookup_list[[variable_name]]
+        if (!is.null(element$multiple)) {
+            display_data_table[[variable_name]] <- list()
+        } else {
+            display_data_table[[variable_name]] <- character()
+        }
+
     }
     # the event column will hold the complete event information as a list
     display_data_table$event <- list()
@@ -152,12 +161,11 @@ get_data_table <- function(events, variable_names) {
     for (event in events) {
         
         for (variable_name in variable_names) {
-            if (is.null(event[[variable_name]])) {
-                display_data_table[row_number, variable_name] <- ""
-            } else {
-                display_data_table[row_number, variable_name] <- 
-                    event[[variable_name]]
+            value <- event[[variable_name]]
+            if (is.null(value)) {
+                value <- ""
             }
+            display_data_table[[row_number, variable_name]] <- value
         }
         
         # double brackets allow saving a list nicely
@@ -169,7 +177,6 @@ get_data_table <- function(events, variable_names) {
         
         row_number <- row_number + 1
     }
-    
     return(display_data_table)
 }
 
@@ -212,6 +219,98 @@ find_event_index <- function(event, event_list) {
     str(event_list)
     #stop("DID NOT FIND EVENT IN THE LIST")
     return(NULL)
+}
+
+# this function is used to update the various texts in the app into the correct
+# language etc.
+# TODO: incorporate into update_ui_element?
+text_output_handler <- function(text_output_code_name, input, output) {
+    text_to_show <- get_disp_name(text_output_code_name, input$language)
+    
+    # get element from the UI structure lookup list
+    element <- structure_lookup_list[[text_output_code_name]]
+    # do pattern matching
+    if (!is.null(element$dynamic)) {
+        patterns <- names(element$dynamic)
+        for (pattern in patterns) {
+            replacement <- input[[ element$dynamic[[pattern]] ]]
+            replacement <- get_disp_name(replacement, input$language)
+            
+            if (replacement == "") {
+                text_to_show <- ""
+                break
+            }
+            
+            text_to_show <- gsub(pattern, replacement, text_to_show)
+        }
+    }
+    
+    output[[text_output_code_name]] <- renderText(text_to_show)
+}
+
+# this function fills the editing table depending on the choice of block and
+# activity.
+# TODO: it is called by the update_tables function
+update_editing_table <- function(session, input, output, block, activity) {
+
+    editing_table_data <- NULL
+    editing_table_variables <- c("mgmt_event_date", "mgmt_event_notes")
+    
+    if (!isTruthy(block) | !isTruthy(activity)) {
+        event_list <- list()
+    } else {
+        editing_table_variables <- 
+            c(editing_table_variables, 
+              unlist(rlapply(activity_options[[activity]], fun = function(x) 
+                  x$code_name)))
+        
+        # generate a list of events to display
+        event_list <- session$userData$event_lists[[block]]
+        # filter list to only show events of the given type
+        event_list <- rlapply(event_list, fun = function(x) 
+            if (x$mgmt_operations_event == activity) {x})
+    }
+    
+    #print("Events to be displayed in the editing table:")
+    #str(event_list)
+    
+    # turn event list into a table to display
+    editing_table_data <- get_data_table(event_list, editing_table_variables)
+    session$userData$displayed_editing_table_data <- editing_table_data
+    
+    #print("Table to be displayed:")
+    #str(editing_table_data)
+    
+    output$editing_table <- DT::renderDataTable({
+        
+        new_data_to_display <- replace_with_display_names(
+            session$userData$displayed_editing_table_data, input$language
+        )
+        n_cols <- ncol(new_data_to_display)
+        datatable(new_data_to_display, 
+                  selection = "single", # allow selection of a single row
+                  rownames = FALSE, # hide row numbers
+                  colnames = c(get_disp_name(editing_table_variables,
+                                             language = input$language,
+                                             is_variable_name = TRUE),
+                               "event", "date_ordering"),
+                  options = list(dom = 't', # hide unnecessary controls
+                                 # TODO: check whether a long list is
+                                 # entirely visible
+                                 # order chronologically by hidden column
+                                 order = list(n_cols - 1, 'desc'), 
+                                 columnDefs = list(
+                                     # hide all other columns except
+                                     # event, date and notes
+                                     list(visible = FALSE, targets = 
+                                              (n_cols - 2):(n_cols - 1)),
+                                     # hide sorting arrows
+                                     list(orderable = FALSE, targets = 
+                                              0:(n_cols - 2)))
+                  ))
+    })
+    
+    text_output_handler("editing_table_title", input, output)
 }
 
 # this function displays the latest data from session$userData$event_tables
@@ -264,8 +363,8 @@ update_tables <- function(session, input, output, changed_blocks = NULL) {
                       selection = "single", # allow selection of a single row
                       rownames = FALSE, # hide row numbers
                       colnames = c(get_disp_name(frontpage_table_variables,
-                                        language = input$language,
-                                        is_variable_name = TRUE),
+                                                 language = input$language,
+                                                 is_variable_name = TRUE),
                                    "event", "date_ordering"),
                       options = list(dom = 't', # hide unnecessary controls
                                      # TODO: check whether a long list is
@@ -292,6 +391,7 @@ update_tables <- function(session, input, output, changed_blocks = NULL) {
         DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
     }
     
+    update_editing_table(session, input, output, input$block, input$activity)
 }
 
 # exit edit mode
@@ -301,14 +401,13 @@ exit_sidebar_mode <- function(session, input) {
     reset_input_fields(session, input, get_category_names("variable_name"))
     # hide sidebar
     shinyjs::hide("sidebar")
+    shinyjs::enable("add_event")
     
     if (session$userData$edit_mode) {
         shinyjs::hide("delete")
         shinyjs::hide("edit_mode_title")
         session$userData$edit_mode <- FALSE
         session$userData$event_to_edit <- NULL
-    } else {
-        shinyjs::enable("add_event")
     }
 }
 
@@ -345,12 +444,12 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     br(),
     
     # create a sidebar layout
-    sidebarLayout(
+    shinyjs::hidden(div(id = "sidebar", sidebarLayout(
         # the sidebar contains the selectors for entering information
         # about the event
-        shinyjs::hidden(div(id = "sidebar", sidebarPanel(
+        sidebarPanel(
             
-            h2(shinyjs::hidden(textOutput("edit_mode_title")),
+            h3(shinyjs::hidden(textOutput("edit_mode_title")),
                style = "margin-bottom = 0px; margin-top = 0px"),
             
             # in general the choices and labels don't have to be defined for
@@ -388,13 +487,15 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             
             shinyjs::hidden(actionButton("delete", label = "Delete", 
                                          class = "btn-warning"))
-        ))),
+        ),
         
         mainPanel(
+            h2(textOutput("editing_table_title")),
+            br(),
             # table for showing already supplied information
             DT::dataTableOutput("editing_table")
         )
-    )
+    )))
 )
 
 # wrap the ui with the secure_app function which hides the app contents
@@ -737,6 +838,16 @@ server <- function(input, output, session) {
         
     })
     
+    # change editing table when input$block is changed
+    observeEvent(input$block, {
+        update_editing_table(session, input, output, input$block, input$mgmt_operations_event)
+    })
+    
+    # change editing table when activity is changed
+    observeEvent(input$mgmt_operations_event, {
+        update_editing_table(session, input, output, input$block, input$mgmt_operations_event)
+    })
+    
     # change language when user requests it
     # TODO: change frontpage_block choices' language
     observeEvent(input$language, {
@@ -748,10 +859,11 @@ server <- function(input, output, session) {
         # change textOutputs when the language is changed
         # one has to use lapply here, for-loop does not work! See
         # https://community.rstudio.com/t/how-do-i-use-for-loop-in-rendering-outputs/35761/2
-        lapply(text_output_code_names, function(text_output_code_name) {
-            output[[text_output_code_name]] <- 
-                renderText(get_disp_name(text_output_code_name, input$language))
-        })
+        
+        # function to render text outputs. Note the pattern matching which
+        # is used for the editing table title (shown in text_output_handler)
+        lapply(text_output_code_names, text_output_handler, input = input,
+               output = output)
         
         # no need to update data tables, their updating is defined in
         # update_tables and they update reactively when language changes
