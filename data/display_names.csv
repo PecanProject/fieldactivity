@@ -19,7 +19,7 @@ block_choice,block_choice_all,All,Kaikki
 variable_name,block,Block,Lohko
 variable_name,mgmt_operations_event,Event,Tapahtuma
 variable_name,mgmt_event_date,Date,Päivä
-variable_name,mgmt_event_notes,Notes,Muistiinpanot
+variable_name,mgmt_event_notes,Description,Kuvaus
 variable_name,harvest_notes,Harvest notes,Sadonkorjuumuistiinpanot
 variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
 variable_name,harvest_crop,Harvest crop,Korjattu laji
@@ -30,8 +30,9 @@ variable_name,harv_operat_size_categor,Harvest operations size category,Sadonkor
 variable_name,harvest_cut_height,Height of cut (cm),Leikkuukorkeus (cm)
 variable_name,organic_material,Organic material,Eloperäinen aine
 variable_name,org_material_notes,Organic material notes,Eloperäinen aine -muistiinpanot
-element_label,window_title,Input Management Data,Syötä tapahtumia
+element_label,window_title,Enter Management Events,Syötä tilanhoitotapahtumia
 element_label,frontpage_text,Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.,Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä.
+element_label,frontpage_table_title,Summary of Events,Yhteenveto tapahtumista
 element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
 element_label,frontpage_block_label,Choose the block to display events:,Valitse lohko nähdäksesi tapahtumia:
 element_label,add_event_label,Add event,Lisää tapahtuma
@@ -39,13 +40,14 @@ element_label,site_label,Select the site:,Valitse sijainti:
 element_label,block_label,Select the block:,Valitse lohko:
 element_label,mgmt_operations_event_label,Select the activity:,Valitse tapahtuma:
 element_label,mgmt_event_date_label,Select the date when the activity was performed:,Valitse päivä jolloin tapahtuma tapahtui:
-element_label,mgmt_event_notes_label,Notes (optional):,Muistiinpanot (vapaaehtoinen):
-element_label,mgmt_event_notes_placeholder,"Anything related to the event, e.g. yield amount, seeding or tillage depth, products spread, machine type, etc.","Mitä tahansa tapahtumaan liittyvää, kuten sadon määrä, kylvön tai kynnön syvyys, levitetty aine, konetyyppi jne."
+element_label,mgmt_event_notes_label,Description (optional):,Kuvaus (vapaaehtoinen):
+element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. 'first harvest of the year'. This will appear on the summary table. ","Yleinen kuvaus tapahtumasta, esim. 'vuoden ensimmäinen sadonkorjuu'. Tämä tulee näkyviin yhteenvetotaulukkoon."
 element_label,save_label,Save,Tallenna
 element_label,cancel_label,Cancel,Peruuta
 element_label,delete_label,Delete,Poista
 element_label,harvest_text_output,Here you can have specific options for the harvest activity type,Tässä voi olla lisävalintoja sadonkorjuutapahtumalle.
-element_label,edit_mode_title,Edit event,Muokkaa tapahtumaa
+element_label,sidebar_title_edit,Edit event,Muokkaa tapahtumaa
+element_label,sidebar_title_add,Add event,Lisää tapahtuma
 element_label,harvest_notes_label,Short notes:,Lyhyet muistiinpanot:
 element_label,harvest_comments_label,Extended comments:, Pidemmät kommentit:
 element_label,harvest_crop_label,Crop harvested:,Korjattu laji:

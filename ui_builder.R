@@ -77,10 +77,16 @@ structure_lookup_list <- build_structure_lookup_list()
 # help texts (technically textOutputs) have a different method of updating
 # when the language is changed because they are outputs rather than inputs,
 # and for that we need a list of the code names of these objects. 
-text_output_code_names <- c("window_title", 
-                            "edit_mode_title", 
-                            "frontpage_text",
-                            "editing_table_title")
+text_output_code_names <- NULL
+for (element in structure_lookup_list) {
+    if (element$type == "textOutput") {
+        text_output_code_names <- c(text_output_code_names, element$code_name)
+    }
+}
+#text_output_code_names <- c("window_title", 
+#                            "edit_mode_title", 
+#                            "frontpage_text",
+#                            "editing_table_title")
 
 # creates the ui for a list of elements in the structure file.
 # create_border specifies whether a border should be drawn around the 

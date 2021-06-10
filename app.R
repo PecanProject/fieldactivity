@@ -224,27 +224,43 @@ find_event_index <- function(event, event_list) {
 # this function is used to update the various texts in the app into the correct
 # language etc.
 # TODO: incorporate into update_ui_element?
-text_output_handler <- function(text_output_code_name, input, output) {
+text_output_handler <- function(text_output_code_name, session, input, output) {
     text_to_show <- get_disp_name(text_output_code_name, input$language)
     
     # get element from the UI structure lookup list
     element <- structure_lookup_list[[text_output_code_name]]
-    # do pattern matching
+    # if the text should be updated dynamically, do that
     if (!is.null(element$dynamic)) {
-        patterns <- names(element$dynamic)
-        for (pattern in patterns) {
-            replacement <- input[[ element$dynamic[[pattern]] ]]
-            replacement <- get_disp_name(replacement, input$language)
-            
-            if (replacement == "") {
-                text_to_show <- ""
-                break
+        
+        # there are currently two modes of dynamic text
+        if (element$dynamic$mode == "input") {
+            # the -1 removes the mode element, we don't want it
+            patterns <- names(element$dynamic)[-1]
+            for (pattern in patterns) {
+                replacement <- input[[ element$dynamic[[pattern]] ]]
+                replacement <- get_disp_name(replacement, input$language)
+                
+                if (replacement == "") {
+                    text_to_show <- ""
+                    break
+                }
+                
+                text_to_show <- gsub(pattern, replacement, text_to_show)
             }
             
-            text_to_show <- gsub(pattern, replacement, text_to_show)
+        } else if (element$dynamic$mode == "session$userData$edit_mode") {
+            
+            if (session$userData$edit_mode) {
+                text_to_show <- element$dynamic[["TRUE"]]
+            } else {
+                text_to_show <- element$dynamic[["FALSE"]]
+            }
+            text_to_show <- get_disp_name(text_to_show, input$language)
+            
         }
     }
     
+    # render text
     output[[text_output_code_name]] <- renderText(text_to_show)
 }
 
@@ -310,7 +326,7 @@ update_editing_table <- function(session, input, output, block, activity) {
                   ))
     })
     
-    text_output_handler("editing_table_title", input, output)
+    text_output_handler("editing_table_title", session, input, output)
 }
 
 # this function displays the latest data from session$userData$event_tables
@@ -405,7 +421,6 @@ exit_sidebar_mode <- function(session, input) {
     
     if (session$userData$edit_mode) {
         shinyjs::hide("delete")
-        shinyjs::hide("edit_mode_title")
         session$userData$edit_mode <- FALSE
         session$userData$event_to_edit <- NULL
     }
@@ -432,15 +447,19 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     # show instructions
     textOutput("frontpage_text"),
     
-    # add a little space between the elements
-    br(),
+    h2(textOutput("frontpage_table_title")),
     
     selectInput("frontpage_block", label = "", choices = c("")),
-    actionButton("add_event", label = ""), 
     
     # front page data table
     DT::dataTableOutput("mgmt_events_table"),
     
+    # add a little space between the elements
+    br(),
+    
+    actionButton("add_event", label = ""), 
+    
+    br(),
     br(),
     
     # create a sidebar layout
@@ -449,8 +468,9 @@ ui <- fluidPage(theme = shinytheme("lumen"),
         # about the event
         sidebarPanel(
             
-            h3(shinyjs::hidden(textOutput("edit_mode_title")),
-               style = "margin-bottom = 0px; margin-top = 0px"),
+            h3(textOutput("sidebar_title"), 
+               style = "margin-bottom = 0px; margin-top = 0px; 
+               margin-block-start = 0px"),
             
             # in general the choices and labels don't have to be defined for
             # selectInputs, as they will be populated when the language is
@@ -603,9 +623,12 @@ server <- function(input, output, session) {
         # save the event we want to edit so that it is preserved even if front
         # page table view is changed
         session$userData$event_to_edit <- selected_event_data
+        # update sidebar title (either add or edit)
+        text_output_handler("sidebar_title", session, input, output)
         shinyjs::show("delete")
-        shinyjs::show("edit_mode_title")
         shinyjs::show("sidebar")
+        # enable add event button in case we were adding an event
+        shinyjs::enable("add_event")
     })
     
     # cancel means we exit edit mode and hide sidebar controls
@@ -629,20 +652,21 @@ server <- function(input, output, session) {
         
         # clear all input fields
         reset_input_fields(session, input, get_category_names("variable_name"))
-        # show sidebar
-        shinyjs::show("sidebar")
+        shinyjs::disable("add_event")
         
         # exit edit mode if we were in it
         if (session$userData$edit_mode) {
-            
             shinyjs::hide("delete")
-            shinyjs::hide("edit_mode_title")
             
             session$userData$edit_mode <- FALSE
             session$userData$event_to_edit <- NULL
         }
         
-        shinyjs::disable("add_event")
+        # update sidebar title
+        text_output_handler("sidebar_title", session, input, output)
+        
+        # show sidebar
+        shinyjs::show("sidebar")
     })
     
     # save input to a file when save button is pressed
@@ -862,7 +886,8 @@ server <- function(input, output, session) {
         
         # function to render text outputs. Note the pattern matching which
         # is used for the editing table title (shown in text_output_handler)
-        lapply(text_output_code_names, text_output_handler, input = input,
+        lapply(text_output_code_names, text_output_handler, session = session,
+               input = input,
                output = output)
         
         # no need to update data tables, their updating is defined in

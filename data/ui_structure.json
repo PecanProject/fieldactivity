@@ -1,7 +1,17 @@
 {
   "frontpage" : {
+    "window_title" : {
+      "code_name" : "window_title",
+      "type" : "textOutput"
+    },
+
     "frontpage_text" : {
       "code_name" : "frontpage_text",
+      "type" : "textOutput"
+    },
+
+    "frontpage_table_title" : {
+      "code_name" : "frontpage_table_title",
       "type" : "textOutput"
     },
 
@@ -20,9 +30,14 @@
   },
 
   "sidebar" : {
-    "edit_mode_title": {
-      "code_name" : "edit_mode_title",
-      "type" : "textOutput"
+    "sidebar_title": {
+      "code_name" : "sidebar_title",
+      "type" : "textOutput",
+      "dynamic" : {
+        "mode" : "session$userData$edit_mode",
+        "TRUE" : "sidebar_title_edit",
+        "FALSE" : "sidebar_title_add"
+      }
     },
 
     "site": {
@@ -159,6 +174,7 @@
       "code_name" : "editing_table_title",
       "type" : "textOutput",
       "dynamic" : {
+        "mode" : "input",
         "%mgmt_operations_event%" : "mgmt_operations_event",
         "%block%" : "block"
       }
