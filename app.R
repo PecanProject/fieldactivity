@@ -534,6 +534,17 @@ ui <- secure_app(ui,
 # Define server logic incl. save button action
 server <- function(input, output, session) {
 
+    # go through all fields and set maxLength if requested in ui_structure.json
+    for (element in structure_lookup_list) {
+        if (!is.null(element$maxlength)) {
+            js_message <- "$('##code_name').attr('maxlength', #maxlength)"
+            js_message <- gsub("#code_name", element$code_name, js_message)
+            js_message <- gsub("#maxlength", element$maxlength, js_message)
+            #print(js_message)
+            shinyjs::runjs(js_message)
+        }
+    }
+    
     # initialise in the normal (non-edit) mode
     session$userData$edit_mode <- FALSE
     
@@ -740,13 +751,12 @@ server <- function(input, output, session) {
             }
             
             # if value has multiple values (e.g. selectInput with possibility
-            # of selecting multiple values), then make that into a list if
-            # necessary
+            # of selecting multiple values), then make that into a list so that
+            # it saves nicely into the event list
+            # if we didn't do this, we'd get an error saying we have too many
+            # replacement values
             if (length(value_to_save) > 1) {
-            #     if (typeof(current_row[[variable_name]]) == "character") {
-                print("The code to change value type to list was run")
                 value_to_save <- list(value_to_save)
-            #     }
             }
             
             event[variable_name] <- value_to_save
@@ -990,7 +1000,11 @@ server <- function(input, output, session) {
                 updateTextInput(session, 
                                 code_name, 
                                 label = get_disp_name(element$label, 
-                                                      input$language))
+                                                      input$language),
+                                placeholder = 
+                                    get_disp_name(
+                                        element$placeholder, 
+                                        input$language))
             } else if (element$type == "numericInput") {
                 updateNumericInput(session,
                                    code_name,

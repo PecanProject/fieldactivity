@@ -149,7 +149,8 @@
       "code_name" : "mgmt_event_notes",
       "type" : "textAreaInput",
       "label" : "mgmt_event_notes_label",
-      "placeholder" : "mgmt_event_notes_placeholder"
+      "placeholder" : "mgmt_event_notes_placeholder",
+      "maxlength" : "80"
     },
 
     "save" : {
