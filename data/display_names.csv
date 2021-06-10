@@ -36,6 +36,7 @@ element_label,frontpage_table_title,Summary of Events,Yhteenveto tapahtumista
 element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
 element_label,frontpage_block_label,Choose the block to display events:,Valitse lohko nähdäksesi tapahtumia:
 element_label,add_event_label,Add event,Lisää tapahtuma
+element_label,clone_event_label,Clone event,Monista tapahtuma
 element_label,site_label,Select the site:,Valitse sijainti:
 element_label,block_label,Select the block:,Valitse lohko:
 element_label,mgmt_operations_event_label,Select the activity:,Valitse tapahtuma:

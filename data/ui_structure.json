@@ -26,6 +26,12 @@
       "code_name" : "add_event",
       "type" : "actionButton",
       "label" : "add_event_label"
+    },
+
+    "clone_event" : {
+      "code_name" : "clone_event",
+      "type" : "actionButton",
+      "label" : "clone_event_label"
     }
   },
 

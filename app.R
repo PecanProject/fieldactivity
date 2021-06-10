@@ -266,7 +266,8 @@ text_output_handler <- function(text_output_code_name, session, input, output) {
 
 # this function fills the editing table depending on the choice of block and
 # activity.
-update_editing_table <- function(session, input, output, block, activity, render = TRUE) {
+update_editing_table <- function(session, input, output, block, activity, 
+                                 render = TRUE) {
 
     editing_table_data <- NULL
     editing_table_variables <- c("mgmt_event_date", "mgmt_event_notes")
@@ -309,9 +310,7 @@ update_editing_table <- function(session, input, output, block, activity, render
                       colnames = get_disp_name(names(new_data_to_display),
                                                  language = input$language,
                                                  is_variable_name = TRUE),
-                      options = list(dom = 't', # hide unnecessary controls
-                                     # TODO: check whether a long list is
-                                     # entirely visible
+                      options = list(dom = 'tp', # hide unnecessary controls
                                      # order chronologically by hidden column
                                      order = list(n_cols - 1, 'desc'), 
                                      columnDefs = list(
@@ -321,7 +320,8 @@ update_editing_table <- function(session, input, output, block, activity, render
                                                   (n_cols - 2):(n_cols - 1)),
                                          # hide sorting arrows
                                          list(orderable = FALSE, targets = 
-                                                  0:(n_cols - 2)))
+                                                  0:(n_cols - 2))),
+                                     pageLength = 25
                       ))
         })
     } else {
@@ -344,7 +344,8 @@ update_editing_table <- function(session, input, output, block, activity, render
 # is not specified, tables will be updated independent of which blocks are 
 # displayed (this happens during start up)
 update_frontpage_table <- function(session, input, output, 
-                                   changed_blocks = NULL) {
+                                   changed_blocks = NULL, 
+                                   clear_selection = "all") {
     # if the blocks to which changes have been made are not specified,
     # fill tables
     frontpage_table_data <- NULL
@@ -382,7 +383,8 @@ update_frontpage_table <- function(session, input, output,
         frontpage_table_data, input$language
     )
     DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
-    DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+    DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE, 
+                    clearSelection = clear_selection)
     
     #update_editing_table(session, input, output, input$block, input$activity)
 }
@@ -435,6 +437,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     br(),
     
     actionButton("add_event", label = ""), 
+    actionButton("clone_event", label = ""),
     
     br(),
     br(),
@@ -589,9 +592,16 @@ server <- function(input, output, session) {
     # enable editing of old entries
     # this runs only when some rows are selected, not when selection is cleared
     # (if you want that, set ignoreNULL = FALSE)
-    observeEvent(input$mgmt_events_table_rows_selected, {
+    observeEvent(input$mgmt_events_table_rows_selected, ignoreNULL = FALSE, {
         
         row_index <- input$mgmt_events_table_rows_selected
+        
+        if (is.null(row_index)) {
+            shinyjs::disable("clone_event")
+            return()
+        } else {
+            shinyjs::enable("clone_event")
+        }
         
         # fetch the event data of the selected row
         selected_event_data <- 
@@ -655,6 +665,32 @@ server <- function(input, output, session) {
         
         # show sidebar
         shinyjs::show("sidebar")
+    })
+    
+    observeEvent(input$clone_event, {
+        # fetch the event to be cloned
+        event <- session$userData$event_to_edit
+        
+        block_data <- retrieve_json_info(input$site, event$block)
+        
+        block_data[[length(block_data) + 1]] <- event
+        
+        # save changes
+        write_json_file(input$site, event$block, block_data)
+        showNotification("Cloned successfully.", type = "message")
+        
+        # update session$userData$event_tables
+        session$userData$event_lists[[event$block]] <- block_data
+        
+        # update tables if necessary
+        current_row <- input$mgmt_events_table_rows_selected
+        update_frontpage_table(session, input, output,
+                               changed_blocks = event$block,
+                               clear_selection = "none")
+        update_editing_table(session, input, output, block = event$block,
+                             activity = event$mgmt_operations_event, 
+                             render = FALSE)
+        
     })
     
     # save input to a file when save button is pressed
@@ -872,9 +908,7 @@ server <- function(input, output, session) {
                   colnames = get_disp_name(names(new_data_to_display),
                                              language = input$language,
                                              is_variable_name = TRUE),
-                  options = list(dom = 't', # hide unnecessary controls
-                                 # TODO: check whether a long list is
-                                 # entirely visible
+                  options = list(dom = 'tp', # hide unnecessary controls
                                  # order chronologically by hidden column
                                  order = list(n_cols - 1, 'desc'), 
                                  columnDefs = list(
@@ -884,7 +918,8 @@ server <- function(input, output, session) {
                                               c(4:(n_cols - 1))),
                                      # hide sorting arrows
                                      list(orderable = FALSE, targets = 
-                                              0:(n_cols - 3)))
+                                              0:(n_cols - 3))),
+                                 pageLength = 25
                   ))
     })
     
