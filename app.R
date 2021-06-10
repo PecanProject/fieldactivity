@@ -266,8 +266,7 @@ text_output_handler <- function(text_output_code_name, session, input, output) {
 
 # this function fills the editing table depending on the choice of block and
 # activity.
-# TODO: it is called by the update_tables function
-update_editing_table <- function(session, input, output, block, activity) {
+update_editing_table <- function(session, input, output, block, activity, render = TRUE) {
 
     editing_table_data <- NULL
     editing_table_variables <- c("mgmt_event_date", "mgmt_event_notes")
@@ -297,35 +296,46 @@ update_editing_table <- function(session, input, output, block, activity) {
     #print("Table to be displayed:")
     #str(editing_table_data)
     
-    output$editing_table <- DT::renderDataTable({
+    if (render) {
+        output$editing_table <- DT::renderDataTable({
+            
+            new_data_to_display <- replace_with_display_names(
+                session$userData$displayed_editing_table_data, input$language
+            )
+            n_cols <- ncol(new_data_to_display)
+            datatable(new_data_to_display, 
+                      selection = "single", # allow selection of a single row
+                      rownames = FALSE, # hide row numbers
+                      colnames = get_disp_name(names(new_data_to_display),
+                                                 language = input$language,
+                                                 is_variable_name = TRUE),
+                      options = list(dom = 't', # hide unnecessary controls
+                                     # TODO: check whether a long list is
+                                     # entirely visible
+                                     # order chronologically by hidden column
+                                     order = list(n_cols - 1, 'desc'), 
+                                     columnDefs = list(
+                                         # hide all other columns except
+                                         # event, date and notes
+                                         list(visible = FALSE, targets = 
+                                                  (n_cols - 2):(n_cols - 1)),
+                                         # hide sorting arrows
+                                         list(orderable = FALSE, targets = 
+                                                  0:(n_cols - 2)))
+                      ))
+        })
+    } else {
         
+        # if we know we don't have to render (e.g. when column don't change)
+        # only updating the data in the table is sufficient
         new_data_to_display <- replace_with_display_names(
-            session$userData$displayed_editing_table_data, input$language
+            editing_table_data, input$language
         )
-        n_cols <- ncol(new_data_to_display)
-        datatable(new_data_to_display, 
-                  selection = "single", # allow selection of a single row
-                  rownames = FALSE, # hide row numbers
-                  colnames = c(get_disp_name(editing_table_variables,
-                                             language = input$language,
-                                             is_variable_name = TRUE),
-                               "event", "date_ordering"),
-                  options = list(dom = 't', # hide unnecessary controls
-                                 # TODO: check whether a long list is
-                                 # entirely visible
-                                 # order chronologically by hidden column
-                                 order = list(n_cols - 1, 'desc'), 
-                                 columnDefs = list(
-                                     # hide all other columns except
-                                     # event, date and notes
-                                     list(visible = FALSE, targets = 
-                                              (n_cols - 2):(n_cols - 1)),
-                                     # hide sorting arrows
-                                     list(orderable = FALSE, targets = 
-                                              0:(n_cols - 2)))
-                  ))
-    })
-    
+        DTproxy <- DT::dataTableProxy("editing_table", session = session)
+        DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+    }
+
+    # update editing table title
     text_output_handler("editing_table_title", session, input, output)
 }
 
@@ -333,7 +343,8 @@ update_editing_table <- function(session, input, output, block, activity) {
 # in the frontpage table and (TODO) in the editing table. If changed_blocks
 # is not specified, tables will be updated independent of which blocks are 
 # displayed (this happens during start up)
-update_tables <- function(session, input, output, changed_blocks = NULL) {
+update_frontpage_table <- function(session, input, output, 
+                                   changed_blocks = NULL) {
     # if the blocks to which changes have been made are not specified,
     # fill tables
     frontpage_table_data <- NULL
@@ -359,55 +370,21 @@ update_tables <- function(session, input, output, changed_blocks = NULL) {
         event_list <- session$userData$event_lists[[input$frontpage_block]]
     }
     
+    # make event list into a table
     frontpage_table_data <- get_data_table(event_list, 
                                            frontpage_table_variables)
     
     # we know now that the displayed data has changed, so update userData
     session$userData$displayed_frontpage_table_data <- frontpage_table_data
-    
-    # if changed_blocks has not been specified, we will render the entire table
-    if (is.null(changed_blocks)) {
-        # this can run on its own, too, when input$language is changed.
-        output$mgmt_events_table <- DT::renderDataTable({
 
-            new_data_to_display <- replace_with_display_names(
-                session$userData$displayed_frontpage_table_data, input$language
-            )
-            n_cols <- ncol(new_data_to_display)
-            
-            datatable(new_data_to_display, 
-                      selection = "single", # allow selection of a single row
-                      rownames = FALSE, # hide row numbers
-                      colnames = c(get_disp_name(frontpage_table_variables,
-                                                 language = input$language,
-                                                 is_variable_name = TRUE),
-                                   "event", "date_ordering"),
-                      options = list(dom = 't', # hide unnecessary controls
-                                     # TODO: check whether a long list is
-                                     # entirely visible
-                                     # order chronologically by hidden column
-                                     order = list(n_cols - 1, 'desc'), 
-                                     columnDefs = list(
-                                         # hide all other columns except
-                                         # event, date and notes
-                                         list(visible = FALSE, targets = 
-                                                  c(4:(n_cols - 1))),
-                                         # hide sorting arrows
-                                         list(orderable = FALSE, targets = 
-                                                  0:(n_cols - 3)))
-                      ))
-        })
-    } else {
-        new_data_to_display <- replace_with_display_names(
-            frontpage_table_data, input$language
-        )
-        
-        # it is sufficient to replace the front page table data
-        DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
-        DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
-    }
+    # update currently displayed data
+    new_data_to_display <- replace_with_display_names(
+        frontpage_table_data, input$language
+    )
+    DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
+    DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
     
-    update_editing_table(session, input, output, input$block, input$activity)
+    #update_editing_table(session, input, output, input$block, input$activity)
 }
 
 # exit edit mode
@@ -655,7 +632,7 @@ server <- function(input, output, session) {
     
     # when block changes, update table
     observeEvent(input$frontpage_block, {
-        update_tables(session, input, output)
+        update_frontpage_table(session, input, output)
     })
     
     # show add event UI when requested
@@ -787,7 +764,7 @@ server <- function(input, output, session) {
         session$userData$event_lists[[input$block]] <- new_block_data
         
         # update tables if necessary
-        update_tables(session, input, output,
+        update_frontpage_table(session, input, output,
                       changed_blocks = c(input$block, orig_block))
         
         # exit sidebar mode
@@ -820,7 +797,7 @@ server <- function(input, output, session) {
         session$userData$event_lists[[event$block]] <- block_data
         
         # update tables if necessary
-        update_tables(session, input, output, changed_blocks = event$block)
+        update_frontpage_table(session, input, output, changed_blocks = event$block)
         
         # exit sidebar mode
         exit_sidebar_mode(session, input)
@@ -874,12 +851,41 @@ server <- function(input, output, session) {
     
     # change editing table when input$block is changed
     observeEvent(input$block, {
-        update_editing_table(session, input, output, input$block, input$mgmt_operations_event)
+        update_editing_table(session, input, output, input$block, input$mgmt_operations_event, render = FALSE)
     })
     
     # change editing table when activity is changed
     observeEvent(input$mgmt_operations_event, {
         update_editing_table(session, input, output, input$block, input$mgmt_operations_event)
+    })
+    
+    # re-render frontpage table when input$language changes
+    output$mgmt_events_table <- DT::renderDataTable({
+        
+        new_data_to_display <- replace_with_display_names(
+            session$userData$displayed_frontpage_table_data, input$language)
+        n_cols <- ncol(new_data_to_display)
+        
+        datatable(new_data_to_display, 
+                  selection = "single", # allow selection of a single row
+                  rownames = FALSE, # hide row numbers
+                  colnames = get_disp_name(names(new_data_to_display),
+                                             language = input$language,
+                                             is_variable_name = TRUE),
+                  options = list(dom = 't', # hide unnecessary controls
+                                 # TODO: check whether a long list is
+                                 # entirely visible
+                                 # order chronologically by hidden column
+                                 order = list(n_cols - 1, 'desc'), 
+                                 columnDefs = list(
+                                     # hide all other columns except
+                                     # event, date and notes
+                                     list(visible = FALSE, targets = 
+                                              c(4:(n_cols - 1))),
+                                     # hide sorting arrows
+                                     list(orderable = FALSE, targets = 
+                                              0:(n_cols - 3)))
+                  ))
     })
     
     # change language when user requests it
