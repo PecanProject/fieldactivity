@@ -314,8 +314,7 @@ update_editing_table <- function(session, input, output, block, activity,
                                      # order chronologically by hidden column
                                      order = list(n_cols - 1, 'desc'), 
                                      columnDefs = list(
-                                         # hide all other columns except
-                                         # event, date and notes
+                                         # hide event and date_ordering columns
                                          list(visible = FALSE, targets = 
                                                   (n_cols - 2):(n_cols - 1)),
                                          # hide sorting arrows
@@ -455,6 +454,10 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             # in general the choices and labels don't have to be defined for
             # selectInputs, as they will be populated when the language is
             # changed (which also happens when the app starts)
+            
+            span(textOutput("required_variables_helptext"), 
+                 style = "color:gray"),
+            br(),
             
             selectInput("block", label = "", choices = ""),
             
@@ -833,7 +836,8 @@ server <- function(input, output, session) {
         session$userData$event_lists[[event$block]] <- block_data
         
         # update tables if necessary
-        update_frontpage_table(session, input, output, changed_blocks = event$block)
+        update_frontpage_table(session, input, output, 
+                               changed_blocks = event$block)
         
         # exit sidebar mode
         exit_sidebar_mode(session, input)
@@ -841,15 +845,20 @@ server <- function(input, output, session) {
     
     # disable the save button if not all necessary info has been filled
     observe({
+        # run whenever any of the inputs change. I know this is not ideal, but
+        # reactivity to input values doesn't work when we dynamically generate
+        # which inputs we want to access
+        reactiveValuesToList(input)
 
-        # is.Truthy essentially checks whether input$site is empty or null        
-        if (!isTruthy(input$site) | !isTruthy(input$block) | 
-            !isTruthy(input$mgmt_operations_event)) {
-            shinyjs::disable("save")
-        } else {
-            shinyjs::enable("save")
+        for (required_variable in session$userData$required_variables) {
+            # is.Truthy essentially checks whether input is empty or null
+            if (!isTruthy(input[[required_variable]])) {
+                shinyjs::disable("save")
+                return()
+            }
         }
         
+        shinyjs::enable("save")
     })
     
     # change available blocks depending on the site and load the site event
@@ -887,12 +896,35 @@ server <- function(input, output, session) {
     
     # change editing table when input$block is changed
     observeEvent(input$block, {
-        update_editing_table(session, input, output, input$block, input$mgmt_operations_event, render = FALSE)
+        update_editing_table(session, input, output, input$block, 
+                             input$mgmt_operations_event, render = FALSE)
     })
     
-    # change editing table when activity is changed
+    # change editing table and required variables when activity is changed
     observeEvent(input$mgmt_operations_event, {
-        update_editing_table(session, input, output, input$block, input$mgmt_operations_event)
+        update_editing_table(session, input, output, input$block, 
+                             input$mgmt_operations_event)
+        
+        required_checker <- function(element) {
+            if (!is.null(element$required)) {
+                return(element$code_name)
+            } else {
+                return(NULL)
+            }
+        }
+        
+        # find the variables that are compulsory for this activity type
+        required_variables <- rlapply(
+            activity_options[[input$mgmt_operations_event]],
+            fun = required_checker)
+        required_variables <- c(list("site", 
+                                     "block", 
+                                     "mgmt_operations_event",
+                                     "mgmt_event_date"),
+                                required_variables)
+        # save to userData. The inputs are compared against this list of
+        # variables in an observe()
+        session$userData$required_variables <- required_variables
     })
     
     # re-render frontpage table when input$language changes

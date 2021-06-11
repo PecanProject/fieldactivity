@@ -46,18 +46,25 @@
       }
     },
 
+    "required_variables_helptext" : {
+      "code_name" : "required_variables_helptext",
+      "type" : "textOutput"
+    },
+
     "site": {
       "code_name": "site",
       "type": "selectInput",
       "label": "site_label",
-      "choices": "IGNORE"
+      "choices": "IGNORE",
+      "required" : "TRUE"
     },
 
     "block": {
       "code_name": "block",
       "type": "selectInput",
       "label": "block_label",
-      "choices": "IGNORE"
+      "choices": "IGNORE",
+      "required": "TRUE"
     },
 
     "mgmt_operations_event": {
@@ -65,6 +72,7 @@
       "type" : "selectInput",
       "label" : "mgmt_operations_event_label",
       "choices": "mgmt_operations_event_choice",
+      "required" : "TRUE",
       "sub_elements": {
 
         "harvest": {
@@ -86,7 +94,8 @@
             "type" : "selectInput",
             "choices" : "CRID",
             "label" : "harvest_crop_label",
-            "multiple" : "TRUE"
+            "multiple" : "TRUE",
+            "required" : "TRUE"
           },
 
           "harvest_operat_component" : {
@@ -121,7 +130,8 @@
             "code_name" : "harvest_cut_height",
             "type" : "numericInput",
             "label" : "harvest_cut_height_label",
-            "min" : "0"
+            "min" : "0",
+            "required" : "TRUE"
           }
         },
 
@@ -148,7 +158,8 @@
     "mgmt_event_date" : {
       "code_name": "mgmt_event_date",
       "type" : "dateInput",
-      "label" : "mgmt_event_date_label"
+      "label" : "mgmt_event_date_label",
+      "required" : "TRUE"
     },
 
     "mgmt_event_notes" : {

@@ -37,10 +37,11 @@ element_label,editing_table_title,"All %mgmt_operations_event% events in block '
 element_label,frontpage_block_label,Choose the block to display events:,Valitse lohko nähdäksesi tapahtumia:
 element_label,add_event_label,Add event,Lisää tapahtuma
 element_label,clone_event_label,Clone event,Monista tapahtuma
+element_label,required_variables_helptext,*Required,*Pakollinen
 element_label,site_label,Select the site:,Valitse sijainti:
-element_label,block_label,Select the block:,Valitse lohko:
-element_label,mgmt_operations_event_label,Select the activity:,Valitse tapahtuma:
-element_label,mgmt_event_date_label,Select the date when the activity was performed:,Valitse päivä jolloin tapahtuma tapahtui:
+element_label,block_label,Select the block*:,Valitse lohko*:
+element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
+element_label,mgmt_event_date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
 element_label,mgmt_event_notes_label,Description (optional):,Kuvaus (vapaaehtoinen):
 element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. 'first harvest of the year'. This will appear on the summary table. ","Yleinen kuvaus tapahtumasta, esim. 'vuoden ensimmäinen sadonkorjuu'. Tämä tulee näkyviin yhteenvetotaulukkoon."
 element_label,save_label,Save,Tallenna
@@ -51,12 +52,12 @@ element_label,sidebar_title_edit,Edit event,Muokkaa tapahtumaa
 element_label,sidebar_title_add,Add event,Lisää tapahtuma
 element_label,harvest_notes_label,Short notes:,Lyhyet muistiinpanot:
 element_label,harvest_comments_label,Extended comments:, Pidemmät kommentit:
-element_label,harvest_crop_label,Crop harvested:,Korjattu laji:
+element_label,harvest_crop_label,Crop harvested*:,Korjattu laji*:
 element_label,harvest_operat_component_label,Crop component harvested:,Kerätty osa:
 element_label,harvest_area_label,Harvest area (ha):,Pinta-ala (ha):
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
 element_label,harv_operat_size_categor_label,Harvest operation size category:,Sadonkorjuukokokategoria:
-element_label,harvest_cut_height_label,Height of cut (cm):,Leikkuukorkeus (cm):
+element_label,harvest_cut_height_label,Height of cut* (cm):,Leikkuukorkeus* (cm):
 element_label,org_material_notes_label,Extended comments:,Pidemmät kommentit:
 element_label,organic_material_label,Organic material:,Eloperäinen aine:
 CRID,FRG,Timothy (Phleum pratense),Timotei (Phleum pratense)
