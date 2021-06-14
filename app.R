@@ -401,7 +401,11 @@ exit_sidebar_mode <- function(session, input) {
         shinyjs::hide("delete")
         session$userData$edit_mode <- FALSE
         session$userData$event_to_edit <- NULL
+        DT::selectRows(proxy = dataTableProxy("mgmt_events_table"), 
+                       selected = NULL)
     }
+    
+    
 }
 
 # Define UI for the application
@@ -436,7 +440,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     br(),
     
     actionButton("add_event", label = ""), 
-    actionButton("clone_event", label = ""),
+    shinyjs::disabled(actionButton("clone_event", label = "")),
     
     br(),
     br(),
@@ -673,6 +677,7 @@ server <- function(input, output, session) {
     observeEvent(input$clone_event, {
         # fetch the event to be cloned
         event <- session$userData$event_to_edit
+        print(event)
         
         block_data <- retrieve_json_info(input$site, event$block)
         
