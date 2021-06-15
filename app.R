@@ -106,8 +106,8 @@ update_ui_element <- function(session, code_name, value, ...) {
         updateTextInput(session, code_name, value = value, ...)
     } else if (element$type == "numericInput") {
         # if we are given a non-numeric value, we don't want to start converting
-        # it. Most likely value is an empty string "" and we want to make that 0
-        if (!is.numeric(value)) { value <- 0 }
+        # it. Let's replace it with an empty string (the default value)
+        if (!is.numeric(value)) { value <- "" }
         updateNumericInput(session, code_name, value = value, ...)
     }
 }
@@ -677,7 +677,6 @@ server <- function(input, output, session) {
     observeEvent(input$clone_event, {
         # fetch the event to be cloned
         event <- session$userData$event_to_edit
-        print(event)
         
         block_data <- retrieve_json_info(input$site, event$block)
         
@@ -809,7 +808,8 @@ server <- function(input, output, session) {
         
         # update tables if necessary
         update_frontpage_table(session, input, output,
-                      changed_blocks = c(input$block, orig_block))
+                      changed_blocks = c(input$block, orig_block), 
+                      clear_selection = "none")
         
         # exit sidebar mode
         exit_sidebar_mode(session, input)

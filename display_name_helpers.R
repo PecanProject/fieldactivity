@@ -78,7 +78,8 @@ replace_with_display_names <- function(events_with_code_names, language) {
                            x, language = language), 
                            collapse = ", ")})
         } else if (element$type == "textAreaInput" | 
-                   element$type == "textInput") {
+                   element$type == "textInput" | 
+                   element$type == "numericInput") {
             events_with_display_names[[variable_name]] <-
                 sapply(events_with_code_names[[variable_name]],
                        FUN = function(x) {

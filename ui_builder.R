@@ -150,7 +150,7 @@ create_element <- function(element, language) {
       new_element <- numericInput(element$code_name, 
                                   element$label, 
                                   min = element$min,
-                                  value = 0)
+                                  value = "")
     } else if (element$type == "textAreaInput") {
       new_element <- textAreaInput(element$code_name, 
                                    element$label,

@@ -20,6 +20,11 @@ variable_name,block,Block,Lohko
 variable_name,mgmt_operations_event,Event,Tapahtuma
 variable_name,mgmt_event_date,Date,Päivä
 variable_name,mgmt_event_notes,Description,Kuvaus
+variable_name,planted_crop,Planted crop,Kylvetty laji
+variable_name,planting_material_weight,Planting material weight (kg), Kylvömateriaalin määrä (kg)
+variable_name,planting_depth,Planting depth (mm),Kylvösyvyys (mm)
+variable_name,planting_material_source,Planting material source,Kylvömateriaalin lähde
+variable_name,planting_notes,Planting notes,Kylvömuistiinpanot
 variable_name,harvest_notes,Harvest notes,Sadonkorjuumuistiinpanot
 variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
 variable_name,harvest_crop,Harvest crop,Korjattu laji
@@ -38,7 +43,7 @@ element_label,frontpage_block_label,Choose the block to display events:,Valitse 
 element_label,add_event_label,Add event,Lisää tapahtuma
 element_label,clone_event_label,Clone event,Monista tapahtuma
 element_label,required_variables_helptext,*Required,*Pakollinen
-element_label,site_label,Select the site:,Valitse sijainti:
+element_label,site_label,Select the site*:,Valitse sijainti*:
 element_label,block_label,Select the block*:,Valitse lohko*:
 element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
 element_label,mgmt_event_date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
@@ -50,6 +55,11 @@ element_label,delete_label,Delete,Poista
 element_label,harvest_text_output,Here you can have specific options for the harvest activity type,Tässä voi olla lisävalintoja sadonkorjuutapahtumalle.
 element_label,sidebar_title_edit,Edit event,Muokkaa tapahtumaa
 element_label,sidebar_title_add,Add event,Lisää tapahtuma
+element_label,planted_crop_label,Planted crop*:,Kylvetty kasvi*:
+element_label,planting_material_weight_label,Weight of planted material (kg):,Kylvömateriaalin määrä (kg):
+element_label,planting_depth_label,Planting depth (mm):,Kylvösyvyys (mm):
+element_label,planting_material_source_label,Planting material source:,Kylvömateriaalin lähde:
+element_label,planting_notes_label,Notes about the planting:,Kylvömuistiinpanoja:
 element_label,harvest_notes_label,Short notes:,Lyhyet muistiinpanot:
 element_label,harvest_comments_label,Extended comments:, Pidemmät kommentit:
 element_label,harvest_crop_label,Crop harvested*:,Korjattu laji*:

@@ -75,6 +75,45 @@
       "required" : "TRUE",
       "sub_elements": {
 
+        "planting" : {
+          "condition" : "input.mgmt_operations_event == 'planting'",
+
+          "planted_crop" : {
+            "code_name" : "planted_crop",
+            "type" : "selectInput",
+            "choices" : "CRID",
+            "label" : "planted_crop_label",
+            "multiple" : "TRUE",
+            "required" : "TRUE"
+          },
+
+          "planting_material_weight" : {
+            "code_name" : "planting_material_weight",
+            "type" : "numericInput",
+            "min" : "0",
+            "label" : "planting_material_weight_label"
+          },
+
+          "planting_depth" : {
+            "code_name" : "planting_depth",
+            "type" : "numericInput",
+            "min" : "0",
+            "label" : "planting_depth_label"
+          },
+
+          "planting_material_source" : {
+            "code_name" : "planting_material_source",
+            "type" : "textInput",
+            "label" : "planting_material_source_label"
+          },
+
+          "planting_notes" : {
+            "code_name" : "planting_notes",
+            "type" : "textAreaInput",
+            "label" : "planting_notes_label"
+          }
+        },
+
         "harvest": {
           "condition": "input.mgmt_operations_event == 'harvest'",
           "harvest_notes" : {
