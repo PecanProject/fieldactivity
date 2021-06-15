@@ -12,10 +12,11 @@ mgmt_operations_event_choice,chemicals,chemicals application,kemikaalin levitys
 mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
 mgmt_operations_event_choice,observation,observation,havainto
 mgmt_operations_event_choice,weeding,mechanical extraction of weeds,rikkaruohojen kitkeminen
-mgmt_operations_event_choice,puddling,paddy system preparation (puddling),riisipellon valmistelu
-mgmt_operations_event_choice,flood_level,paddy system flood level control,riisipellon tulvatason hallinta
 mgmt_operations_event_choice,other,other,muu
 block_choice,block_choice_all,All,Kaikki
+#
+# variable names (these show up in the tables)
+#
 variable_name,block,Block,Lohko
 variable_name,mgmt_operations_event,Event,Tapahtuma
 variable_name,mgmt_event_date,Date,Päivä
@@ -25,16 +26,20 @@ variable_name,planting_material_weight,Planting material weight (kg), Kylvömate
 variable_name,planting_depth,Planting depth (mm),Kylvösyvyys (mm)
 variable_name,planting_material_source,Planting material source,Kylvömateriaalin lähde
 variable_name,planting_notes,Planting notes,Kylvömuistiinpanot
-variable_name,harvest_notes,Harvest notes,Sadonkorjuumuistiinpanot
-variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
+variable_name,harvest_area,Harvest area (ha),Pinta-ala (ha)
 variable_name,harvest_crop,Harvest crop,Korjattu laji
 variable_name,harvest_operat_component,Crop component harvested,Kerätty kasvinosa
-variable_name,harvest_area,Harvest area,Pinta-ala
+variable_name,canopy_height_harvest,Canopy height (m),Viljelykasvin korkeus (m)
+variable_name,harvest_yield_harvest_dw,"Yield, dry weight (kg/ha)","Sato, kuivapaino (kg/ha)"
+variable_name,harv_yield_harv_f_wt,"Yield, fresh weight (t/ha)","Sato, märkäpaino (t/ha)"
 variable_name,harvest_method,Harvest method,Korjuutapa
-variable_name,harv_operat_size_categor,Harvest operations size category,Sadonkorjuukokokategoria
-variable_name,harvest_cut_height,Height of cut (cm),Leikkuukorkeus (cm)
+variable_name,harvest_cut_height,Height of cut (cm),Niittokorkeus (cm)
+variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
 variable_name,organic_material,Organic material,Eloperäinen aine
 variable_name,org_material_notes,Organic material notes,Eloperäinen aine -muistiinpanot
+#
+# labels for widgets, incl. help texts etc.
+#
 element_label,window_title,Enter Management Events,Syötä tilanhoitotapahtumia
 element_label,frontpage_text,Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.,Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä.
 element_label,frontpage_table_title,Summary of Events,Yhteenveto tapahtumista
@@ -52,7 +57,6 @@ element_label,mgmt_event_notes_placeholder,"A high level description of the even
 element_label,save_label,Save,Tallenna
 element_label,cancel_label,Cancel,Peruuta
 element_label,delete_label,Delete,Poista
-element_label,harvest_text_output,Here you can have specific options for the harvest activity type,Tässä voi olla lisävalintoja sadonkorjuutapahtumalle.
 element_label,sidebar_title_edit,Edit event,Muokkaa tapahtumaa
 element_label,sidebar_title_add,Add event,Lisää tapahtuma
 element_label,planted_crop_label,Planted crop*:,Kylvetty kasvi*:
@@ -60,16 +64,21 @@ element_label,planting_material_weight_label,Weight of planted material (kg):,Ky
 element_label,planting_depth_label,Planting depth (mm):,Kylvösyvyys (mm):
 element_label,planting_material_source_label,Planting material source:,Kylvömateriaalin lähde:
 element_label,planting_notes_label,Notes about the planting:,Kylvömuistiinpanoja:
-element_label,harvest_notes_label,Short notes:,Lyhyet muistiinpanot:
-element_label,harvest_comments_label,Extended comments:, Pidemmät kommentit:
-element_label,harvest_crop_label,Crop harvested*:,Korjattu laji*:
-element_label,harvest_operat_component_label,Crop component harvested:,Kerätty osa:
-element_label,harvest_area_label,Harvest area (ha):,Pinta-ala (ha):
+element_label,harvest_area_label,Harvest area (ha)*:,Pinta-ala (ha)*:
+element_label,harvest_crop_label,Harvested crop*:,Korjattu laji*:
+element_label,harvest_operat_component_label,Crop component harvested:,Kerätty kasvinosa:
+element_label,canopy_height_harvest_label,Canopy height at harvest (m):,Kasvin korkeus korjuuhetkellä (m):
+element_label,harvest_yield_harvest_dw_label,"Harvest yield, dry weight (kg/ha):","Sato, kuivapaino (kg/ha):"
+element_label,harv_yield_harv_f_wt_label,"Harvest yield, fresh weight (t/ha):","Sato, märkäpaino (t/ha):"
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
-element_label,harv_operat_size_categor_label,Harvest operation size category:,Sadonkorjuukokokategoria:
-element_label,harvest_cut_height_label,Height of cut* (cm):,Leikkuukorkeus* (cm):
+element_label,harvest_cut_height_label,Height of cut (cm)*:,Niittokorkeus (cm)*:
+element_label,harvest_comments_label,Harvest comments:,Kommentit sadonkorjuusta:
+element_label,harvest_residue_help_text,"If you left the crop residue on the field, you should add a new organic material event for that.","Jos jätit korjuutähteet pellolle, tee tästä uusi orgaanisen aineen levitys -tapahtuma."
 element_label,org_material_notes_label,Extended comments:,Pidemmät kommentit:
 element_label,organic_material_label,Organic material:,Eloperäinen aine:
+#
+# others
+#
 CRID,FRG,Timothy (Phleum pratense),Timotei (Phleum pratense)
 CRID,WHT,Wheat (Triticum spp.), Vehnä (Triticum spp.)
 HACOM,canopy,Canopy,Latvusto
@@ -88,10 +97,6 @@ HARM,HM004,"Hand picked, no further processing","Poimittu käsin, ei muuta prose
 HARM,HM005,"Hand picked, machine processing","Poimittu käsin, prosessoitu koneella"
 HARM,HM006,Cotton stripper,Puuvillakone
 HARM,HM999,Method unknown/not given,Tapa ei tiedossa
-HASIZ,A,All,Kaikki
-HASIZ,S,Small - less than 1/3 full size,Pieni - alle 1/3 täydestä koosta
-HASIZ,M,Medium - from 1/3 to 2/3 full size,Keskikokoinen - 1/3 - 2/3 täydestä koosta
-HASIZ,L,Large - greater than 2/3 full size, Suuri - enemmän kuin 2/3 täydestä koosta
 OMCD,RE001,Generic crop residue,Yleinen kasvijäte
 OMCD,RE002,Green manure,Vihreä lanta
 OMCD,RE003,Barnyard manure,RE003-käännös

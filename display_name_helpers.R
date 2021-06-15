@@ -4,17 +4,13 @@
 
 # read the csv file containing the display names
 display_name_dict_path <- "data/display_names.csv"
-display_names_dict <- read.csv(display_name_dict_path)
+display_names_dict <- read.csv(display_name_dict_path, comment.char = "#")
 
 # find all code names and display names belonging to a given category
 # display names are set as the names, code names are the values
 # if language is NULL, only code names are returned
 get_category_names <- function(category1, language = NULL) {
-  
-  #if (is.null(language)) {
-  #  return("Could not find display names")
-  #}
-  
+    
   category_names <- subset(display_names_dict, category == category1)
   code_names <- category_names$code_name
   

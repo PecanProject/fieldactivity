@@ -116,16 +116,13 @@
 
         "harvest": {
           "condition": "input.mgmt_operations_event == 'harvest'",
-          "harvest_notes" : {
-            "code_name": "harvest_notes",
-            "type" : "textInput",
-            "label" : "harvest_notes_label"
-          },
 
-          "harvest_comments" : {
-            "code_name" : "harvest_comments",
-            "type" : "textAreaInput",
-            "label" : "harvest_comments_label"
+          "harvest_area" : {
+            "code_name" : "harvest_area",
+            "type" : "numericInput",
+            "label" : "harvest_area_label",
+            "min" : "0",
+            "required" : "TRUE"
           },
 
           "harvest_crop" : {
@@ -144,10 +141,24 @@
             "label" : "harvest_operat_component_label"
           },
 
-          "harvest_area" : {
-            "code_name" : "harvest_area",
+          "canopy_height_harvest" : {
+            "code_name" : "canopy_height_harvest",
             "type" : "numericInput",
-            "label" : "harvest_area_label",
+            "label" : "canopy_height_harvest_label",
+            "min" : "0"
+          },
+
+          "harvest_yield_harvest_dw" : {
+            "code_name" : "harvest_yield_harvest_dw",
+            "type" : "numericInput",
+            "label" : "harvest_yield_harvest_dw_label",
+            "min" : "0"
+          },
+
+          "harv_yield_harv_f_wt" : {
+            "code_name" : "harv_yield_harv_f_wt",
+            "type" : "numericInput",
+            "label" : "harv_yield_harv_f_wt_label",
             "min" : "0"
           },
 
@@ -158,19 +169,23 @@
             "choices" : "HARM"
           },
 
-          "harv_operat_size_categor" : {
-            "code_name" : "harv_operat_size_categor",
-            "type" : "selectInput",
-            "label" : "harv_operat_size_categor_label",
-            "choices" : "HASIZ"
-          },
-
           "harvest_cut_height" : {
             "code_name" : "harvest_cut_height",
             "type" : "numericInput",
             "label" : "harvest_cut_height_label",
             "min" : "0",
             "required" : "TRUE"
+          },
+
+          "harvest_comments" : {
+            "code_name" : "harvest_comments",
+            "type" : "textAreaInput",
+            "label" : "harvest_comments_label"
+          },
+
+          "harvest_residue_help_text" : {
+            "code_name" : "harvest_residue_help_text",
+            "type" : "textOutput"
           }
         },
 

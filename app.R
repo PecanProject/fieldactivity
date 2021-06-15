@@ -277,8 +277,13 @@ update_editing_table <- function(session, input, output, block, activity,
     } else {
         editing_table_variables <- 
             c(editing_table_variables, 
-              unlist(rlapply(activity_options[[activity]], fun = function(x) 
-                  x$code_name)))
+              unlist(rlapply(activity_options[[activity]], fun = function(x) {
+                  if (x$type == "textOutput") {
+                      return(NULL)
+                  } else {
+                      return(x$code_name)
+                  }
+              })))
         
         # generate a list of events to display
         event_list <- session$userData$event_lists[[block]]
