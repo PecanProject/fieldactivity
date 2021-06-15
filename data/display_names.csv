@@ -3,7 +3,7 @@ mgmt_operations_event_choice,planting,planting,kylvö
 mgmt_operations_event_choice,fertilizer,fertilizer application,lannoitteen levitys
 mgmt_operations_event_choice,irrigation,irrigation application,kastelu
 mgmt_operations_event_choice,tillage,tillage application,maanmuokkaus
-mgmt_operations_event_choice,organic_material,organic material application,orgaanisen aineen levitys
+mgmt_operations_event_choice,organic_material,organic material application,eloperäisen aineen levitys
 mgmt_operations_event_choice,harvest,harvest,sadonkorjuu
 mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
 mgmt_operations_event_choice,inorg_mulch,placement of inorganic mulch,epäorgaanisen katteen levitys
@@ -36,7 +36,9 @@ variable_name,harvest_method,Harvest method,Korjuutapa
 variable_name,harvest_cut_height,Height of cut (cm),Niittokorkeus (cm)
 variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
 variable_name,organic_material,Organic material,Eloperäinen aine
-variable_name,org_material_notes,Organic material notes,Eloperäinen aine -muistiinpanot
+variable_name,org_material_applic_meth,Organic material application method,Eloperäisen aineen levitystapa
+variable_name,org_material_appl_depth,Organic material application depth (cm),Eloperäisen aineen levityssyvyys (cm)
+variable_name,org_material_notes,Notes,Muistiinpanot
 #
 # labels for widgets, incl. help texts etc.
 #
@@ -73,11 +75,13 @@ element_label,harv_yield_harv_f_wt_label,"Harvest yield, fresh weight (t/ha):","
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
 element_label,harvest_cut_height_label,Height of cut (cm)*:,Niittokorkeus (cm)*:
 element_label,harvest_comments_label,Harvest comments:,Kommentit sadonkorjuusta:
-element_label,harvest_residue_help_text,"If you left the crop residue on the field, you should add a new organic material event for that.","Jos jätit korjuutähteet pellolle, tee tästä uusi orgaanisen aineen levitys -tapahtuma."
-element_label,org_material_notes_label,Extended comments:,Pidemmät kommentit:
-element_label,organic_material_label,Organic material:,Eloperäinen aine:
+element_label,harvest_residue_help_text,"If you left the crop residue on the field, you should add a new organic material event for that.","Jos jätit korjuutähteet pellolle, tee tästä uusi eloperäisen aineen levitys -tapahtuma."
+element_label,organic_material_label,Organic material*:,Eloperäinen aine*:
+element_label,org_material_applic_meth_label,Application method:,Levitystapa:
+element_label,org_material_appl_depth_label,Application depth (cm):,Levityssyvyys (cm):
+element_label,org_material_notes_label,Comments:,Kommentit:
 #
-# others
+############### others
 #
 CRID,FRG,Timothy (Phleum pratense),Timotei (Phleum pratense)
 CRID,WHT,Wheat (Triticum spp.), Vehnä (Triticum spp.)
@@ -132,3 +136,23 @@ OMCD,RE401,Bush fallow residue,RE401-käännös
 OMCD,RE402,Sugarcane,RE402-käännös
 OMCD,RE403,Pineapple,RE403-käännös
 OMCD,RE999,Decomposed crop residue,RE999-käännös
+OMACD,AP001,"Broadcast, not incorporated",AP001-käännös
+OMACD,AP002,"Broadcast, incorporated",AP002-käännös
+OMACD,AP003,Banded on surface,AP003-käännös
+OMACD,AP004,Banded beneath surface,AP004-käännös
+OMACD,AP005,Applied in irrigation water,AP005-käännös
+OMACD,AP006,Foliar spray,AP006-käännös
+OMACD,AP007,Bottom of hole,AP007-käännös
+OMACD,AP008,On the seed,AP008-käännös
+OMACD,AP009,Injected,AP009-käännös
+OMACD,AP011,"Broadcast on flooded/saturated soil, none in soil",AP011-käännös
+OMACD,AP012,"Broadcast on flooded/saturated soil, 15% in soil",AP012-käännös
+OMACD,AP013,"Broadcast on flooded/saturated soil, 30% in soil",AP013-käännös
+OMACD,AP014,"Broadcast on flooded/saturated soil, 45% in soil",AP014-käännös
+OMACD,AP015,"Broadcast on flooded/saturated soil, 60% in soil",AP015-käännös
+OMACD,AP016,"Broadcast on flooded/saturated soil, 75% in soil",AP016-käännös
+OMACD,AP017,"Broadcast on flooded/saturated soil, 90% in soil",AP017-käännös
+OMACD,AP018,"Band on saturated soil, 2cm flood, 92% in soil",AP018-käännös
+OMACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil",AP019-käännös
+OMACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil",AP020-käännös
+OMACD,AP999,Method unknown/not given,Tapa ei tiedossa

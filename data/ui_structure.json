@@ -192,17 +192,32 @@
         "organic_material" : {
           "condition": "input.mgmt_operations_event == 'organic_material'",
 
-          "org_material_notes" : {
-            "code_name" : "org_material_notes",
-            "type" : "textAreaInput",
-            "label" : "org_material_notes_label"
-          },
-
           "organic_material" : {
             "code_name" : "organic_material",
             "type" : "selectInput",
             "label" : "organic_material_label",
-            "choices" : "OMCD"
+            "choices" : "OMCD",
+            "required" : "TRUE"
+          },
+
+          "org_material_applic_meth" : {
+            "code_name" : "org_material_applic_meth",
+            "type" : "selectInput",
+            "label" : "org_material_applic_meth_label",
+            "choices" : "OMACD"
+          },
+
+          "org_material_appl_depth" : {
+            "code_name" : "org_material_appl_depth",
+            "type" : "numericInput",
+            "label" : "org_material_appl_depth_label",
+            "min" : "0"
+          },
+
+          "org_material_notes" : {
+            "code_name" : "org_material_notes",
+            "type" : "textAreaInput",
+            "label" : "org_material_notes_label"
           }
         }
 
