@@ -39,6 +39,9 @@ variable_name,organic_material,Organic material,Eloperäinen aine
 variable_name,org_material_applic_meth,Organic material application method,Eloperäisen aineen levitystapa
 variable_name,org_material_appl_depth,Organic material application depth (cm),Eloperäisen aineen levityssyvyys (cm)
 variable_name,org_material_notes,Notes,Muistiinpanot
+variable_name,tillage_implement,Tillage implement,Muokkausväline
+variable_name,tillage_operations_depth,Tillage depth (cm),Muokkaussyvyys (cm)
+variable_name,tillage_treatment_notes,Tillage notes,Muokkausmuistiinpanot
 #
 # labels for widgets, incl. help texts etc.
 #
@@ -80,6 +83,9 @@ element_label,organic_material_label,Organic material*:,Eloperäinen aine*:
 element_label,org_material_applic_meth_label,Application method:,Levitystapa:
 element_label,org_material_appl_depth_label,Application depth (cm):,Levityssyvyys (cm):
 element_label,org_material_notes_label,Comments:,Kommentit:
+element_label,tillage_implement_label,Tillage implement*:,Muokkausväline*:
+element_label,tillage_operations_depth_label,Tillage depth (cm):,Muokkaussyvyys (cm):
+element_label,tillage_treatment_notes_label,Tillage notes:,Muokkausmuistiinpanot:
 #
 ############### others
 #
@@ -156,3 +162,40 @@ OMACD,AP018,"Band on saturated soil, 2cm flood, 92% in soil",AP018-käännös
 OMACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil",AP019-käännös
 OMACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil",AP020-käännös
 OMACD,AP999,Method unknown/not given,Tapa ei tiedossa
+TIIMP,TI001,V-Ripper,TI001-käännös
+TIIMP,TI002,Subsoiler,TI002-käännös
+TIIMP,TI003,Moldboard plow 20cm depth,TI003-käännös
+TIIMP,TI004,"Chisel plow, sweeps",TI004-käännös
+TIIMP,TI005,"Chisel plow, straight point",TI005-käännös
+TIIMP,TI006,"Chisel plow, twisted shovels",TI006-käännös
+TIIMP,TI007,Disk plow,TI007-käännös
+TIIMP,TI008,"Disk, 1-way",TI008-käännös
+TIIMP,TI009,"Disk, tandem",TI009-käännös
+TIIMP,TI010,"Disk, double disk",TI010-käännös
+TIIMP,TI011,"Cultivator, field",TI011-käännös
+TIIMP,TI012,"Cultivator, row",TI012-käännös
+TIIMP,TI013,"Cultivator, ridge till",TI013-käännös
+TIIMP,TI014,"Harrow, spike",TI014-käännös
+TIIMP,TI015,"Harrow, tine",TI015-käännös
+TIIMP,TI016,Lister,TI016-käännös
+TIIMP,TI017,Bedder,TI017-käännös
+TIIMP,TI018,Blade cultivator,TI018-käännös
+TIIMP,TI019,"Fertilizer applicator, anhydr",TI019-käännös
+TIIMP,TI020,Manure injector,TI020-käännös
+TIIMP,TI022,Mulch treader,TI022-käännös
+TIIMP,TI023,Plank,TI023-käännös
+TIIMP,TI024,Roller packer,TI024-käännös
+TIIMP,TI025,"Drill, double-disk",TI025-käännös
+TIIMP,TI026,"Drill, deep furrow",TI026-käännös
+TIIMP,TI031,"Drill, no-till",TI031-käännös
+TIIMP,TI032,"Drill, no-till (into sod)",TI032-käännös
+TIIMP,TI033,"Planter, row",TI033-käännös
+TIIMP,TI034,"Planter, no-till",TI034-käännös
+TIIMP,TI035,Planting stick (hand),TI035-käännös
+TIIMP,TI036,Matraca hand planter,TI036-käännös
+TIIMP,TI037,Rod weeder,TI037-käännös
+TIIMP,TI038,Rotary hoe,TI038-käännös
+TIIMP,TI039,"Roller harrow, cultipacker",TI039-käännös
+TIIMP,TI041,Moldboard plow 25cm,TI041-käännös
+TIIMP,TI042,Moldboard plow 30 cm,TI042-käännös
+TIIMP,TI043,Strip tillage,TI043-käännös

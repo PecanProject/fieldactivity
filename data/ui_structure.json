@@ -219,6 +219,31 @@
             "type" : "textAreaInput",
             "label" : "org_material_notes_label"
           }
+        },
+
+        "tillage" : {
+          "condition" : "input.mgmt_operations_event == 'tillage'",
+
+          "tillage_implement" : {
+            "code_name" : "tillage_implement",
+            "type" : "selectInput",
+            "label" : "tillage_implement_label",
+            "choices" : "TIIMP",
+            "required" : "TRUE"
+          },
+
+          "tillage_operations_depth" : {
+            "code_name" : "tillage_operations_depth",
+            "type" : "numericInput",
+            "label" : "tillage_operations_depth_label",
+            "min" : "0"
+          },
+
+          "tillage_treatment_notes" : {
+            "code_name" : "tillage_treatment_notes",
+            "type" : "textAreaInput",
+            "label" : "tillage_treatment_notes_label"
+          }
         }
 
       }
