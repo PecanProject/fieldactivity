@@ -120,7 +120,7 @@ create_element <- function(element, language) {
     # element is a list of elements, because it doesn't have the type
     # attribute. In that case we want to create all of the elements in that list
     if (is.null(element$type)) {
-      return(create_ui(element, language = language, create_border = TRUE))
+      return(create_ui(element, language = language, create_border = FALSE))
     }
         
     new_element <- NULL
@@ -164,7 +164,7 @@ create_element <- function(element, language) {
     # if there are sub-elements to create, do that
     if (!is.null(element$sub_elements)) {
       return(list(new_panel, 
-                  create_ui(element$sub_elements, create_border = TRUE)))
+                  create_ui(element$sub_elements, create_border = FALSE)))
     }
     
     return(new_panel)

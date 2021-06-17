@@ -172,7 +172,7 @@ get_data_table <- function(events, variable_names) {
         display_data_table[[row_number, "event"]] <- event
         
         display_data_table[row_number, "date_ordering"] <- as.Date(
-            event$mgmt_event_date, 
+            event$date, 
             format = date_format)
         
         row_number <- row_number + 1
@@ -270,7 +270,7 @@ update_editing_table <- function(session, input, output, block, activity,
                                  render = TRUE) {
 
     editing_table_data <- NULL
-    editing_table_variables <- c("mgmt_event_date", "mgmt_event_notes")
+    editing_table_variables <- c("date", "mgmt_event_notes")
     
     if (!isTruthy(block) | !isTruthy(activity)) {
         event_list <- list()
@@ -278,7 +278,7 @@ update_editing_table <- function(session, input, output, block, activity,
         editing_table_variables <- 
             c(editing_table_variables, 
               unlist(rlapply(activity_options[[activity]], fun = function(x) {
-                  if (x$type == "textOutput") {
+                  if (is.null(x$type) || x$type == "textOutput") {
                       return(NULL)
                   } else {
                       return(x$code_name)
@@ -355,7 +355,7 @@ update_frontpage_table <- function(session, input, output,
     frontpage_table_data <- NULL
     frontpage_table_variables <- c("block", 
                                    "mgmt_operations_event", 
-                                   "mgmt_event_date", 
+                                   "date", 
                                    "mgmt_event_notes")
   
     # generate the data to display on the front page table depending on
@@ -412,6 +412,11 @@ exit_sidebar_mode <- function(session, input) {
     
     
 }
+
+row <- data.frame(eka = as.character(numericInput("moi", label = "muu", value = 3)), 
+                  toka = as.character(selectInput("huhuu", label = "jaa",
+                                                  choices = c("1", "2"))),
+                  kolkki = as.character(textInput("mahtava", label = "joo")))
 
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
@@ -474,7 +479,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             
             # setting max disallows inputting future events
             dateInput(
-                "mgmt_event_date",
+                "date",
                 format = "dd/mm/yyyy",
                 label = "",
                 max = Sys.Date(),
@@ -507,8 +512,16 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             # table for showing already supplied information
             DT::dataTableOutput("editing_table")
         )
-    )))
+    ))),
+    
+
+    
+    conditionalPanel("input.harvest_crop.length > 1", DT::datatable(row, escape = FALSE)),
+    
+    #DT::dataTableOutput("test_table")
+    #uiOutput("test_table")
 )
+
 
 # wrap the ui with the secure_app function which hides the app contents
 # until login is successful
@@ -525,7 +538,11 @@ ui <- secure_app(ui,
 
 # Define server logic incl. save button action
 server <- function(input, output, session) {
-
+    
+    observeEvent(input$huhuu, {
+        showNotification(input$huhuu)
+    })
+    
     # go through all fields and set maxLength if requested in ui_structure.json
     for (element in structure_lookup_list) {
         if (!is.null(element$maxlength)) {
@@ -749,7 +766,7 @@ server <- function(input, output, session) {
             fun = function(x) x$code_name))
         relevant_variables <- c("block", 
                                 "mgmt_operations_event",
-                                "mgmt_event_date",
+                                "date",
                                 "mgmt_event_notes",
                                 relevant_variables)
         
@@ -860,6 +877,13 @@ server <- function(input, output, session) {
         # which inputs we want to access
         reactiveValuesToList(input)
 
+        req(auth_result$admin)
+        
+        if (auth_result$admin == "TRUE") {
+            # if we are in admin mode, we don't care about required variables
+            return()
+        }
+        
         for (required_variable in session$userData$required_variables) {
             # is.Truthy essentially checks whether input is empty or null
             if (!isTruthy(input[[required_variable]])) {
@@ -930,7 +954,7 @@ server <- function(input, output, session) {
         required_variables <- c(list("site", 
                                      "block", 
                                      "mgmt_operations_event",
-                                     "mgmt_event_date"),
+                                     "date"),
                                 required_variables)
         # save to userData. The inputs are compared against this list of
         # variables in an observe()

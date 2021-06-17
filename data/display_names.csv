@@ -19,7 +19,7 @@ block_choice,block_choice_all,All,Kaikki
 #
 variable_name,block,Block,Lohko
 variable_name,mgmt_operations_event,Event,Tapahtuma
-variable_name,mgmt_event_date,Date,Päivä
+variable_name,date,Date,Päivä
 variable_name,mgmt_event_notes,Description,Kuvaus
 variable_name,planted_crop,Planted crop,Kylvetty laji
 variable_name,planting_material_weight,Planting material weight (kg), Kylvömateriaalin määrä (kg)
@@ -29,7 +29,7 @@ variable_name,planting_notes,Planting notes,Kylvömuistiinpanot
 variable_name,harvest_area,Harvest area (ha),Pinta-ala (ha)
 variable_name,harvest_crop,Harvest crop,Korjattu laji
 variable_name,harvest_operat_component,Crop component harvested,Kerätty kasvinosa
-variable_name,canopy_height_harvest,Canopy height (m),Viljelykasvin korkeus (m)
+variable_name,canopy_height_harvest,Canopy height (m),Kasvuston korkeus (m)
 variable_name,harvest_yield_harvest_dw,"Yield, dry weight (kg/ha)","Sato, kuivapaino (kg/ha)"
 variable_name,harv_yield_harv_f_wt,"Yield, fresh weight (t/ha)","Sato, märkäpaino (t/ha)"
 variable_name,harvest_method,Harvest method,Korjuutapa
@@ -56,7 +56,7 @@ element_label,required_variables_helptext,*Required,*Pakollinen
 element_label,site_label,Select the site*:,Valitse sijainti*:
 element_label,block_label,Select the block*:,Valitse lohko*:
 element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
-element_label,mgmt_event_date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
+element_label,date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
 element_label,mgmt_event_notes_label,Description (optional):,Kuvaus (vapaaehtoinen):
 element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. 'first harvest of the year'. This will appear on the summary table. ","Yleinen kuvaus tapahtumasta, esim. 'vuoden ensimmäinen sadonkorjuu'. Tämä tulee näkyviin yhteenvetotaulukkoon."
 element_label,save_label,Save,Tallenna
@@ -72,7 +72,7 @@ element_label,planting_notes_label,Notes about the planting:,Kylvömuistiinpanoj
 element_label,harvest_area_label,Harvest area (ha)*:,Pinta-ala (ha)*:
 element_label,harvest_crop_label,Harvested crop*:,Korjattu laji*:
 element_label,harvest_operat_component_label,Crop component harvested:,Kerätty kasvinosa:
-element_label,canopy_height_harvest_label,Canopy height at harvest (m):,Kasvin korkeus korjuuhetkellä (m):
+element_label,canopy_height_harvest_label,Canopy height at harvest (m):,Kasvuston korkeus korjuuhetkellä (m):
 element_label,harvest_yield_harvest_dw_label,"Harvest yield, dry weight (kg/ha):","Sato, kuivapaino (kg/ha):"
 element_label,harv_yield_harv_f_wt_label,"Harvest yield, fresh weight (t/ha):","Sato, märkäpaino (t/ha):"
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
