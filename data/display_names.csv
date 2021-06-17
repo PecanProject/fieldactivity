@@ -32,6 +32,7 @@ variable_name,harvest_operat_component,Crop component harvested,Kerätty kasvino
 variable_name,canopy_height_harvest,Canopy height (m),Viljelykasvin korkeus (m)
 variable_name,harvest_yield_harvest_dw,"Yield, dry weight (kg/ha)","Sato, kuivapaino (kg/ha)"
 variable_name,harv_yield_harv_f_wt,"Yield, fresh weight (t/ha)","Sato, märkäpaino (t/ha)"
+variable_name,yield_C_at_harvest,Yield carbon (C) amount (kg/ha),Hiilen (C) määrä sadossa (kg/ha)
 variable_name,harvest_method,Harvest method,Korjuutapa
 variable_name,harvest_cut_height,Height of cut (cm),Niittokorkeus (cm)
 variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
