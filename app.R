@@ -861,7 +861,7 @@ server <- function(input, output, session) {
         
         req(auth_result$admin)
         
-        if (auth_result$admin == "FALSE") {
+        if (auth_result$admin == "TRUE") {
             # if we are in admin mode, we don't care about requirements
             return()
         }
