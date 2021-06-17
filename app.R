@@ -43,7 +43,7 @@ set_db_key <- FALSE
 
 # missing value in the ICASA standard
 missingval <- "-99.0"
-date_format <- "%d/%m/%Y"
+date_format_json <- "%Y-%m-%d"
 
 #### / AUTHENTICATION STUFF
 
@@ -93,9 +93,9 @@ update_ui_element <- function(session, code_name, value, ...) {
         if (value == "") {
             formatted_date <- Sys.Date()
         } else {
-            formatted_date <- as.Date(value, format = date_format)
+            formatted_date <- as.Date(value, format = date_format_json)
         }
-        updateDateInput(session, code_name, value = formatted_date, ...)
+        updateDateInput(session, code_name, value = formatted_date,...)
     } else if (element$type == "textAreaInput") {
         updateTextAreaInput(session, code_name, value = value,  ...)
     } else if (element$type == "checkboxInput") {
@@ -171,9 +171,8 @@ get_data_table <- function(events, variable_names) {
         # double brackets allow saving a list nicely
         display_data_table[[row_number, "event"]] <- event
         
-        display_data_table[row_number, "date_ordering"] <- as.Date(
-            event$mgmt_event_date, 
-            format = date_format)
+        display_data_table[row_number, "date_ordering"] <- 
+            as.Date(event$date, format = date_format_json)
         
         row_number <- row_number + 1
     }
@@ -270,7 +269,7 @@ update_editing_table <- function(session, input, output, block, activity,
                                  render = TRUE) {
 
     editing_table_data <- NULL
-    editing_table_variables <- c("mgmt_event_date", "mgmt_event_notes")
+    editing_table_variables <- c("date", "mgmt_event_notes")
     
     if (!isTruthy(block) | !isTruthy(activity)) {
         event_list <- list()
@@ -355,7 +354,7 @@ update_frontpage_table <- function(session, input, output,
     frontpage_table_data <- NULL
     frontpage_table_variables <- c("block", 
                                    "mgmt_operations_event", 
-                                   "mgmt_event_date", 
+                                   "date", 
                                    "mgmt_event_notes")
   
     # generate the data to display on the front page table depending on
@@ -474,7 +473,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             
             # setting max disallows inputting future events
             dateInput(
-                "mgmt_event_date",
+                "date",
                 format = "dd/mm/yyyy",
                 label = "",
                 max = Sys.Date(),
@@ -749,7 +748,7 @@ server <- function(input, output, session) {
             fun = function(x) x$code_name))
         relevant_variables <- c("block", 
                                 "mgmt_operations_event",
-                                "mgmt_event_date",
+                                "date",
                                 "mgmt_event_notes",
                                 relevant_variables)
         
@@ -772,7 +771,7 @@ server <- function(input, output, session) {
             
             # format value to character string if it is a date
             if (class(value_to_save) == "Date") {
-                value_to_save <- format(value_to_save, date_format)
+                value_to_save <- format(value_to_save, date_format_json)
             }
             
             # if value has multiple values (e.g. selectInput with possibility
@@ -859,6 +858,13 @@ server <- function(input, output, session) {
         # reactivity to input values doesn't work when we dynamically generate
         # which inputs we want to access
         reactiveValuesToList(input)
+        
+        req(auth_result$admin)
+        
+        if (auth_result$admin == "FALSE") {
+            # if we are in admin mode, we don't care about requirements
+            return()
+        }
 
         for (required_variable in session$userData$required_variables) {
             # is.Truthy essentially checks whether input is empty or null
@@ -930,7 +936,7 @@ server <- function(input, output, session) {
         required_variables <- c(list("site", 
                                      "block", 
                                      "mgmt_operations_event",
-                                     "mgmt_event_date"),
+                                     "date"),
                                 required_variables)
         # save to userData. The inputs are compared against this list of
         # variables in an observe()

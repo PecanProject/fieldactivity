@@ -249,10 +249,10 @@
       }
     },
 
-    "mgmt_event_date" : {
-      "code_name": "mgmt_event_date",
+    "date" : {
+      "code_name": "date",
       "type" : "dateInput",
-      "label" : "mgmt_event_date_label",
+      "label" : "date_label",
       "required" : "TRUE"
     },
 

@@ -19,7 +19,7 @@ block_choice,block_choice_all,All,Kaikki
 #
 variable_name,block,Block,Lohko
 variable_name,mgmt_operations_event,Event,Tapahtuma
-variable_name,mgmt_event_date,Date,Päivä
+variable_name,date,Date,Päivä
 variable_name,mgmt_event_notes,Description,Kuvaus
 variable_name,planted_crop,Planted crop,Kylvetty laji
 variable_name,planting_material_weight,Planting material weight (kg), Kylvömateriaalin määrä (kg)
@@ -57,7 +57,7 @@ element_label,required_variables_helptext,*Required,*Pakollinen
 element_label,site_label,Select the site*:,Valitse sijainti*:
 element_label,block_label,Select the block*:,Valitse lohko*:
 element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
-element_label,mgmt_event_date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
+element_label,date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
 element_label,mgmt_event_notes_label,Description (optional):,Kuvaus (vapaaehtoinen):
 element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. 'first harvest of the year'. This will appear on the summary table. ","Yleinen kuvaus tapahtumasta, esim. 'vuoden ensimmäinen sadonkorjuu'. Tämä tulee näkyviin yhteenvetotaulukkoon."
 element_label,save_label,Save,Tallenna

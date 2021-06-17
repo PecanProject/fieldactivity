@@ -6,6 +6,9 @@
 display_name_dict_path <- "data/display_names.csv"
 display_names_dict <- read.csv(display_name_dict_path, comment.char = "#")
 
+date_format_json <- "%Y-%m-%d"
+date_format_display <- "%d/%m/%Y"
+
 # find all code names and display names belonging to a given category
 # display names are set as the names, code names are the values
 # if language is NULL, only code names are returned
@@ -80,6 +83,14 @@ replace_with_display_names <- function(events_with_code_names, language) {
                 sapply(events_with_code_names[[variable_name]],
                        FUN = function(x) {
                            ifelse(x==missingval,"",x)})
+        } else if (element$type == "dateInput") {
+            events_with_display_names[[variable_name]] <-
+                sapply(events_with_code_names[[variable_name]], 
+                       FUN = function(x) { 
+                           format(
+                               as.Date(x, format = date_format_json), 
+                               date_format_display) 
+                           })
         }
         
     }
