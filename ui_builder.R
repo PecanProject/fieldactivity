@@ -83,78 +83,77 @@ for (element in structure_lookup_list) {
         text_output_code_names <- c(text_output_code_names, element$code_name)
     }
 }
-#text_output_code_names <- c("window_title", 
-#                            "edit_mode_title", 
-#                            "frontpage_text",
-#                            "editing_table_title")
+# TODO: list code names for data tables as well?
 
 # creates the ui for a list of elements in the structure file.
 # create_border specifies whether a border should be drawn around the 
 # elements in the input_list. It is typically set to false when calling
 # create_ui for the entire activity_options list, and true otherwise
 create_ui <- function(input_list, language, create_border) {
-  new_elements <- lapply(input_list, create_element, language = language)
-  
-  if (create_border) {
-    new_elements <- wellPanel(new_elements)
-  }
-  
-  # if there is a visibility condition, apply it
-  if (!is.null(input_list$condition)) {
-    new_elements <- conditionalPanel(
-      condition = input_list$condition, new_elements)
-  }
-
-  return(new_elements)
+    new_elements <- lapply(input_list, create_element, language = language)
+    
+    if (create_border) {
+        new_elements <- wellPanel(new_elements)
+    }
+    
+    # if there is a visibility condition, apply it
+    if (!is.null(input_list$condition)) {
+        new_elements <- conditionalPanel(
+            condition = input_list$condition, new_elements)
+    }
+    
+    return(new_elements)
 }
 
 # creates the individual elements
 create_element <- function(element, language) {
-  
+    
     # element is a string, i.e. a visibility condition for a element set
     # it has already been handled in create_ui
     if (!is.list(element)) {
-      return()
+        return()
     }
-  
+    
     # element is a list of elements, because it doesn't have the type
     # attribute. In that case we want to create all of the elements in that list
     if (is.null(element$type)) {
-      return(create_ui(element, language = language, create_border = FALSE))
+        return(create_ui(element, language = language, create_border = FALSE))
     }
-        
+    
     new_element <- NULL
-        
+    
     # the labels will be set to element$label which is a code_name, not a 
     # display_name, but this is okay as the server will update this as the
     # language changes (which also happens when the program starts)
     
     if (element$type == "checkboxInput") {
-      new_element <- checkboxInput(element$code_name, element$label)
+        new_element <- checkboxInput(element$code_name, element$label)
     } else if (element$type == "selectInput") {
-      # if multiple is defined (=TRUE) then pass that to selectInput
-      multiple <- ifelse(is.null(element$multiple), FALSE, TRUE)
-      # we don't enter choices yet, that will be handled by the server
-      new_element <- selectInput(element$code_name, element$label, 
-                                 choices = c(""), multiple = multiple)
+        # if multiple is defined (=TRUE) then pass that to selectInput
+        multiple <- ifelse(is.null(element$multiple), FALSE, TRUE)
+        # we don't enter choices yet, that will be handled by the server
+        new_element <- selectInput(element$code_name, element$label, 
+                                   choices = c(""), multiple = multiple)
     } else if (element$type == "textOutput") {
-      # these are inteded to look like helpTexts so make text gray
-      new_element <- span(textOutput(element$code_name), style = "color:gray")
-      # add to the list to draw the text in the correct language
-      # the <<- operator assigns to the global environment
-      # maybe not the best programming technique, but it works
-      text_output_code_names <<- c(text_output_code_names, element$code_name)
+        # these are inteded to look like helpTexts so make text gray
+        new_element <- span(textOutput(element$code_name), style = "color:gray")
+        # add to the list to draw the text in the correct language
+        # the <<- operator assigns to the global environment
+        # maybe not the best programming technique, but it works
+        text_output_code_names <<- c(text_output_code_names, element$code_name)
     } else if (element$type == "textInput") {
-      new_element <- textInput(element$code_name, element$label)
+        new_element <- textInput(element$code_name, element$label)
     } else if (element$type == "numericInput") {
-      new_element <- numericInput(element$code_name, 
-                                  element$label, 
-                                  min = element$min,
-                                  value = "")
+        new_element <- numericInput(element$code_name, 
+                                    element$label, 
+                                    min = element$min,
+                                    value = "")
     } else if (element$type == "textAreaInput") {
-      new_element <- textAreaInput(element$code_name, 
-                                   element$label,
-                                   resize = "vertical")
+        new_element <- textAreaInput(element$code_name, 
+                                     element$label,
+                                     resize = "vertical")
+    } else if (element$type == "dataTable") {
+        new_element <- DT::dataTableOutput(element$code_name)
     }
     
     # put the new element in a conditionalPanel. If no condition is specified,
@@ -163,8 +162,8 @@ create_element <- function(element, language) {
     
     # if there are sub-elements to create, do that
     if (!is.null(element$sub_elements)) {
-      return(list(new_panel, 
-                  create_ui(element$sub_elements, create_border = FALSE)))
+        return(list(new_panel, 
+                    create_ui(element$sub_elements, create_border = FALSE)))
     }
     
     return(new_panel)
@@ -176,15 +175,15 @@ create_element <- function(element, language) {
 # this function is used in app.R to find the element corresponding to a
 # given code name when updating UI language
 code_name_checker <- function(x, code_name) {
-  if (is.null(x$code_name)) {
-    return(NULL)
-  }
-  
-  if (x$code_name == code_name) {
-    return(x)
-  } else {
-    return(NULL)
-  }
+    if (is.null(x$code_name)) {
+        return(NULL)
+    }
+    
+    if (x$code_name == code_name) {
+        return(x)
+    } else {
+        return(NULL)
+    }
 }
 
 

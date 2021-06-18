@@ -40,7 +40,7 @@
       "code_name" : "sidebar_title",
       "type" : "textOutput",
       "dynamic" : {
-        "mode" : "session$userData$edit_mode",
+        "mode" : "edit_mode",
         "TRUE" : "sidebar_title_edit",
         "FALSE" : "sidebar_title_add"
       }
