@@ -92,7 +92,8 @@
                 "planted_crop_table" : {
                   "code_name" : "planted_crop_table",
                   "type" : "dataTable",
-                  "columns" : ["planting_material_weight", "planting_depth", "planting_material_source"]
+                  "columns" : ["planting_material_weight", "planting_depth", "planting_material_source"],
+                  "rows" : "planted_crop"
                 }
               },
 

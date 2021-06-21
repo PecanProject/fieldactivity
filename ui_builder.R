@@ -76,21 +76,25 @@ structure_lookup_list <- build_structure_lookup_list()
 
 # help texts (technically textOutputs) have a different method of updating
 # when the language is changed because they are outputs rather than inputs,
-# and for that we need a list of the code names of these objects. 
+# and for that we need a list of the code names of these objects.
+# The same goes for data tables (although frontpage table and editing table are
+# not here)
 text_output_code_names <- NULL
+data_table_code_names <- NULL
 for (element in structure_lookup_list) {
     if (element$type == "textOutput") {
         text_output_code_names <- c(text_output_code_names, element$code_name)
+    } else if (element$type == "dataTable") {
+        data_table_code_names <- c(data_table_code_names, element$code_name)
     }
 }
-# TODO: list code names for data tables as well?
 
 # creates the ui for a list of elements in the structure file.
 # create_border specifies whether a border should be drawn around the 
 # elements in the input_list. It is typically set to false when calling
 # create_ui for the entire activity_options list, and true otherwise
-create_ui <- function(input_list, language, create_border) {
-    new_elements <- lapply(input_list, create_element, language = language)
+create_ui <- function(input_list, create_border) {
+    new_elements <- lapply(input_list, create_element)
     
     if (create_border) {
         new_elements <- wellPanel(new_elements)
@@ -106,7 +110,11 @@ create_ui <- function(input_list, language, create_border) {
 }
 
 # creates the individual elements
-create_element <- function(element, language) {
+# the override_label and ... functionalities are used for creating elements
+# in dynamic (e.g. multi-crop) data tables. Do NOT supply the label argument in
+# the unnamed arguments (...)!
+create_element <- function(element, override_label = NULL, 
+                           override_code_name = NULL, ...) {
     
     # element is a string, i.e. a visibility condition for a element set
     # it has already been handled in create_ui
@@ -117,43 +125,47 @@ create_element <- function(element, language) {
     # element is a list of elements, because it doesn't have the type
     # attribute. In that case we want to create all of the elements in that list
     if (is.null(element$type)) {
-        return(create_ui(element, language = language, create_border = FALSE))
+        return(create_ui(element, create_border = FALSE))
     }
-    
-    new_element <- NULL
-    
+
     # the labels will be set to element$label which is a code_name, not a 
     # display_name, but this is okay as the server will update this as the
     # language changes (which also happens when the program starts)
+    # the following allows overwriting the label through ...
+    element_label <- element$label
+    if (!is.null(override_label)) {
+        element_label <- override_label
+    }
     
-    if (element$type == "checkboxInput") {
-        new_element <- checkboxInput(element$code_name, element$label)
+    element_code_name <- element$code_name
+    if (!is.null(override_code_name)) {
+        element_code_name <- override_code_name
+    }
+
+    new_element <- if (element$type == "checkboxInput") {
+        checkboxInput(element_code_name, label = element_label, ...)
     } else if (element$type == "selectInput") {
         # if multiple is defined (=TRUE) then pass that to selectInput
         multiple <- ifelse(is.null(element$multiple), FALSE, TRUE)
         # we don't enter choices yet, that will be handled by the server
-        new_element <- selectInput(element$code_name, element$label, 
-                                   choices = c(""), multiple = multiple)
+        selectInput(element_code_name, label = element_label, 
+                                   choices = c(""), multiple = multiple, ...)
     } else if (element$type == "textOutput") {
         # these are inteded to look like helpTexts so make text gray
-        new_element <- span(textOutput(element$code_name), style = "color:gray")
-        # add to the list to draw the text in the correct language
-        # the <<- operator assigns to the global environment
-        # maybe not the best programming technique, but it works
-        text_output_code_names <<- c(text_output_code_names, element$code_name)
+        span(textOutput(element_code_name, ...), style = "color:gray")
     } else if (element$type == "textInput") {
-        new_element <- textInput(element$code_name, element$label)
+        textInput(inputId = element_code_name, label = element_label, ...)
     } else if (element$type == "numericInput") {
-        new_element <- numericInput(element$code_name, 
-                                    element$label, 
+        numericInput(inputId = element_code_name, 
+                                    label = element_label, 
                                     min = element$min,
-                                    value = "")
+                                    value = "", ...)
     } else if (element$type == "textAreaInput") {
-        new_element <- textAreaInput(element$code_name, 
-                                     element$label,
-                                     resize = "vertical")
+        textAreaInput(element_code_name, 
+                                     label = element_label,
+                                     resize = "vertical", ...)
     } else if (element$type == "dataTable") {
-        new_element <- DT::dataTableOutput(element$code_name)
+        tableInput(element_code_name)
     }
     
     # put the new element in a conditionalPanel. If no condition is specified,

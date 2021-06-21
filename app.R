@@ -53,8 +53,9 @@ date_format <- "%d/%m/%Y"
 
 #### / AUTHENTICATION STUFF
 
-# make helper functions available
+# make helper functions and modules available
 source("display_name_helpers.R")
+source("table.R")
 source("ui_builder.R")
 source("json_file_helpers.R")
 
@@ -457,8 +458,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             
             # show a detailed options panel for the different activities
             # activity_options is defined in ui_builder.R
-            create_ui(activity_options, language = default_language, 
-                      create_border = FALSE),
+            create_ui(activity_options, create_border = FALSE),
             
             textAreaInput(
                 "mgmt_event_notes",
@@ -718,8 +718,8 @@ server <- function(input, output, session) {
                 if (x$mgmt_operations_event == input$mgmt_operations_event) {x})
         }
         
-        print("Events to be displayed in the editing table:")
-        str(event_list)
+        #print("Events to be displayed in the editing table:")
+        #str(event_list)
         
         # turn event list into a table to display
         data <- get_data_table(event_list, editing_table_variables)
@@ -1020,10 +1020,8 @@ server <- function(input, output, session) {
         #                     input$mgmt_operations_event, render = FALSE)
     })
     
-    # change editing table and required variables when activity is changed
+    # change required variables when activity is changed
     observeEvent(input$mgmt_operations_event, {
-        #update_editing_table(session, input, output, input$block, 
-        #                     input$mgmt_operations_event)
         
         required_checker <- function(element) {
             if (!is.null(element$required)) {
@@ -1106,14 +1104,29 @@ server <- function(input, output, session) {
                   ))
     })
     
+    # table_data <- lapply(data_table_code_names, 
+    #                      FUN = function(data_table_code_name) {
+    #     table_structure <- structure_lookup_list[[data_table_code_name]]
+    #     row_names <- reactive(input[[table_structure$rows]])
+    #     tableServer(data_table_code_name, row_names, reactive(input$language))
+    # })
+    
+    table_structure <- structure_lookup_list[["planted_crop_table"]]
+    row_names <- reactive(input[[table_structure$rows]])
+    data_from_single_table <- tableServer("planted_crop_table", row_names,
+                                          reactive(input$language))
+    
+    observeEvent(data_from_single_table, {
+        message("hoi")
+        str(reactiveValuesToList(data_from_single_table()))
+    })
+    
     # update each of the text outputs automatically, including language changes
     # and the dynamic updating in editing table title etc. 
     lapply(text_output_code_names, FUN = function(text_output_code_name) {
         
         # render text
         output[[text_output_code_name]] <- renderText({
-            
-            message(glue("Updating text output {text_output_code_name}"))
             
             text_to_show <- get_disp_name(text_output_code_name, input$language)
             
