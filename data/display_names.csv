@@ -91,6 +91,7 @@ element_label,tillage_treatment_notes_label,Tillage notes:,Muokkausmuistiinpanot
 #
 CRID,FRG,Timothy (Phleum pratense),Timotei (Phleum pratense)
 CRID,WHT,Wheat (Triticum spp.), Vehnä (Triticum spp.)
+CRID,OAT,Oats (Avena sativa),Kaura (Avena sativa)
 HACOM,canopy,Canopy,Latvusto
 HACOM,leaf,Leaves,Lehdet
 HACOM,grain,"Grain, legume seeds","Jyvä, palkokasvin siemen"

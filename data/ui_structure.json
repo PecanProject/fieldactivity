@@ -148,50 +148,66 @@
             "choices" : "CRID",
             "label" : "harvest_crop_label",
             "multiple" : "TRUE",
-            "required" : "TRUE"
-          },
+            "required" : "TRUE",
+            "sub_elements" : {
+              "multiple" : {
+                "condition"  : "input.harvest_crop.length > 1",
 
-          "harvest_operat_component" : {
-            "code_name" : "harvest_operat_component",
-            "type" : "selectInput",
-            "choices" : "HACOM",
-            "label" : "harvest_operat_component_label"
-          },
+                "harvest_crop_table" : {
+                  "code_name" : "harvest_crop_table",
+                  "type" : "dataTable",
+                  "columns" : ["harvest_operat_component", "canopy_height_harvest", "harvest_yield_harvest_dw", "harv_yield_harv_f_wt", "harvest_method", "harvest_cut_height"],
+                  "rows" : "harvest_crop"
+                }
+              },
 
-          "canopy_height_harvest" : {
-            "code_name" : "canopy_height_harvest",
-            "type" : "numericInput",
-            "label" : "canopy_height_harvest_label",
-            "min" : "0"
-          },
+              "single" : {
+                "condition" : "input.harvest_crop.length <= 1",
 
-          "harvest_yield_harvest_dw" : {
-            "code_name" : "harvest_yield_harvest_dw",
-            "type" : "numericInput",
-            "label" : "harvest_yield_harvest_dw_label",
-            "min" : "0"
-          },
+                "harvest_operat_component" : {
+                  "code_name" : "harvest_operat_component",
+                  "type" : "selectInput",
+                  "choices" : "HACOM",
+                  "label" : "harvest_operat_component_label"
+                },
 
-          "harv_yield_harv_f_wt" : {
-            "code_name" : "harv_yield_harv_f_wt",
-            "type" : "numericInput",
-            "label" : "harv_yield_harv_f_wt_label",
-            "min" : "0"
-          },
+                "canopy_height_harvest" : {
+                  "code_name" : "canopy_height_harvest",
+                  "type" : "numericInput",
+                  "label" : "canopy_height_harvest_label",
+                  "min" : "0"
+                },
 
-          "harvest_method" : {
-            "code_name" : "harvest_method",
-            "type" : "selectInput",
-            "label" : "harvest_method_label",
-            "choices" : "HARM"
-          },
+                "harvest_yield_harvest_dw" : {
+                  "code_name" : "harvest_yield_harvest_dw",
+                  "type" : "numericInput",
+                  "label" : "harvest_yield_harvest_dw_label",
+                  "min" : "0"
+                },
 
-          "harvest_cut_height" : {
-            "code_name" : "harvest_cut_height",
-            "type" : "numericInput",
-            "label" : "harvest_cut_height_label",
-            "min" : "0",
-            "required" : "TRUE"
+                "harv_yield_harv_f_wt" : {
+                  "code_name" : "harv_yield_harv_f_wt",
+                  "type" : "numericInput",
+                  "label" : "harv_yield_harv_f_wt_label",
+                  "min" : "0"
+                },
+
+                "harvest_method" : {
+                  "code_name" : "harvest_method",
+                  "type" : "selectInput",
+                  "label" : "harvest_method_label",
+                  "choices" : "HARM"
+                },
+
+                "harvest_cut_height" : {
+                  "code_name" : "harvest_cut_height",
+                  "type" : "numericInput",
+                  "label" : "harvest_cut_height_label",
+                  "min" : "0",
+                  "required" : "TRUE"
+                }
+              }
+            }
           },
 
           "harvest_comments" : {

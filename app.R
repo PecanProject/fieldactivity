@@ -383,10 +383,6 @@ find_event_index <- function(event, event_list) {
 #     #update_editing_table(session, input, output, input$block, input$activity)
 # }
 
-#row <- data.frame(eka = as.character(numericInput("moi", label = "muu", value = 3)), 
-#                  toka = as.character(selectInput("huhuu", label = "jaa",
-#                                                  choices = c("1", "2"))),
-#                  kolkki = as.character(textInput("mahtava", label = "joo")))
 
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
@@ -482,13 +478,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             DT::dataTableOutput("editing_table")
         )
     ))),
-    
 
-    
-    #conditionalPanel("input.harvest_crop.length > 1", DT::datatable(row, escape = FALSE)),
-    
-    #DT::dataTableOutput("test_table")
-    #uiOutput("test_table")
 )
 
 
@@ -1046,7 +1036,9 @@ server <- function(input, output, session) {
     })
     
     # (re-)render frontpage table when input$language changes
-    output$mgmt_events_table <- DT::renderDataTable({
+    # TODO: figure server = FALSE out
+    output$mgmt_events_table <- DT::renderDataTable(#server = FALSE,
+                                                    {
         
         new_data_to_display <- replace_with_display_names(
             isolate(frontpage_table_data()), input$language)
@@ -1074,7 +1066,9 @@ server <- function(input, output, session) {
     })
     
     # render the editing table when language or data changes
-    output$editing_table <- DT::renderDataTable({
+    # TODO: figure server = FALSE out
+    output$editing_table <- DT::renderDataTable(#server = FALSE, 
+        {
         
         # take a dependency on activity, since that is an indicator
         # of when the table needs to be re-rendered
@@ -1104,21 +1098,36 @@ server <- function(input, output, session) {
                   ))
     })
     
-    # table_data <- lapply(data_table_code_names, 
-    #                      FUN = function(data_table_code_name) {
-    #     table_structure <- structure_lookup_list[[data_table_code_name]]
-    #     row_names <- reactive(input[[table_structure$rows]])
-    #     tableServer(data_table_code_name, row_names, reactive(input$language))
-    # })
+    # holds boolean values which indicate whether the conditions for the 
+    # visibility of data tables are met
+    conditions <- reactiveValues()
     
-    table_structure <- structure_lookup_list[["planted_crop_table"]]
-    row_names <- reactive(input[[table_structure$rows]])
-    data_from_single_table <- tableServer("planted_crop_table", row_names,
-                                          reactive(input$language))
+    # initialise the table server for each of the dynamically added tables
+    table_data <- lapply(data_table_code_names, 
+                         FUN = function(data_table_code_name) {
+        table_structure <- structure_lookup_list[[data_table_code_name]]
+        row_names <- reactive(input[[table_structure$rows]])
+        
+        # add observer to visibility condition of table
+        # table is visible if the length of the variable presented on the rows
+        # of the table is more than 1
+        observeEvent(row_names(), {
+            conditions[[data_table_code_name]] <- length(row_names()) > 1
+        })
+        
+        tableServer(data_table_code_name, row_names, reactive(input$language),
+                    visible = reactive(conditions[[data_table_code_name]]))
+    })
     
-    observeEvent(data_from_single_table, {
-        message("hoi")
-        str(reactiveValuesToList(data_from_single_table()))
+    # table_structure <- structure_lookup_list[["planted_crop_table"]]
+    # row_names <- reactive(input[[table_structure$rows]])
+    # data_from_single_table <- tableServer("planted_crop_table", row_names,
+    #                                       reactive(input$language))
+    
+    observe({
+        for (value in table_data) {
+            str(value())
+        }
     })
     
     # update each of the text outputs automatically, including language changes
@@ -1207,54 +1216,26 @@ server <- function(input, output, session) {
             # sidebar_ui_structure.json
             if (is.null(element$type)) next
             
+            label <- get_disp_name(element$label, input$language)
+            
             if (element$type == "selectInput") {
                 
-                # the code name for the label is stored in label
-                label_code_name <- element$label
-                
-                # the choices for a selectInput element can be stored in
-                # three ways: 
-                # 1) the code names of the choices are given as a vector
-                # 2) for site and block selectors, there is IGNORE:
-                # this means that the choices should not be updated here
-                # 3) the category name for the choices is given.
-                # in the following if-statement, these are handled
-                # in this same order
-                selector_choices <- NULL
-                
-                if (length(element$choices) > 1) {
-                    selector_choices <- c("", element$choices)
-                    names(selector_choices) <- c("", get_disp_name(
-                        element$choices,
-                        language = input$language))
-                    
-                } else if (element$choices == "IGNORE") {
-                    selector_choices <- NULL
-                } else {
-                    # get_category_names returns both display names and 
-                    # code names
-                    selector_choices <- c(
-                        "",
-                        get_category_names(element$choices,
-                                                   language = input$language)
-                    )
-                }
+                # fetch choices for the selectInput
+                choices <- get_selectInput_choices(element, input$language)
                 
                 # make sure we don't change the selected value
                 current_value <- input[[code_name]]
                 
-                if (is.null(selector_choices)) {
+                if (is.null(choices)) {
                     updateSelectInput(session, 
                                       code_name,
-                                      label = get_disp_name(
-                                          label_code_name, input$language),
+                                      label = label,
                                       selected = current_value) 
                 } else {
                     updateSelectInput(session, 
                                       code_name,
-                                      label = get_disp_name(
-                                          label_code_name, input$language),
-                                      choices = selector_choices,
+                                      label = label,
+                                      choices = choices,
                                       selected = current_value)
                 }
                 
@@ -1262,13 +1243,11 @@ server <- function(input, output, session) {
             } else if (element$type == "dateInput") {
                 updateDateInput(session, 
                                 code_name, 
-                                label = get_disp_name(element$label,
-                                                      input$language))
+                                label = label)
             } else if (element$type == "textAreaInput") {
                 updateTextAreaInput(session,
                                     code_name,
-                                    label = get_disp_name(element$label,
-                                                          input$language),
+                                    label = label,
                                     placeholder = 
                                         get_disp_name(
                                             element$placeholder, 
@@ -1276,18 +1255,15 @@ server <- function(input, output, session) {
             } else if (element$type == "actionButton") {
                 updateActionButton(session,
                                    code_name,
-                                   label = get_disp_name(element$label,
-                                                         input$language))
+                                   label = label)
             } else if (element$type == "checkboxInput") {
                 updateCheckboxInput(session,
                                     code_name,
-                                    label = get_disp_name(element$label,
-                                                          input$language))
+                                    label = label)
             } else if (element$type == "textInput") {
                 updateTextInput(session, 
                                 code_name, 
-                                label = get_disp_name(element$label, 
-                                                      input$language),
+                                label = label,
                                 placeholder = 
                                     get_disp_name(
                                         element$placeholder, 
@@ -1295,8 +1271,7 @@ server <- function(input, output, session) {
             } else if (element$type == "numericInput") {
                 updateNumericInput(session,
                                    code_name,
-                                   label = get_disp_name(element$label, 
-                                                         input$language))
+                                   label = label)
             }
 
         }
