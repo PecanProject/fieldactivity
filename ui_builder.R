@@ -175,7 +175,8 @@ create_element <- function(element, override_label = NULL,
         numericInput(inputId = element_code_name, 
                      label = element_label, 
                      min = element$min,
-                     value = element_value, ...)
+                     value = element_value,
+                     step = "any", ...)
     } else if (element$type == "textAreaInput") {
         textAreaInput(element_code_name, 
                       label = element_label,

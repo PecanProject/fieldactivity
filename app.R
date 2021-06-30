@@ -13,10 +13,10 @@ library(DT) # fancier data table
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- TRUE
-if (dev_mode) {
+dev_mode <- FALSE
+#if (dev_mode) {
     library(glue) # used for debug printing
-}
+#}
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -120,6 +120,7 @@ update_ui_element <- function(session, code_name, value, ...) {
 }
 
 # sets the specified input fields to their default states
+# TODO: make sure this is always used
 reset_input_fields <- function(session, input, fields_to_clear, 
                                exceptions = c("")) {
     
@@ -133,7 +134,8 @@ reset_input_fields <- function(session, input, fields_to_clear,
     
     # if the frontpage_block selector is set to a specific block, mirror that
     # value in input$block. Otherwise don't change the block widget value
-    if (input$frontpage_block != "block_choice_all") {
+    if (!is.null(input$frontpage_block) &&
+        input$frontpage_block != "block_choice_all") {
         update_ui_element(session, "block", input$frontpage_block)
     }
 }
@@ -152,11 +154,11 @@ get_data_table <- function(events, variable_names) {
         # get corresponding element and determine whether the column type should 
         # be list or character
         element <- structure_lookup_list[[variable_name]]
-        if (!is.null(element$multiple)) {
+        #if (!is.null(element$multiple)) {
             display_data_table[[variable_name]] <- list()
-        } else {
-            display_data_table[[variable_name]] <- character()
-        }
+        #} else {
+        #    display_data_table[[variable_name]] <- character()
+        #}
 
     }
     # the event column will hold the complete event information as a list
@@ -172,6 +174,9 @@ get_data_table <- function(events, variable_names) {
             if (is.null(value)) {
                 value <- ""
             }
+            # TODO: paste for now because value might be a vector
+            #display_data_table[[row_number, variable_name]] <- 
+            #    paste(value, collapse = " ")
             display_data_table[[row_number, variable_name]] <- value
         }
         
@@ -186,7 +191,6 @@ get_data_table <- function(events, variable_names) {
     }
     return(display_data_table)
 }
-
 
 # find the index corresponding to the given event in the list of events.
 # this is used when editing events
@@ -207,8 +211,23 @@ find_event_index <- function(event, event_list) {
 
     }
 
-    str(event_list)
-    #stop("DID NOT FIND EVENT IN THE LIST")
+    # We didn't find a match, so return NULL
+    return(NULL)
+}
+
+# if a variable is in a table (e.g. planting_depth is in a table when 
+# planted_crop has multiple values), return the code name of that table. 
+# Otherwise return NULL
+get_variable_table <- function(variable_name) {
+    
+    for (table_code_name in data_table_code_names) {
+        table <- structure_lookup_list[[table_code_name]]
+        
+        if (variable_name %in% c(table$rows, table$columns)) {
+            return(table_code_name)
+        }
+    }
+
     return(NULL)
 }
 
@@ -477,7 +496,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
             # table for showing already supplied information
             DT::dataTableOutput("editing_table")
         )
-    ))),
+    )))
 
 )
 
@@ -502,89 +521,6 @@ if (!dev_mode) {
 # Define server logic incl. save button action
 server <- function(input, output, session) {
     
-    if (dev_mode) {
-        shinyjs::show("site")
-    }
-    
-    # go through all fields and set maxLength if requested in ui_structure.json
-    for (element in structure_lookup_list) {
-        if (!is.null(element$maxlength)) {
-            js_message <- "$('##code_name').attr('maxlength', #maxlength)"
-            js_message <- gsub("#code_name", element$code_name, js_message)
-            js_message <- gsub("#maxlength", element$maxlength, js_message)
-            #print(js_message)
-            shinyjs::runjs(js_message)
-        }
-    }
-    
-    # initialise in the normal (non-edit) mode
-    event_to_edit <- reactiveVal()
-    # lists of events by block on the currently viewed site
-    # accessed like events$by_block[["0"]]
-    events <- reactiveValues(by_block = list())
-    
-    observeEvent(event_to_edit(), ignoreNULL = FALSE, {
-        
-        if (is.null(event_to_edit())) {
-            # edit mode was disabled
-            shinyjs::hide("delete")
-            shinyjs::disable("clone_event")
-            DT::selectRows(proxy = dataTableProxy("mgmt_events_table"), 
-                           selected = NULL)
-            exit_sidebar_mode()
-        } else {
-            # edit mode was enabled, or there was a switch from one event to
-            # another
-            
-            # populate the input controls with the values corresponding to the 
-            # event
-            for (variable_name in names(event_to_edit())) {
-                # Update the UI elements corresponding to the variable names
-                # to hold the data of the event. If no element is found 
-                # corresponding to that name, update_ui_element does nothing.
-                # this happens e.g. with date_ordering
-                update_ui_element(session, variable_name,
-                                  value = event_to_edit()[[variable_name]])
-            }
-            
-            shinyjs::show("delete")
-            shinyjs::show("sidebar")
-            shinyjs::disable("add_event")
-            shinyjs::enable("clone_event")
-        }
-        
-    })
-    
-    # exit edit mode
-    # this is called when saving and when pressing cancel
-    # TODO: make obsolete
-    exit_sidebar_mode <- function() {
-        # reset all input fields
-        reset_input_fields(session, input, get_category_names("variable_name"))
-        # hide sidebar
-        shinyjs::hide("sidebar")
-        shinyjs::enable("add_event")
-    }
-    
-    # load data from all the json files corresponding to a site and store it in
-    # separate lists in event_lists
-    # TODO: move elsewhere, return the list instead of saving it here
-    # maybe fuse with retrieve_json_info?
-    load_json_data <- function(site1) {
-        # clear possible previous data
-        events$by_block <- list()
-        
-        # find all blocks on this site
-        site_blocks <- subset(sites, site == site1)$blocks[[1]]
-        
-        # go through the blocks and save events from the corresponding json file
-        # to events$by_block
-        for (block in site_blocks) {
-            events$by_block[[block]] <- 
-                retrieve_json_info(site1, block)
-        }
-    }
-    
     # check_credentials returns a function to authenticate users
     # might have to use the hand-typed passphrase option for now when deploying
     # to shinyapps.io
@@ -593,10 +529,11 @@ server <- function(input, output, session) {
         # passphrase = key_get("FO-mgmt-events-key", "FO-mgmt-events-user")
         passphrase = "salasana"
     )
+
     
     # change login form language when requested
     observeEvent(input$login_language, {
-
+        
         # yes we are overwriting the English language. This is by far
         # the simplest method
         
@@ -641,22 +578,138 @@ server <- function(input, output, session) {
             shinyjs::enable("site")
             shinyjs::show("site")
         }
-
+        
         # here would be good to somehow fetch the language selection from
         # login UI, but it's difficult
     })
     
-    # TODO: probably needs to be an observe
+    # call the server part of shinymanager
+    # weird observation: this has to be after the observeEvent block
+    # which observes the auth_result$user. If it isn't the site selectInput
+    # selection is not updated to match the username.
+    auth_result <- secure_server(check_credentials = credential_checker)
+    
+    if (dev_mode) {
+        shinyjs::show("site")
+    }
+    
+    # go through all fields and set maxLength if requested in ui_structure.json
+    for (element in structure_lookup_list) {
+        if (!is.null(element$maxlength)) {
+            js_message <- "$('##code_name').attr('maxlength', #maxlength)"
+            js_message <- gsub("#code_name", element$code_name, js_message)
+            js_message <- gsub("#maxlength", element$maxlength, js_message)
+            shinyjs::runjs(js_message)
+        }
+    }
+    
     frontpage_table_data <- reactiveVal()
     editing_table_data <- reactiveVal()
+    # initialise in the normal (non-edit) mode
+    event_to_edit <- reactiveVal()
+    # lists of events by block on the currently viewed site
+    # accessed like events$by_block[["0"]]
+    events <- reactiveValues(by_block = list())
     
+    observeEvent(event_to_edit(), ignoreNULL = FALSE, {
+        
+        if (is.null(event_to_edit())) {
+            # edit mode was disabled
+            shinyjs::hide("delete")
+            shinyjs::disable("clone_event")
+            DT::selectRows(proxy = dataTableProxy("mgmt_events_table"), 
+                           selected = NULL)
+            exit_sidebar_mode()
+        } else {
+            # edit mode was enabled, or there was a switch from one event to
+            # another
+            
+            # populate the input controls with the values corresponding to the 
+            # event
+            for (variable_name in get_category_names("variable_name")) {
+                # Update the UI elements corresponding to the variable names
+                # to hold the data of the event. If no element is found 
+                # corresponding to that name, update_ui_element does nothing.
+                # this happens e.g. with date_ordering
+                
+                # if there is a table corresponding to the variable, this is
+                # its name
+                table_code_name <- paste(variable_name, "table", sep = "_")
+                
+                # TODO: change to use reset_input_fields
+                # this clears up old values. Note that this does not clear
+                # table values, but that should not 
+                if (!(variable_name %in% names(event_to_edit()))) {
+                    update_ui_element(session, variable_name, value = "")
+                    
+                    if (!is.null(structure_lookup_list[[table_code_name]])) {
+                        prefill_values[[table_code_name]](list())
+                    }
+                    next
+                }
+                
+                value <- event_to_edit()[[variable_name]]
+                
+                if (length(value) > 1) {
+                    
+                    if (is.null(structure_lookup_list[[table_code_name]])) {
+                        # there is a vector of elements, but this is not the
+                        # variable on the rows. Skip until we find it
+                        next
+                    }
+                    prefill_values[[table_code_name]](event_to_edit())
+                }
+                
+                update_ui_element(session, variable_name, value = value)
+            }
+            
+            shinyjs::show("delete")
+            shinyjs::show("sidebar")
+            shinyjs::disable("add_event")
+            shinyjs::enable("clone_event")
+        }
+        
+    })
+    
+    # exit edit mode
+    # this is called when saving and when pressing cancel
+    # TODO: make obsolete
+    exit_sidebar_mode <- function() {
+        # reset all input fields
+        reset_input_fields(session, input, get_category_names("variable_name"))
+        # hide sidebar
+        shinyjs::hide("sidebar")
+        shinyjs::enable("add_event")
+    }
+    
+    # load data from all the json files corresponding to a site and store it in
+    # separate lists in events$by_block
+    # TODO: move elsewhere, return the list instead of saving it here
+    # maybe fuse with retrieve_json_info?
+    load_json_data <- function(site1) {
+        # clear possible previous data
+        events$by_block <- list()
+        
+        # find all blocks on this site
+        site_blocks <- subset(sites, site == site1)$blocks[[1]]
+        
+        # go through the blocks and save events from the corresponding json file
+        # to events$by_block
+        for (block in site_blocks) {
+            events$by_block[[block]] <- retrieve_json_info(site1, block)
+        }
+    }
+
     observe({
+        
         frontpage_table_variables <- c("block", 
                                        "mgmt_operations_event", 
                                        "date", 
                                        "mgmt_event_notes")
         
-        if (input$frontpage_block == "block_choice_all") {
+        if (is.null(input$frontpage_block)) {
+            event_list <- list()
+        } else if (input$frontpage_block == "block_choice_all") {
             event_list <- list()
             for (block_data in events$by_block) {
                 event_list <- c(event_list, block_data)
@@ -680,6 +733,7 @@ server <- function(input, output, session) {
     # we set priority = 1 so that this runs before the editing table rendering
     # runs (which is reactive on input$mgmt_operations_event)
     observe(priority = 1, {
+        
         editing_table_variables <- c("date", "mgmt_event_notes")
         
         event_list <- list()
@@ -736,13 +790,12 @@ server <- function(input, output, session) {
         }
         
         # fetch the event data of the selected row
-        selected_event_data <- 
-            frontpage_table_data()[[row_index,"event"]]
+        selected_event_data <- frontpage_table_data()[[row_index,"event"]]
         
         # set edit mode on. This saves the event we want to edit so that it is
         # preserved even if front page table view is changed
         event_to_edit(selected_event_data)
-
+        
     })
     
     # cancel means we exit edit mode and hide sidebar controls
@@ -753,12 +806,6 @@ server <- function(input, output, session) {
             event_to_edit(NULL)
         }
     })
-    
-    # call the server part of shinymanager
-    # weird observation: this has to be after the observeEvent block
-    # which observes the auth_result$user. If it isn't the site selectInput
-    # selection is not updated to match the username.
-    auth_result <- secure_server(check_credentials = credential_checker)
     
     # when block changes, update table
     #observeEvent(input$frontpage_block, {
@@ -808,8 +855,10 @@ server <- function(input, output, session) {
     # we are either creating a new event or editing an older one
     observeEvent(input$save, {
         
-        # let's create a list to edit
-        event <- if (!is.null(event_to_edit())) {
+        # are we editing an existing event or creating a new one?
+        editing <- !is.null(event_to_edit())
+        # let's create a list which we will update to match the event info
+        event <- if (editing) {
             event_to_edit()
         } else {
             list()
@@ -820,25 +869,26 @@ server <- function(input, output, session) {
         # block data list. Also, if the block has been changed, update that 
         # file. If the block has not changed, we will need the index when
         # replacing the old event with the updated one.
-        if (!is.null(event_to_edit())) {
+        if (editing) {
             
             orig_block_data <- retrieve_json_info(input$site, orig_block)
-            event_index <- 
-                find_event_index(event, orig_block_data)
+            event_index <- find_event_index(event, orig_block_data)
 
             if (is.null(event_index)) {
-                showNotification("Could not edit entry.", type = "error")
+                showNotification("Could not edit entry because it was not 
+                                 found in the event files.", type = "error")
                 return()
             }
             
-            if (!(orig_block == input$block)) {
+            # if the block of the event has been changed, delete it from the 
+            # original block file
+            if (orig_block != input$block) {
                 orig_block_data[event_index] <- NULL
                 write_json_file(input$site, orig_block, orig_block_data)
                 events$by_block[[orig_block]] <- orig_block_data
             }
             
         }
-
         # fill out current_event to match new / updated data.
         # find variables that correspond to the selected activity and save
         # only those
@@ -851,6 +901,15 @@ server <- function(input, output, session) {
                                 "mgmt_event_notes",
                                 relevant_variables)
         
+        # TODO: change to use get_variable_table?
+        # determine whether we need to read some variables from a table or not
+        read_from_table <- NULL
+        for (table_code_name in data_table_code_names) {
+            if (visible[[table_code_name]]) {
+                read_from_table <- structure_lookup_list[[table_code_name]]
+            }
+        }
+        
         # fill / update information
         for (variable_name in get_category_names("variable_name")) {
             
@@ -860,12 +919,26 @@ server <- function(input, output, session) {
                 event[variable_name] <- NULL
                 next
             }
-                
-            value_to_save <- input[[variable_name]]
+            
+
+            if (!is.null(read_from_table) && 
+                variable_name %in% read_from_table$columns) {
+        
+                value_to_save <- 
+                    table_data[[read_from_table$code_name]]()[[variable_name]]
+            } else {
+                value_to_save <- input[[variable_name]]
+            }
 
             # if the value is not defined or empty, replace with missingval
-            if (!isTruthy(value_to_save)) {
+            if (length(value_to_save) == 0) {
                 value_to_save <- missingval
+            } else {
+                missing_indexes <- is.na(value_to_save) | 
+                    trimws(value_to_save) == ""
+                if (any(missing_indexes)) {
+                    value_to_save[missing_indexes] <- missingval
+                }
             }
             
             # format value to character string if it is a date
@@ -891,12 +964,11 @@ server <- function(input, output, session) {
         # load the json file corresponding to the new block selection (new as in
         # the current input$block value). We load from the file because it might
         # have changed and events$by_block might be out of date
-        
         new_block_data <- retrieve_json_info(input$site, input$block)
         
         # if editing and block didn't change, replace event. 
         # Otherwise append event to the list
-        if (!is.null(event_to_edit()) && orig_block == input$block) {
+        if (editing && orig_block == input$block) {
             new_block_data[[event_index]] <- event
         } else {
             new_block_data[[length(new_block_data) + 1]] <- event
@@ -910,7 +982,12 @@ server <- function(input, output, session) {
         events$by_block[[input$block]] <- new_block_data
         
         # exit sidebar mode
-        event_to_edit(NULL)
+        if (editing) {
+            event_to_edit(NULL)
+        } else {
+            exit_sidebar_mode()
+        }
+        
     })
     
     # delete entry when delete button is pressed
@@ -942,31 +1019,6 @@ server <- function(input, output, session) {
         event_to_edit(NULL)
     })
     
-    # disable the save button if not all necessary info has been filled
-    observe({
-        # run whenever any of the inputs change. I know this is not ideal, but
-        # reactivity to input values doesn't work when we dynamically generate
-        # which inputs we want to access
-        reactiveValuesToList(input)
-
-        if (!dev_mode) {req(auth_result$admin)}
-        
-        if (dev_mode || auth_result$admin == "TRUE") {
-            # if we are in admin or dev mode, 
-            # we don't care about required variables
-            return()
-        }
-        
-        for (required_variable in session$userData$required_variables) {
-            # is.Truthy essentially checks whether input is empty or null
-            if (!isTruthy(input[[required_variable]])) {
-                shinyjs::disable("save")
-                return()
-            }
-        }
-        
-        shinyjs::enable("save")
-    })
     
     # change available blocks depending on the site and load the site event
     # data into memory (events$by_block)
@@ -1005,10 +1057,13 @@ server <- function(input, output, session) {
     })
     
     # change editing table when input$block is changed
-    observeEvent(input$block, {
+    #observeEvent(input$block, {
         #update_editing_table(session, input, output, input$block, 
         #                     input$mgmt_operations_event, render = FALSE)
-    })
+    #})
+    
+    required_variables <- reactiveVal(list("site", "block", "date",
+                                           "mgmt_operations_event"))
     
     # change required variables when activity is changed
     observeEvent(input$mgmt_operations_event, {
@@ -1022,24 +1077,60 @@ server <- function(input, output, session) {
         }
         
         # find the variables that are compulsory for this activity type
-        required_variables <- rlapply(
+        variables <- rlapply(
             activity_options[[input$mgmt_operations_event]],
             fun = required_checker)
-        required_variables <- c(list("site", 
-                                     "block", 
-                                     "mgmt_operations_event",
-                                     "date"),
-                                required_variables)
-        # save to userData. The inputs are compared against this list of
+        variables <- c(list("site", 
+                            "block", 
+                            "mgmt_operations_event",
+                            "date"),
+                       variables)
+        # save to a reactiveval. The inputs are compared against this list of
         # variables in an observe()
-        session$userData$required_variables <- required_variables
+        required_variables(variables)
+    })
+    
+    # disable the save button if not all necessary info has been filled
+    observe({
+        if (!dev_mode) {req(auth_result$admin)}
+        
+        # run whenever any of the inputs change. I know this is not ideal, but
+        # reactivity to input values doesn't work when we dynamically generate
+        # which inputs we want to access
+        reactiveValuesToList(input)
+        
+        if (dev_mode || auth_result$admin == "TRUE") {
+            # if we are in admin or dev mode, 
+            # we don't care about required variables
+            return()
+        }
+        
+        for (required_variable in required_variables()) {
+            
+            table_code_name <- get_variable_table(required_variable)
+            
+            current_val <- if (!is.null(table_code_name) && 
+                               visible[[table_code_name]]) {
+                table_data[[table_code_name]]()[[required_variable]]
+            } else {
+                input[[required_variable]]
+            }
+            
+            # is.Truthy essentially checks whether input is empty or null
+            is_filled <- sapply(current_val, isTruthy)
+            if (!all(is_filled)) {
+                shinyjs::disable("save")
+                return()
+            }
+        }
+        
+        shinyjs::enable("save")
     })
     
     # (re-)render frontpage table when input$language changes
     # TODO: figure server = FALSE out
     output$mgmt_events_table <- DT::renderDataTable(#server = FALSE,
-                                                    {
-        
+        {
         new_data_to_display <- replace_with_display_names(
             isolate(frontpage_table_data()), input$language)
         n_cols <- ncol(new_data_to_display)
@@ -1069,7 +1160,7 @@ server <- function(input, output, session) {
     # TODO: figure server = FALSE out
     output$editing_table <- DT::renderDataTable(#server = FALSE, 
         {
-        
+            
         # take a dependency on activity, since that is an indicator
         # of when the table needs to be re-rendered
         input$mgmt_operations_event
@@ -1100,10 +1191,14 @@ server <- function(input, output, session) {
     
     # holds boolean values which indicate whether the conditions for the 
     # visibility of data tables are met
-    conditions <- reactiveValues()
+    visible <- reactiveValues()
+    
+    # changing these overrides the values in the table
+    prefill_values <- list()
     
     # initialise the table server for each of the dynamically added tables
-    table_data <- lapply(data_table_code_names, 
+    # sapply with simplify = FALSE is equivalent to lapply
+    table_data <- sapply(data_table_code_names,
                          FUN = function(data_table_code_name) {
         table_structure <- structure_lookup_list[[data_table_code_name]]
         row_names <- reactive(input[[table_structure$rows]])
@@ -1111,24 +1206,22 @@ server <- function(input, output, session) {
         # add observer to visibility condition of table
         # table is visible if the length of the variable presented on the rows
         # of the table is more than 1
-        observeEvent(row_names(), {
-            conditions[[data_table_code_name]] <- length(row_names()) > 1
+        observeEvent(row_names(), ignoreNULL = FALSE, {
+            visible[[data_table_code_name]] <- length(row_names()) > 1
+            message(glue("Visibility for {data_table_code_name} is {visible[[data_table_code_name]]}"))
         })
         
+        prefill_values[[data_table_code_name]] <<- reactiveVal()
         tableServer(data_table_code_name, row_names, reactive(input$language),
-                    visible = reactive(conditions[[data_table_code_name]]))
-    })
+                    visible = reactive(visible[[data_table_code_name]]),
+                    override_values = prefill_values[[data_table_code_name]])
+    }, USE.NAMES = TRUE, simplify = FALSE)
     
-    # table_structure <- structure_lookup_list[["planted_crop_table"]]
-    # row_names <- reactive(input[[table_structure$rows]])
-    # data_from_single_table <- tableServer("planted_crop_table", row_names,
-    #                                       reactive(input$language))
-    
-    observe({
-        for (value in table_data) {
-            str(value())
-        }
-    })
+    # observe({
+    #     for (value in table_data) {
+    #         str(value())
+    #     }
+    # })
     
     # update each of the text outputs automatically, including language changes
     # and the dynamic updating in editing table title etc. 
@@ -1162,8 +1255,7 @@ server <- function(input, output, session) {
                     # see the text at all
                     if ("" %in% replacements) { text_to_show <- "" }
 
-                } else if (element$dynamic$mode ==
-                           "edit_mode") {
+                } else if (element$dynamic$mode == "edit_mode") {
 
                     text_to_show <- if (!is.null(event_to_edit())) {
                         element$dynamic[["TRUE"]]
