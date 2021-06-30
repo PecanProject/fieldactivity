@@ -76,115 +76,175 @@ structure_lookup_list <- build_structure_lookup_list()
 
 # help texts (technically textOutputs) have a different method of updating
 # when the language is changed because they are outputs rather than inputs,
-# and for that we need a list of the code names of these objects. 
+# and for that we need a list of the code names of these objects.
+# The same goes for data tables (although frontpage table and editing table are
+# not here)
 text_output_code_names <- NULL
+data_table_code_names <- NULL
 for (element in structure_lookup_list) {
     if (element$type == "textOutput") {
         text_output_code_names <- c(text_output_code_names, element$code_name)
+    } else if (element$type == "dataTable") {
+        data_table_code_names <- c(data_table_code_names, element$code_name)
     }
 }
-#text_output_code_names <- c("window_title", 
-#                            "edit_mode_title", 
-#                            "frontpage_text",
-#                            "editing_table_title")
 
 # creates the ui for a list of elements in the structure file.
 # create_border specifies whether a border should be drawn around the 
 # elements in the input_list. It is typically set to false when calling
 # create_ui for the entire activity_options list, and true otherwise
-create_ui <- function(input_list, language, create_border) {
-  new_elements <- lapply(input_list, create_element, language = language)
-  
-  if (create_border) {
-    new_elements <- wellPanel(new_elements)
-  }
-  
-  # if there is a visibility condition, apply it
-  if (!is.null(input_list$condition)) {
-    new_elements <- conditionalPanel(
-      condition = input_list$condition, new_elements)
-  }
-
-  return(new_elements)
+create_ui <- function(input_list, create_border) {
+    new_elements <- lapply(input_list, create_element)
+    
+    if (create_border) {
+        new_elements <- wellPanel(new_elements)
+    }
+    
+    # if there is a visibility condition, apply it
+    if (!is.null(input_list$condition)) {
+        new_elements <- conditionalPanel(
+            condition = input_list$condition, new_elements)
+    }
+    
+    return(new_elements)
 }
 
 # creates the individual elements
-create_element <- function(element, language) {
-  
+# the override_label and ... functionalities are used for creating elements
+# in dynamic (e.g. multi-crop) data tables. Do NOT supply the label argument in
+# the unnamed arguments (...)!
+create_element <- function(element, override_label = NULL, 
+                           override_code_name = NULL, 
+                           override_value = NULL,
+                           override_choices = NULL,
+                           override_selected = NULL, ...) {
+    
     # element is a string, i.e. a visibility condition for a element set
     # it has already been handled in create_ui
     if (!is.list(element)) {
-      return()
+        return()
     }
-  
+    
     # element is a list of elements, because it doesn't have the type
     # attribute. In that case we want to create all of the elements in that list
     if (is.null(element$type)) {
-      return(create_ui(element, language = language, create_border = TRUE))
+        return(create_ui(element, create_border = FALSE))
     }
-        
-    new_element <- NULL
-        
+
     # the labels will be set to element$label which is a code_name, not a 
     # display_name, but this is okay as the server will update this as the
     # language changes (which also happens when the program starts)
+    # the following allows overwriting the label through ...
+    element_label <- element$label
+    if (!is.null(override_label)) {
+        element_label <- override_label
+    }
     
-    if (element$type == "checkboxInput") {
-      new_element <- checkboxInput(element$code_name, element$label)
+    element_code_name <- element$code_name
+    if (!is.null(override_code_name)) {
+        element_code_name <- override_code_name
+    }
+    
+    element_value <- ""
+    if (!is.null(override_value)) {
+        element_value <- override_value
+    }
+    
+    element_choices <- ""
+    if (!is.null(override_choices)) {
+        element_choices <- override_choices
+    }
+
+    new_element <- if (element$type == "checkboxInput") {
+        checkboxInput(element_code_name, label = element_label, ...)
     } else if (element$type == "selectInput") {
-      # if multiple is defined (=TRUE) then pass that to selectInput
-      multiple <- ifelse(is.null(element$multiple), FALSE, TRUE)
-      # we don't enter choices yet, that will be handled by the server
-      new_element <- selectInput(element$code_name, element$label, 
-                                 choices = c(""), multiple = multiple)
+        # if multiple is defined (=TRUE) then pass that to selectInput
+        multiple <- ifelse(is.null(element$multiple), FALSE, TRUE)
+        # we don't enter choices yet, that will be handled by the server
+        selectInput(element_code_name, label = element_label, 
+                    choices = element_choices, multiple = multiple,
+                    selected = override_selected, ...)
     } else if (element$type == "textOutput") {
-      # these are inteded to look like helpTexts so make text gray
-      new_element <- span(textOutput(element$code_name), style = "color:gray")
-      # add to the list to draw the text in the correct language
-      # the <<- operator assigns to the global environment
-      # maybe not the best programming technique, but it works
-      text_output_code_names <<- c(text_output_code_names, element$code_name)
+        # these are inteded to look like helpTexts so make text gray
+        tagList(span(textOutput(element_code_name, ...), style = "color:gray"),
+                br())
     } else if (element$type == "textInput") {
-      new_element <- textInput(element$code_name, element$label)
+        textInput(inputId = element_code_name, label = element_label, 
+                  value = element_value, ...)
     } else if (element$type == "numericInput") {
-      new_element <- numericInput(element$code_name, 
-                                  element$label, 
-                                  min = element$min,
-                                  value = "")
+        numericInput(inputId = element_code_name, 
+                     label = element_label, 
+                     min = element$min,
+                     value = element_value,
+                     step = "any", ...)
     } else if (element$type == "textAreaInput") {
-      new_element <- textAreaInput(element$code_name, 
-                                   element$label,
-                                   resize = "vertical")
+        textAreaInput(element_code_name, 
+                      label = element_label,
+                      resize = "vertical", 
+                      value = element_value, ...)
+    } else if (element$type == "dataTable") {
+        tableInput(element_code_name)
     }
     
     # put the new element in a conditionalPanel. If no condition is specified,
     # the element will be visible by default
-    new_panel <- conditionalPanel(condition = element$condition, new_element)
+    #new_element <- conditionalPanel(condition = element$condition, new_element)
     
     # if there are sub-elements to create, do that
     if (!is.null(element$sub_elements)) {
-      return(list(new_panel, 
-                  create_ui(element$sub_elements, create_border = TRUE)))
+        return(list(new_element, 
+                    create_ui(element$sub_elements, create_border = FALSE)))
     }
     
-    return(new_panel)
+    return(new_element)
 }
 
+# return choices for a selectInput given its structure 
+# (as read from ui_structure.json)
+get_selectInput_choices <- function(element_structure, language) {
+    # the choices for a selectInput element can be stored in
+    # three ways: 
+    # 1) the code names of the choices are given as a vector
+    # 2) for site and block selectors, there is IGNORE:
+    # this means that the choices should not be updated here (return NULL)
+    # 3) the category name for the choices is given.
+    # in the following if-statement, these are handled
+    # in this same order
+
+    if (length(element_structure$choices) > 1) {
+        choices <- c("", element_structure$choices)
+        names(choices) <- c("", get_disp_name(
+            element_structure$choices,
+            language = language))
+    } else if (element_structure$choices == "IGNORE") {
+        choices <- NULL
+    } else {
+        # get_category_names returns both display names and 
+        # code names
+        choices <- c(
+            "",
+            get_category_names(element_structure$choices,
+                               language = language)
+        )
+    }
+    
+    return(choices)
+}
 
 # checks whether the list x (corresponding to a UI element) has a specified
 # code name, and if yes, return it
 # this function is used in app.R to find the element corresponding to a
 # given code name when updating UI language
 code_name_checker <- function(x, code_name) {
-  if (is.null(x$code_name)) {
-    return(NULL)
-  }
-  
-  if (x$code_name == code_name) {
-    return(x)
-  } else {
-    return(NULL)
-  }
+    if (is.null(x$code_name)) {
+        return(NULL)
+    }
+    
+    if (x$code_name == code_name) {
+        return(x)
+    } else {
+        return(NULL)
+    }
 }
 
 

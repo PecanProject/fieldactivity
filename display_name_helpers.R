@@ -53,8 +53,7 @@ get_disp_name <- function(code_name1, language, is_variable_name = FALSE) {
 }
 
 # replace code names with display names in an event data frame
-# this only applies to values coming from selectInputs, textInputs and
-# textAreaInputs (for now)
+# also replaces missingvals
 replace_with_display_names <- function(events_with_code_names, language) {
     events_with_display_names <- events_with_code_names
     
@@ -73,16 +72,24 @@ replace_with_display_names <- function(events_with_code_names, language) {
             # when x is a character vector
             events_with_display_names[[variable_name]] <-
                 sapply(events_with_code_names[[variable_name]],
-                       FUN = function(x) {paste(get_disp_name(
-                           x, language = language), 
-                           collapse = ", ")})
+                       FUN = function(x) {
+                           name <- get_disp_name(
+                               x, language = language)
+                           paste(ifelse(name=="", "-", name), 
+                                 collapse = ", ")})
         } else if (element$type == "textAreaInput" | 
                    element$type == "textInput" | 
                    element$type == "numericInput") {
             events_with_display_names[[variable_name]] <-
                 sapply(events_with_code_names[[variable_name]],
                        FUN = function(x) {
-                           ifelse(x==missingval,"",x)})
+                           if (length(x) > 1) {
+                               paste(ifelse(x==missingval,"-",x), 
+                                     collapse = ", ")
+                           } else {
+                               ifelse(x==missingval,"",x)
+                           }
+                       })
         } else if (element$type == "dateInput") {
             events_with_display_names[[variable_name]] <-
                 sapply(events_with_code_names[[variable_name]], 

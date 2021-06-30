@@ -29,7 +29,7 @@ variable_name,planting_notes,Planting notes,Kylvömuistiinpanot
 variable_name,harvest_area,Harvest area (ha),Pinta-ala (ha)
 variable_name,harvest_crop,Harvest crop,Korjattu laji
 variable_name,harvest_operat_component,Crop component harvested,Kerätty kasvinosa
-variable_name,canopy_height_harvest,Canopy height (m),Viljelykasvin korkeus (m)
+variable_name,canopy_height_harvest,Canopy height (m),Kasvuston korkeus (m)
 variable_name,harvest_yield_harvest_dw,"Yield, dry weight (kg/ha)","Sato, kuivapaino (kg/ha)"
 variable_name,harv_yield_harv_f_wt,"Yield, fresh weight (t/ha)","Sato, märkäpaino (t/ha)"
 variable_name,yield_C_at_harvest,Yield carbon (C) amount (kg/ha),Hiilen (C) määrä sadossa (kg/ha)
@@ -73,7 +73,7 @@ element_label,planting_notes_label,Notes about the planting:,Kylvömuistiinpanoj
 element_label,harvest_area_label,Harvest area (ha)*:,Pinta-ala (ha)*:
 element_label,harvest_crop_label,Harvested crop*:,Korjattu laji*:
 element_label,harvest_operat_component_label,Crop component harvested:,Kerätty kasvinosa:
-element_label,canopy_height_harvest_label,Canopy height at harvest (m):,Kasvin korkeus korjuuhetkellä (m):
+element_label,canopy_height_harvest_label,Canopy height at harvest (m):,Kasvuston korkeus korjuuhetkellä (m):
 element_label,harvest_yield_harvest_dw_label,"Harvest yield, dry weight (kg/ha):","Sato, kuivapaino (kg/ha):"
 element_label,harv_yield_harv_f_wt_label,"Harvest yield, fresh weight (t/ha):","Sato, märkäpaino (t/ha):"
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
@@ -92,6 +92,7 @@ element_label,tillage_treatment_notes_label,Tillage notes:,Muokkausmuistiinpanot
 #
 CRID,FRG,Timothy (Phleum pratense),Timotei (Phleum pratense)
 CRID,WHT,Wheat (Triticum spp.), Vehnä (Triticum spp.)
+CRID,OAT,Oats (Avena sativa),Kaura (Avena sativa)
 HACOM,canopy,Canopy,Latvusto
 HACOM,leaf,Leaves,Lehdet
 HACOM,grain,"Grain, legume seeds","Jyvä, palkokasvin siemen"
