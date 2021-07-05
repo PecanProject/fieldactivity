@@ -117,7 +117,8 @@ create_element <- function(element, override_label = NULL,
                            override_code_name = NULL, 
                            override_value = NULL,
                            override_choices = NULL,
-                           override_selected = NULL, ...) {
+                           override_selected = NULL,
+                           override_placeholder = NULL, ...) {
     
     # element is a string, i.e. a visibility condition for a element set
     # it has already been handled in create_ui
@@ -154,6 +155,11 @@ create_element <- function(element, override_label = NULL,
     if (!is.null(override_choices)) {
         element_choices <- override_choices
     }
+    
+    element_placeholder <- element$placeholder
+    if (!is.null(override_placeholder)) {
+        element_placeholder <- override_placeholder
+    }
 
     new_element <- if (element$type == "checkboxInput") {
         checkboxInput(element_code_name, label = element_label, ...)
@@ -170,20 +176,33 @@ create_element <- function(element, override_label = NULL,
                 br())
     } else if (element$type == "textInput") {
         textInput(inputId = element_code_name, label = element_label, 
-                  value = element_value, ...)
+                  value = element_value, placeholder = element_placeholder, ...)
     } else if (element$type == "numericInput") {
         numericInput(inputId = element_code_name, 
                      label = element_label, 
                      min = element$min,
+                     max = ifelse(is.null(element$max),NA,element$max),
                      value = element_value,
-                     step = "any", ...)
+                     step = ifelse(is.null(element$step),"any",element$step),
+                     ...)
     } else if (element$type == "textAreaInput") {
         textAreaInput(element_code_name, 
                       label = element_label,
                       resize = "vertical", 
-                      value = element_value, ...)
+                      value = element_value,
+                      placeholder = element_placeholder, ...)
     } else if (element$type == "dataTable") {
         tableInput(element_code_name)
+    } else if (element$type == "fileInput") {
+        fileInput(element_code_name, 
+                  label = element_label,
+                  accept = element$accept, ...)
+    } else if (element$type == "dateRangeInput") {
+        dateRangeInput(element_code_name, 
+                       label = element_label,
+                       separator = "-",
+                       weekstart = 1,
+                       max = Sys.Date())
     }
     
     # put the new element in a conditionalPanel. If no condition is specified,

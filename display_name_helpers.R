@@ -73,10 +73,13 @@ replace_with_display_names <- function(events_with_code_names, language) {
             events_with_display_names[[variable_name]] <-
                 sapply(events_with_code_names[[variable_name]],
                        FUN = function(x) {
-                           name <- get_disp_name(
-                               x, language = language)
-                           paste(ifelse(name=="", "-", name), 
-                                 collapse = ", ")})
+                           name <- get_disp_name(x, language = language)
+                           if (length(name) > 1) {
+                               name <- paste(ifelse(name=="", "-", name), 
+                                             collapse = ", ")
+                           }
+                           name
+                       })
         } else if (element$type == "textAreaInput" | 
                    element$type == "textInput" | 
                    element$type == "numericInput") {
@@ -90,13 +93,13 @@ replace_with_display_names <- function(events_with_code_names, language) {
                                ifelse(x==missingval,"",x)
                            }
                        })
-        } else if (element$type == "dateInput") {
+        } else if (element$type %in% c("dateInput", "dateRangeInput")) {
             events_with_display_names[[variable_name]] <-
                 sapply(events_with_code_names[[variable_name]], 
                        FUN = function(x) { 
-                           format(
-                               as.Date(x, format = date_format_json), 
-                               date_format_display) 
+                           paste(format(as.Date(x, format = date_format_json), 
+                                        date_format_display),
+                                 collapse = " - ")
                            })
         }
         

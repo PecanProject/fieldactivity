@@ -1,17 +1,18 @@
 category,code_name,disp_name_eng,disp_name_fin
-mgmt_operations_event_choice,planting,planting,kylvö
+mgmt_operations_event_choice,planting,sowing,kylvö
 mgmt_operations_event_choice,fertilizer,fertilizer application,lannoitteen levitys
-mgmt_operations_event_choice,irrigation,irrigation application,kastelu
-mgmt_operations_event_choice,tillage,tillage application,maanmuokkaus
-mgmt_operations_event_choice,organic_material,organic material application,eloperäisen aineen levitys
+mgmt_operations_event_choice,tillage,tillage,maanmuokkaus
 mgmt_operations_event_choice,harvest,harvest,sadonkorjuu
+mgmt_operations_event_choice,chemicals,chemicals application,kemikaalin levitys
+mgmt_operations_event_choice,grazing,grazing,laidunnus # not ICASA
+mgmt_operations_event_choice,weeding,mechanical extraction of weeds,rikkaruohojen kitkeminen
+mgmt_operations_event_choice,irrigation,irrigation application,kastelu
+mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
+mgmt_operations_event_choice,observation,observation,havainto
 mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
 mgmt_operations_event_choice,inorg_mulch,placement of inorganic mulch,epäorgaanisen katteen levitys
 mgmt_operations_event_choice,Inorg_mul_rem,removal of inorganic mulch,epäorgaanisen katteen poisto
-mgmt_operations_event_choice,chemicals,chemicals application,kemikaalin levitys
-mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
-mgmt_operations_event_choice,observation,observation,havainto
-mgmt_operations_event_choice,weeding,mechanical extraction of weeds,rikkaruohojen kitkeminen
+#   mgmt_operations_event_choice,organic_material,organic material application,eloperäisen aineen levitys
 mgmt_operations_event_choice,other,other,muu
 block_choice,block_choice_all,All,Kaikki
 #
@@ -22,27 +23,91 @@ variable_name,mgmt_operations_event,Event,Tapahtuma
 variable_name,date,Date,Päivä
 variable_name,mgmt_event_notes,Description,Kuvaus
 variable_name,planted_crop,Planted crop,Kylvetty laji
-variable_name,planting_material_weight,Planting material weight (kg), Kylvömateriaalin määrä (kg)
-variable_name,planting_depth,Planting depth (mm),Kylvösyvyys (mm)
-variable_name,planting_material_source,Planting material source,Kylvömateriaalin lähde
-variable_name,planting_notes,Planting notes,Kylvömuistiinpanot
+variable_name,planting_material_weight,Weight of seeds (kg/ha), Siementen määrä (kg/ha)
+variable_name,planting_depth,Sowing depth (mm),Kylvösyvyys (mm)
+variable_name,planting_material_source,Source of seeds,Siementen alkuperä
+variable_name,planting_notes,Sowing notes,Kylvömuistiinpanoja
 variable_name,harvest_area,Harvest area (ha),Pinta-ala (ha)
 variable_name,harvest_crop,Harvest crop,Korjattu laji
 variable_name,harvest_operat_component,Crop component harvested,Kerätty kasvinosa
 variable_name,canopy_height_harvest,Canopy height (m),Kasvuston korkeus (m)
 variable_name,harvest_yield_harvest_dw,"Yield, dry weight (kg/ha)","Sato, kuivapaino (kg/ha)"
 variable_name,harv_yield_harv_f_wt,"Yield, fresh weight (t/ha)","Sato, märkäpaino (t/ha)"
-variable_name,yield_C_at_harvest,Yield carbon (C) amount (kg/ha),Hiilen (C) määrä sadossa (kg/ha)
+variable_name,harvest_moisture,Yield moisture (%),Sadon kosteus (%)
+variable_name,yield_C_at_harvest,Carbon (C) in yield (kg/ha),Hiilen (C) määrä sadossa (kg/ha) # not in ICASA
 variable_name,harvest_method,Harvest method,Korjuutapa
 variable_name,harvest_cut_height,Height of cut (cm),Niittokorkeus (cm)
+variable_name,plant_density_harvest,Plant density at harvest (plants/m2),Kasvitiheys korjuuhetkellä (kasveja/m2)
 variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
-variable_name,organic_material,Organic material,Eloperäinen aine
-variable_name,org_material_applic_meth,Organic material application method,Eloperäisen aineen levitystapa
-variable_name,org_material_appl_depth,Organic material application depth (cm),Eloperäisen aineen levityssyvyys (cm)
-variable_name,org_material_notes,Notes,Muistiinpanot
+#   variable_name,org_material_applic_meth,Organic material application method,Eloperäisen aineen levitystapa
+#   variable_name,org_material_appl_depth,Organic material application depth (cm),Eloperäisen aineen levityssyvyys (cm)
+#   variable_name,org_material_notes,Notes,Muistiinpanot
+variable_name,tillage_practice,Tillage type,Muokkaustyyppi # possibly not the same meaning in ICASA
 variable_name,tillage_implement,Tillage implement,Muokkausväline
 variable_name,tillage_operations_depth,Tillage depth (cm),Muokkaussyvyys (cm)
-variable_name,tillage_treatment_notes,Tillage notes,Muokkausmuistiinpanot
+variable_name,tillage_treatment_notes,Tillage notes,Muistiinpanot muokkauksesta
+variable_name,fertilizer_type,Fertilizer type,Lannoitteen tyyppi
+variable_name,organic_material,Organic material,Eloperäinen aine
+variable_name,org_matter_moisture_conc,Moisture concentration (%),Aineen kosteus (%)
+variable_name,org_matter_carbon_conc,Carbon (C) concentration (%),Hiilen (C) määrä aineessa (%)
+variable_name,fertilizer_product_name,Name of fertilizer,Lannoitteen nimi
+variable_name,fertilizer_material,Fertilizer,Lannoite
+variable_name,fertilizer_material_source,Fertilizer material source,Lannoitteen alkuperä
+variable_name,fertilizer_applic_method,Application method,Levitystapa
+variable_name,application_depth_fert,Application depth (cm),Levityssyvyys (cm)
+variable_name,fertilizer_total_amount,Total amount of fertilizer (kg/ha),Lannoitteen kokonaismäärä (kg/ha)
+variable_name,N_in_applied_fertilizer,Amount of nitrogen (N) in fertilizer (kg/ha),Typen (N) määrä lannoitteessa (kg/ha)
+variable_name,phosphorus_applied_fert,Amount of phosphorus (P) in fertilizer (kg/ha),Fosforin (P) määrä lannoitteessa (kg/ha)
+variable_name,fertilizer_K_applied,Amount of potassium (K) in fertilizer (kg/ha),Kaliumin (K) määrä lannoitteessa (kg/ha)
+variable_name,S_in_applied_fertilizer,Amount of sulphur (S) in fertilizer (kg/ha),Rikin (S) määrä lannoitteessa (kg/ha)
+variable_name,Ca_in_applied_fertilizer,Amount of calcium (Ca) in fertilizer (kg/ha),Kalsiumin (Ca) määrä lannoitteessa (kg/ha)
+variable_name,Mg_in_applied_fertilizer,Amount of magnesium (Mg) in fertilizer (kg/ha),Magnesiumin (Mg) määrä lannoitteessa (kg/ha)
+variable_name,Na_in_applied_fertilizer,Amount of sodium (Na) in fertilizer (kg/ha),Natriumin (Na) määrä lannoitteessa (kg/ha)
+variable_name,Cu_in_applied_fertilizer,Amount of copper (Cu) in fertilizer (kg/ha),Kuparin (Cu) määrä lannoitteessa (kg/ha)
+variable_name,Zn_in_applied_fertilizer,Amount of zinc (Zn) in fertilizer (kg/ha),Sinkin (Zn) määrä lannoitteessa (kg/ha)
+variable_name,B_in_applied_fertilizer,Amount of boron (B) in fertilizer (kg/ha),Boorin (B) määrä lannoitteessa (kg/ha)
+variable_name,Mn_in_applied_fertilizer,Amount of manganese (Mn) in fertilizer (kg/ha),Mangaanin (Mn) määrä lannoitteessa (kg/ha)
+variable_name,Se_in_applied_fertilizer,Amount of selenium (Se) in fertilizer (kg/ha),Seleenin (Se) määrä lannoitteessa (kg/ha)
+variable_name,Fe_in_applied_fertilizer,Amount of iron (Fe) in fertilizer (kg/ha),Raudan (Fe) määrä lannoitteessa (kg/ha)
+variable_name,fertilizer_notes,Notes on fertilizer application,Muistiinpanoja lannoitteen levityksestä
+variable_name,grazing_species,Grazing species,Laiduntava laji
+variable_name,grazing_species_age_group,Livestock age group (yr),Eläinten ikäryhmä (v)
+variable_name,livestock_density,Livestock density (number/ha),Eläinten tiheys (eläintä/ha)
+variable_name,grazing_intensity,Grazing intensity (kg/ha),Laidunnusintensiteetti (kg/ha)
+variable_name,grazing_period,Grazing period,Laidunnusjakso
+variable_name,grazing_type,Grazing type,Laidunnuksen tyyppi,
+variable_name,grazing_area,Grazing area (ha),Laidunnettava ala (ha),
+variable_name,grazing_material_removed_prop,Proportion of material removed (%),Syödyn aineksen määrä (%)
+variable_name,grazing_starting_height,Starting height (cm),Aloituspituus (cm)
+variable_name,grazing_end_height,End height (cm),Lopetuspituus (cm)
+variable_name,grazing_notes,Grazing notes,Laidunnusmuistiinpanot
+variable_name,mowed_crop,Mowed crop,Leikattu kasvi
+variable_name,mowed_area,Mowed area (ha),Leikattu ala (ha)
+variable_name,mowing_method,Mowing method,Leikkuutapa
+variable_name,mowing_canopy_height,Canopy height before mowing (m),Kasvuston korkeus ennen leikkuuta (m)
+variable_name,mowing_cut_height,Cut height (cm),Leikkuukorkeus (cm)
+variable_name,mowing_notes,Mowing notes,Muistiinpanot leikkuusta
+variable_name,observation_type,Observation type,Havainnon tyyppi
+variable_name,soil_layer_count,Number of layers in soil sample,Maanäytteen kerrosten lukumäärä
+variable_name,soil_layer_top_depth,"Soil layer depth, top (cm)","Kerroksen yläosan syvyys (cm)"
+variable_name,soil_layer_base_depth,"Soil layer depth, bottom (cm)","Kerroksen alaosan syvyys (cm)",
+variable_name,soil_classification_by_layer,Soil structure (MARA card),Maan rakenne (MARA-kortti)
+variable_name,root_depth,Root depth (m),Juurten syvyys (m)
+variable_name,soil_compactification_depth,Soil compactification depth (cm),Tiivistymän syvyys (cm)
+variable_name,earthworm_count,Number of earthworms,Lierojen lukumäärä
+variable_name,soil_image,Photo of soil,Kuva maaperästä
+variable_name,growth_stage,Plant growth stage,Kasvuvaihe
+variable_name,plant_density,Plant density (plants/m2),Kasvitiheys (kasveja/m2)
+variable_name,specific_leaf_area,Specific leaf area (cm2/g),Ominaislehtiala (cm2/g)
+variable_name,leaf_area_index,Leaf area index (m2/m2),Lehtialaindeksi (m2/m2)
+variable_name,canopy_height,Canopy height (m),Latvuston korkeus (m)
+variable_name,canopeo_reading,Canopeo reading,Canopeo-lukema
+variable_name,canopeo_image,Canopeo image,Canopeo-kuva
+variable_name,floodwater_depth,Floodwater depth (mm),Tulvaveden syvyys (mm)
+variable_name,water_table_depth,Water table level (cm),Pohjaveden pinnan syvyys (cm)
+variable_name,plant_pop_reduct_cum,"Amount of plants eaten (%, cumulative)","Syötyjen kasvien määrä (%, kumulatiivinen)"
+variable_name,fuel_amount,Fuel used (liters/ha),Käytetty polttoaine (litraa/ha)
+variable_name,observation_notes,Observations,Havaintoja
 #
 # labels for widgets, incl. help texts etc.
 #
@@ -58,56 +123,149 @@ element_label,site_label,Select the site*:,Valitse sijainti*:
 element_label,block_label,Select the block*:,Valitse lohko*:
 element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
 element_label,date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
-element_label,mgmt_event_notes_label,Description (optional):,Kuvaus (vapaaehtoinen):
-element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. 'first harvest of the year'. This will appear on the summary table. ","Yleinen kuvaus tapahtumasta, esim. 'vuoden ensimmäinen sadonkorjuu'. Tämä tulee näkyviin yhteenvetotaulukkoon."
+element_label,mgmt_event_notes_label,Description:,Kuvaus:
+element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. “first harvest of the year”, “spring fertilization” or “protection against rot”. This will appear on the summary table.","Yleinen kuvaus tapahtumasta, esim. “vuoden ensimmäinen sadonkorjuu”, “kevätlannoitus” tai “suoja mädäntymistä vastaan”. Tämä tulee näkyviin yhteenvetotaulukkoon."
 element_label,save_label,Save,Tallenna
 element_label,cancel_label,Cancel,Peruuta
 element_label,delete_label,Delete,Poista
 element_label,sidebar_title_edit,Edit event,Muokkaa tapahtumaa
 element_label,sidebar_title_add,Add event,Lisää tapahtuma
+element_label,file_input_button_label,Browse...,Selaa...
+element_label,file_input_placeholder,No file selected,Tiedostoa ei valittu
 element_label,planted_crop_label,Planted crop*:,Kylvetty kasvi*:
-element_label,planting_material_weight_label,Weight of planted material (kg):,Kylvömateriaalin määrä (kg):
-element_label,planting_depth_label,Planting depth (mm):,Kylvösyvyys (mm):
-element_label,planting_material_source_label,Planting material source:,Kylvömateriaalin lähde:
-element_label,planting_notes_label,Notes about the planting:,Kylvömuistiinpanoja:
+element_label,planting_material_weight_label,Weight of seeds (kg/ha):,Siementen määrä (kg/ha):
+element_label,planting_depth_label,Sowing depth (mm):,Kylvösyvyys (mm):
+element_label,planting_material_source_label,Source of seeds:,Siementen alkuperä:
+element_label,planting_material_source_placeholder,"Commercial / own seeds, seed cultivar, etc.","Ostetut / omat siemenet, lajike, jne."
+element_label,planting_notes_label,Notes about the sowing:,Kylvömuistiinpanoja:
+element_label,planting_notes_placeholder,"Any notes or observations about the event, e.g. “soil was drier than usual at the time of sowing”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “maa oli tavallista kuivempi”"
 element_label,harvest_area_label,Harvest area (ha)*:,Pinta-ala (ha)*:
 element_label,harvest_crop_label,Harvested crop*:,Korjattu laji*:
 element_label,harvest_operat_component_label,Crop component harvested:,Kerätty kasvinosa:
 element_label,canopy_height_harvest_label,Canopy height at harvest (m):,Kasvuston korkeus korjuuhetkellä (m):
+element_label,harvest_cut_height_label,Height of cut (cm):,Niittokorkeus (cm):
 element_label,harvest_yield_harvest_dw_label,"Harvest yield, dry weight (kg/ha):","Sato, kuivapaino (kg/ha):"
 element_label,harv_yield_harv_f_wt_label,"Harvest yield, fresh weight (t/ha):","Sato, märkäpaino (t/ha):"
+element_label,harvest_moisture_label,"Yield moisture (%):","Sadon kosteus (%):"
+element_label,yield_C_at_harvest_label,Carbon (C) in yield (kg/ha):,Hiilen (C) määrä sadossa (kg/ha):
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
-element_label,harvest_cut_height_label,Height of cut (cm)*:,Niittokorkeus (cm)*:
+element_label,plant_density_harvest_label,Plant density at harvest (number/m2):,Kasvitiheys korjuuhetkellä (kpl/m2):
 element_label,harvest_comments_label,Harvest comments:,Kommentit sadonkorjuusta:
-element_label,harvest_residue_help_text,"If you left the crop residue on the field, you should add a new organic material event for that.","Jos jätit korjuutähteet pellolle, tee tästä uusi eloperäisen aineen levitys -tapahtuma."
-element_label,organic_material_label,Organic material*:,Eloperäinen aine*:
-element_label,org_material_applic_meth_label,Application method:,Levitystapa:
-element_label,org_material_appl_depth_label,Application depth (cm):,Levityssyvyys (cm):
-element_label,org_material_notes_label,Comments:,Kommentit:
-element_label,tillage_implement_label,Tillage implement*:,Muokkausväline*:
+element_label,harvest_comments_placeholder,"Any notes or observations about the event, e.g. “cutting height was not uniform”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “leikkuukorkeus ei ollut sama kaikkialla”"
+element_label,harvest_residue_help_text,"If you left the crop residue on the field, you should add a new fertilizer application event for that.","Jos jätit korjuutähteet pellolle, tee tästä uusi lannoitustapahtuma."
+element_label,tillage_practice_label,Tillage type*:,Muokkaustyyppi*:
+element_label,tillage_implement_label,Tillage implement:,Muokkausväline:
 element_label,tillage_operations_depth_label,Tillage depth (cm):,Muokkaussyvyys (cm):
-element_label,tillage_treatment_notes_label,Tillage notes:,Muokkausmuistiinpanot:
+element_label,tillage_treatment_notes_label,Tillage notes:,Muistiinpanot muokkauksesta:
+element_label,tillage_treatment_notes_placeholder,"Any notes or observations about the event, e.g. “had to stop tillage and continue the next day”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “jatkoin muokkausta seuraavana päivänä”"
+element_label,fertilizer_type_label,Fertilizer type*:,Lannoitteen tyyppi*:
+element_label,organic_material_label,Organic material:,Eloperäinen aine:
+element_label,org_matter_moisture_conc_label,Moisture concentration (%):,Aineen kosteus (%):
+element_label,org_matter_carbon_conc_label,Carbon (C) concentration (%):,Hiilen (C) määrä aineessa (%):
+element_label,fertilizer_product_name_label,Name of fertilizer:,Lannoitteen nimi:
+element_label,fertilizer_material_label,Fertilizer:,Lannoite:
+element_label,fertilizer_material_source_label,Fertilizer material source:,Lannoitteen alkuperä:
+element_label,fertilizer_material_source_placeholder,"e.g. local stables or own farm or Commercial (brand)","esim. paikallinen talli, oma tila tai kaupallinen (tuotteen nimi)"
+element_label,fertilizer_applic_method_label,Application method:,Levitystapa:
+element_label,application_depth_fert_label,Application depth (cm):,Levityssyvyys (cm):
+element_label,fertilizer_total_amount_label,Total amount of fertilizer (kg/ha)*:,Lannoitteen kokonaismäärä (kg/ha)*:
+element_label,N_in_applied_fertilizer_label,Amount of nitrogen (N) in fertilizer (kg/ha):,Typen (N) määrä lannoitteessa (kg/ha):
+element_label,phosphorus_applied_fert_label,Amount of phosphorus (P) in fertilizer (kg/ha):,Fosforin (P) määrä lannoitteessa (kg/ha):
+element_label,fertilizer_K_applied_label,Amount of potassium (K) in fertilizer (kg/ha):,Kaliumin (K) määrä lannoitteessa (kg/ha):
+element_label,S_in_applied_fertilizer_label,Amount of sulphur (S) in fertilizer (kg/ha):,Rikin (S) määrä lannoitteessa (kg/ha):
+element_label,Ca_in_applied_fertilizer_label,Amount of calcium (Ca) in fertilizer (kg/ha):,Kalsiumin (Ca) määrä lannoitteessa (kg/ha):
+element_label,Mg_in_applied_fertilizer_label,Amount of magnesium (Mg) in fertilizer (kg/ha):,Magnesiumin (Mg) määrä lannoitteessa (kg/ha):
+element_label,Na_in_applied_fertilizer_label,Amount of sodium (Na) in fertilizer (kg/ha):,Natriumin (Na) määrä lannoitteessa (kg/ha):
+element_label,Cu_in_applied_fertilizer_label,Amount of copper (Cu) in fertilizer (kg/ha):,Kuparin (Cu) määrä lannoitteessa (kg/ha):
+element_label,Zn_in_applied_fertilizer_label,Amount of zinc (Zn) in fertilizer (kg/ha):,Sinkin (Zn) määrä lannoitteessa (kg/ha):
+element_label,B_in_applied_fertilizer_label,Amount of boron (B) in fertilizer (kg/ha):,Boorin (B) määrä lannoitteessa (kg/ha):
+element_label,Mn_in_applied_fertilizer_label,Amount of manganese (Mn) in fertilizer (kg/ha):,Mangaanin (Mn) määrä lannoitteessa (kg/ha):
+element_label,Se_in_applied_fertilizer_label,Amount of selenium (Se) in fertilizer (kg/ha):,Seleenin (Se) määrä lannoitteessa (kg/ha):
+element_label,Fe_in_applied_fertilizer_label,Amount of iron (Fe) in fertilizer (kg/ha):,Raudan (Fe) määrä lannoitteessa (kg/ha):
+element_label,fertilizer_notes_label,Notes on fertilizer application:,Muistiinpanoja lannoitteen levityksestä:
+element_label,fertilizer_notes_placeholder,"Any notes or observations about the event, e.g. “biostimulant was added because the field suffered from drought”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “lisäsin biostimulanttia pellon kuivuuden vuoksi”"
+#   element_label,org_material_applic_meth_label,Application method:,Levitystapa:
+#   element_label,org_material_appl_depth_label,Application depth (cm):,Levityssyvyys (cm):
+#   element_label,org_material_notes_label,Comments:,Kommentit:
+element_label,grazing_species_label,Grazing species*:,Laiduntava laji*:
+element_label,grazing_species_age_group_label,Livestock age group (years):,Eläinten ikäryhmä (vuotta):
+element_label,livestock_density_label,Livestock density (number/ha):,Eläinten tiheys (eläintä/ha):
+element_label,grazing_intensity_label,"Grazing intensity (total weight of animals, kg/ha):","Laidunnusintensiteetti (eläinten kokonaispaino, kg/ha):"
+element_label,grazing_period_label,Grazing period:,Laidunnusjakso:
+element_label,grazing_type_label,Grazing type:,Laidunnuksen tyyppi:
+element_label,grazing_area_label,Grazing area (ha):,Laidunnettava ala (ha):,
+element_label,grazing_material_removed_prop_label,Proportion of material removed (%):,Syödyn aineksen määrä (%):
+element_label,grazing_starting_height_label,Starting height (cm):,Aloituspituus (cm):
+element_label,grazing_end_height_label,End height (cm):,Lopetuspituus (cm):
+element_label,grazing_notes_label,Grazing notes:,Laidunnusmuistiinpanot:
+element_label,grazing_notes_placeholder,"Any notes or observations about the event, e.g. “animals were too late to the field”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “eläimet vietiin pellolle liian myöhään”"
+element_label,mowed_crop_label,Mowed crop*:,Leikattu kasvi*:
+element_label,mowed_area_label,Mowed area (ha):,Leikattu ala (ha):
+element_label,mowing_method_label,Mowing method:,Leikkuutapa:
+element_label,mowing_canopy_height_label,Canopy height before mowing (m):,Kasvuston korkeus ennen leikkuuta (m):,
+element_label,mowing_cut_height_label,Cut height (cm):,Leikkuukorkeus (cm):
+element_label,mowing_notes_label,Mowing notes:,Muistiinpanot leikkuusta:
+element_label,mowing_notes_placeholder,"Any notes or observations about the event, e.g. “mowing height was not uniform”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “leikkuukorkeus ei ollut sama kaikkialla”"
+element_label,observation_type_label,Observation type*:,Havainnon tyyppi*:
+element_label,soil_layer_count_label,Number of layers in soil sample:,Maanäytteen kerrosten lukumäärä:
+element_label,soil_layer_top_depth_label,"Soil layer depth, top (cm):","Kerroksen yläosan syvyys (cm):"
+element_label,soil_layer_base_depth_label,"Soil layer depth, bottom (cm):","Kerroksen alaosan syvyys (cm):",
+element_label,soil_classification_by_layer_label,Soil structure (MARA card):,Maan rakenne (MARA-kortti):
+element_label,root_depth_label,Root depth (m):,Juurten syvyys (m):
+element_label,soil_compactification_depth_label,Soil compactification depth (cm):,Tiivistymän syvyys (cm):
+element_label,earthworm_count_label,Number of earthworms:,Lierojen lukumäärä:
+element_label,soil_image_label,Photo of soil:,Kuva maaperästä:
+element_label,growth_stage_label,Plant growth stage:,Kasvuvaihe:
+element_label,plant_density_label,Plant density (plants/m2):,Kasvitiheys (plants/m2):
+element_label,specific_leaf_area_label,Specific leaf area (cm2/g):,Ominaislehtiala (cm2/g):
+element_label,leaf_area_index_label,Leaf area index (m2/m2):,Lehtialaindeksi (m2/m2):
+element_label,canopy_height_label,Canopy height (m):,Latvuston korkeus (m):
+element_label,canopeo_reading_label,Canopeo reading:,Canopeo-lukema:
+element_label,canopeo_image_label,Canopeo image:,Canopeo-kuva:
+element_label,floodwater_depth_label,Floodwater depth (mm):,Tulvaveden syvyys (mm):
+element_label,water_table_depth_label,Water table level (cm):,Pohjaveden pinnan syvyys (cm):
+element_label,plant_pop_reduct_cum_label,"Amount of plants eaten (%, cumulative):","Syötyjen kasvien määrä (%, kumulatiivinen):"
+element_label,fuel_amount_label,Fuel used (liters/ha):,Käytetty polttoaine (litraa/ha):
+element_label,observation_notes_label,Observations:,Havainnot:
+
 #
 ############### others
 #
 CRID,FRG,Timothy (Phleum pratense),Timotei (Phleum pratense)
-CRID,WHT,Wheat (Triticum spp.), Vehnä (Triticum spp.)
+CRID,WHT,Wheat (Triticum spp.),Vehnä (Triticum spp.)
 CRID,OAT,Oats (Avena sativa),Kaura (Avena sativa)
+CRID,RYE,Rye (Secale cereale),Ruis (Secale cereale)
+CRID,BAR,Barley (Hordeum vulgare),Ohra (Hordeum vulgare)
+CRID,ZZ1,Mixed grain,Seosvilja
+CRID,BWH,Buckwheat (Fagopyrum esculentum),Tattari (Fagopyrum esculentum)
+CRID,POT,Potato (Solanum tuberosum),Peruna (Solanum tuberosum)
+CRID,SBT,Sugar beet	(Beta vulgaris var. altissima),Sokerijuurikas (Beta vulgaris var. altissima)
+CRID,PEA,Pea (Pisum sativum),Herne (Pisum sativum)
+CRID,FBN,Faba bean (Vicia faba),Härkäpapu (Vicia faba)
+CRID,RYP,Turnip rape (Brassica rapa subsp. oleifera),Rypsi (Brassica rapa subsp. oleifera) # not ICASA
+CRID,RAP,Rapeseed (Brassica napus subsp. napus),Rapsi (Brassica napus subsp. napus)
+CRID,FLX,Flax (Linum usitatissimum),Pellava (Linum usitatissimum)
+CRID,CCA,Caraway (Carum carvi),Kumina (Carum carvi) # not ICASA
+CRID,PHA,Reed canary grass (Phalaris arundinacea),Ruokohelpi (Phalaris arundinacea) #not ICASA
 HACOM,canopy,Canopy,Latvusto
 HACOM,leaf,Leaves,Lehdet
 HACOM,grain,"Grain, legume seeds","Jyvä, palkokasvin siemen"
 HACOM,silage,Silage,Säilörehu
 HACOM,tuber,"Tuber, root, etc.","Mukula, juuri, yms."
 HACOM,fruit,Fruit,Hedelmä
-HACOM,fiber,Fiber,Kuitu
-HACOM,seed_cotton,"Cotton boil, including lint","Puuvillakeite, myös nukka"
+#HACOM,fiber,Fiber,Kuitu
+#HACOM,seed_cotton,"Cotton boil, including lint","Puuvillakeite, myös nukka"
 HACOM,stem,Stem,Varsi
 HARM,HM001,Combined,Leikkuupuimuri
-HARM,HM002,"Hand cut, machine threshed","Leikattu käsin, puitu koneella"
-HARM,HM003,"Hand cut, hand threshed","Leikattu käsin, puitu käsin"
+#HARM,HM002,"Hand cut, machine threshed","Leikattu käsin, puitu koneella"
+#HARM,HM003,"Hand cut, hand threshed","Leikattu käsin, puitu käsin"
 HARM,HM004,"Hand picked, no further processing","Poimittu käsin, ei muuta prosessointia"
 HARM,HM005,"Hand picked, machine processing","Poimittu käsin, prosessoitu koneella"
-HARM,HM006,Cotton stripper,Puuvillakone
+#HARM,HM006,Cotton stripper,Puuvillakone
+HARM,HM007,Hay,Heinä # not in ICASA
+HARM,HM008,Silage,Säilörehu # not in ICASA
+HARM,HM009,Potato harvester,Perunannostokone # not in ICASA
+HARM,HM010,Sugar beet harvester,Juurikkaannostokone # not in ICASA
 HARM,HM999,Method unknown/not given,Tapa ei tiedossa
 OMCD,RE001,Generic crop residue,Yleinen kasvijäte
 OMCD,RE002,Green manure,Vihreä lanta
@@ -116,20 +274,20 @@ OMCD,RE004,Liquid manure,RE004-käännös
 OMCD,RE005,Compost,RE005-käännös
 OMCD,RE006,Bark,RE006-käännös
 OMCD,RE101,Generic legume residue,RE101-käännös
-OMCD,RE102,Cowpea residue,RE102-käännös
-OMCD,RE103,Mucuna residue,RE103-käännös
-OMCD,RE104,Peanut residue,RE104-käännös
-OMCD,RE105,Pigeon Pea residue,RE105-käännös
-OMCD,RE106,Soybean residue,RE106-käännös
-OMCD,RE107,Alfalfa residue,RE107-käännös
-OMCD,RE108,Chickpea forage,RE108-käännös
+#OMCD,RE102,Cowpea residue,RE102-käännös
+#OMCD,RE103,Mucuna residue,RE103-käännös
+#OMCD,RE104,Peanut residue,RE104-käännös
+#OMCD,RE105,Pigeon Pea residue,RE105-käännös
+#OMCD,RE106,Soybean residue,RE106-käännös
+#OMCD,RE107,Alfalfa residue,RE107-käännös
+#OMCD,RE108,Chickpea forage,RE108-käännös
 OMCD,RE109,Faba bean,RE109-käännös
 OMCD,RE110,Pea residue,RE110-käännös
 OMCD,RE111,Hairy vetch,RE111-käännös
 OMCD,RE201,Generic cereal crop residue,RE201-käännös
-OMCD,RE202,Pearl millet residue,RE202-käännös
-OMCD,RE203,Maize residue,RE203-käännös
-OMCD,RE204,Sorghum residue,RE204-käännös
+#OMCD,RE202,Pearl millet residue,RE202-käännös
+#OMCD,RE203,Maize residue,RE203-käännös
+#OMCD,RE204,Sorghum residue,RE204-käännös
 OMCD,RE205,Wheat residue,RE205-käännös
 OMCD,RE206,Barley,RE206-käännös
 OMCD,RE207,Rice,RE207-käännös
@@ -144,60 +302,104 @@ OMCD,RE401,Bush fallow residue,RE401-käännös
 OMCD,RE402,Sugarcane,RE402-käännös
 OMCD,RE403,Pineapple,RE403-käännös
 OMCD,RE999,Decomposed crop residue,RE999-käännös
-OMACD,AP001,"Broadcast, not incorporated",AP001-käännös
-OMACD,AP002,"Broadcast, incorporated",AP002-käännös
-OMACD,AP003,Banded on surface,AP003-käännös
-OMACD,AP004,Banded beneath surface,AP004-käännös
-OMACD,AP005,Applied in irrigation water,AP005-käännös
-OMACD,AP006,Foliar spray,AP006-käännös
-OMACD,AP007,Bottom of hole,AP007-käännös
-OMACD,AP008,On the seed,AP008-käännös
-OMACD,AP009,Injected,AP009-käännös
-OMACD,AP011,"Broadcast on flooded/saturated soil, none in soil",AP011-käännös
-OMACD,AP012,"Broadcast on flooded/saturated soil, 15% in soil",AP012-käännös
-OMACD,AP013,"Broadcast on flooded/saturated soil, 30% in soil",AP013-käännös
-OMACD,AP014,"Broadcast on flooded/saturated soil, 45% in soil",AP014-käännös
-OMACD,AP015,"Broadcast on flooded/saturated soil, 60% in soil",AP015-käännös
-OMACD,AP016,"Broadcast on flooded/saturated soil, 75% in soil",AP016-käännös
-OMACD,AP017,"Broadcast on flooded/saturated soil, 90% in soil",AP017-käännös
-OMACD,AP018,"Band on saturated soil, 2cm flood, 92% in soil",AP018-käännös
-OMACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil",AP019-käännös
-OMACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil",AP020-käännös
-OMACD,AP999,Method unknown/not given,Tapa ei tiedossa
-TIIMP,TI001,V-Ripper,TI001-käännös
+FEACD,AP001,"Broadcast, not incorporated",AP001-käännös
+FEACD,AP002,"Broadcast, incorporated",AP002-käännös
+FEACD,AP003,Banded on surface,AP003-käännös
+FEACD,AP004,Banded beneath surface,AP004-käännös
+FEACD,AP005,Applied in irrigation water,AP005-käännös
+FEACD,AP006,Foliar spray,AP006-käännös
+FEACD,AP007,Bottom of hole,AP007-käännös
+FEACD,AP008,On the seed,AP008-käännös
+FEACD,AP009,Injected,AP009-käännös
+#   FEACD,AP011,"Broadcast on flooded/saturated soil, none in soil",AP011-käännös
+#   FEACD,AP012,"Broadcast on flooded/saturated soil, 15% in soil",AP012-käännös
+#   FEACD,AP013,"Broadcast on flooded/saturated soil, 30% in soil",AP013-käännös
+#   FEACD,AP014,"Broadcast on flooded/saturated soil, 45% in soil",AP014-käännös
+#   FEACD,AP015,"Broadcast on flooded/saturated soil, 60% in soil",AP015-käännös
+#   FEACD,AP016,"Broadcast on flooded/saturated soil, 75% in soil",AP016-käännös
+#   FEACD,AP017,"Broadcast on flooded/saturated soil, 90% in soil",AP017-käännös
+#   FEACD,AP018,"Band on saturated soil, 2cm flood, 92% in soil",AP018-käännös
+FEACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil",AP019-käännös
+FEACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil",AP020-käännös
+FEACD,AP999,Method unknown/not given,Tapa ei tiedossa
+#   the following tillage_practice choices are not from ICASA
+tillage_practice_choice,tillage_practice_primary,Primary (residue incorporation),Perusmuokkaus
+tillage_practice_choice,tillage_practice_secondary,Secondary (seedbed),Kylvömuokkaus
+tillage_practice_choice,tillage_practice_tertiary,Tertiary (weed control),Rikkakasvien torjunta
+#TIIMP,TI001,V-Ripper,TI001-käännös
 TIIMP,TI002,Subsoiler,TI002-käännös
-TIIMP,TI003,Moldboard plow 20cm depth,TI003-käännös
-TIIMP,TI004,"Chisel plow, sweeps",TI004-käännös
-TIIMP,TI005,"Chisel plow, straight point",TI005-käännös
-TIIMP,TI006,"Chisel plow, twisted shovels",TI006-käännös
-TIIMP,TI007,Disk plow,TI007-käännös
-TIIMP,TI008,"Disk, 1-way",TI008-käännös
-TIIMP,TI009,"Disk, tandem",TI009-käännös
-TIIMP,TI010,"Disk, double disk",TI010-käännös
+TIIMP,TI003,Moldboard plough,TI003-käännös # in ICASA this is Moldboard plow 20cm depth, here we use it for all depths
+#TIIMP,TI004,"Chisel plow, sweeps",TI004-käännös
+#TIIMP,TI005,"Chisel plow, straight point",TI005-käännös
+#TIIMP,TI006,"Chisel plow, twisted shovels",TI006-käännös
+#TIIMP,TI007,Disk plow,TI007-käännös
+#TIIMP,TI008,"Disk, 1-way",TI008-käännös
+TIIMP,TI009,"Disk, tandem",Lautasäes
+#TIIMP,TI010,"Disk, double disk",TI010-käännös
 TIIMP,TI011,"Cultivator, field",TI011-käännös
-TIIMP,TI012,"Cultivator, row",TI012-käännös
-TIIMP,TI013,"Cultivator, ridge till",TI013-käännös
-TIIMP,TI014,"Harrow, spike",TI014-käännös
-TIIMP,TI015,"Harrow, tine",TI015-käännös
+#TIIMP,TI012,"Cultivator, row",TI012-käännös
+#TIIMP,TI013,"Cultivator, ridge till",TI013-käännös
+#TIIMP,TI014,"Harrow, spike",TI014-käännös
+TIIMP,TI015,"Harrow, tine",Joustopiikkiäes
 TIIMP,TI016,Lister,TI016-käännös
-TIIMP,TI017,Bedder,TI017-käännös
+#TIIMP,TI017,Bedder,TI017-käännös
 TIIMP,TI018,Blade cultivator,TI018-käännös
-TIIMP,TI019,"Fertilizer applicator, anhydr",TI019-käännös
+#TIIMP,TI019,"Fertilizer applicator, anhydr",TI019-käännös
 TIIMP,TI020,Manure injector,TI020-käännös
-TIIMP,TI022,Mulch treader,TI022-käännös
-TIIMP,TI023,Plank,TI023-käännös
+#TIIMP,TI022,Mulch treader,TI022-käännös
+#TIIMP,TI023,Plank,TI023-käännös
 TIIMP,TI024,Roller packer,TI024-käännös
 TIIMP,TI025,"Drill, double-disk",TI025-käännös
-TIIMP,TI026,"Drill, deep furrow",TI026-käännös
+#TIIMP,TI026,"Drill, deep furrow",TI026-käännös
 TIIMP,TI031,"Drill, no-till",TI031-käännös
-TIIMP,TI032,"Drill, no-till (into sod)",TI032-käännös
+#TIIMP,TI032,"Drill, no-till (into sod)",TI032-käännös
 TIIMP,TI033,"Planter, row",TI033-käännös
-TIIMP,TI034,"Planter, no-till",TI034-käännös
-TIIMP,TI035,Planting stick (hand),TI035-käännös
-TIIMP,TI036,Matraca hand planter,TI036-käännös
-TIIMP,TI037,Rod weeder,TI037-käännös
+#TIIMP,TI034,"Planter, no-till",TI034-käännös
+#TIIMP,TI035,Planting stick (hand),TI035-käännös
+#TIIMP,TI036,Matraca hand planter,TI036-käännös
+#TIIMP,TI037,Rod weeder,TI037-käännös
 TIIMP,TI038,Rotary hoe,TI038-käännös
-TIIMP,TI039,"Roller harrow, cultipacker",TI039-käännös
-TIIMP,TI041,Moldboard plow 25cm,TI041-käännös
-TIIMP,TI042,Moldboard plow 30 cm,TI042-käännös
-TIIMP,TI043,Strip tillage,TI043-käännös
+#TIIMP,TI039,"Roller harrow, cultipacker",TI039-käännös
+#TIIMP,TI041,Moldboard plow 25cm,TI041-käännös
+#TIIMP,TI042,Moldboard plow 30 cm,TI042-käännös
+#TIIMP,TI043,Strip tillage,TI043-käännös
+TIIMP,TI044,Tine weeder,Rikkaäes #not on ICASA
+TIIMP,TI999,Other,Muu #not on ICASA
+# the following fertilizer_type_choice tags are not in ICASA
+fertilizer_type_choice,fertilizer_type_organic,Organic,Eloperäinen lannoite
+fertilizer_type_choice,fertilizer_type_mineral,Mineral,Väkilannoite
+fertilizer_type_choice,fertilizer_type_soil_amendment,Soil amendment,Maanparannusaine
+grazing_species_choice,grazing_species_cattle,Cattle,Nautakarja
+grazing_species_choice,grazing_species_sheep,Sheep,Lampaat
+grazing_species_choice,grazing_species_goat,Goats,Vuohet
+grazing_species_choice,grazing_species_mix,Mix,Useita
+grazing_species_choice,grazing_species_other,Other,Muu
+grazing_species_age_group_choice,grazing_species_age_group_mix,Mix,Useita
+grazing_type_choice,grazing_type_continuous,Continuous,Jatkuva
+grazing_type_choice,grazing_type_rotation,Rotation,Kiertolaidunnus
+grazing_type_choice,grazing_type_mob_grazing,Mob grazing,Mob grazing -käännös
+grazing_type_choice,grazing_type_strip,Strip,Strip-käännös
+grazing_type_choice,grazing_type_multi_species,Multi-species,Multi-species-käännös
+grazing_type_choice,grazing_type_creep,Creep,Creep-käännös,
+grazing_type_choice,grazing_type_forward,Forward,Forward-käännös
+grazing_type_choice,grazing_type_other,Other,Muu
+observation_type_choice,observation_type_soil,Soil,Maaperä
+observation_type_choice,observation_type_vegetation,Vegetation,Kasvillisuus
+observation_type_choice,observation_type_water,Water,Vesi
+observation_type_choice,observation_type_animals,Animals,Eläimet
+observation_type_choice,observation_type_pests,Pests,Tuholaiset
+observation_type_choice,observation_type_disturbance,Disturbance,Häiriö
+observation_type_choice,observation_type_management,Management,Tilanhoito
+observation_type_choice,observation_type_other,Other,Muu
+soil_classification_by_layer_choice,soil_classification_1,1,1
+soil_classification_by_layer_choice,soil_classification_2,2,2
+soil_classification_by_layer_choice,soil_classification_3,3,3
+soil_classification_by_layer_choice,soil_classification_4,4,4
+soil_classification_by_layer_choice,soil_classification_5,5,5
+growth_stage_choice,growth_stage_germination,Germination,Itäminen
+growth_stage_choice,growth_stage_first_pod,First pod,First pod -käännös
+growth_stage_choice,growth_stage_pegging,Pegging,Pegging-käännös
+growth_stage_choice,growth_stage_budding,Budding,Budding-käännös
+growth_stage_choice,growth_stage_blooming,Blooming,Blooming-käännös
+growth_stage_choice,growth_stage_seeding,Seeding,Seeding-käännös
+growth_stage_choice,growth_stage_maturity,Maturity,Maturity-käännös

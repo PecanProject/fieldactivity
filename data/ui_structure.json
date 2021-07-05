@@ -117,7 +117,8 @@
                 "planting_material_source" : {
                   "code_name" : "planting_material_source",
                   "type" : "textInput",
-                  "label" : "planting_material_source_label"
+                  "label" : "planting_material_source_label",
+                  "placeholder" : "planting_material_source_placeholder"
                 }
 
               }
@@ -127,7 +128,8 @@
           "planting_notes" : {
             "code_name" : "planting_notes",
             "type" : "textAreaInput",
-            "label" : "planting_notes_label"
+            "label" : "planting_notes_label",
+            "placeholder" : "planting_notes_placeholder"
           }
         },
 
@@ -150,33 +152,20 @@
             "multiple" : "TRUE",
             "required" : "TRUE",
             "sub_elements" : {
+
               "multiple" : {
                 "condition"  : "input.harvest_crop.length > 1",
 
                 "harvest_crop_table" : {
                   "code_name" : "harvest_crop_table",
                   "type" : "dataTable",
-                  "columns" : ["harvest_operat_component", "canopy_height_harvest", "harvest_yield_harvest_dw", "harv_yield_harv_f_wt", "harvest_method", "harvest_cut_height"],
+                  "columns" : ["harvest_yield_harvest_dw", "harv_yield_harv_f_wt", "harvest_moisture", "yield_C_at_harvest", "harvest_method", "harvest_operat_component", "canopy_height_harvest", "harvest_cut_height", "plant_density_harvest"],
                   "rows" : "harvest_crop"
                 }
               },
 
               "single" : {
                 "condition" : "input.harvest_crop.length <= 1",
-
-                "harvest_operat_component" : {
-                  "code_name" : "harvest_operat_component",
-                  "type" : "selectInput",
-                  "choices" : "HACOM",
-                  "label" : "harvest_operat_component_label"
-                },
-
-                "canopy_height_harvest" : {
-                  "code_name" : "canopy_height_harvest",
-                  "type" : "numericInput",
-                  "label" : "canopy_height_harvest_label",
-                  "min" : "0"
-                },
 
                 "harvest_yield_harvest_dw" : {
                   "code_name" : "harvest_yield_harvest_dw",
@@ -192,6 +181,21 @@
                   "min" : "0"
                 },
 
+                "harvest_moisture" : {
+                  "code_name" : "harvest_moisture",
+                  "type" : "numericInput",
+                  "label" : "harvest_moisture_label",
+                  "min" : "0",
+                  "max" : "100"
+                },
+
+                "yield_C_at_harvest" : {
+                  "code_name" : "yield_C_at_harvest",
+                  "type" : "numericInput",
+                  "label" : "yield_C_at_harvest_label",
+                  "min" : "0"
+                },
+
                 "harvest_method" : {
                   "code_name" : "harvest_method",
                   "type" : "selectInput",
@@ -199,12 +203,32 @@
                   "choices" : "HARM"
                 },
 
+                "harvest_operat_component" : {
+                  "code_name" : "harvest_operat_component",
+                  "type" : "selectInput",
+                  "choices" : "HACOM",
+                  "label" : "harvest_operat_component_label"
+                },
+
+                "canopy_height_harvest" : {
+                  "code_name" : "canopy_height_harvest",
+                  "type" : "numericInput",
+                  "label" : "canopy_height_harvest_label",
+                  "min" : "0"
+                },
+
                 "harvest_cut_height" : {
                   "code_name" : "harvest_cut_height",
                   "type" : "numericInput",
                   "label" : "harvest_cut_height_label",
-                  "min" : "0",
-                  "required" : "TRUE"
+                  "min" : "0"
+                },
+
+                "plant_density_harvest" : {
+                  "code_name" : "plant_density_harvest",
+                  "type" : "numericInput",
+                  "label" : "plant_density_harvest_label",
+                  "min" : "0"
                 }
               }
             }
@@ -213,7 +237,8 @@
           "harvest_comments" : {
             "code_name" : "harvest_comments",
             "type" : "textAreaInput",
-            "label" : "harvest_comments_label"
+            "label" : "harvest_comments_label",
+            "placeholder" : "harvest_comments_placeholder"
           },
 
           "harvest_residue_help_text" : {
@@ -222,47 +247,22 @@
           }
         },
 
-        "organic_material" : {
-          "condition": "input.mgmt_operations_event == 'organic_material'",
-
-          "organic_material" : {
-            "code_name" : "organic_material",
-            "type" : "selectInput",
-            "label" : "organic_material_label",
-            "choices" : "OMCD",
-            "required" : "TRUE"
-          },
-
-          "org_material_applic_meth" : {
-            "code_name" : "org_material_applic_meth",
-            "type" : "selectInput",
-            "label" : "org_material_applic_meth_label",
-            "choices" : "OMACD"
-          },
-
-          "org_material_appl_depth" : {
-            "code_name" : "org_material_appl_depth",
-            "type" : "numericInput",
-            "label" : "org_material_appl_depth_label",
-            "min" : "0"
-          },
-
-          "org_material_notes" : {
-            "code_name" : "org_material_notes",
-            "type" : "textAreaInput",
-            "label" : "org_material_notes_label"
-          }
-        },
-
         "tillage" : {
           "condition" : "input.mgmt_operations_event == 'tillage'",
+
+          "tillage_practice" : {
+            "code_name" : "tillage_practice",
+            "type" : "selectInput",
+            "label" : "tillage_practice_label",
+            "choices" : "tillage_practice_choice",
+            "required" : "TRUE"
+          },
 
           "tillage_implement" : {
             "code_name" : "tillage_implement",
             "type" : "selectInput",
             "label" : "tillage_implement_label",
-            "choices" : "TIIMP",
-            "required" : "TRUE"
+            "choices" : "TIIMP"
           },
 
           "tillage_operations_depth" : {
@@ -275,8 +275,524 @@
           "tillage_treatment_notes" : {
             "code_name" : "tillage_treatment_notes",
             "type" : "textAreaInput",
-            "label" : "tillage_treatment_notes_label"
+            "label" : "tillage_treatment_notes_label",
+            "placeholder" : "tillage_treatment_notes_placeholder"
           }
+        },
+
+        "fertilizer" : {
+          "condition" : "input.mgmt_operations_event == 'fertilizer'",
+
+          "fertilizer_type" : {
+            "code_name" : "fertilizer_type",
+            "type" : "selectInput",
+            "label" : "fertilizer_type_label",
+            "choices" : "fertilizer_type_choice",
+            "required" : "TRUE",
+            "sub_elements" : {
+              "organic" : {
+                "condition" : "input.fertilizer_type == 'fertilizer_type_organic'",
+
+                "organic_material" : {
+                  "code_name" : "organic_material",
+                  "type" : "selectInput",
+                  "label" : "organic_material_label",
+                  "choices" : "OMCD"
+                },
+
+                "org_matter_moisture_conc" : {
+                  "code_name" : "org_matter_moisture_conc",
+                  "type" : "numericInput",
+                  "label" : "org_matter_moisture_conc_label",
+                  "min" : "0",
+                  "max" : "100"
+                },
+
+                "org_matter_carbon_conc" : {
+                  "code_name" : "org_matter_carbon_conc",
+                  "type": "numericInput",
+                  "label" : "org_matter_carbon_conc_label",
+                  "min" : "0",
+                  "max" : "100"
+                }
+              },
+
+              "mineral" : {
+                "condition" : "input.fertilizer_type == 'fertilizer_type_mineral'",
+
+                "fertilizer_product_name" : {
+                  "code_name" : "fertilizer_product_name",
+                  "type" : "textInput",
+                  "label" : "fertilizer_product_name_label"
+                }
+
+              },
+
+              "soil_amendment" : {
+                "condition" : "input.fertilizer_type == 'fertilizer_type_soil_amendment'",
+
+                "fertilizer_material" : {
+                  "code_name" : "fertilizer_material",
+                  "type" : "selectInput",
+                  "label" : "fertilizer_material_label",
+                  "choices" : "FECD"
+                }
+              },
+
+              "organic_or_soil_amendment" : {
+                "condition" : "input.fertilizer_type == 'fertilizer_type_organic' | input.fertilizer_type == 'fertilizer_type_soil_amendment'",
+
+                "fertilizer_material_source" : {
+                  "code_name" : "fertilizer_material_source",
+                  "type" : "textInput",
+                  "label" : "fertilizer_material_source_label",
+                  "placeholder" : "fertilizer_material_source_placeholder"
+                }
+              }
+            }
+          },
+
+          "fertilizer_applic_method" : {
+            "code_name" : "fertilizer_applic_method",
+            "type" : "selectInput",
+            "choices" : "FEACD",
+            "label" : "fertilizer_applic_method_label"
+          },
+
+          "application_depth_fert" : {
+            "code_name" : "application_depth_fert",
+            "type" : "numericInput",
+            "label" : "application_depth_fert_label",
+            "min" : "0"
+          },
+
+          "fertilizer_total_amount" : {
+            "code_name" : "fertilizer_total_amount",
+            "type" : "numericInput",
+            "label" : "fertilizer_total_amount_label",
+            "min" : "0",
+            "required" : "TRUE"
+          },
+
+          "N_in_applied_fertilizer" : {
+            "code_name" : "N_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "N_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "phosphorus_applied_fert" : {
+            "code_name" : "phosphorus_applied_fert",
+            "type" : "numericInput",
+            "label" : "phosphorus_applied_fert_label",
+            "min" : "0"
+          },
+
+          "fertilizer_K_applied" : {
+            "code_name" : "fertilizer_K_applied",
+            "type" : "numericInput",
+            "label" : "fertilizer_K_applied_label",
+            "min" : "0"
+          },
+
+          "S_in_applied_fertilizer" : {
+            "code_name" : "S_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "S_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "Ca_in_applied_fertilizer" : {
+            "code_name" : "Ca_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "Ca_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "Mg_in_applied_fertilizer" : {
+            "code_name" : "Mg_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "Mg_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "Na_in_applied_fertilizer" : {
+            "code_name" : "Na_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "Na_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "Cu_in_applied_fertilizer" : {
+            "code_name" : "Cu_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "Cu_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "Zn_in_applied_fertilizer" : {
+            "code_name" : "Zn_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "Zn_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "B_in_applied_fertilizer" : {
+            "code_name" : "B_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "B_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "Mn_in_applied_fertilizer" : {
+            "code_name" : "Mn_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "Mn_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "Se_in_applied_fertilizer" : {
+            "code_name" : "Se_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "Se_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "Fe_in_applied_fertilizer" : {
+            "code_name" : "Fe_in_applied_fertilizer",
+            "type" : "numericInput",
+            "label" : "Fe_in_applied_fertilizer_label",
+            "min" : "0"
+          },
+
+          "fertilizer_notes" : {
+            "code_name" : "fertilizer_notes",
+            "type" : "textAreaInput",
+            "label" : "fertilizer_notes_label",
+            "placeholder" : "fertilizer_notes_placeholder"
+          }
+
+        },
+
+        "grazing" : {
+          "condition" : "input.mgmt_operations_event == 'grazing'",
+
+          "grazing_species" : {
+            "code_name" : "grazing_species",
+            "type" : "selectInput",
+            "label" : "grazing_species_label",
+            "choices" : "grazing_species_choice",
+            "required" : "TRUE"
+          },
+
+          "grazing_species_age_group" : {
+            "code_name" : "grazing_species_age_group",
+            "type" : "selectInput",
+            "label" : "grazing_species_age_group_label",
+            "choices" : ["0-1","1-2","2-3","3-5","5-10","10+","grazing_species_age_group_mix"]
+          },
+
+          "livestock_density" : {
+            "code_name" : "livestock_density",
+            "type" : "numericInput",
+            "label" : "livestock_density_label",
+            "min" : 0
+          },
+
+          "grazing_intensity" : {
+            "code_name" : "grazing_intensity",
+            "type" : "numericInput",
+            "label" : "grazing_intensity_label",
+            "min" : 0
+          },
+
+          "grazing_period" : {
+            "code_name" : "grazing_period",
+            "type" : "dateRangeInput",
+            "label" : "grazing_period_label"
+          },
+
+          "grazing_type" : {
+            "code_name" : "grazing_type",
+            "type" : "selectInput",
+            "label" : "grazing_type_label",
+            "choices" : "grazing_type_choice"
+          },
+
+          "grazing_area" : {
+            "code_name" : "grazing_area",
+            "type" : "numericInput",
+            "label" : "grazing_area_label",
+            "min" : 1
+          },
+
+          "grazing_material_removed_prop" : {
+            "code_name" : "grazing_material_removed_prop",
+            "type" : "numericInput",
+            "label" : "grazing_material_removed_prop_label",
+            "min" : 0,
+            "max" : 100
+          },
+
+          "grazing_starting_height" : {
+            "code_name" : "grazing_starting_height",
+            "type" : "numericInput",
+            "label"  : "grazing_starting_height_label",
+            "min" : 0
+          },
+
+          "grazing_end_height" : {
+            "code_name" : "grazing_end_height",
+            "type" : "numericInput",
+            "label" : "grazing_end_height_label",
+            "min" : 0
+          },
+
+          "grazing_notes" : {
+            "code_name" : "grazing_notes",
+            "type" : "textAreaInput",
+            "label" : "grazing_notes_label",
+            "placeholder" : "grazing_notes_placeholder"
+          }
+        },
+
+        "mowing" : {
+          "condition" : "input.mgmt_operations_event == 'mowing'",
+
+          "mowed_crop" : {
+            "code_name" : "mowed_crop",
+            "type" : "selectInput",
+            "label" : "mowed_crop_label",
+            "choices" : "CRID",
+            "required" : "TRUE"
+          },
+
+          "mowed_area" : {
+            "code_name" : "mowed_area",
+            "type" : "numericInput",
+            "label" : "mowed_area_label",
+            "min" : "0"
+          },
+
+          "mowing_method" : {
+            "code_name" : "mowing_method",
+            "type" : "selectInput",
+            "label" : "mowing_method_label",
+            "choices" : "mowing_method_choices"
+          },
+
+          "mowing_canopy_height" : {
+            "code_name" : "mowing_canopy_height",
+            "type" : "numericInput",
+            "label" : "mowing_canopy_height_label",
+            "min" : "0"
+          },
+
+          "mowing_cut_height" : {
+            "code_name" : "mowing_cut_height",
+            "type" : "numericInput",
+            "label" : "mowing_cut_height_label",
+            "min" : "0"
+          },
+
+          "mowing_notes" : {
+            "code_name" : "mowing_notes",
+            "type" : "textAreaInput",
+            "label" : "mowing_notes_label",
+            "placeholder" : "mowing_notes_placeholder"
+          }
+        },
+
+        "observation" : {
+          "condition" : "input.mgmt_operations_event == 'observation'",
+
+          "observation_type" : {
+            "code_name" : "observation_type",
+            "type" : "selectInput",
+            "label" : "observation_type_label",
+            "choices" : "observation_type_choice",
+            "required" : "TRUE"
+          },
+
+          "soil" : {
+            "condition" : "input.observation_type == 'observation_type_soil'",
+
+            "soil_layer_count" : {
+              "code_name" : "soil_layer_count",
+              "type" : "numericInput",
+              "label" : "soil_layer_count_label",
+              "min" : "1",
+              "step" : 1,
+              "sub_elements" : {
+                "multiple" : {
+                  "condition" : "input.soil_layer_count >= 2",
+
+                  "soil_layer_count_table" : {
+                    "code_name" : "soil_layer_count_table",
+                    "type" : "dataTable",
+                    "columns" : ["soil_layer_top_depth", "soil_layer_base_depth", "soil_classification_by_layer"],
+                    "rows" : "soil_layer_count"
+                  }
+                },
+
+                "single" : {
+                  "condition" : "input.soil_layer_count == 1",
+
+                  "soil_layer_top_depth" : {
+                    "code_name" : "soil_layer_top_depth",
+                    "type" : "numericInput",
+                    "label" : "soil_layer_top_depth_label",
+                    "min" : "0"
+                  },
+
+                  "soil_layer_base_depth" : {
+                    "code_name" : "soil_layer_base_depth",
+                    "type" : "numericInput",
+                    "label" : "soil_layer_base_depth_label",
+                    "min" : "0"
+                  },
+
+                  "soil_classification_by_layer" : {
+                    "code_name" : "soil_classification_by_layer",
+                    "type" : "selectInput",
+                    "label" : "soil_classification_by_layer_label",
+                    "choices" : "soil_classification_by_layer_choice"
+                  }
+
+                }
+              }
+            },
+
+            "root_depth" : {
+              "code_name" : "root_depth",
+              "type" : "numericInput",
+              "label" : "root_depth_label",
+              "min" : "0"
+            },
+
+            "soil_compactification_depth" : {
+              "code_name" : "soil_compactification_depth",
+              "type" : "numericInput",
+              "label" : "soil_compactification_depth_label",
+              "min" : "0"
+            },
+
+            "earthworm_count" : {
+              "code_name" : "earthworm_count",
+              "type" : "numericInput",
+              "label" : "earthworm_count_label",
+              "min" : "0",
+              "step" : "1"
+            },
+
+            "soil_image" : {
+              "code_name" : "soil_image",
+              "type" : "fileInput",
+              "filetype" : "image/*",
+              "label" : "soil_image_label"
+            }
+          },
+
+          "vegetation" : {
+            "condition" : "input.observation_type == 'observation_type_vegetation'",
+
+            "growth_stage" : {
+              "code_name" : "growth_stage",
+              "type" : "selectInput",
+              "label" : "growth_stage_label",
+              "choices" : "growth_stage_choice"
+            },
+
+            "plant_density" : {
+              "code_name" : "plant_density",
+              "type" : "numericInput",
+              "label" : "plant_density_label",
+              "min" : "0"
+            },
+
+            "specific_leaf_area" : {
+              "code_name" : "specific_leaf_area",
+              "type" : "numericInput",
+              "label" : "specific_leaf_area_label",
+              "min" : "0"
+            },
+
+            "leaf_area_index" : {
+              "code_name" : "leaf_area_index",
+              "type" : "numericInput",
+              "label" : "leaf_area_index_label",
+              "min" : "0"
+            },
+
+            "canopy_height" : {
+              "code_name" : "canopy_height",
+              "type" : "numericInput",
+              "label" : "canopy_height_label",
+              "min" : "0"
+            },
+
+            "canopeo_reading" : {
+              "code_name" : "canopeo_reading",
+              "type" : "numericInput",
+              "label" : "canopeo_reading_label",
+              "min" : "0"
+            },
+
+            "canopeo_image" : {
+              "code_name" : "canopeo_image",
+              "type" : "fileInput",
+              "filetype" : "image/*",
+              "label" : "canopeo_image_label"
+            }
+          },
+
+          "water" : {
+            "condition" : "input.observation_type == 'observation_type_water'",
+
+            "floodwater_depth" : {
+              "code_name" : "floodwater_depth",
+              "type" : "numericInput",
+              "label" : "floodwater_depth_label",
+              "min" : "0"
+            },
+
+            "water_table_depth" : {
+              "code_name" : "water_table_depth",
+              "type" : "numericInput",
+              "label" : "water_table_depth_label",
+              "min" : "0"
+            }
+          },
+
+          "pests" : {
+            "condition" : "input.observation_type == 'observation_type_pests'",
+
+            "plant_pop_reduct_cum" : {
+              "code_name" : "plant_pop_reduct_cum",
+              "type" : "numericInput",
+              "label" : "plant_pop_reduct_cum_label",
+              "min" : "0",
+              "max" : "100"
+            }
+          },
+
+          "management" : {
+            "condition" : "input.observation_type == 'observation_type_management'",
+
+            "fuel_amount" : {
+              "code_name" : "fuel_amount",
+              "type" : "numericInput",
+              "label" : "fuel_amount_label",
+              "min" : "0"
+            }
+          },
+
+          "observation_notes" : {
+            "code_name" : "observation_notes",
+            "type" : "textAreaInput",
+            "label" : "observation_notes_label"
+          }
+
         }
 
       }

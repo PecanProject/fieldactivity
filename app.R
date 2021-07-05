@@ -9,14 +9,12 @@ library(shinymanager) # for user authentication
 library(shinythemes) # change theme for login UI (and possibly rest of app)
 #library(keyring) # for interacting with system credential store to store db key
 library(DT) # fancier data table
+library(glue) # used for debug printing
 
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- FALSE
-#if (dev_mode) {
-    library(glue) # used for debug printing
-#}
+dev_mode <- TRUE
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -216,17 +214,37 @@ find_event_index <- function(event, event_list) {
 # if a variable is in a table (e.g. planting_depth is in a table when 
 # planted_crop has multiple values), return the code name of that table. 
 # Otherwise return NULL
-get_variable_table <- function(variable_name) {
+# only_rows determines whether we seek the variable from the rows only, i.e.
+# if it is set to TRUE then get_variable_table("harvest_crop", only_rows = TRUE) # returns "harvest_crop_table" and 
+# get_variable_table("harvest_cut_height", only_rows = TRUE) returns FALSE
+get_variable_table <- function(variable_name, only_rows = FALSE) {
     
     for (table_code_name in data_table_code_names) {
         table <- structure_lookup_list[[table_code_name]]
         
-        if (variable_name %in% c(table$rows, table$columns)) {
+        names_to_check <- table$rows
+        if (!only_rows) {
+            names_to_check <- c(names_to_check, table$columns)
+        }
+        
+        if (variable_name %in% names_to_check) {
             return(table_code_name)
         }
     }
 
     return(NULL)
+}
+
+# takes a condition writte in javascript notation (like visibility conditions
+# in ui_structure.json) and evaluates it in R.
+# Might not be best coding practice, but works as long as the js_condition
+# doesn't have any typos.
+# TODO: add error catching
+evaluate_condition <- function(js_condition) {
+    # substitute dots with dollar signs
+    condition <- gsub(".", "$", js_condition, fixed = TRUE)
+    # parse string into an expression and evaluate it
+    eval(parse(text = condition))
 }
 
 # this function is used to update the various texts in the app into the correct
@@ -465,19 +483,21 @@ ui <- fluidPage(theme = shinytheme("lumen"),
                 format = "dd/mm/yyyy",
                 label = "",
                 max = Sys.Date(),
-                value = Sys.Date()
+                value = Sys.Date(),
+                weekstart = 1
             ),
-            
-            # show a detailed options panel for the different activities
-            # activity_options is defined in ui_builder.R
-            create_ui(activity_options, create_border = FALSE),
             
             textAreaInput(
                 "mgmt_event_notes",
                 label = "",
                 placeholder = "",
-                resize = "vertical"
+                resize = "vertical",
+                height = "70px"
             ),
+            
+            # show a detailed options panel for the different activities
+            # activity_options is defined in ui_builder.R
+            create_ui(activity_options, create_border = FALSE),
             
             actionButton("save", label = "Save"),
             
@@ -629,9 +649,10 @@ server <- function(input, output, session) {
                 # corresponding to that name, update_ui_element does nothing.
                 # this happens e.g. with date_ordering
                 
-                # if there is a table corresponding to the variable, this is
-                # its name
-                table_code_name <- paste(variable_name, "table", sep = "_")
+                # if there is a table corresponding to the variable (it is on
+                # the rows of the table), this is its name
+                table_code_name <- get_variable_table(variable_name, 
+                                                      only_rows = TRUE)
                 
                 # TODO: change to use reset_input_fields
                 # this clears up old values. Note that this does not clear
@@ -639,23 +660,30 @@ server <- function(input, output, session) {
                 if (!(variable_name %in% names(event_to_edit()))) {
                     update_ui_element(session, variable_name, value = "")
                     
-                    if (!is.null(structure_lookup_list[[table_code_name]])) {
+                    if (!is.null(table_code_name)) {
                         prefill_values[[table_code_name]](list())
                     }
                     next
                 }
                 
+                # now update all the UI elements to show the event info
                 value <- event_to_edit()[[variable_name]]
                 
-                if (length(value) > 1) {
-                    
-                    if (is.null(structure_lookup_list[[table_code_name]])) {
-                        # there is a vector of elements, but this is not the
-                        # variable on the rows. Skip until we find it
-                        next
-                    }
+                # if there is a table corresponding to this variable, pre-fill
+                # it (even if it doesn't become visible)
+                if (!is.null(table_code_name)) {
                     prefill_values[[table_code_name]](event_to_edit())
                 }
+                
+                # if (length(value) > 1) {
+                #     
+                #     if (is.null(structure_lookup_list[[table_code_name]])) {
+                #         # there is a vector of elements, but this is not the
+                #         # variable on the rows. Skip until we find it
+                #         next
+                #     }
+                #     prefill_values[[table_code_name]](event_to_edit())
+                # }
                 
                 update_ui_element(session, variable_name, value = value)
             }
@@ -889,6 +917,8 @@ server <- function(input, output, session) {
         # fill out current_event to match new / updated data.
         # find variables that correspond to the selected activity and save
         # only those
+        # TODO: not all of the variables under an activity option are 
+        # necessarily relevant. How to determine the ones that are?
         relevant_variables <- unlist(rlapply(
             activity_options[[input$mgmt_operations_event]],
             fun = function(x) x$code_name))
@@ -1088,18 +1118,19 @@ server <- function(input, output, session) {
     
     # disable the save button if not all necessary info has been filled
     observe({
-        if (!dev_mode) {req(auth_result$admin)}
+        #if (!dev_mode) {req(auth_result$admin)}
+        #req(auth_result$admin)
         
         # run whenever any of the inputs change. I know this is not ideal, but
         # reactivity to input values doesn't work when we dynamically generate
         # which inputs we want to access
         reactiveValuesToList(input)
         
-        if (dev_mode || auth_result$admin == "TRUE") {
+        # if (dev_mode || auth_result$admin == "TRUE") {
             # if we are in admin or dev mode, 
             # we don't care about required variables
-            return()
-        }
+            # return()
+        # }
         
         for (required_variable in required_variables()) {
             
@@ -1197,14 +1228,36 @@ server <- function(input, output, session) {
     table_data <- sapply(data_table_code_names,
                          FUN = function(data_table_code_name) {
         table_structure <- structure_lookup_list[[data_table_code_name]]
-        row_names <- reactive(input[[table_structure$rows]])
+        
+        # what are the names of the rows? This can either be determined by
+        # the choices of selectInput with multiple selections, or a numericInput
+        # which represents the number of rows
+        row_names <- reactive({
+            row_variable <- structure_lookup_list[[table_structure$rows]]
+            if (row_variable$type == "numericInput") {
+                
+                number_of_rows <- input[[row_variable$code_name]]
+                
+                if (!isTruthy(number_of_rows)) {
+                    NULL
+                } else {
+                    number_of_rows <- max(ceiling(number_of_rows), 1)
+                    1:number_of_rows
+                }
+                
+                
+            } else if (row_variable$type == "selectInput") {
+                input[[row_variable$code_name]]
+            }
+            
+        })
         
         # add observer to visibility condition of table
         # table is visible if the length of the variable presented on the rows
         # of the table is more than 1
         observeEvent(row_names(), ignoreNULL = FALSE, {
             visible[[data_table_code_name]] <- length(row_names()) > 1
-            message(glue("Visibility for {data_table_code_name} is {visible[[data_table_code_name]]}"))
+            #message(glue("Visibility for {data_table_code_name} is {visible[[data_table_code_name]]}"))
         })
         
         prefill_values[[data_table_code_name]] <<- reactiveVal()
@@ -1329,9 +1382,16 @@ server <- function(input, output, session) {
                 
                 
             } else if (element$type == "dateInput") {
+                #language_code <- if (input$language == "disp_name_fin") {
+                #    "fi"
+                #} else {
+                #    "en"
+                #}
                 updateDateInput(session, 
                                 code_name, 
-                                label = label)
+                                label = label,
+                                #language = language_code
+                                )
             } else if (element$type == "textAreaInput") {
                 updateTextAreaInput(session,
                                     code_name,
@@ -1360,6 +1420,10 @@ server <- function(input, output, session) {
                 updateNumericInput(session,
                                    code_name,
                                    label = label)
+            } else if (element$type == "dateRangeInput") {
+                updateDateRangeInput(session,
+                                     code_name,
+                                     label = label)
             }
 
         }
