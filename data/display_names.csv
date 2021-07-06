@@ -6,7 +6,7 @@ mgmt_operations_event_choice,harvest,harvest,sadonkorjuu
 mgmt_operations_event_choice,chemicals,chemicals application,kemikaalin levitys
 mgmt_operations_event_choice,grazing,grazing,laidunnus # not ICASA
 mgmt_operations_event_choice,weeding,mechanical extraction of weeds,rikkaruohojen kitkeminen
-mgmt_operations_event_choice,irrigation,irrigation application,kastelu
+mgmt_operations_event_choice,irrigation,irrigation,kastelu
 mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
 mgmt_operations_event_choice,observation,observation,havainto
 mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
@@ -87,6 +87,14 @@ variable_name,mowing_method,Mowing method,Leikkuutapa
 variable_name,mowing_canopy_height,Canopy height before mowing (m),Kasvuston korkeus ennen leikkuuta (m)
 variable_name,mowing_cut_height,Cut height (cm),Leikkuukorkeus (cm)
 variable_name,mowing_notes,Mowing notes,Muistiinpanot leikkuusta
+variable_name,chemical_type,Chemical type,Kemikaalin tyyppi
+variable_name,chemical_product_name,Chemical product name,Kemikaalivalmisteen nimi
+variable_name,chemical_applic_material,Active substance in chemical,Kemikaalin tehoaine
+variable_name,chemical_applic_target,Chemical application target,Kemikaalinlevityksen kohde
+variable_name,chemical_applic_method,Chemical application method,Kemikaalinlevitystapa
+variable_name,chemical_applic_amount,Chemical amount (kg/ha),Kemikaalin määrä (kg/ha)
+variable_name,application_depth_chem,Chemical application depth (cm),Kemikaalinlevityssyvyys (cm)
+variable_name,chemical_applic_notes,Chemical application notes,Kemikaalinlevitysmuistiinpanot
 variable_name,observation_type,Observation type,Havainnon tyyppi
 variable_name,soil_layer_count,Number of layers in soil sample,Maanäytteen kerrosten lukumäärä
 variable_name,soil_layer_top_depth,"Soil layer depth, top (cm)","Kerroksen yläosan syvyys (cm)"
@@ -108,6 +116,11 @@ variable_name,water_table_depth,Water table level (cm),Pohjaveden pinnan syvyys 
 variable_name,plant_pop_reduct_cum,"Amount of plants eaten (%, cumulative)","Syötyjen kasvien määrä (%, kumulatiivinen)"
 variable_name,fuel_amount,Fuel used (liters/ha),Käytetty polttoaine (litraa/ha)
 variable_name,observation_notes,Observations,Havaintoja
+variable_name,irrigation_operation,Irrigation method,Kastelujärjestelmä
+variable_name,irrig_amount_depth,"Irrigation amount (depth, mm)","Kastelun määrä (veden syvyys, mm)"
+variable_name,irrigation_applic_depth,Irrigation depth (cm),Kastelusyvyys (cm)
+variable_name,irrigation_notes,Irrigation notes,Kastelumuistiinpanot
+variable_name,other_notes,Notes,Muistiinpanot
 #
 # labels for widgets, incl. help texts etc.
 #
@@ -206,6 +219,15 @@ element_label,mowing_canopy_height_label,Canopy height before mowing (m):,Kasvus
 element_label,mowing_cut_height_label,Cut height (cm):,Leikkuukorkeus (cm):
 element_label,mowing_notes_label,Mowing notes:,Muistiinpanot leikkuusta:
 element_label,mowing_notes_placeholder,"Any notes or observations about the event, e.g. “mowing height was not uniform”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “leikkuukorkeus ei ollut sama kaikkialla”"
+element_label,chemical_type_label,Chemical type*:,Kemikaalin tyyppi*:
+element_label,chemical_product_name_label,Chemical product name*:,Kemikaalivalmisteen nimi*:
+element_label,chemical_applic_material_label,Active substance in chemical:,Kemikaalin tehoaine:
+element_label,chemical_applic_target_label,Chemical application target*:,Kemikaalinlevityksen kohde*:
+element_label,chemical_applic_method_label,Chemical application method:,Kemikaalinlevitystapa:
+element_label,chemical_applic_amount_label,Chemical amount (kg/ha):,Kemikaalin määrä (kg/ha):
+element_label,application_depth_chem_label,Chemical application depth (cm):,Kemikaalinlevityssyvyys (cm):
+element_label,chemical_applic_notes_label,Chemical application notes:,Kemikaalinlevitysmuistiinpanot:
+element_label,chemical_applic_notes_placeholder,"Any notes or observations about the event, e.g. “rot affecting X % of plants”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “mätää X % kasveista”"
 element_label,observation_type_label,Observation type*:,Havainnon tyyppi*:
 element_label,soil_layer_count_label,Number of layers in soil sample:,Maanäytteen kerrosten lukumäärä:
 element_label,soil_layer_top_depth_label,"Soil layer depth, top (cm):","Kerroksen yläosan syvyys (cm):"
@@ -227,7 +249,12 @@ element_label,water_table_depth_label,Water table level (cm):,Pohjaveden pinnan 
 element_label,plant_pop_reduct_cum_label,"Amount of plants eaten (%, cumulative):","Syötyjen kasvien määrä (%, kumulatiivinen):"
 element_label,fuel_amount_label,Fuel used (liters/ha):,Käytetty polttoaine (litraa/ha):
 element_label,observation_notes_label,Observations:,Havainnot:
-
+element_label,irrigation_operation_label,Irrigation method:,Kastelujärjestelmä:
+element_label,irrig_amount_depth_label,"Irrigation amount (depth, mm)*:","Kastelun määrä (veden syvyys, mm)*:"
+element_label,irrigation_applic_depth_label,Irrigation depth (e.g. of drip line) (cm):,Kastelusyvyys (esim. tippukasteluletkun syvyys) (cm):
+element_label,irrigation_notes_label,Irrigation notes:,Kastelumuistiinpanot:
+element_label,irrigation_notes_placeholder,"Any notes or observations about the event, e.g. “drip line flow rate seems a bit low”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “tippukasteluletkun virtausnopeus vaikuttaa melko hitaalta”"
+element_label,other_notes_label,Event notes*:,Muistiinpanoja tapahtumasta*:
 #
 ############### others
 #
@@ -383,6 +410,216 @@ grazing_type_choice,grazing_type_multi_species,Multi-species,Multi-species-kää
 grazing_type_choice,grazing_type_creep,Creep,Creep-käännös,
 grazing_type_choice,grazing_type_forward,Forward,Forward-käännös
 grazing_type_choice,grazing_type_other,Other,Muu
+chemical_type_choice,chemical_type_insecticide,Insecticide,Hyönteismyrkky
+chemical_type_choice,chemical_type_herbicide,Herbicide,Rikkaruohomyrkky
+chemical_type_choice,chemical_type_fungicide,Fungicide,Sienimyrkky
+chemical_type_choice,chemical_type_growth_regulator,Growth regulator,Kasvunsääde
+active_substance,AS001,(E,E)-8,10-dodekadien-1-oli,(E,E)-8,10-dodekadien-1-oli
+active_substance,AS002,(Z)-11-tetradeken-1-yyliasetaatti,(Z)-11-tetradeken-1-yyliasetaatti
+active_substance,AS003,"1,4-dimetyylinaftaleeni","1,4-dimetyylinaftaleeni"
+active_substance,AS004,"2,4-D","2,4-D"
+active_substance,AS005,6-bentsyyliadeniini,6-bentsyyliadeniini
+active_substance,AS006,Abamektiini,Abamektiini
+active_substance,AS007,aklonifeeni,aklonifeeni
+active_substance,AS008,Alfa-sypermetriini,Alfa-sypermetriini
+active_substance,AS009,Alumiinifosfidi,Alumiinifosfidi
+active_substance,AS010,Amidosulfuroni,Amidosulfuroni
+active_substance,AS011,Aminopyralidi,Aminopyralidi
+active_substance,AS012,Amisulbromi (ISO),Amisulbromi (ISO)
+active_substance,AS013,Asetamipridi,Asetamipridi
+active_substance,AS014,Atsoksistrobiini (ISO),Atsoksistrobiini (ISO)
+active_substance,AS015,Bacillus amyloliquefaciens (kanta MBI 600),Bacillus amyloliquefaciens (kanta MBI 600)
+active_substance,AS016,Bacillus subtilis QST 713,Bacillus subtilis QST 713
+active_substance,AS017,Bacillus thuringiensis subsp. aizawai (kanta GC-91),Bacillus thuringiensis subsp. aizawai (kanta GC-91)
+active_substance,AS018,Beauveria bassiana GHA,Beauveria bassiana GHA
+active_substance,AS019,Bentatsoni,Bentatsoni
+active_substance,AS020,Bentsoehappo,Bentsoehappo
+active_substance,AS021,Bentsovindiflupyyri (ISO),Bentsovindiflupyyri (ISO)
+active_substance,AS022,Bifenatsaatti (ISO),Bifenatsaatti (ISO)
+active_substance,AS023,Bifenoksi,Bifenoksi
+active_substance,AS024,Biksafeeni,Biksafeeni
+active_substance,AS025,Boskalidi,Boskalidi
+active_substance,AS026,Bromoksiniili,Bromoksiniili
+active_substance,AS027,Buprofetsiini,Buprofetsiini
+active_substance,AS028,"Coniothyrium minitans, strain CON/M/91-08","Coniothyrium minitans, strain CON/M/91-08"
+active_substance,AS029,Cydia pomonella granulovirus (CpGV),Cydia pomonella granulovirus (CpGV)
+active_substance,AS030,Daminotsidi,Daminotsidi
+active_substance,AS031,Deltametriini,Deltametriini
+active_substance,AS032,Difenokonatsoli,Difenokonatsoli
+active_substance,AS033,Diflufenikaani,Diflufenikaani
+active_substance,AS034,Dikamba,Dikamba
+active_substance,AS035,Diklorproppi-P,Diklorproppi-P
+active_substance,AS036,Dikvatti,Dikvatti
+active_substance,AS037,Dimetenamidi-P (ISO),Dimetenamidi-P (ISO)
+active_substance,AS038,Dimetomorfi,Dimetomorfi
+active_substance,AS039,Ditianoni,Ditianoni
+active_substance,AS040,dodiini,dodiini
+active_substance,AS041,Esfenvaleraatti,Esfenvaleraatti
+active_substance,AS042,etefoni,etefoni
+active_substance,AS043,Etikkahappo,Etikkahappo
+active_substance,AS044,Etofumesaatti (ISO),Etofumesaatti (ISO)
+active_substance,AS045,Fenheksamidi,Fenheksamidi
+active_substance,AS046,Fenmedifaami,Fenmedifaami
+active_substance,AS047,Fenoksaproppi-P-etyyli (ISO),Fenoksaproppi-P-etyyli (ISO)
+active_substance,AS048,Fenpyratsamiini,Fenpyratsamiini
+active_substance,AS049,fenpyroksimaatti (ISO),fenpyroksimaatti (ISO)
+active_substance,AS050,Flonikamidi (ISO),Flonikamidi (ISO)
+active_substance,AS051,Florasulaami,Florasulaami
+active_substance,AS052,Fluatsifoppi-P-butyyli,Fluatsifoppi-P-butyyli
+active_substance,AS053,Fluatsinami,Fluatsinami
+active_substance,AS054,Fludioksiniili (ISO),Fludioksiniili (ISO)
+active_substance,AS055,Fludioksoniili,Fludioksoniili
+active_substance,AS056,fluksapyroksadi,fluksapyroksadi
+active_substance,AS057,Fluopikolidi,Fluopikolidi
+active_substance,AS058,Fluopyraami (ISO),Fluopyraami (ISO)
+active_substance,AS059,Flupyradifuroni,Flupyradifuroni
+active_substance,AS060,fluroksipyyri,fluroksipyyri
+active_substance,AS061,fluroksipyyri-meptyyli (ISO),fluroksipyyri-meptyyli (ISO)
+active_substance,AS062,Flutolaniili,Flutolaniili
+active_substance,AS063,Foramsulfuroni,Foramsulfuroni
+active_substance,AS064,Fosetyyli,Fosetyyli
+active_substance,AS065,Fosetyyli-alumiini,Fosetyyli-alumiini
+active_substance,AS066,Gamma-syhalotriini,Gamma-syhalotriini
+active_substance,AS067,Gibberelliini (GA4 ja GA7 seos),Gibberelliini (GA4 ja GA7 seos)
+active_substance,AS068,Gliocladium catenulatum -sienen rihmastoa ja itiöitä,Gliocladium catenulatum -sienen rihmastoa ja itiöitä
+active_substance,AS069,Glyfosaatti (glyfosaatin ammoniumsuolana),Glyfosaatti (glyfosaatin ammoniumsuolana)
+active_substance,AS070,Glyfosaatti (Glyfosaatin dimetyyliamiinisuolana),Glyfosaatti (Glyfosaatin dimetyyliamiinisuolana)
+active_substance,AS071,Glyfosaatti (glyfosaatin isopropyyliamiinisuolana),Glyfosaatti (glyfosaatin isopropyyliamiinisuolana)
+active_substance,AS072,Glyfosaatti (glyfosaatin kaliumsuolana),Glyfosaatti (glyfosaatin kaliumsuolana)
+active_substance,AS073,Halauksifeeni-metyyli,Halauksifeeni-metyyli
+active_substance,AS074,Harmaaorvakka-sienen itiöitä,Harmaaorvakka-sienen itiöitä
+active_substance,AS075,heksytiatsoksi (ISO),heksytiatsoksi (ISO)
+active_substance,AS076,hymeksatsoli (ISO),hymeksatsoli (ISO)
+active_substance,AS077,Imatsaliili,Imatsaliili
+active_substance,AS078,Imatsamoksi,Imatsamoksi
+active_substance,AS079,Imidaklopridi,Imidaklopridi
+active_substance,AS080,Indoksakarbi,Indoksakarbi
+active_substance,AS081,"Isaria fumosorosea, kanta Apopka 97","Isaria fumosorosea, kanta Apopka 97"
+active_substance,AS082,Isoksabeeni,Isoksabeeni
+active_substance,AS083,Isopyratsaami,Isopyratsaami
+active_substance,AS084,Jodosulfuroni-metyyli-natrium,Jodosulfuroni-metyyli-natrium
+active_substance,AS085,Kaliumfosfonaatit (kaliumvetyfosfonaatti + dikaliumfosfonaatti),Kaliumfosfonaatit (kaliumvetyfosfonaatti + dikaliumfosfonaatti)
+active_substance,AS086,Kapriinihappo,Kapriinihappo
+active_substance,AS087,Kapryylihappo,Kapryylihappo
+active_substance,AS088,Kaptaani,Kaptaani
+active_substance,AS089,Karfentratsoni-etyyli,Karfentratsoni-etyyli
+active_substance,AS090,Kletodiimi (ISO),Kletodiimi (ISO)
+active_substance,AS091,Klomatsoni,Klomatsoni
+active_substance,AS092,Klopyralidi,Klopyralidi
+active_substance,AS093,Klorantraniliproli,Klorantraniliproli
+active_substance,AS094,Klormekvattikloridi,Klormekvattikloridi
+active_substance,AS095,Kresoksiimi-metyyli,Kresoksiimi-metyyli
+active_substance,AS096,Kvinmerakki,Kvinmerakki
+active_substance,AS097,Kvitsalofoppi-P-etyyli,Kvitsalofoppi-P-etyyli
+active_substance,AS098,Lambda-syhalotriini,Lambda-syhalotriini
+active_substance,AS099,Lampaanrasva,Lampaanrasva
+active_substance,AS100,Magnesiumfosfidi,Magnesiumfosfidi
+active_substance,AS101,Maleiinihydratsidi,Maleiinihydratsidi
+active_substance,AS102,Mandipropamidi (ISO),Mandipropamidi (ISO)
+active_substance,AS103,Mankotsebi,Mankotsebi
+active_substance,AS104,MCPA,MCPA
+active_substance,AS105,mefentriflukonatsoli,mefentriflukonatsoli
+active_substance,AS106,Mekoproppi-P,Mekoproppi-P
+active_substance,AS107,Mepanipyriimi,Mepanipyriimi
+active_substance,AS108,mepikvattikloridi,mepikvattikloridi
+active_substance,AS109,Mesosulfuroni-metyyli (ISO),Mesosulfuroni-metyyli (ISO)
+active_substance,AS110,Metalaksyyli-M,Metalaksyyli-M
+active_substance,AS111,metamitroni,metamitroni
+active_substance,AS112,Metatsakloori,Metatsakloori
+active_substance,AS113,Metkonatsoli,Metkonatsoli
+active_substance,AS114,Metobromuroni,Metobromuroni
+active_substance,AS115,Metributsiini,Metributsiini
+active_substance,AS116,Metsulfuroni-metyyli,Metsulfuroni-metyyli
+active_substance,AS117,Napropamidi,Napropamidi
+active_substance,AS118,Oksatiapiproliini,Oksatiapiproliini
+active_substance,AS119,Paklobutratsoli (ISO),Paklobutratsoli (ISO)
+active_substance,AS120,Parafiiniöljy (CAS-nro 64742-46-7),Parafiiniöljy (CAS-nro 64742-46-7)
+active_substance,AS121,Parafiiniöljy (CAS-nro 8042-47-5),Parafiiniöljy (CAS-nro 8042-47-5)
+active_substance,AS122,Pelargonihappo,Pelargonihappo
+active_substance,AS123,Pendimetaliini,Pendimetaliini
+active_substance,AS124,penflufeeni,penflufeeni
+active_substance,AS125,Penkonatsoli,Penkonatsoli
+active_substance,AS126,Pepinon mosaiikkivirus (kannan CH2 isolaatti 1906),Pepinon mosaiikkivirus (kannan CH2 isolaatti 1906)
+active_substance,AS127,Pikloraami,Pikloraami
+active_substance,AS128,Pinoksadeeni (ISO),Pinoksadeeni (ISO)
+active_substance,AS129,Proheksadionikalsium,Proheksadionikalsium
+active_substance,AS130,Prokinatsidi,Prokinatsidi
+active_substance,AS131,Propakvitsafoppi,Propakvitsafoppi
+active_substance,AS132,Propamokarbi,Propamokarbi
+active_substance,AS133,Propamokarbi-hydrokloridi,Propamokarbi-hydrokloridi
+active_substance,AS134,Propoksikarbatsoni-natrium,Propoksikarbatsoni-natrium
+active_substance,AS135,Prosulfokarbi,Prosulfokarbi
+active_substance,AS136,Protiokonatsoli,Protiokonatsoli
+active_substance,AS137,Pseudomonas chlororaphis MA 342,Pseudomonas chlororaphis MA 342
+active_substance,AS138,Pyraflufeeni-etyyli (ISO),Pyraflufeeni-etyyli (ISO)
+active_substance,AS139,Pyraklostrobiini,Pyraklostrobiini
+active_substance,AS140,Pyretriinit,Pyretriinit
+active_substance,AS141,Pyridaatti (ISO),Pyridaatti (ISO)
+active_substance,AS142,Pyrimetaniili,Pyrimetaniili
+active_substance,AS143,Pyriofenoni,Pyriofenoni
+active_substance,AS144,Pyroksulaami,Pyroksulaami
+active_substance,AS145,Rapsiöljy,Rapsiöljy
+active_substance,AS146,Rasvahappojen kaliumsuoloja,Rasvahappojen kaliumsuoloja
+active_substance,AS147,Rautafosfaatti,Rautafosfaatti
+active_substance,AS148,Rautasulfaatti,Rautasulfaatti
+active_substance,AS149,Rimsulfuroni,Rimsulfuroni
+active_substance,AS150,Rypsiöljy,Rypsiöljy
+active_substance,AS151,Sedaksaani,Sedaksaani
+active_substance,AS152,Spirodiklofeeni (ISO),Spirodiklofeeni (ISO)
+active_substance,AS153,spiroksamiini,spiroksamiini
+active_substance,AS154,Spirotetramaatti (ISO),Spirotetramaatti (ISO)
+active_substance,AS155,Streptomyces K61 -sädebakteerin rihmastoa ja itiöitä,Streptomyces K61 -sädebakteerin rihmastoa ja itiöitä
+active_substance,AS156,Sulfosulfuroni,Sulfosulfuroni
+active_substance,AS157,Syantraniiliproli,Syantraniiliproli
+active_substance,AS158,Syatsofamidi,Syatsofamidi
+active_substance,AS159,Sykloksidiimi,Sykloksidiimi
+active_substance,AS160,symoksaniili,symoksaniili
+active_substance,AS161,Sypermetriini,Sypermetriini
+active_substance,AS162,Syprodiniili,Syprodiniili
+active_substance,AS163,Syprokonatsoli,Syprokonatsoli
+active_substance,AS164,tau-fluvalinaatti,tau-fluvalinaatti
+active_substance,AS165,Tebukonatsoli,Tebukonatsoli
+active_substance,AS166,Terpenoidien seos QRD 460,Terpenoidien seos QRD 460
+active_substance,AS167,Tiaklopridi,Tiaklopridi
+active_substance,AS168,Tieenikarbatsoni-metyyli,Tieenikarbatsoni-metyyli
+active_substance,AS169,Tifensulfuroni-metyyli,Tifensulfuroni-metyyli
+active_substance,AS170,Tiofanaatti-metyyli,Tiofanaatti-metyyli
+active_substance,AS171,Tolklofossi-metyyli,Tolklofossi-metyyli
+active_substance,AS172,Tribenuronimetyyli (ISO),Tribenuronimetyyli (ISO)
+active_substance,AS173,Trichoderma harzianum (kanta T-22),Trichoderma harzianum (kanta T-22)
+active_substance,AS174,Trifloksistrobiini,Trifloksistrobiini
+active_substance,AS175,Triflusulfuroni-metyyli,Triflusulfuroni-metyyli
+active_substance,AS176,Trineksapakki-etyyli,Trineksapakki-etyyli
+active_substance,AS177,Tritikonatsoli,Tritikonatsoli
+active_substance,AS178,Tritosulfuroni,Tritosulfuroni
+active_substance,AS179,Urea,Urea
+active_substance,AS180,viherminttuöljy,viherminttuöljy
+CH_TARGETS,BIRD,Birds,Linnut
+CH_TARGETS,PCLA,Defoliation %,Lehtikato
+CH_TARGETS,PDLA,Diseased leaf area %,Tautia lehdissä
+CH_TARGETS,PSTDS,General pest and diseases losses (due to rot, tikka, leafminer, etc.),Yleiset tuhoeläin- ja tautivahingot (mätä, miinaajat jne.)
+CH_TARGETS,PRP,Reduction in photosynthetic rate %,Lasku yhteyttämisnopeudessa %
+CH_TARGETS,WORM,Worm (generic),Madot
+CH_TARGETS,LEAF_MIN,Leafminer,Miinaajat
+CH_TARGETS,STINKB,Stink bug,Typpyluteet(?)
+CH_TARGETS,LOOPER,Looper,Looper-käännös
+CH_TARGETS,CATERP,Caterpillar,Perhostoukat
+CH_TARGETS,INSECT,Insect (generic),Hyönteiset
+CH_TARGETS,RABBIT,Rabbit,Jänikset
+CH_TARGETS,DEER,Deer,Hirvieläimet
+CH_TARGETS,MAMMAL,Mammal (generic),Yleiset nisäkkäät
+CH_TARGETS,RKN,Root-knot nematode,Meloidogyne spp.
+CH_TARGETS,NEMATODE,Nematode (generic),Sukkulamadot
+CH_TARGETS,PSTVd,Potato spindle tuber viroid,Perunan sukkulamukulaviroidi
+CH_TARGETS,VIROID,Viroid (generic),Viroidit
+CH_TARGETS,BCMV,Bean common mosaic virus,Bean common mosaic virus
+CH_TARGETS,VIRUS,Virus (generic),Yleiset virukset
+CH_TARGETS,HAIL,Hail storm damage,Raekuurovahingot
+CH_TARGETS,WIND,Wind damage,Tuulivahingot
+CH_TARGETS,DROUGHT,Drought,Kuivuus
+CH_TARGETS,WEATHER,Weather damage (generic),Yleiset säävahingot
+CH_TARGETS,BRLFWD,Broad-leafed weeds,Leveälehtiset rikkakasvit
+CH_TARGETS,WEED,Weeds (generic),Yleiset rikkakasvit
 observation_type_choice,observation_type_soil,Soil,Maaperä
 observation_type_choice,observation_type_vegetation,Vegetation,Kasvillisuus
 observation_type_choice,observation_type_water,Water,Vesi
@@ -403,3 +640,16 @@ growth_stage_choice,growth_stage_budding,Budding,Budding-käännös
 growth_stage_choice,growth_stage_blooming,Blooming,Blooming-käännös
 growth_stage_choice,growth_stage_seeding,Seeding,Seeding-käännös
 growth_stage_choice,growth_stage_maturity,Maturity,Maturity-käännös
+IROP,IR001,Furrow,Furrow-käännös
+IROP,IR002,Alternating furrows,Alternating furrows-käännös
+IROP,IR003,Flood,Tulva
+IROP,IR004,Sprinkler,Sadetin
+IROP,IR005,Drip or trickle,Drip or trickle -käännös
+#IROP,IR006,Flood depth,
+#IROP,IR007,Water table depth,
+#IROP,IR008,Percolation rate,
+#IROP,IR009,Bund height,
+#IROP,IR010,Puddling (for Rice only)
+#IROP,IR011,Constant flood depth,
+IROP,IR012,Subsurface (buried) drip,Subsurface (buried) drip -käännös
+IROP,IR999,Unknown/not given,Ei tiedossa

@@ -56,7 +56,7 @@
       "type": "selectInput",
       "label": "site_label",
       "choices": "IGNORE",
-      "required" : "TRUE"
+      "required" : true
     },
 
     "block": {
@@ -64,7 +64,7 @@
       "type": "selectInput",
       "label": "block_label",
       "choices": "IGNORE",
-      "required": "TRUE"
+      "required": true
     },
 
     "mgmt_operations_event": {
@@ -72,7 +72,7 @@
       "type" : "selectInput",
       "label" : "mgmt_operations_event_label",
       "choices": "mgmt_operations_event_choice",
-      "required" : "TRUE",
+      "required" : true,
       "sub_elements": {
 
         "planting" : {
@@ -83,8 +83,8 @@
             "type" : "selectInput",
             "choices" : "CRID",
             "label" : "planted_crop_label",
-            "multiple" : "TRUE",
-            "required" : "TRUE",
+            "multiple" : true,
+            "required" : true,
             "sub_elements" : {
               "multiple" : {
                 "condition" : "input.planted_crop.length > 1",
@@ -141,7 +141,7 @@
             "type" : "numericInput",
             "label" : "harvest_area_label",
             "min" : "0",
-            "required" : "TRUE"
+            "required" : true
           },
 
           "harvest_crop" : {
@@ -149,8 +149,8 @@
             "type" : "selectInput",
             "choices" : "CRID",
             "label" : "harvest_crop_label",
-            "multiple" : "TRUE",
-            "required" : "TRUE",
+            "multiple" : true,
+            "required" : true,
             "sub_elements" : {
 
               "multiple" : {
@@ -255,7 +255,7 @@
             "type" : "selectInput",
             "label" : "tillage_practice_label",
             "choices" : "tillage_practice_choice",
-            "required" : "TRUE"
+            "required" : true
           },
 
           "tillage_implement" : {
@@ -288,7 +288,7 @@
             "type" : "selectInput",
             "label" : "fertilizer_type_label",
             "choices" : "fertilizer_type_choice",
-            "required" : "TRUE",
+            "required" : true,
             "sub_elements" : {
               "organic" : {
                 "condition" : "input.fertilizer_type == 'fertilizer_type_organic'",
@@ -371,7 +371,7 @@
             "type" : "numericInput",
             "label" : "fertilizer_total_amount_label",
             "min" : "0",
-            "required" : "TRUE"
+            "required" : true
           },
 
           "N_in_applied_fertilizer" : {
@@ -482,7 +482,7 @@
             "type" : "selectInput",
             "label" : "grazing_species_label",
             "choices" : "grazing_species_choice",
-            "required" : "TRUE"
+            "required" : true
           },
 
           "grazing_species_age_group" : {
@@ -564,7 +564,7 @@
             "type" : "selectInput",
             "label" : "mowed_crop_label",
             "choices" : "CRID",
-            "required" : "TRUE"
+            "required" : true
           },
 
           "mowed_area" : {
@@ -603,6 +603,69 @@
           }
         },
 
+        "chemicals" : {
+          "condition" : "input.mgmt_operations_event == 'chemicals'",
+
+          "chemical_type" : {
+            "code_name" : "chemical_type",
+            "type" : "selectInput",
+            "label" : "chemical_type_label",
+            "choices" : "chemical_type_choice",
+            "required" : true
+          },
+
+          "chemical_product_name" : {
+            "code_name" : "chemical_product_name",
+            "type" : "textInput",
+            "label" : "chemical_product_name_label",
+            "required" : true
+          },
+
+          "chemical_applic_material" : {
+            "code_name" : "chemical_applic_material",
+            "type" : "selectInput",
+            "label" : "chemical_applic_material_label",
+            "choices" : "active_substance",
+            "multiple" : true
+          },
+
+          "chemical_applic_target" : {
+            "code_name" : "chemical_applic_target",
+            "type" : "selectInput",
+            "label" : "chemical_applic_target_label",
+            "required" : true,
+            "choices" : "CH_TARGETS"
+          },
+
+          "chemical_applic_method" : {
+            "code_name" : "chemical_applic_method",
+            "type" : "selectInput",
+            "label" : "chemical_applic_method_label",
+            "choices" : "FEACD"
+          },
+
+          "chemical_applic_amount" : {
+            "code_name" : "chemical_applic_amount",
+            "type" : "numericInput",
+            "label" : "chemical_applic_amount_label",
+            "min" : 1
+          },
+
+          "application_depth_chem" : {
+            "code_name" : "application_depth_chem",
+            "type" : "numericInput",
+            "label" : "application_depth_chem_label",
+            "min" : 0
+          },
+
+          "chemical_applic_notes" : {
+            "code_name" : "chemical_applic_notes",
+            "type" : "textAreaInput",
+            "label" : "chemical_applic_notes_label",
+            "placeholder" : "chemical_applic_notes_placeholder"
+          }
+        },
+
         "observation" : {
           "condition" : "input.mgmt_operations_event == 'observation'",
 
@@ -611,7 +674,7 @@
             "type" : "selectInput",
             "label" : "observation_type_label",
             "choices" : "observation_type_choice",
-            "required" : "TRUE"
+            "required" : true
           },
 
           "soil" : {
@@ -793,6 +856,52 @@
             "label" : "observation_notes_label"
           }
 
+        },
+
+        "irrigation" : {
+          "condition" : "input.mgmt_operations_event == 'irrigation'",
+
+          "irrigation_operation" : {
+            "code_name" : "irrigation_operation",
+            "type" : "selectInput",
+            "label" : "irrigation_operation_label",
+            "choices" : "IROP"
+          },
+
+          "irrig_amount_depth" : {
+            "code_name" : "irrig_amount_depth",
+            "type" : "numericInput",
+            "label" : "irrig_amount_depth_label",
+            "min" : 0,
+            "required" : true
+          },
+
+          "irrigation_applic_depth" : {
+            "code_name" : "irrigation_applic_depth",
+            "type" : "numericInput",
+            "label" : "irrigation_applic_depth_label",
+            "min" : 0
+          },
+
+          "irrigation_notes" : {
+            "code_name" : "irrigation_notes",
+            "type" : "textAreaInput",
+            "label" : "irrigation_notes_label",
+            "placeholder" : "irrigation_notes_placeholder"
+          }
+
+
+        },
+
+        "other" : {
+          "condtion" : "input.mgmt_operations_event == 'other'",
+
+          "other_notes" : {
+            "code_name" : "other_notes",
+            "type" : "textAreaInput",
+            "label" : "other_notes_label",
+            "required" : true
+          }
         }
 
       }
@@ -802,7 +911,7 @@
       "code_name": "date",
       "type" : "dateInput",
       "label" : "date_label",
-      "required" : "TRUE"
+      "required" : true
     },
 
     "mgmt_event_notes" : {
