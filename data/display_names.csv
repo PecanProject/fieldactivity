@@ -38,6 +38,7 @@ variable_name,yield_C_at_harvest,Carbon (C) in yield (kg/ha),Hiilen (C) määrä
 variable_name,harvest_method,Harvest method,Korjuutapa
 variable_name,harvest_cut_height,Height of cut (cm),Niittokorkeus (cm)
 variable_name,plant_density_harvest,Plant density at harvest (plants/m2),Kasvitiheys korjuuhetkellä (kasveja/m2)
+variable_name,harvest_residue_placement,Harvest residue placement,Korjuutähteiden sijoituspaikka
 variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
 #   variable_name,org_material_applic_meth,Organic material application method,Eloperäisen aineen levitystapa
 #   variable_name,org_material_appl_depth,Organic material application depth (cm),Eloperäisen aineen levityssyvyys (cm)
@@ -51,7 +52,7 @@ variable_name,organic_material,Organic material,Eloperäinen aine
 variable_name,org_matter_moisture_conc,Moisture concentration (%),Aineen kosteus (%)
 variable_name,org_matter_carbon_conc,Carbon (C) concentration (%),Hiilen (C) määrä aineessa (%)
 variable_name,fertilizer_product_name,Name of fertilizer,Lannoitteen nimi
-variable_name,fertilizer_material,Fertilizer,Lannoite
+variable_name,fertilizer_material,Soil amendment subtance,Maanparannusaine
 variable_name,fertilizer_material_source,Fertilizer material source,Lannoitteen alkuperä
 variable_name,fertilizer_applic_method,Application method,Levitystapa
 variable_name,application_depth_fert,Application depth (cm),Levityssyvyys (cm)
@@ -172,9 +173,10 @@ element_label,harvest_moisture_label,"Yield moisture (%):","Sadon kosteus (%):"
 element_label,yield_C_at_harvest_label,Carbon (C) in yield (kg/ha):,Hiilen (C) määrä sadossa (kg/ha):
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:
 element_label,plant_density_harvest_label,Plant density at harvest (number/m2):,Kasvitiheys korjuuhetkellä (kpl/m2):
+element_label,harvest_residue_placement_label,Harvest residue placement:,Korjuutähteiden sijoituspaikka:
+element_label,harvest_residue_help_text,"If you left the harvest residue on the field, please add a new event (fertilizer application or tillage) accordingly.","Jos jätit korjuutähteet pellolle, tee tästä uusi soveltuva tapahtuma (lannoitus- tai maanmuokkaus-)."
 element_label,harvest_comments_label,Harvest comments:,Kommentit sadonkorjuusta:
 element_label,harvest_comments_placeholder,"Any notes or observations about the event, e.g. “cutting height was not uniform”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “leikkuukorkeus ei ollut sama kaikkialla”"
-element_label,harvest_residue_help_text,"If you left the crop residue on the field, you should add a new fertilizer application event for that.","Jos jätit korjuutähteet pellolle, tee tästä uusi lannoitustapahtuma."
 element_label,tillage_practice_label,Tillage type*:,Muokkaustyyppi*:
 element_label,tillage_implement_label,Tillage implement:,Muokkausväline:
 element_label,tillage_operations_depth_label,Tillage depth (cm):,Muokkaussyvyys (cm):
@@ -185,7 +187,7 @@ element_label,organic_material_label,Organic material:,Eloperäinen aine:
 element_label,org_matter_moisture_conc_label,Moisture concentration (%):,Aineen kosteus (%):
 element_label,org_matter_carbon_conc_label,Carbon (C) concentration (%):,Hiilen (C) määrä aineessa (%):
 element_label,fertilizer_product_name_label,Name of fertilizer:,Lannoitteen nimi:
-element_label,fertilizer_material_label,Fertilizer:,Lannoite:
+element_label,fertilizer_material_label,Soil amendment substance:,Maanparannusaine:
 element_label,fertilizer_material_source_label,Fertilizer material source:,Lannoitteen alkuperä:
 element_label,fertilizer_material_source_placeholder,"e.g. local stables or own farm or Commercial (brand)","esim. paikallinen talli, oma tila tai kaupallinen (tuotteen nimi)"
 element_label,fertilizer_applic_method_label,Application method:,Levitystapa:
@@ -316,6 +318,10 @@ HARM,HM008,Silage,Säilörehu # not in ICASA
 HARM,HM009,Potato harvester,Perunannostokone # not in ICASA
 HARM,HM010,Sugar beet harvester,Juurikkaannostokone # not in ICASA
 HARM,HM999,Method unknown/not given,Tapa ei tiedossa
+harvest_residue_placement_choice,harvest_residue_placement_green_manure,Left in the field as green manure,Jätetty pellolle vihreäksi lannaksi
+harvest_residue_placement_choice,harvest_residue_placement_tillage,Left in the field for tillage incorporation,Jätetty pellolle kyntämällä sekoittamista varten
+harvest_residue_placement_choice,harvest_residue_placement_burned,Burned,Poltettu
+harvest_residue_placement_choice,harvest_residue_placement_removed,Removed from the field,Poistettu pellolta
 OMCD,RE001,Generic crop residue,Yleinen kasvijäte
 OMCD,RE002,Green manure,Vihreä lanta
 OMCD,RE003,Barnyard manure,RE003-käännös

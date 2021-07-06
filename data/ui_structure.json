@@ -159,7 +159,7 @@
                 "harvest_crop_table" : {
                   "code_name" : "harvest_crop_table",
                   "type" : "dataTable",
-                  "columns" : ["harvest_yield_harvest_dw", "harv_yield_harv_f_wt", "harvest_moisture", "yield_C_at_harvest", "harvest_method", "harvest_operat_component", "canopy_height_harvest", "harvest_cut_height", "plant_density_harvest"],
+                  "columns" : ["harvest_yield_harvest_dw", "harv_yield_harv_f_wt", "harvest_moisture", "yield_C_at_harvest", "harvest_method", "harvest_operat_component", "canopy_height_harvest", "harvest_cut_height", "plant_density_harvest", "harvest_residue_placement"],
                   "rows" : "harvest_crop"
                 }
               },
@@ -229,9 +229,21 @@
                   "type" : "numericInput",
                   "label" : "plant_density_harvest_label",
                   "min" : "0"
+                },
+
+                "harvest_residue_placement" : {
+                  "code_name" : "harvest_residue_placement",
+                  "type" : "selectInput",
+                  "label" : "harvest_residue_placement_label",
+                  "choices" : "harvest_residue_placement_choice"
                 }
               }
             }
+          },
+
+          "harvest_residue_help_text" : {
+            "code_name" : "harvest_residue_help_text",
+            "type" : "textOutput"
           },
 
           "harvest_comments" : {
@@ -239,12 +251,8 @@
             "type" : "textAreaInput",
             "label" : "harvest_comments_label",
             "placeholder" : "harvest_comments_placeholder"
-          },
-
-          "harvest_residue_help_text" : {
-            "code_name" : "harvest_residue_help_text",
-            "type" : "textOutput"
           }
+
         },
 
         "tillage" : {
