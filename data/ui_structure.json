@@ -890,11 +890,70 @@
             "placeholder" : "irrigation_notes_placeholder"
           }
 
+        },
 
+        "inorg_mulch" : {
+          "condition" : "input.mgmt_operations_event == 'inorg_mulch'",
+
+          "mulch_type" : {
+            "code_name" : "mulch_type",
+            "type" : "selectInput",
+            "label" : "mulch_type_label",
+            "required" : true,
+            "choices" : "MLTP"
+          },
+
+          "mulch_thickness" : {
+            "code_name" : "mulch_thickness",
+            "type" : "numericInput",
+            "label" : "mulch_thickness_label",
+            "min" : 0
+          },
+
+          "mulch_cover_fraction" : {
+            "code_name" : "mulch_cover_fraction",
+            "type" : "numericInput",
+            "label" : "mulch_cover_fraction_label",
+            "min" : 0,
+            "max" : 100
+          },
+
+          "mulch_color" : {
+            "code_name" : "mulch_color",
+            "type" : "selectInput",
+            "label" : "mulch_color_label",
+            "choices" : "MLCOL"
+          },
+
+          "mulch_placement_notes" : {
+            "code_name" : "mulch_placement_notes",
+            "type" : "textAreaInput",
+            "label" : "mulch_placement_notes_label",
+            "placeholder" : "mulch_placement_notes_placeholder"
+          }
+        },
+
+        "Inorg_mul_rem" : {
+          "condition" : "input.mgmt_operations_event == 'Inorg_mul_rem'",
+
+          "mulch_type_remove" : {
+            "code_name" : "mulch_type_remove",
+            "type" : "selectInput",
+            "label" : "mulch_type_remove_label",
+            "choices" : "MLTP",
+            "required" : true
+          },
+
+          "mulch_removal_notes" : {
+            "code_name" : "mulch_removal_notes",
+            "type" : "textAreaInput",
+            "label" : "mulch_removal_notes_label",
+            "placeholder" : "mulch_removal_notes_placeholder"
+          }
         },
 
         "other" : {
-          "condtion" : "input.mgmt_operations_event == 'other'",
+          "condition" : "input.mgmt_operations_event == 'other'",
 
           "other_notes" : {
             "code_name" : "other_notes",

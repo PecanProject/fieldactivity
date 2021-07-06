@@ -229,8 +229,9 @@ get_selectInput_choices <- function(element_structure, language) {
     # 3) the category name for the choices is given.
     # in the following if-statement, these are handled
     # in this same order
-
-    if (length(element_structure$choices) > 1) {
+    if (is.null(element_structure$choices)) {
+        choices <- NULL
+    } else if (length(element_structure$choices) > 1) {
         choices <- c("", element_structure$choices)
         names(choices) <- c("", get_disp_name(
             element_structure$choices,

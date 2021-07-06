@@ -120,6 +120,13 @@ variable_name,irrigation_operation,Irrigation method,Kastelujärjestelmä
 variable_name,irrig_amount_depth,"Irrigation amount (depth, mm)","Kastelun määrä (veden syvyys, mm)"
 variable_name,irrigation_applic_depth,Irrigation depth (cm),Kastelusyvyys (cm)
 variable_name,irrigation_notes,Irrigation notes,Kastelumuistiinpanot
+variable_name,mulch_type,Mulch type,Katteen tyyppi
+variable_name,mulch_thickness,Mulch thickness (mm),Katteen paksuus (mm)
+variable_name,mulch_cover_fraction,Fraction of surface covered (%),Peitto-osuus (%)
+variable_name,mulch_color,Mulch colour,Katteen väri
+variable_name,mulch_placement_notes,Mulch placement notes,Katteenlevitysmuistiinpanot
+variable_name,mulch_type_remove,Type of removed mulch,Poistetun katteen tyyppi
+variable_name,mulch_removal_notes,Mulch removal notes,Katteenpoistomuistiinpanot
 variable_name,other_notes,Notes,Muistiinpanot
 #
 # labels for widgets, incl. help texts etc.
@@ -254,6 +261,15 @@ element_label,irrig_amount_depth_label,"Irrigation amount (depth, mm)*:","Kastel
 element_label,irrigation_applic_depth_label,Irrigation depth (e.g. of drip line) (cm):,Kastelusyvyys (esim. tippukasteluletkun syvyys) (cm):
 element_label,irrigation_notes_label,Irrigation notes:,Kastelumuistiinpanot:
 element_label,irrigation_notes_placeholder,"Any notes or observations about the event, e.g. “drip line flow rate seems a bit low”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “tippukasteluletkun virtausnopeus vaikuttaa melko hitaalta”"
+element_label,mulch_type_label,Mulch type*:,Katteen tyyppi*:
+element_label,mulch_thickness_label,Mulch thickness (mm):,Katteen paksuus (mm):
+element_label,mulch_cover_fraction_label,Fraction of surface covered (%):,Peitto-osuus (%):
+element_label,mulch_color_label,Mulch colour:,Katteen väri:
+element_label,mulch_placement_notes_label,Mulch placement notes:,Katteenlevitysmuistiinpanot:
+element_label,mulch_placement_notes_placeholder,"Any notes or observations about the event, e.g. “mulch was placed only on the northern half of the field”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “kate levitettiin ainoastaan pellon pohjoiselle puoliskolle”"
+element_label,mulch_type_remove_label,Type of removed mulch*:,Poistetun katteen tyyppi*:
+element_label,mulch_removal_notes_label,Mulch removal notes:,Katteenpoistomuistiinpanot:
+element_label,mulch_removal_notes_placeholder,"Any notes or observations about the event, e.g. “the mulch was recycled”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “kate kierrätettiin”"
 element_label,other_notes_label,Event notes*:,Muistiinpanoja tapahtumasta*:
 #
 ############### others
@@ -653,3 +669,20 @@ IROP,IR005,Drip or trickle,Drip or trickle -käännös
 #IROP,IR011,Constant flood depth,
 IROP,IR012,Subsurface (buried) drip,Subsurface (buried) drip -käännös
 IROP,IR999,Unknown/not given,Ei tiedossa
+MLTP,MT001,Polyethylene sheet - solid,Katemuovi (PE) (Polyethylene sheet?)
+MLTP,MT002,Polyethylene sheet - perforated,Rei'itetty katemuovi (PE) (Polyethylene sheet - perforated?)
+MLTP,MT003,Landscape fabric,Maisemointikangas
+MLTP,MT004,Paper,Paperi
+MLTP,MT005,Grass clippings,Leikattu ruoho
+MLTP,MT006,Pine needles,Männynneulaset
+MLTP,MT007,Straw,Olki
+MLTP,MT008,Foil,Foil-käännös
+MLTP,MT009,Foil coated plastic,Foil coated with plastic -käännös
+MLTP,MT010,Photodegradable plastic,Photodegradable plastic -käännös
+MLTP,MT999,Not given/unknown,Ei tiedossa
+MLCOL,MC001,Transparent,Läpinäkyvä
+MLCOL,MC002,White,Valkoinen
+MLCOL,MC003,Black,Musta
+MLCOL,MC004,Brown,Ruskea
+MLCOL,MC005,Gray,Harmaa
+MLCOL,MC006,Light straw color,Olki
