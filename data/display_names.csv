@@ -127,6 +127,8 @@ variable_name,mulch_color,Mulch colour,Katteen väri
 variable_name,mulch_placement_notes,Mulch placement notes,Katteenlevitysmuistiinpanot
 variable_name,mulch_type_remove,Type of removed mulch,Poistetun katteen tyyppi
 variable_name,mulch_removal_notes,Mulch removal notes,Katteenpoistomuistiinpanot
+variable_name,weeding_notes,Notes on the extraction of weeds,Muistiinpanot rikkakasvien kitkemisestä
+variable_name,bed_prep_notes,Notes on the preparation of raised beds,Muistiinpanot kasvatuslaatikoiden valmistelusta
 variable_name,other_notes,Notes,Muistiinpanot
 #
 # labels for widgets, incl. help texts etc.
@@ -270,6 +272,10 @@ element_label,mulch_placement_notes_placeholder,"Any notes or observations about
 element_label,mulch_type_remove_label,Type of removed mulch*:,Poistetun katteen tyyppi*:
 element_label,mulch_removal_notes_label,Mulch removal notes:,Katteenpoistomuistiinpanot:
 element_label,mulch_removal_notes_placeholder,"Any notes or observations about the event, e.g. “the mulch was recycled”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “kate kierrätettiin”"
+element_label,weeding_notes_label,Notes on the extraction of weeds:,Muistiinpanot rikkakasvien kitkemisestä:
+element_label,weeding_notes_placeholder,"Any notes or observations about the event, e.g. “the weeds had very deep roots”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “rikkakasvien juuret olivat syvällä”"
+element_label,bed_prep_notes_label,Notes on the preparation of raised beds:,Muistiinpanot kasvatuslaatikoiden valmistelusta:
+element_label,bed_prep_notes_placeholder,"Any notes or observations about the event, e.g. “used the beds from last year”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “käytettiin samoja kasvatuslaatikoita kuin edellisenä vuonna”"
 element_label,other_notes_label,Event notes*:,Muistiinpanoja tapahtumasta*:
 #
 ############### others

@@ -952,6 +952,28 @@
           }
         },
 
+        "weeding" : {
+          "condition" : "input.mgmt_operations_event == 'weeding'",
+
+          "weeding_notes" : {
+            "code_name" : "weeding_notes",
+            "type" : "textAreaInput",
+            "label" : "weeding_notes_label",
+            "placeholder" : "weeding_notes_placeholder"
+          }
+        },
+
+        "bed_prep" : {
+          "condition" : "input.mgmt_operations_event == 'bed_prep'",
+
+          "bed_prep_notes" : {
+            "code_name" : "bed_prep_notes",
+            "type" : "textAreaInput",
+            "label" : "bed_prep_notes_label",
+            "placeholder" : "bed_prep_notes_placeholder"
+          }
+        },
+
         "other" : {
           "condition" : "input.mgmt_operations_event == 'other'",
 
