@@ -117,7 +117,9 @@ update_ui_element <- function(session, code_name, value, ...) {
     }
 }
 
-# sets the specified input fields to their default states
+# sets the specified input fields to their default states.
+# this doesn't reset the tables (e.g. harvest_crop_table) -- they reset 
+# themselves every time they become hidden
 # TODO: make sure this is always used
 reset_input_fields <- function(session, input, fields_to_clear, 
                                exceptions = c("")) {
@@ -130,11 +132,11 @@ reset_input_fields <- function(session, input, fields_to_clear,
         update_ui_element(session, code_name, value = "")
     }
     
-    # if the frontpage_block selector is set to a specific block, mirror that
+    # if the table_block selector is set to a specific block, mirror that
     # value in input$block. Otherwise don't change the block widget value
-    if (!is.null(input$frontpage_block) &&
-        input$frontpage_block != "block_choice_all") {
-        update_ui_element(session, "block", input$frontpage_block)
+    if (!is.null(input$table_block) &&
+        input$table_block != "block_choice_all") {
+        update_ui_element(session, "block", input$table_block)
     }
 }
 
@@ -172,10 +174,9 @@ get_data_table <- function(events, variable_names) {
             if (is.null(value)) {
                 value <- ""
             }
-            # TODO: paste for now because value might be a vector
-            #display_data_table[[row_number, variable_name]] <- 
-            #    paste(value, collapse = " ")
             display_data_table[[row_number, variable_name]] <- value
+            # if value is a vector, it will be turned into a single string
+            # when the table is converted to a table with display names
         }
         
         # double brackets allow saving a list nicely
@@ -188,8 +189,8 @@ get_data_table <- function(events, variable_names) {
     return(display_data_table)
 }
 
-# find the index corresponding to the given event in the list of events.
-# this is used when editing events
+# find the (first) index corresponding to the given event in the list of events.
+# This is used when editing events
 find_event_index <- function(event, event_list) {
 
     # sort the items in the lists to the same order (alphabetical)
@@ -213,10 +214,11 @@ find_event_index <- function(event, event_list) {
 
 # if a variable is in a table (e.g. planting_depth is in a table when 
 # planted_crop has multiple values), return the code name of that table. 
-# Otherwise return NULL
+# Otherwise return NULL.
 # only_rows determines whether we seek the variable from the rows only, i.e.
-# if it is set to TRUE then get_variable_table("harvest_crop", only_rows = TRUE) # returns "harvest_crop_table" and 
-# get_variable_table("harvest_cut_height", only_rows = TRUE) returns FALSE
+# get_variable_table("harvest_crop", only_rows = TRUE) returns 
+# "harvest_crop_table" and 
+# get_variable_table("harvest_cut_height", only_rows = TRUE) returns NULL
 get_variable_table <- function(variable_name, only_rows = FALSE) {
     
     for (table_code_name in data_table_code_names) {
@@ -235,13 +237,13 @@ get_variable_table <- function(variable_name, only_rows = FALSE) {
     return(NULL)
 }
 
-# takes a condition writte in javascript notation (like visibility conditions
+# takes a condition written in javascript notation (visibility conditions
 # in ui_structure.json) and evaluates it in R.
 # Might not be best coding practice, but works as long as the js_condition
 # doesn't have any typos.
 # TODO: add error catching
 evaluate_condition <- function(js_condition) {
-    # substitute dots with dollar signs
+    # substitute dots with dollar signs (fixed = TRUE means we don't use regex)
     condition <- gsub(".", "$", js_condition, fixed = TRUE)
     # parse string into an expression and evaluate it
     eval(parse(text = condition))
@@ -441,7 +443,9 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     
     h2(textOutput("frontpage_table_title")),
     
-    selectInput("frontpage_block", label = "", choices = c("")),
+    selectInput("table_activity", label = "", choices = c("")),
+    selectInput("table_block", label = "", choices = c("")),
+    selectInput("table_year", label = "", choices = c("")),
     
     # front page data table
     DT::dataTableOutput("mgmt_events_table"),
@@ -508,10 +512,10 @@ ui <- fluidPage(theme = shinytheme("lumen"),
         ),
         
         mainPanel(
-            h2(textOutput("editing_table_title")),
-            br(),
-            # table for showing already supplied information
-            DT::dataTableOutput("editing_table")
+        #     h2(textOutput("editing_table_title")),
+        #     br(),
+        #     # table for showing already supplied information
+        #     DT::dataTableOutput("editing_table")
         )
     )))
 
@@ -596,7 +600,7 @@ server <- function(input, output, session) {
             shinyjs::show("site")
         }
         
-        # here would be good to somehow fetch the language selection from
+        # here would be good to somehow fetch the language selection from the
         # login UI, but it's difficult
     })
     
@@ -655,8 +659,7 @@ server <- function(input, output, session) {
                                                       only_rows = TRUE)
                 
                 # TODO: change to use reset_input_fields
-                # this clears up old values. Note that this does not clear
-                # table values, but that should not 
+                # this clears up old values
                 if (!(variable_name %in% names(event_to_edit()))) {
                     update_ui_element(session, variable_name, value = "")
                     
@@ -670,20 +673,10 @@ server <- function(input, output, session) {
                 value <- event_to_edit()[[variable_name]]
                 
                 # if there is a table corresponding to this variable, pre-fill
-                # it (even if it doesn't become visible)
+                # it
                 if (!is.null(table_code_name)) {
                     prefill_values[[table_code_name]](event_to_edit())
                 }
-                
-                # if (length(value) > 1) {
-                #     
-                #     if (is.null(structure_lookup_list[[table_code_name]])) {
-                #         # there is a vector of elements, but this is not the
-                #         # variable on the rows. Skip until we find it
-                #         next
-                #     }
-                #     prefill_values[[table_code_name]](event_to_edit())
-                # }
                 
                 update_ui_element(session, variable_name, value = value)
             }
@@ -724,7 +717,43 @@ server <- function(input, output, session) {
             events$by_block[[block]] <- retrieve_json_info(site1, block)
         }
     }
+    
+    get_table_year_choices <- function() {
+        years <- NULL
+        
+        for (event_list in events$by_block) {
+            for (event in event_list) {
+                
+                # this shouldn't happen
+                if (is.null(event$date)) next
+                
+                year <- format(as.Date(event$date, date_format_json), "%Y")
+                
+                if (!(year %in% years)) { years <- c(years, year) }
+            }
+        }
+        
+        sort(years, decreasing = TRUE)
+    }
 
+    # update year choices when events change
+    # TODO: this can be sped up by keeping a up-to-date list of event years
+    observeEvent(events$by_block, {
+        years <- get_table_year_choices()
+        
+        current_choice <- input$table_year
+        if (!isTruthy(current_choice) || !(current_choice %in% years)) {
+            current_choice <- "year_choice_all"
+        }
+        
+        table_year_choices <- c("year_choice_all", years)
+        names(table_year_choices) <- get_disp_name(table_year_choices, 
+                                                   input$language)
+        updateSelectInput(session, "table_year", selected = current_choice,
+                          choices = table_year_choices)
+    })
+    
+    # update frontpage_table_data and the table itself when necessary
     observe({
         
         frontpage_table_variables <- c("block", 
@@ -732,27 +761,26 @@ server <- function(input, output, session) {
                                        "date", 
                                        "mgmt_event_notes")
         
-        if (is.null(input$frontpage_block)) {
+        if (is.null(input$table_block)) {
             event_list <- list()
-        } else if (input$frontpage_block == "block_choice_all") {
+        } else if (input$table_block == "block_choice_all") {
             event_list <- list()
             for (block_data in events$by_block) {
                 event_list <- c(event_list, block_data)
             }
         } else {
-            event_list <- events$by_block[[input$frontpage_block]]
+            event_list <- events$by_block[[input$table_block]]
         }
         
         # make event list into a table
         data <- get_data_table(event_list, frontpage_table_variables)
+        frontpage_table_data(data)
         
         # update currently displayed data
         new_data_to_display <- replace_with_display_names(data, input$language)
         DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
         DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE, 
                         clearSelection = "none")
-        
-        frontpage_table_data(data)
     })
     
     # we set priority = 1 so that this runs before the editing table rendering
@@ -803,8 +831,6 @@ server <- function(input, output, session) {
     })
     
     # enable editing of old entries
-    # this runs only when some rows are selected, not when selection is cleared
-    # (if you want that, set ignoreNULL = FALSE)
     observeEvent(input$mgmt_events_table_rows_selected, ignoreNULL = FALSE, {
         
         row_index <- input$mgmt_events_table_rows_selected
@@ -862,7 +888,7 @@ server <- function(input, output, session) {
         write_json_file(input$site, event$block, block_data)
         showNotification("Cloned successfully.", type = "message")
         
-        # update session$userData$event_tables
+        # update events data
         events$by_block[[event$block]] <- block_data
         
         # update tables if necessary
@@ -928,7 +954,6 @@ server <- function(input, output, session) {
                                 "mgmt_event_notes",
                                 relevant_variables)
         
-        # TODO: change to use get_variable_table?
         # determine whether we need to read some variables from a table or not
         read_from_table <- NULL
         for (table_code_name in data_table_code_names) {
@@ -1051,30 +1076,28 @@ server <- function(input, output, session) {
     observeEvent(input$site, {
 
         if (is.null(input$site) | input$site == "") {
-            shinyjs::disable("frontpage_block")
+            shinyjs::disable("table_block")
             shinyjs::disable("block")
             shinyjs::disable("add_event")
             return()
         } 
         
-        shinyjs::enable("frontpage_block")
+        shinyjs::enable("table_block")
         shinyjs::enable("block")
         shinyjs::enable("add_event")
         
-        # update block choices.
-        # frontpage_block choices are also updated in the observeEvent for
+        # update table_block choices.
+        # table_block choices are also updated in the observeEvent for
         # input$language to make the block_choice_all name translate
         block_choices <- subset(sites, site == input$site)$blocks[[1]]
-        names_for_frontpage_selector <- c(
-            get_disp_name("block_choice_all", input$language),
+        names_for_block_choices <- c(
+            get_disp_name("block_choice_all", input$language), 
             block_choices)
-        choices_for_frontpage_selector <- c("block_choice_all",
-                                            block_choices)
-        names(choices_for_frontpage_selector) <-
-            names_for_frontpage_selector
-
-        updateSelectInput(session, "frontpage_block",
-                          choices = choices_for_frontpage_selector)
+        choices_for_table_block <- c("block_choice_all", block_choices)
+        names(choices_for_table_block) <- names_for_block_choices
+        
+        updateSelectInput(session, "table_block", 
+                          choices = choices_for_table_block)
         updateSelectInput(session, "block", choices = block_choices)
         
         # load the events corresponding to this site into memory
@@ -1428,21 +1451,41 @@ server <- function(input, output, session) {
 
         }
         
-        # update frontpage_block selector choices separately
+        # update table_block selector choices separately
         if (isTruthy(input$site)) {
             block_choices <- subset(sites, site == input$site)$blocks[[1]]
-            names_for_frontpage_selector <- c(
+            names_for_block_choices <- c(
                 get_disp_name("block_choice_all", input$language), 
                 block_choices)
-            choices_for_frontpage_selector <- c("block_choice_all", 
-                                                block_choices)
-            names(choices_for_frontpage_selector) <-
-                names_for_frontpage_selector
+            choices_for_table_block <- c("block_choice_all", block_choices)
+            names(choices_for_table_block) <- names_for_block_choices
             
-            updateSelectInput(session, "frontpage_block", 
-                              choices = choices_for_frontpage_selector)
+            updateSelectInput(session, "table_block", 
+                              choices = choices_for_table_block)
         }
         
+        # update table_activity selector choices separately
+        choices_for_table_activity <- 
+            c("activity_choice_all", get_category_names(
+                "mgmt_operations_event_choice"))
+        names(choices_for_table_activity) <- 
+            get_disp_name(choices_for_table_activity, input$language)
+        updateSelectInput(session, "table_activity", 
+                          choices = choices_for_table_activity)
+        
+        # update table_year selector choices separately
+        years <- get_table_year_choices()
+        
+        current_choice <- input$table_year
+        if (!isTruthy(current_choice) || !(current_choice %in% years)) {
+            current_choice <- "year_choice_all"
+        }
+        
+        table_year_choices <- c("year_choice_all", years)
+        names(table_year_choices) <- get_disp_name(table_year_choices, 
+                                                   input$language)
+        updateSelectInput(session, "table_year", selected = current_choice,
+                          choices = table_year_choices)
     })
     
 }

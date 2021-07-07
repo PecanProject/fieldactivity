@@ -33,23 +33,25 @@ get_category_names <- function(category1, language = NULL) {
 # there might be clashes between the variable and non-variable code names
 # e.g. organic_material is both an option in mgmt_operations_event and a 
 # variable
-get_disp_name <- function(code_name1, language, is_variable_name = FALSE) {
-  
-  if (is_variable_name) {
-      rows_to_check <- subset(display_names_dict, category == "variable_name")
-  } else {
-      rows_to_check <- subset(display_names_dict, 
-                                !(category == "variable_name"))
-  }
-  
-  row_indexes <- match(code_name1, rows_to_check$code_name)
-  display_name <- rows_to_check[row_indexes, language]
-  
-  # replace missing display names with the corresponding code names
-  display_name[is.na(display_name)] <- code_name1[is.na(display_name)]
-  display_name[display_name == missingval] <- ""
-  
-  return(display_name)
+get_disp_name <- function(code_name, language = NULL, 
+                          is_variable_name = FALSE) {
+    
+    if (is.null(language)) {return(code_name)}
+    
+    if (is_variable_name) {
+        rows_to_check <- subset(display_names_dict, category == "variable_name")
+    } else {
+        rows_to_check <- subset(display_names_dict, category != "variable_name")
+    }
+    
+    row_indexes <- match(code_name, rows_to_check$code_name)
+    display_name <- rows_to_check[row_indexes, language]
+    
+    # replace missing display names with the corresponding code names
+    display_name[is.na(display_name)] <- code_name[is.na(display_name)]
+    display_name[display_name == missingval] <- ""
+    
+    return(display_name)
 }
 
 # replace code names with display names in an event data frame

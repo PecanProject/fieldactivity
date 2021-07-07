@@ -15,10 +15,24 @@
       "type" : "textOutput"
     },
 
-    "frontpage_block" : {
-      "code_name" : "frontpage_block",
+    "table_activity" : {
+      "code_name" : "table_activity",
       "type" : "selectInput",
-      "label" : "frontpage_block_label",
+      "label" : "table_activity_label",
+      "choices" : "IGNORE"
+    },
+
+    "table_block" : {
+      "code_name" : "table_block",
+      "type" : "selectInput",
+      "label" : "table_block_label",
+      "choices" : "IGNORE"
+    },
+
+    "table_year" : {
+      "code_name" : "table_year",
+      "type" : "selectInput",
+      "label" : "table_year_label",
       "choices" : "IGNORE"
     },
 
