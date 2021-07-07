@@ -193,6 +193,8 @@ get_data_table <- function(events, variable_names) {
 # This is used when editing events
 find_event_index <- function(event, event_list) {
 
+    if (length(event_list) == 0) { return(NULL) }
+    
     # sort the items in the lists to the same order (alphabetical)
     event <- event[order(names(event))]
     
@@ -634,6 +636,9 @@ server <- function(input, output, session) {
     # per session global variable, indicates whether the currently edited event
     # is visible in the front page table
     edited_event_visible <- TRUE
+    # what were the table view settings (table_block, table_activity, table_yea)
+    # before we started editing?
+    pre_edit_table_view <- list()
     
     observeEvent(event_to_edit(), ignoreNULL = FALSE, {
         
@@ -644,6 +649,13 @@ server <- function(input, output, session) {
             DT::selectRows(proxy = dataTableProxy("mgmt_events_table"), 
                            selected = NULL)
             exit_sidebar_mode()
+            # restore table view settings
+            updateSelectInput(session, "table_activity", 
+                              selected = pre_edit_table_view$activity)
+            updateSelectInput(session, "table_block", 
+                              selected = pre_edit_table_view$block)
+            updateSelectInput(session, "table_year", 
+                              selected = pre_edit_table_view$year)
         } else {
             # edit mode was enabled, or there was a switch from one event to
             # another
@@ -683,6 +695,15 @@ server <- function(input, output, session) {
                 
                 update_ui_element(session, variable_name, value = value)
             }
+            
+            # save table view to be restored when editing is over
+            pre_edit_table_view <<- list(activity = input$table_activity,
+                                         block = input$table_block,
+                                         year = input$table_year)
+            
+            # change view of the front page table
+            updateSelectInput(session, "table_activity", 
+                              selected = event_to_edit()$mgmt_operations_event)
             
             shinyjs::show("delete")
             shinyjs::show("sidebar")
