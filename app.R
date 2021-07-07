@@ -624,8 +624,8 @@ server <- function(input, output, session) {
         }
     }
     
-    frontpage_table_data <- reactiveVal()
-    editing_table_data <- reactiveVal()
+    #frontpage_table_data <- reactiveVal()
+    #editing_table_data <- reactiveVal()
     # initialise in the normal (non-edit) mode
     event_to_edit <- reactiveVal()
     # lists of events by block on the currently viewed site
@@ -718,9 +718,11 @@ server <- function(input, output, session) {
         }
     }
     
-    get_table_year_choices <- function() {
+    # TODO: this can be sped up by keeping a up-to-date list of event years
+    update_table_year_choices <- function() {
         years <- NULL
         
+        # find years present in event dates
         for (event_list in events$by_block) {
             for (event in event_list) {
                 
@@ -733,37 +735,99 @@ server <- function(input, output, session) {
             }
         }
         
-        sort(years, decreasing = TRUE)
-    }
-
-    # update year choices when events change
-    # TODO: this can be sped up by keeping a up-to-date list of event years
-    observeEvent(events$by_block, {
-        years <- get_table_year_choices()
+        years <- sort(years, decreasing = TRUE)
+        table_year_choices <- c("year_choice_all", years)
+        names(table_year_choices) <- get_disp_name(table_year_choices, 
+                                                   input$language)
         
+        # retain current selection if possible
         current_choice <- input$table_year
         if (!isTruthy(current_choice) || !(current_choice %in% years)) {
             current_choice <- "year_choice_all"
         }
         
-        table_year_choices <- c("year_choice_all", years)
-        names(table_year_choices) <- get_disp_name(table_year_choices, 
-                                                   input$language)
         updateSelectInput(session, "table_year", selected = current_choice,
                           choices = table_year_choices)
+    }
+    
+    update_table_block_choices <- function() {
+        if (!isTruthy(input$site)) { return() }
+        
+        block_choices <- c("block_choice_all",
+                           subset(sites, site == input$site)$blocks[[1]])
+        # the following assumes that no block name is a code name for something
+        # else
+        names(block_choices) <- get_disp_name(block_choices, input$language)
+        
+        current_choice <- input$table_block
+        if (!isTruthy(current_choice) || !(current_choice %in% block_choices)) {
+            current_choice <- "block_choice_all"
+        }
+        
+        updateSelectInput(session, "table_block", selected = current_choice,
+                          choices = block_choices)
+    }
+    
+    update_table_activity_choices <- function() {
+        choices_for_table_activity <- 
+            c("activity_choice_all", get_category_names(
+                "mgmt_operations_event_choice"))
+        names(choices_for_table_activity) <- 
+            get_disp_name(choices_for_table_activity, input$language)
+        
+        current_choice <- input$table_activity
+        if (!isTruthy(current_choice)) {
+            current_choice <- "activity_choice_all"
+        }
+        
+        updateSelectInput(session, "table_activity", selected = current_choice,
+                          choices = choices_for_table_activity)
+    }
+
+    # update year choices when events change
+    observeEvent(events$by_block, {
+        update_table_year_choices()
     })
     
-    # update frontpage_table_data and the table itself when necessary
-    observe({
+    # data to display in the table
+    frontpage_table_data <- reactive({
+        if (!(isTruthy(input$table_activity) & 
+              isTruthy(input$table_block) &
+              isTruthy(input$table_year))) {
+            default_variables <- c("block", "mgmt_operations_event",
+                                   "date", "mgmt_event_notes")
+            return(get_data_table(list(), default_variables))
+        }
         
-        frontpage_table_variables <- c("block", 
-                                       "mgmt_operations_event", 
-                                       "date", 
-                                       "mgmt_event_notes")
+        # determine the columns displayed in the table
+        table_variables <- c("date", "mgmt_event_notes")
+        if (input$table_activity == "activity_choice_all") {
+            table_variables <- c("mgmt_operations_event", table_variables)
+        }
+        if (input$table_block == "block_choice_all") {
+            table_variables <- c("block", table_variables)
+        }
         
-        if (is.null(input$table_block)) {
-            event_list <- list()
-        } else if (input$table_block == "block_choice_all") {
+        # if we are only looking at a specific event type, show columns
+        # appropriate to it
+        if (input$table_activity != "activity_choice_all") {
+            activity_variables <- unlist(rlapply(
+                activity_options[[input$table_activity]],
+                fun = function(x) {
+                    if (is.null(x$type) ||
+                        x$type == "textOutput" ||
+                        x$type == "dataTable") {
+                        return(NULL)
+                    } else {
+                        return(x$code_name)
+                    }
+                }))
+            table_variables <- c(table_variables, activity_variables)
+        }
+        
+        # create an event list filtered by user choices
+        # filter by block
+        if (input$table_block == "block_choice_all") {
             event_list <- list()
             for (block_data in events$by_block) {
                 event_list <- c(event_list, block_data)
@@ -772,63 +836,77 @@ server <- function(input, output, session) {
             event_list <- events$by_block[[input$table_block]]
         }
         
+        # filter by activity type
+        if (input$table_activity != "activity_choice_all") {
+            event_list <- rlapply(event_list, fun = function(x)
+                if (x$mgmt_operations_event == input$table_activity) {x})
+        }
+        
+        # filter by year
+        if (input$table_year != "year_choice_all") {
+            event_list <- rlapply(event_list, fun = function(x) {
+                event_year <- format(as.Date(x$date, date_format_json), "%Y")
+                if (event_year == input$table_year) {x}
+            })
+        }
+        
         # make event list into a table
-        data <- get_data_table(event_list, frontpage_table_variables)
-        frontpage_table_data(data)
+        data <- get_data_table(event_list, table_variables)
+        data
         
         # update currently displayed data
-        new_data_to_display <- replace_with_display_names(data, input$language)
-        DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
-        DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE, 
-                        clearSelection = "none")
+        #new_data_to_display <- replace_with_display_names(data, input$language)
+        #DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
+        #DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE, 
+        #                clearSelection = "none")
     })
     
     # we set priority = 1 so that this runs before the editing table rendering
     # runs (which is reactive on input$mgmt_operations_event)
-    observe(priority = 1, {
-        
-        editing_table_variables <- c("date", "mgmt_event_notes")
-        
-        event_list <- list()
-        if (isTruthy(input$block) & isTruthy(input$mgmt_operations_event)) {
-            
-            # find variables specific to activity
-            activity_variables <- unlist(rlapply(
-                activity_options[[input$mgmt_operations_event]], 
-                fun = function(x) {
-                    if (is.null(x$type) || 
-                        x$type == "textOutput" || 
-                        x$type == "dataTable") {
-                        return(NULL)
-                    } else {
-                        return(x$code_name)
-                    }
-                }))
-            
-            editing_table_variables <- c(editing_table_variables, 
-                                         activity_variables)
-            
-            # generate a list of events to display
-            event_list <- events$by_block[[input$block]]
-            # filter list to only show events of the given type
-            event_list <- rlapply(event_list, fun = function(x) 
-                if (x$mgmt_operations_event == input$mgmt_operations_event) {x})
-        }
-        
-        #print("Events to be displayed in the editing table:")
-        #str(event_list)
-        
-        # turn event list into a table to display
-        data <- get_data_table(event_list, editing_table_variables)
-        editing_table_data(data)
-        
-        #print("Table to be displayed:")
-        #str(editing_table_data)
-        
-        new_data_to_display <- replace_with_display_names(data, input$language)
-        DTproxy <- DT::dataTableProxy("editing_table", session = session)
-        DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
-    })
+    # observe(priority = 1, {
+    #     
+    #     editing_table_variables <- c("date", "mgmt_event_notes")
+    #     
+    #     event_list <- list()
+    #     if (isTruthy(input$block) & isTruthy(input$mgmt_operations_event)) {
+    #         
+    #         # find variables specific to activity
+    #         activity_variables <- unlist(rlapply(
+    #             activity_options[[input$mgmt_operations_event]], 
+    #             fun = function(x) {
+    #                 if (is.null(x$type) || 
+    #                     x$type == "textOutput" || 
+    #                     x$type == "dataTable") {
+    #                     return(NULL)
+    #                 } else {
+    #                     return(x$code_name)
+    #                 }
+    #             }))
+    #         
+    #         editing_table_variables <- c(editing_table_variables, 
+    #                                      activity_variables)
+    #         
+    #         # generate a list of events to display
+    #         event_list <- events$by_block[[input$block]]
+    #         # filter list to only show events of the given type
+    #         event_list <- rlapply(event_list, fun = function(x) 
+    #             if (x$mgmt_operations_event == input$mgmt_operations_event) {x})
+    #     }
+    #     
+    #     #print("Events to be displayed in the editing table:")
+    #     #str(event_list)
+    #     
+    #     # turn event list into a table to display
+    #     data <- get_data_table(event_list, editing_table_variables)
+    #     editing_table_data(data)
+    #     
+    #     #print("Table to be displayed:")
+    #     #str(editing_table_data)
+    #     
+    #     new_data_to_display <- replace_with_display_names(data, input$language)
+    #     DTproxy <- DT::dataTableProxy("editing_table", session = session)
+    #     DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE)
+    # })
     
     # enable editing of old entries
     observeEvent(input$mgmt_events_table_rows_selected, ignoreNULL = FALSE, {
@@ -1090,14 +1168,7 @@ server <- function(input, output, session) {
         # table_block choices are also updated in the observeEvent for
         # input$language to make the block_choice_all name translate
         block_choices <- subset(sites, site == input$site)$blocks[[1]]
-        names_for_block_choices <- c(
-            get_disp_name("block_choice_all", input$language), 
-            block_choices)
-        choices_for_table_block <- c("block_choice_all", block_choices)
-        names(choices_for_table_block) <- names_for_block_choices
-        
-        updateSelectInput(session, "table_block", 
-                          choices = choices_for_table_block)
+        update_table_block_choices()
         updateSelectInput(session, "block", choices = block_choices)
         
         # load the events corresponding to this site into memory
@@ -1177,12 +1248,12 @@ server <- function(input, output, session) {
         shinyjs::enable("save")
     })
     
-    # (re-)render frontpage table when input$language changes
-    # TODO: figure server = FALSE out
-    output$mgmt_events_table <- DT::renderDataTable(#server = FALSE,
-        {
+    # render frontpage table when input$language or table data changes
+    output$mgmt_events_table <- DT::renderDataTable(server = FALSE, {
+            
+            
         new_data_to_display <- replace_with_display_names(
-            isolate(frontpage_table_data()), input$language)
+            frontpage_table_data(), input$language)
         n_cols <- ncol(new_data_to_display)
         
         datatable(new_data_to_display, 
@@ -1197,47 +1268,47 @@ server <- function(input, output, session) {
                                  columnDefs = list(
                                      # hide all other columns except
                                      # event, date and notes
-                                     list(visible = FALSE, targets = 
-                                              c(4:(n_cols - 1))),
-                                     # hide sorting arrows
-                                     list(orderable = FALSE, targets = 
-                                              0:(n_cols - 3))),
-                                 pageLength = 25
-                  ))
-    })
-    
-    # render the editing table when language or data changes
-    # TODO: figure server = FALSE out
-    output$editing_table <- DT::renderDataTable(#server = FALSE, 
-        {
-            
-        # take a dependency on activity, since that is an indicator
-        # of when the table needs to be re-rendered
-        input$mgmt_operations_event
-        
-        new_data_to_display <- replace_with_display_names(
-            isolate(editing_table_data()), input$language
-        )
-        n_cols <- ncol(new_data_to_display)
-        datatable(new_data_to_display, 
-                  selection = "none", # allow selection of a single row
-                  rownames = FALSE, # hide row numbers
-                  colnames = get_disp_name(names(new_data_to_display),
-                                           language = input$language,
-                                           is_variable_name = TRUE),
-                  options = list(dom = 'tp', # hide unnecessary controls
-                                 # order chronologically by hidden column
-                                 order = list(n_cols - 1, 'desc'), 
-                                 columnDefs = list(
-                                     # hide event and date_ordering columns
-                                     list(visible = FALSE, targets = 
-                                              (n_cols - 2):(n_cols - 1)),
+                                     list(visible = FALSE, 
+                                          targets = (n_cols - 2):(n_cols - 1)),
                                      # hide sorting arrows
                                      list(orderable = FALSE, targets = 
                                               0:(n_cols - 2))),
                                  pageLength = 25
                   ))
     })
+    
+    # render the editing table when language or data changes
+    # TODO: figure server = FALSE out
+    # output$editing_table <- DT::renderDataTable(#server = FALSE, 
+    #     {
+    #         
+    #     # take a dependency on activity, since that is an indicator
+    #     # of when the table needs to be re-rendered
+    #     input$mgmt_operations_event
+    #     
+    #     new_data_to_display <- replace_with_display_names(
+    #         isolate(editing_table_data()), input$language
+    #     )
+    #     n_cols <- ncol(new_data_to_display)
+    #     datatable(new_data_to_display, 
+    #               selection = "none", # allow selection of a single row
+    #               rownames = FALSE, # hide row numbers
+    #               colnames = get_disp_name(names(new_data_to_display),
+    #                                        language = input$language,
+    #                                        is_variable_name = TRUE),
+    #               options = list(dom = 'tp', # hide unnecessary controls
+    #                              # order chronologically by hidden column
+    #                              order = list(n_cols - 1, 'desc'), 
+    #                              columnDefs = list(
+    #                                  # hide event and date_ordering columns
+    #                                  list(visible = FALSE, targets = 
+    #                                           (n_cols - 2):(n_cols - 1)),
+    #                                  # hide sorting arrows
+    #                                  list(orderable = FALSE, targets = 
+    #                                           0:(n_cols - 2))),
+    #                              pageLength = 25
+    #               ))
+    # })
     
     # holds boolean values which indicate whether the conditions for the 
     # visibility of data tables are met
@@ -1451,41 +1522,10 @@ server <- function(input, output, session) {
 
         }
         
-        # update table_block selector choices separately
-        if (isTruthy(input$site)) {
-            block_choices <- subset(sites, site == input$site)$blocks[[1]]
-            names_for_block_choices <- c(
-                get_disp_name("block_choice_all", input$language), 
-                block_choices)
-            choices_for_table_block <- c("block_choice_all", block_choices)
-            names(choices_for_table_block) <- names_for_block_choices
-            
-            updateSelectInput(session, "table_block", 
-                              choices = choices_for_table_block)
-        }
-        
-        # update table_activity selector choices separately
-        choices_for_table_activity <- 
-            c("activity_choice_all", get_category_names(
-                "mgmt_operations_event_choice"))
-        names(choices_for_table_activity) <- 
-            get_disp_name(choices_for_table_activity, input$language)
-        updateSelectInput(session, "table_activity", 
-                          choices = choices_for_table_activity)
-        
-        # update table_year selector choices separately
-        years <- get_table_year_choices()
-        
-        current_choice <- input$table_year
-        if (!isTruthy(current_choice) || !(current_choice %in% years)) {
-            current_choice <- "year_choice_all"
-        }
-        
-        table_year_choices <- c("year_choice_all", years)
-        names(table_year_choices) <- get_disp_name(table_year_choices, 
-                                                   input$language)
-        updateSelectInput(session, "table_year", selected = current_choice,
-                          choices = table_year_choices)
+        # update table selector choices separately
+        update_table_block_choices()
+        update_table_activity_choices()
+        update_table_year_choices()
     })
     
 }
