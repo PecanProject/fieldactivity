@@ -631,6 +631,9 @@ server <- function(input, output, session) {
     # lists of events by block on the currently viewed site
     # accessed like events$by_block[["0"]]
     events <- reactiveValues(by_block = list())
+    # per session global variable, indicates whether the currently edited event
+    # is visible in the front page table
+    edited_event_visible <- TRUE
     
     observeEvent(event_to_edit(), ignoreNULL = FALSE, {
         
@@ -914,7 +917,12 @@ server <- function(input, output, session) {
         row_index <- input$mgmt_events_table_rows_selected
         
         if (is.null(row_index)) {
-            event_to_edit(NULL)
+            # if it was the user de-selecting the event, exit edit mode
+            # (the other alternative is that the currently edited event is not
+            # visible in the table and therefore no element can be selected)
+            if (edited_event_visible) {
+                event_to_edit(NULL)
+            }
             return()
         }
         
@@ -1251,13 +1259,24 @@ server <- function(input, output, session) {
     # render frontpage table when input$language or table data changes
     output$mgmt_events_table <- DT::renderDataTable(server = FALSE, {
             
-            
         new_data_to_display <- replace_with_display_names(
             frontpage_table_data(), input$language)
         n_cols <- ncol(new_data_to_display)
         
+        # select the row which we are currently editing
+        row_number <- NULL
+        if (!is.null(isolate(event_to_edit()))) {
+            row_number <- find_event_index(isolate(event_to_edit()), 
+                                           new_data_to_display$event)
+            # if we couldn't find the currently edited event in the table,
+            # prevent clearing the event
+            edited_event_visible <<- !is.null(row_number)
+        }
+        
         datatable(new_data_to_display, 
-                  selection = "single", # allow selection of a single row
+                  # allow selection of a single row
+                  selection = list(mode = "single", 
+                                   selected = row_number),
                   rownames = FALSE, # hide row numbers
                   colnames = get_disp_name(names(new_data_to_display),
                                              language = input$language,
