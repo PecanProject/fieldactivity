@@ -14,7 +14,7 @@ library(glue) # used for debug printing
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- TRUE
+dev_mode <- FALSE
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -462,64 +462,72 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     br(),
     
     # create a sidebar layout
-    shinyjs::hidden(div(id = "sidebar", sidebarLayout(
+    #shinyjs::hidden(div(id = "sidebar", sidebarLayout(
+    shinyjs::hidden(div(id = "sidebar", wellPanel(
         # the sidebar contains the selectors for entering information
         # about the event
-        sidebarPanel(
-            
-            h3(textOutput("sidebar_title"), 
-               style = "margin-bottom = 0px; margin-top = 0px; 
-               margin-block-start = 0px"),
-            
-            # in general the choices and labels don't have to be defined for
-            # selectInputs, as they will be populated when the language is
-            # changed (which also happens when the app starts)
-            
-            span(textOutput("required_variables_helptext"), 
-                 style = "color:gray"),
-            br(),
-            
-            selectInput("block", label = "", choices = ""),
-            
-            selectInput("mgmt_operations_event", label = "", choice = ""),
-            
-            # setting max disallows inputting future events
-            dateInput(
-                "date",
-                format = "dd/mm/yyyy",
-                label = "",
-                max = Sys.Date(),
-                value = Sys.Date(),
-                weekstart = 1
-            ),
-            
-            textAreaInput(
-                "mgmt_event_notes",
-                label = "",
-                placeholder = "",
-                resize = "vertical",
-                height = "70px"
-            ),
-            
-            # show a detailed options panel for the different activities
-            # activity_options is defined in ui_builder.R
-            create_ui(activity_options, create_border = FALSE),
-            
-            actionButton("save", label = "Save"),
-            
-            actionButton("cancel", label = "Cancel"),
-            
-            shinyjs::hidden(actionButton("delete", label = "Delete", 
-                                         class = "btn-warning"))
-        ),
+        #sidebarPanel(width = 12,
+                     fluidRow(
+                     column(width = 3,
+                            h3(textOutput("sidebar_title"), 
+                               style = "margin-bottom = 0px; margin-top = 0px; 
+                   margin-block-start = 0px"),
+                            
+                            # in general the choices and labels don't have to be 
+                            # defined for  selectInputs, as they will be 
+                            # populated when the language is changed 
+                            # (which also happens when the app starts)
+                            
+                            span(textOutput("required_variables_helptext"), 
+                                 style = "color:gray"),
+                            br(),
+                            
+                            selectInput("block", label = "", choices = ""),
+                            
+                            selectInput("mgmt_operations_event", label = "", 
+                                        choice = ""),
+                            
+                            # setting max disallows inputting future events
+                            dateInput(
+                                "date",
+                                format = "dd/mm/yyyy",
+                                label = "",
+                                max = Sys.Date(),
+                                value = Sys.Date(),
+                                weekstart = 1
+                            ),
+                            
+                            textAreaInput(
+                                "mgmt_event_notes",
+                                label = "",
+                                placeholder = "",
+                                resize = "vertical",
+                                height = "70px"
+                            ),
+                            
+                            actionButton("save", label = "Save"),
+                            
+                            actionButton("cancel", label = "Cancel"),
+                            
+                            shinyjs::hidden(actionButton("delete", label = "Delete", 
+                                                         class = "btn-warning"))
+                     ),
+                     
+                     column(width = 9, 
+                            # show a detailed options panel for the 
+                            # different activities
+                            # activity_options is defined in ui_builder.R
+                            create_ui(activity_options, create_border = FALSE)
+                     ))
+        )#,
         
-        mainPanel(
-        #     h2(textOutput("editing_table_title")),
-        #     br(),
-        #     # table for showing already supplied information
-        #     DT::dataTableOutput("editing_table")
-        )
-    )))
+        #mainPanel(width = 0
+                  #     h2(textOutput("editing_table_title")),
+                  #     br(),
+                  #     # table for showing already supplied information
+                  #     DT::dataTableOutput("editing_table")
+        #)
+    ))#)
 
 )
 

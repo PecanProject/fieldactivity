@@ -272,7 +272,7 @@ tableServer <- function(id, row_names, language, visible,
                     # not escaped when rendering the table
                     widget <- as.character(
                         create_element(element,
-                                       width = width,
+                                       #width = width,
                                        override_code_name = code_name,
                                        override_label = "",
                                        override_value = value,
