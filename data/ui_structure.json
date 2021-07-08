@@ -15,24 +15,36 @@
       "type" : "textOutput"
     },
 
+    "table_filter_text_1" : {
+      "code_name" : "table_filter_text_1",
+      "type" : "textOutput"
+    },
+
+    "table_filter_text_2" : {
+      "code_name" : "table_filter_text_2",
+      "type" : "textOutput"
+    },
+
+    "table_filter_text_3" : {
+      "code_name" : "table_filter_text_3",
+      "type" : "textOutput"
+    },
+
     "table_activity" : {
       "code_name" : "table_activity",
       "type" : "selectInput",
-      "label" : "table_activity_label",
       "choices" : "IGNORE"
     },
 
     "table_block" : {
       "code_name" : "table_block",
       "type" : "selectInput",
-      "label" : "table_block_label",
       "choices" : "IGNORE"
     },
 
     "table_year" : {
       "code_name" : "table_year",
       "type" : "selectInput",
-      "label" : "table_year_label",
       "choices" : "IGNORE"
     },
 

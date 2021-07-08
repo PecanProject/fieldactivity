@@ -17,9 +17,9 @@ mgmt_operations_event_choice,other,other,muu
 #
 # the following are the “all” choices for frontpage selectors
 #
-activity_choice,activity_choice_all,All,Kaikki
-block_choice,block_choice_all,All,Kaikki
-year_choice,year_choice_all,All,Kaikki
+activity_choice,activity_choice_all,all,kaikki
+block_choice,block_choice_all,all,kaikki
+year_choice,year_choice_all,all,kaikki
 #
 # variable names (these show up in the tables)
 #
@@ -141,8 +141,11 @@ variable_name,other_notes,Notes,Muistiinpanot
 #
 element_label,window_title,Enter Management Events,Syötä tilanhoitotapahtumia
 element_label,frontpage_text,Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.,Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä.
-element_label,frontpage_table_title,Summary of Events,Yhteenveto tapahtumista
+element_label,frontpage_table_title,Events,Tapahtumat
 #   element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
+element_label,table_filter_text_1,"Showing ","Näytetään "
+element_label,table_filter_text_2," events from block "," tapahtumat lohkosta "
+element_label,table_filter_text_3," and from year "," ja vuodelta "
 element_label,table_activity_label,Choose which event types to display:,Valitse mitkä tapahtumatyypit näytetään:
 element_label,table_block_label,Choose which blocks' events to display:,Valitse minkä lohkojen tapahtumat näytetään:
 element_label,table_year_label,Choose which years' events to display:,Valitse minkä vuosien tapahtumat näytetään:
@@ -154,7 +157,7 @@ element_label,block_label,Select the block*:,Valitse lohko*:
 element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
 element_label,date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
 element_label,mgmt_event_notes_label,Description:,Kuvaus:
-element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. “first harvest of the year”, “spring fertilization” or “protection against rot”. This will appear on the summary table.","Yleinen kuvaus tapahtumasta, esim. “vuoden ensimmäinen sadonkorjuu”, “kevätlannoitus” tai “suoja mädäntymistä vastaan”. Tämä tulee näkyviin yhteenvetotaulukkoon."
+element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. “first harvest of the year”, “spring fertilization” or “protection against rot”. This will appear on the event list.","Yleinen kuvaus tapahtumasta, esim. “vuoden ensimmäinen sadonkorjuu”, “kevätlannoitus” tai “suoja mädäntymistä vastaan”. Tämä tulee näkyviin tapahtumalistaan."
 element_label,save_label,Save,Tallenna
 element_label,cancel_label,Cancel,Peruuta
 element_label,delete_label,Delete,Poista

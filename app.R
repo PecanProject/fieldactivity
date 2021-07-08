@@ -10,11 +10,12 @@ library(shinythemes) # change theme for login UI (and possibly rest of app)
 #library(keyring) # for interacting with system credential store to store db key
 library(DT) # fancier data table
 library(glue) # used for debug printing
+library(stringr) # used esp in evaluate_condition
 
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- FALSE
+dev_mode <- TRUE
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -239,18 +240,6 @@ get_variable_table <- function(variable_name, only_rows = FALSE) {
     return(NULL)
 }
 
-# takes a condition written in javascript notation (visibility conditions
-# in ui_structure.json) and evaluates it in R.
-# Might not be best coding practice, but works as long as the js_condition
-# doesn't have any typos.
-# TODO: add error catching
-evaluate_condition <- function(js_condition) {
-    # substitute dots with dollar signs (fixed = TRUE means we don't use regex)
-    condition <- gsub(".", "$", js_condition, fixed = TRUE)
-    # parse string into an expression and evaluate it
-    eval(parse(text = condition))
-}
-
 # this function is used to update the various texts in the app into the correct
 # language etc.
 # TODO: incorporate into update_ui_element?
@@ -441,13 +430,26 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     h1(textOutput("window_title")),
     
     # show instructions
-    textOutput("frontpage_text"),
+    div(style = "max-width:500px;", textOutput("frontpage_text")),
     
     h2(textOutput("frontpage_table_title")),
     
-    selectInput("table_activity", label = "", choices = c("")),
-    selectInput("table_block", label = "", choices = c("")),
-    selectInput("table_year", label = "", choices = c("")),
+    div(style="display: inline-block;vertical-align:middle;",
+        textOutput("table_filter_text_1", inline = TRUE)),
+    div(style="display: inline-block;vertical-align:middle;", 
+        selectInput("table_activity", label = "", choices = c(""), 
+                    width = "100px")),
+    div(style="display: inline-block;vertical-align:middle;",
+        textOutput("table_filter_text_2", inline = TRUE)),
+    div(style="display: inline-block;vertical-align:middle;", 
+        selectInput("table_block", label = "", choices = c(""),
+                    width = "100px")),
+    div(style="display: inline-block;vertical-align:middle;",
+        textOutput("table_filter_text_3", inline = TRUE)),
+    div(style="display: inline-block;vertical-align:middle;", 
+        selectInput("table_year", label = "", choices = c(""),
+                    width = "100px")),
+    div(style="display: inline-block;vertical-align:middle;", "."),
     
     # front page data table
     DT::dataTableOutput("mgmt_events_table"),
@@ -503,14 +505,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
                                 placeholder = "",
                                 resize = "vertical",
                                 height = "70px"
-                            ),
-                            
-                            actionButton("save", label = "Save"),
-                            
-                            actionButton("cancel", label = "Cancel"),
-                            
-                            shinyjs::hidden(actionButton("delete", label = "Delete", 
-                                                         class = "btn-warning"))
+                            )
                      ),
                      
                      column(width = 9, 
@@ -518,8 +513,18 @@ ui <- fluidPage(theme = shinytheme("lumen"),
                             # different activities
                             # activity_options is defined in ui_builder.R
                             create_ui(activity_options, create_border = FALSE)
+                     )),
+                     
+                     fluidRow(
+                         column(width = 12,
+                         actionButton("save", label = "Save"),
+                         
+                         actionButton("cancel", label = "Cancel"),
+                         
+                         shinyjs::hidden(actionButton("delete", label = "Delete", 
+                                                      class = "btn-warning"))
                      ))
-        )#,
+        )
         
         #mainPanel(width = 0
                   #     h2(textOutput("editing_table_title")),
@@ -527,7 +532,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
                   #     # table for showing already supplied information
                   #     DT::dataTableOutput("editing_table")
         #)
-    ))#)
+    ))
 
 )
 
@@ -560,7 +565,6 @@ server <- function(input, output, session) {
         # passphrase = key_get("FO-mgmt-events-key", "FO-mgmt-events-user")
         passphrase = "salasana"
     )
-
     
     # change login form language when requested
     observeEvent(input$login_language, {
@@ -815,6 +819,27 @@ server <- function(input, output, session) {
         updateSelectInput(session, "table_activity", selected = current_choice,
                           choices = choices_for_table_activity)
     }
+    
+    # takes a condition written in javascript notation (visibility conditions
+    # in ui_structure.json) and evaluates it in R.
+    # Might not be best coding practice, but works as long as the js_condition
+    # doesn't have any typos.
+    evaluate_condition <- function(js_condition) {
+        # substitute dots with dollar signs 
+        # (fixed = TRUE means we don't use regex)
+        condition <- gsub("input.", "input$", js_condition, fixed = TRUE)
+        
+        if (str_detect(condition, ".length")) {
+            length_index <- str_locate(condition, ".length")
+            start <- str_sub(condition, end = length_index[,"start"]-1)
+            condition <- paste0("length(", start, ")", 
+                                    str_sub(condition, 
+                                            start = length_index[,"end"] + 1))
+        }
+        message(condition)
+        # parse string into an expression and evaluate it
+        tryCatch(eval(parse(text = condition)), finally = {message("FAIL")})
+    }
 
     # update year choices when events change
     observeEvent(events$by_block, {
@@ -1060,14 +1085,25 @@ server <- function(input, output, session) {
         # only those
         # TODO: not all of the variables under an activity option are 
         # necessarily relevant. How to determine the ones that are?
-        relevant_variables <- unlist(rlapply(
-            activity_options[[input$mgmt_operations_event]],
+        
+        widget_list <- activity_options[[input$mgmt_operations_event]]
+
+        relevant_variables <- unlist(rlapply(widget_list,
             fun = function(x) x$code_name))
         relevant_variables <- c("block", 
                                 "mgmt_operations_event",
                                 "date",
                                 "mgmt_event_notes",
                                 relevant_variables)
+        # skip_variables <- unlist(rlapply(widget_list, fun = function(x) {
+        #     if (!is.null(x$condition)  && !evaluate_condition(x$condition)) {
+        #         rlapply(x, fun = function(x) x$code_name)
+        #     }
+        # }))
+        # 
+        # print(relevant_variables)
+        # print(skip_variables)
+        # return()
         
         # determine whether we need to read some variables from a table or not
         read_from_table <- NULL
@@ -1512,12 +1548,12 @@ server <- function(input, output, session) {
                 if (is.null(choices)) {
                     updateSelectInput(session, 
                                       code_name,
-                                      label = label,
+                                      label = ifelse(is.null(label),"",label),
                                       selected = current_value) 
                 } else {
                     updateSelectInput(session, 
                                       code_name,
-                                      label = label,
+                                      label = ifelse(is.null(label),"",label),
                                       choices = choices,
                                       selected = current_value)
                 }
