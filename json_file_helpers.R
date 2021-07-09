@@ -4,25 +4,27 @@
 # missing value in the ICASA standard
 missingval <- "-99.0"
 # relative path to json file folder
-json_file_folder <- "data/management_events"
+#json_file_folder <- "data/management_events"
+json_file_folder <- "/data/fo-event-files"
 
 create_json_file <- function(file_path) {
-  
-  # if the events directory (stored in json_file_folder) doesn't exist,
-  # create it
-  if (!file.exists(json_file_folder)) {
-    dir.create(json_file_folder, recursive = TRUE)
-  }
-  
-  # create structure with no events
-  experiment <- list()
-  experiment$management <- list()
-  experiment$management$events <- list()
-  
-  # create file
-  jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-                       null = 'null', auto_unbox = TRUE)
-  
+    
+    # if the events directory (stored in json_file_folder) doesn't exist,
+    # create it
+    if (!file.exists(json_file_folder)) {
+        stop(glue("Could not find folder {json_file_folder}"))
+        #dir.create(json_file_folder, recursive = TRUE)
+    }
+    
+    # create structure with no events
+    experiment <- list()
+    experiment$management <- list()
+    experiment$management$events <- list()
+    
+    # create file
+    jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
+                         null = 'null', auto_unbox = TRUE)
+    
 }
 
 # write a given data frame to a json file, overwriting everything in it
@@ -57,33 +59,6 @@ write_json_file <- function(site_name, block, new_list) {
                          auto_unbox = TRUE)
 }
 
-# generate_empty_data_frame <- function() {
-#     variable_names <- get_category_names("variable_name", NULL)
-#     new_table <- data.frame()
-#     
-#     for (variable_name in variable_names) {
-#         
-#         # check if column should be list, character or numeric
-#         # currently list only if multiple is defined on the element in
-#         # sidebar_ui_structure.json
-#         #element <- rlapply(
-#         #    structure,
-#         #    code_name_checker,
-#         #    code_name = variable_name)
-#         element <- structure_lookup_list[[variable_name]]
-#         
-#         if (element$type == "numericInput") {
-#             new_table[[variable_name]] <- numeric()
-#         } else if (!is.null(element$multiple)) {
-#             new_table[[variable_name]] <- list()
-#         } else {
-#             new_table[[variable_name]] <- character()
-#         }
-#     }
-#     
-#     return(new_table)
-# }
-
 # retrieve the events of a specific site and block and return as a NESTED LIST.
 # this retrieves the events in the same "format" as they will be saved back
 # later, i.e. with code names, "-99.0" for missing values etc.
@@ -107,33 +82,6 @@ retrieve_json_info <- function(site_name, block) {
     if (length(events) == 0) {
         return(list())
     }
-    
-    # sometimes the types of the columns in the events data frame is incorrect,
-    # e.g. harvest_crop should be a list() type whereas if only single crops are
-    # reported in the json file, it will have said column as a character type.
-    # So let's convert them
-    # for (variable_name in get_category_names("variable_name")) {
-    #     
-    #     # we'll add block later
-    #     if (variable_name == "block") next
-    #     
-    #     element <- structure_lookup_list[[variable_name]]
-    #     
-    #     # if the data frame doesn't contain this variable already, add it
-    #     if (is.null(events[[variable_name]])) {
-    #         events[[variable_name]] <- NA #character(nrow(events))
-    #     }
-    #     
-    #     if (element$type == "numericInput" && 
-    #         !is.numeric(events[[variable_name]])) {
-    #         events[[variable_name]] <- as.numeric(events[[variable_name]])
-    #     } else if (!is.null(element$multiple) && 
-    #                !(class(events[[variable_name]]) == "list")) {
-    #         events[[variable_name]] <- as.list(events[[variable_name]])
-    #     } else if (class(events[[variable_name]]) == "logical") {
-    #         events[[variable_name]] <- as.character(events[[variable_name]])
-    #     }
-    # }
     
     # add block information to each event
     for (i in 1:length(events)) {

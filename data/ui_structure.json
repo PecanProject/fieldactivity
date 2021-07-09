@@ -543,7 +543,8 @@
           "grazing_period" : {
             "code_name" : "grazing_period",
             "type" : "dateRangeInput",
-            "label" : "grazing_period_label"
+            "label" : "grazing_period_label",
+            "required" : true
           },
 
           "grazing_type" : {

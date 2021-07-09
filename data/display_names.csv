@@ -225,7 +225,7 @@ element_label,grazing_species_label,Grazing species*:,Laiduntava laji*:
 element_label,grazing_species_age_group_label,Livestock age group (years):,Eläinten ikäryhmä (vuotta):
 element_label,livestock_density_label,Livestock density (number/ha):,Eläinten tiheys (eläintä/ha):
 element_label,grazing_intensity_label,"Grazing intensity (total weight of animals, kg/ha):","Laidunnusintensiteetti (eläinten kokonaispaino, kg/ha):"
-element_label,grazing_period_label,Grazing period:,Laidunnusjakso:
+element_label,grazing_period_label,Grazing period*:,Laidunnusjakso*:
 element_label,grazing_type_label,Grazing type:,Laidunnuksen tyyppi:
 element_label,grazing_area_label,Grazing area (ha):,Laidunnettava ala (ha):,
 element_label,grazing_material_removed_prop_label,Proportion of material removed (%):,Syödyn aineksen määrä (%):
