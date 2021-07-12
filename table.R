@@ -189,8 +189,11 @@ tableServer <- function(id, row_names, language, visible,
                     return(table_to_display)
                 }
                 if (!all(variables %in% names(override_vals))) {
-                    stop(paste("The override values supplied to table", id, 
-                               "are faulty!"))
+                    message(glue("The override values supplied to table {id} ",
+                                 "are missing some variables, the table ",
+                                 "will not be rendered"))
+                    override_values(NULL)
+                    return(table_to_display)
                 }
             }
 
