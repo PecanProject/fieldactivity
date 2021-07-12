@@ -690,13 +690,22 @@ server <- function(input, output, session) {
     
     # takes a condition written in javascript notation (visibility conditions
     # in ui_structure.json) and evaluates it in R.
+    # Returns either TRUE or FALSE. If the condition could not be evaluated, 
+    # returns NULL. 
     # Might not be best coding practice, but works as long as the js_condition
     # doesn't have any typos.
     evaluate_condition <- function(js_condition) {
+        
+        if (is.null(js_condition) || !is.character(js_condition)) {
+            return(NULL)
+        }
+        
         # substitute dots with dollar signs 
         # (fixed = TRUE means we don't use regex)
         condition <- gsub("input.", "input$", js_condition, fixed = TRUE)
         
+        # if the condition relates to the length of something, modify it
+        # to look like R. e.g. change "thing.length > 1" to "length(thing) > 1"
         if (str_detect(condition, ".length")) {
             length_index <- str_locate(condition, ".length")
             start <- str_sub(condition, end = length_index[,"start"]-1)
@@ -704,9 +713,24 @@ server <- function(input, output, session) {
                                     str_sub(condition, 
                                             start = length_index[,"end"] + 1))
         }
-        message(condition)
+        
+        # replace 'true' with 'TRUE' and 'false' with 'FALSE'
+        if (condition == "true") {
+            condition <- "TRUE"
+        } else if (condition == "false") {
+            condition <- "FALSE"
+        }
+
+        #message(glue("Evaluating condition {condition}"))
+        
         # parse string into an expression and evaluate it
-        tryCatch(eval(parse(text = condition)), finally = {message("FAIL")})
+        tryCatch(
+            expr = eval(parse(text = condition)),
+            error = function(cnd) {
+                message(glue("Condition {condition} could not be evaluated"))
+                NULL
+            }
+        )
     }
 
     # update year choices when events change
@@ -886,12 +910,10 @@ server <- function(input, output, session) {
             }
             
         }
+        
         # fill out current_event to match new / updated data.
         # find variables that correspond to the selected activity and save
         # only those
-        # TODO: not all of the variables under an activity option are 
-        # necessarily relevant. How to determine the ones that are?
-        
         widget_list <- activity_options[[input$mgmt_operations_event]]
 
         relevant_variables <- unlist(rlapply(widget_list,
@@ -901,54 +923,64 @@ server <- function(input, output, session) {
                                 "date",
                                 "mgmt_event_notes",
                                 relevant_variables)
-        # skip_variables <- unlist(rlapply(widget_list, fun = function(x) {
-        #     if (!is.null(x$condition)  && !evaluate_condition(x$condition)) {
-        #         rlapply(x, fun = function(x) x$code_name)
-        #     }
-        # }))
-        # 
-        # print(relevant_variables)
-        # print(skip_variables)
-        # return()
-        
+        # if a variable group's visibility condition evaluates to FALSE, 
+        # the variables in the group are not relevant and they are added to 
+        # the list of variables to be skipped.
+        # This list may include variables which we don't want to skip but
+        # will actually want to read from a table, not from a regular widget.
+        # That will be handled later.
+        skip_variables <- unlist(rlapply(widget_list, fun = function(x) {
+            if (!is.null(x$condition)) {
+                relevant <- evaluate_condition(x$condition)
+                if (!is.null(relevant) && is.na(relevant) || !relevant) {
+                    rlapply(x, fun = function(x) x$code_name)
+                }
+            }
+        }))
+
         # determine whether we need to read some variables from a table or not
-        read_from_table <- NULL
+        table_to_read <- NULL
         for (table_code_name in data_table_code_names) {
             if (visible[[table_code_name]]) {
-                read_from_table <- structure_lookup_list[[table_code_name]]
+                table_to_read <- structure_lookup_list[[table_code_name]]
+                break
             }
         }
         
         # fill / update information
         for (variable_name in get_category_names("variable_name")) {
           
+            # should the variable's value be read from a table?
+            read_from_table <- !is.null(table_to_read) && 
+                variable_name %in% table_to_read$columns
+            
             # if this variable is not relevant, make sure it is not included
             # in the event data
-            if (!(variable_name %in% relevant_variables)) {
+            if (!(variable_name %in% relevant_variables) ||
+                variable_name %in% skip_variables & !read_from_table) {
                 event[variable_name] <- NULL
                 next
             }
            
-            if (!is.null(read_from_table) && 
-                variable_name %in% read_from_table$columns) {
-        
-                value_to_save <- 
-                    table_data[[read_from_table$code_name]]()[[variable_name]]
+            # read value from table if it is available there, otherwise
+            # read the value from a regular input
+            value_to_save <- if (read_from_table) {
+                table_data[[table_to_read$code_name]]()[[variable_name]]
             } else {
-                value_to_save <- input[[variable_name]]
+                input[[variable_name]]
             }
             
             # format date value to character string and replace with missingval
             # if that fails for some reason
             if (class(value_to_save) == "Date") {
                 value_to_save <- tryCatch(
+                    expr = format(value_to_save, date_format_json),
                     error = function(cnd) {
                         message(glue("Unable to format date {value_to_save}",
                                      "into string when saving event,",
                                      "replaced with {missingval}")) 
                         missingval
-                    },
-                    format(value_to_save, date_format_json)
+                    }
                 )
             }
             
