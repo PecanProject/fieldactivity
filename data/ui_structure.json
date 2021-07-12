@@ -179,33 +179,45 @@
             "required" : true,
             "sub_elements" : {
 
+              "always" : {
+                "condition" : "true",
+                
+                "harvest_yield_harvest_dw_total" : {
+                  "code_name" : "harvest_yield_harvest_dw_total",
+                  "type" : "numericInput",
+                  "label" : "harvest_yield_harvest_dw_total_label",
+                  "min" : "0",
+                  "required" : true
+                },
+
+                "harv_yield_harv_f_wt_total" : {
+                  "code_name" : "harv_yield_harv_f_wt_total",
+                  "type" : "numericInput",
+                  "label" : "harv_yield_harv_f_wt_total_label",
+                  "min" : "0"
+                },
+        
+                "yield_C_at_harvest_total" : {
+                  "code_name" : "yield_C_at_harvest_total",
+                  "type" : "numericInput",
+                  "label" : "yield_C_at_harvest_total_label",
+                  "min" : "0"
+                }
+              },
+
               "multiple" : {
                 "condition"  : "input.harvest_crop.length > 1",
 
                 "harvest_crop_table" : {
                   "code_name" : "harvest_crop_table",
                   "type" : "dataTable",
-                  "columns" : ["harvest_yield_harvest_dw", "harv_yield_harv_f_wt", "harvest_moisture", "yield_C_at_harvest", "harvest_method", "harvest_operat_component", "canopy_height_harvest", "harvest_cut_height", "plant_density_harvest", "harvest_residue_placement"],
+                  "columns" : ["harvest_yield_harvest_dw", "harv_yield_harv_f_wt", "yield_C_at_harvest", "harvest_moisture",  "harvest_method", "harvest_operat_component", "canopy_height_harvest", "harvest_cut_height", "plant_density_harvest", "harvest_residue_placement"],
                   "rows" : "harvest_crop"
                 }
               },
 
               "single" : {
                 "condition" : "input.harvest_crop.length <= 1",
-
-                "harvest_yield_harvest_dw" : {
-                  "code_name" : "harvest_yield_harvest_dw",
-                  "type" : "numericInput",
-                  "label" : "harvest_yield_harvest_dw_label",
-                  "min" : "0"
-                },
-
-                "harv_yield_harv_f_wt" : {
-                  "code_name" : "harv_yield_harv_f_wt",
-                  "type" : "numericInput",
-                  "label" : "harv_yield_harv_f_wt_label",
-                  "min" : "0"
-                },
 
                 "harvest_moisture" : {
                   "code_name" : "harvest_moisture",
@@ -214,14 +226,7 @@
                   "min" : "0",
                   "max" : "100"
                 },
-
-                "yield_C_at_harvest" : {
-                  "code_name" : "yield_C_at_harvest",
-                  "type" : "numericInput",
-                  "label" : "yield_C_at_harvest_label",
-                  "min" : "0"
-                },
-
+                
                 "harvest_method" : {
                   "code_name" : "harvest_method",
                   "type" : "selectInput",
@@ -263,6 +268,33 @@
                   "label" : "harvest_residue_placement_label",
                   "choices" : "harvest_residue_placement_choice"
                 }
+              }, 
+              
+              "hidden" : {
+                 
+                "condition" : "false",
+                
+                "harvest_yield_harvest_dw" : {
+                  "code_name" : "harvest_yield_harvest_dw",
+                  "type" : "numericInput",
+                  "label" : "harvest_yield_harvest_dw_label",
+                  "min" : "0"
+                },
+
+                "harv_yield_harv_f_wt" : {
+                  "code_name" : "harv_yield_harv_f_wt",
+                  "type" : "numericInput",
+                  "label" : "harv_yield_harv_f_wt_label",
+                  "min" : "0"
+                },
+                
+                "yield_C_at_harvest" : {
+                  "code_name" : "yield_C_at_harvest",
+                  "type" : "numericInput",
+                  "label" : "yield_C_at_harvest_label",
+                  "min" : "0"
+                }
+                
               }
             }
           },

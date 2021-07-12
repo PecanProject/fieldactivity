@@ -33,13 +33,16 @@ variable_name,planting_depth,Sowing depth (mm),Kylvösyvyys (mm)
 variable_name,planting_material_source,Source of seeds,Siementen alkuperä
 variable_name,planting_notes,Sowing notes,Kylvömuistiinpanoja
 variable_name,harvest_area,Harvest area (ha),Pinta-ala (ha)
+variable_name,harvest_yield_harvest_dw_total,"Yield, total dry weight (kg/ha)","Sato, kuivapaino yhteensä (kg/ha)" # not in ICASA
+variable_name,harv_yield_harv_f_wt_total,"Yield, total fresh weight (t/ha)","Sato, märkäpaino yhteensä (t/ha)" # not in ICASA
+variable_name,yield_C_at_harvest_total,"Carbon (C) in yield, total (kg/ha)",Hiilen (C) määrä sadossa yhteensä (kg/ha) # not in ICASA
 variable_name,harvest_crop,Harvest crop,Korjattu laji
 variable_name,harvest_operat_component,Crop component harvested,Kerätty kasvinosa
 variable_name,canopy_height_harvest,Canopy height (m),Kasvuston korkeus (m)
 variable_name,harvest_yield_harvest_dw,"Yield, dry weight (kg/ha)","Sato, kuivapaino (kg/ha)"
 variable_name,harv_yield_harv_f_wt,"Yield, fresh weight (t/ha)","Sato, märkäpaino (t/ha)"
-variable_name,harvest_moisture,Yield moisture (%),Sadon kosteus (%)
 variable_name,yield_C_at_harvest,Carbon (C) in yield (kg/ha),Hiilen (C) määrä sadossa (kg/ha) # not in ICASA
+variable_name,harvest_moisture,Yield moisture (%),Sadon kosteus (%)
 variable_name,harvest_method,Harvest method,Korjuutapa
 variable_name,harvest_cut_height,Height of cut (cm),Niittokorkeus (cm)
 variable_name,plant_density_harvest,Plant density at harvest (plants/m2),Kasvitiheys korjuuhetkellä (kasveja/m2)
@@ -173,12 +176,15 @@ element_label,planting_material_source_placeholder,"Commercial / own seeds, seed
 element_label,planting_notes_label,Notes about the sowing:,Kylvömuistiinpanoja:
 element_label,planting_notes_placeholder,"Any notes or observations about the event, e.g. “soil was drier than usual at the time of sowing”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “maa oli tavallista kuivempi”"
 element_label,harvest_area_label,Harvest area (ha)*:,Pinta-ala (ha)*:
+element_label,harvest_yield_harvest_dw_total_label,"Yield, total dry weight (kg/ha)*:","Sato, kuivapaino yhteensä (kg/ha)*:" # not in ICASA
+element_label,harv_yield_harv_f_wt_total_label,"Yield, total fresh weight (t/ha):","Sato, märkäpaino yhteensä (t/ha):" # not in ICASA
+element_label,yield_C_at_harvest_total_label,"Carbon (C) in yield, total (kg/ha):",Hiilen (C) määrä sadossa yhteensä (kg/ha): # not in ICASA
 element_label,harvest_crop_label,Harvested crop*:,Korjattu laji*:
 element_label,harvest_operat_component_label,Crop component harvested:,Kerätty kasvinosa:
 element_label,canopy_height_harvest_label,Canopy height at harvest (m):,Kasvuston korkeus korjuuhetkellä (m):
 element_label,harvest_cut_height_label,Height of cut (cm):,Niittokorkeus (cm):
-element_label,harvest_yield_harvest_dw_label,"Harvest yield, dry weight (kg/ha):","Sato, kuivapaino (kg/ha):"
-element_label,harv_yield_harv_f_wt_label,"Harvest yield, fresh weight (t/ha):","Sato, märkäpaino (t/ha):"
+element_label,harvest_yield_harvest_dw_label,"Yield, dry weight (kg/ha):","Sato, kuivapaino (kg/ha):"
+element_label,harv_yield_harv_f_wt_label,"Yield, fresh weight (t/ha):","Sato, märkäpaino (t/ha):"
 element_label,harvest_moisture_label,"Yield moisture (%):","Sadon kosteus (%):"
 element_label,yield_C_at_harvest_label,Carbon (C) in yield (kg/ha):,Hiilen (C) määrä sadossa (kg/ha):
 element_label,harvest_method_label,Harvest method:,Sadonkorjuumenetelmä:

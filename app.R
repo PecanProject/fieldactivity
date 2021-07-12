@@ -432,7 +432,11 @@ server <- function(input, output, session) {
     # change login form language when requested
     observeEvent(input$login_language, {
         
-        # yes we are overwriting the English language. This is by far
+        #str(reactiveValuesToList(input))
+        #updateTextInput(session, "auth-user_id", value = "oma1")
+        #updateTextInput(session, "auth-user_pwd", value = "oma2")
+        #shinyjs::click("auth-go_auth") # doesn't work
+             # yes we are overwriting the English language. This is by far
         # the simplest method
         
         if (input$login_language == "disp_name_fin") {
