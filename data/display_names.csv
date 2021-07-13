@@ -78,6 +78,7 @@ variable_name,B_in_applied_fertilizer,Amount of boron (B) in fertilizer (kg/ha),
 variable_name,Mn_in_applied_fertilizer,Amount of manganese (Mn) in fertilizer (kg/ha),Mangaanin (Mn) määrä lannoitteessa (kg/ha)
 variable_name,Se_in_applied_fertilizer,Amount of selenium (Se) in fertilizer (kg/ha),Seleenin (Se) määrä lannoitteessa (kg/ha)
 variable_name,Fe_in_applied_fertilizer,Amount of iron (Fe) in fertilizer (kg/ha),Raudan (Fe) määrä lannoitteessa (kg/ha)
+variable_name,other_element_in_applied_fertilizer,Other elements in fertilizer (kg/ha),Muut ravinteet lannoitteessa (kg/ha)
 variable_name,fertilizer_notes,Notes on fertilizer application,Muistiinpanoja lannoitteen levityksestä
 variable_name,grazing_species,Grazing species,Laiduntava laji
 variable_name,grazing_species_age_group,Livestock age group (yr),Eläinten ikäryhmä (v)
@@ -209,19 +210,34 @@ element_label,fertilizer_material_source_placeholder,"e.g. local stables or own 
 element_label,fertilizer_applic_method_label,Application method:,Levitystapa:
 element_label,application_depth_fert_label,Application depth (cm):,Levityssyvyys (cm):
 element_label,fertilizer_total_amount_label,Total amount of fertilizer (kg/ha)*:,Lannoitteen kokonaismäärä (kg/ha)*:
-element_label,N_in_applied_fertilizer_label,Amount of nitrogen (N) in fertilizer (kg/ha):,Typen (N) määrä lannoitteessa (kg/ha):
-element_label,phosphorus_applied_fert_label,Amount of phosphorus (P) in fertilizer (kg/ha):,Fosforin (P) määrä lannoitteessa (kg/ha):
-element_label,fertilizer_K_applied_label,Amount of potassium (K) in fertilizer (kg/ha):,Kaliumin (K) määrä lannoitteessa (kg/ha):
-element_label,S_in_applied_fertilizer_label,Amount of sulphur (S) in fertilizer (kg/ha):,Rikin (S) määrä lannoitteessa (kg/ha):
-element_label,Ca_in_applied_fertilizer_label,Amount of calcium (Ca) in fertilizer (kg/ha):,Kalsiumin (Ca) määrä lannoitteessa (kg/ha):
-element_label,Mg_in_applied_fertilizer_label,Amount of magnesium (Mg) in fertilizer (kg/ha):,Magnesiumin (Mg) määrä lannoitteessa (kg/ha):
-element_label,Na_in_applied_fertilizer_label,Amount of sodium (Na) in fertilizer (kg/ha):,Natriumin (Na) määrä lannoitteessa (kg/ha):
-element_label,Cu_in_applied_fertilizer_label,Amount of copper (Cu) in fertilizer (kg/ha):,Kuparin (Cu) määrä lannoitteessa (kg/ha):
-element_label,Zn_in_applied_fertilizer_label,Amount of zinc (Zn) in fertilizer (kg/ha):,Sinkin (Zn) määrä lannoitteessa (kg/ha):
-element_label,B_in_applied_fertilizer_label,Amount of boron (B) in fertilizer (kg/ha):,Boorin (B) määrä lannoitteessa (kg/ha):
-element_label,Mn_in_applied_fertilizer_label,Amount of manganese (Mn) in fertilizer (kg/ha):,Mangaanin (Mn) määrä lannoitteessa (kg/ha):
-element_label,Se_in_applied_fertilizer_label,Amount of selenium (Se) in fertilizer (kg/ha):,Seleenin (Se) määrä lannoitteessa (kg/ha):
-element_label,Fe_in_applied_fertilizer_label,Amount of iron (Fe) in fertilizer (kg/ha):,Raudan (Fe) määrä lannoitteessa (kg/ha):
+element_label,N_in_applied_fertilizer_label,nitrogen (N),typpi (N)
+element_label,phosphorus_applied_fert_label,phosphorus (P),fosfori (P)
+element_label,fertilizer_K_applied_label,potassium (K),kalium (K)
+element_label,S_in_applied_fertilizer_label,sulphur (S),rikki (S)
+element_label,Ca_in_applied_fertilizer_label,calcium (Ca),kalsium (Ca)
+element_label,Mg_in_applied_fertilizer_label,magnesium (Mg),magnesium (Mg)
+element_label,Na_in_applied_fertilizer_label,sodium (Na),natrium (Na)
+element_label,Cu_in_applied_fertilizer_label,copper (Cu),kupari (Cu)
+element_label,Zn_in_applied_fertilizer_label,zinc (Zn),sinkki (Zn)
+element_label,B_in_applied_fertilizer_label,boron (B),boori (B)
+element_label,Mn_in_applied_fertilizer_label,manganese (Mn),mangaani (Mn)
+element_label,Se_in_applied_fertilizer_label,selenium (Se),seleeni (Se)
+element_label,Fe_in_applied_fertilizer_label,iron (Fe),rauta (Fe)
+element_label,other_element_in_applied_fertilizer_label,other (please specify),muu (mikä?)
+element_label,fertilizer_element_table_title,"Amounts of elements in fertilizer (kg/ha), if known:","Ravinteiden määrät lannoitteessa (kg/ha), jos tiedossa:"
+#   element_label,N_in_applied_fertilizer_label,Amount of nitrogen (N) in fertilizer (kg/ha):,Typen (N) määrä lannoitteessa (kg/ha):
+#   element_label,phosphorus_applied_fert_label,Amount of phosphorus (P) in fertilizer (kg/ha):,Fosforin (P) määrä lannoitteessa (kg/ha):
+#   element_label,fertilizer_K_applied_label,Amount of potassium (K) in fertilizer (kg/ha):,Kaliumin (K) määrä lannoitteessa (kg/ha):
+#   element_label,S_in_applied_fertilizer_label,Amount of sulphur (S) in fertilizer (kg/ha):,Rikin (S) määrä lannoitteessa (kg/ha):
+#   element_label,Ca_in_applied_fertilizer_label,Amount of calcium (Ca) in fertilizer (kg/ha):,Kalsiumin (Ca) määrä lannoitteessa (kg/ha):
+#   element_label,Mg_in_applied_fertilizer_label,Amount of magnesium (Mg) in fertilizer (kg/ha):,Magnesiumin (Mg) määrä lannoitteessa (kg/ha):
+#   element_label,Na_in_applied_fertilizer_label,Amount of sodium (Na) in fertilizer (kg/ha):,Natriumin (Na) määrä lannoitteessa (kg/ha):
+#   element_label,Cu_in_applied_fertilizer_label,Amount of copper (Cu) in fertilizer (kg/ha):,Kuparin (Cu) määrä lannoitteessa (kg/ha):
+#   element_label,Zn_in_applied_fertilizer_label,Amount of zinc (Zn) in fertilizer (kg/ha):,Sinkin (Zn) määrä lannoitteessa (kg/ha):
+#   element_label,B_in_applied_fertilizer_label,Amount of boron (B) in fertilizer (kg/ha):,Boorin (B) määrä lannoitteessa (kg/ha):
+#   element_label,Mn_in_applied_fertilizer_label,Amount of manganese (Mn) in fertilizer (kg/ha):,Mangaanin (Mn) määrä lannoitteessa (kg/ha):
+#   element_label,Se_in_applied_fertilizer_label,Amount of selenium (Se) in fertilizer (kg/ha):,Seleenin (Se) määrä lannoitteessa (kg/ha):
+#   element_label,Fe_in_applied_fertilizer_label,Amount of iron (Fe) in fertilizer (kg/ha):,Raudan (Fe) määrä lannoitteessa (kg/ha):
 element_label,fertilizer_notes_label,Notes on fertilizer application:,Muistiinpanoja lannoitteen levityksestä:
 element_label,fertilizer_notes_placeholder,"Any notes or observations about the event, e.g. “biostimulant was added because the field suffered from drought”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “lisäsin biostimulanttia pellon kuivuuden vuoksi”"
 #   element_label,org_material_applic_meth_label,Application method:,Levitystapa:

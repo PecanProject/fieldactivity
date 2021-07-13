@@ -439,96 +439,119 @@
             "min" : "0",
             "required" : true
           },
-
-          "N_in_applied_fertilizer" : {
-            "code_name" : "N_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "N_in_applied_fertilizer_label",
-            "min" : "0"
+          
+          "fertilizer_element_table_title" : {
+            "code_name" : "fertilizer_element_table_title",
+            "type" : "textOutput",
+            "style" : "label"
           },
-
-          "phosphorus_applied_fert" : {
-            "code_name" : "phosphorus_applied_fert",
-            "type" : "numericInput",
-            "label" : "phosphorus_applied_fert_label",
-            "min" : "0"
+          
+          "fertilizer_element_table" : {
+            "code_name" : "fertilizer_element_table",
+            "type" : "dataTable",
+            "rows" : [["N_in_applied_fertilizer", "phosphorus_applied_fert", "fertilizer_K_applied", "S_in_applied_fertilizer", "Ca_in_applied_fertilizer", "Mg_in_applied_fertilizer", "Na_in_applied_fertilizer"], ["Cu_in_applied_fertilizer", "Zn_in_applied_fertilizer", "B_in_applied_fertilizer", "Mn_in_applied_fertilizer", "Se_in_applied_fertilizer", "Fe_in_applied_fertilizer", "other_element_in_applied_fertilizer"]]  
           },
+          
+          "hidden" : {
+            "condition" : "false",
+            
+            "N_in_applied_fertilizer" : {
+              "code_name" : "N_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "N_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "fertilizer_K_applied" : {
-            "code_name" : "fertilizer_K_applied",
-            "type" : "numericInput",
-            "label" : "fertilizer_K_applied_label",
-            "min" : "0"
-          },
+            "phosphorus_applied_fert" : {
+              "code_name" : "phosphorus_applied_fert",
+              "type" : "numericInput",
+              "label" : "phosphorus_applied_fert_label",
+              "min" : "0"
+            },
 
-          "S_in_applied_fertilizer" : {
-            "code_name" : "S_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "S_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "fertilizer_K_applied" : {
+              "code_name" : "fertilizer_K_applied",
+              "type" : "numericInput",
+              "label" : "fertilizer_K_applied_label",
+              "min" : "0"
+            },
 
-          "Ca_in_applied_fertilizer" : {
-            "code_name" : "Ca_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "Ca_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "S_in_applied_fertilizer" : {
+              "code_name" : "S_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "S_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "Mg_in_applied_fertilizer" : {
-            "code_name" : "Mg_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "Mg_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "Ca_in_applied_fertilizer" : {
+              "code_name" : "Ca_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "Ca_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "Na_in_applied_fertilizer" : {
-            "code_name" : "Na_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "Na_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "Mg_in_applied_fertilizer" : {
+              "code_name" : "Mg_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "Mg_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "Cu_in_applied_fertilizer" : {
-            "code_name" : "Cu_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "Cu_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "Na_in_applied_fertilizer" : {
+              "code_name" : "Na_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "Na_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "Zn_in_applied_fertilizer" : {
-            "code_name" : "Zn_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "Zn_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "Cu_in_applied_fertilizer" : {
+              "code_name" : "Cu_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "Cu_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "B_in_applied_fertilizer" : {
-            "code_name" : "B_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "B_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "Zn_in_applied_fertilizer" : {
+              "code_name" : "Zn_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "Zn_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "Mn_in_applied_fertilizer" : {
-            "code_name" : "Mn_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "Mn_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "B_in_applied_fertilizer" : {
+              "code_name" : "B_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "B_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "Se_in_applied_fertilizer" : {
-            "code_name" : "Se_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "Se_in_applied_fertilizer_label",
-            "min" : "0"
-          },
+            "Mn_in_applied_fertilizer" : {
+              "code_name" : "Mn_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "Mn_in_applied_fertilizer_label",
+              "min" : "0"
+            },
 
-          "Fe_in_applied_fertilizer" : {
-            "code_name" : "Fe_in_applied_fertilizer",
-            "type" : "numericInput",
-            "label" : "Fe_in_applied_fertilizer_label",
-            "min" : "0"
+            "Se_in_applied_fertilizer" : {
+              "code_name" : "Se_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "Se_in_applied_fertilizer_label",
+              "min" : "0"
+            },
+
+            "Fe_in_applied_fertilizer" : {
+              "code_name" : "Fe_in_applied_fertilizer",
+              "type" : "numericInput",
+              "label" : "Fe_in_applied_fertilizer_label",
+              "min" : "0"
+            },
+            
+            "other_element_in_applied_fertilizer" : {
+              "code_name" : "other_element_in_applied_fertilizer",
+              "type" : "textInput",
+              "label" : "other_element_in_applied_fertilizer_label"
+            }
+            
           },
 
           "fertilizer_notes" : {

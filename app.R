@@ -73,84 +73,6 @@ sites$blocks <- sapply(sites$blocks, blocks_to_vector)
 languages <- c("English 🇬🇧" = "disp_name_eng",
                "suomi 🇫🇮" = "disp_name_fin")
 
-# function for updating a UI element. The function determines the type of the
-# element and updates its value. The value should be an atomic vector.
-# if value is set to NULL, the value of the element is cleared
-update_ui_element <- function(session, code_name, value = NULL, ...) {
-    # find the element from the UI structure lookup list, which has been
-    # generated in ui_builder.R 
-    element <- structure_lookup_list[[code_name]]
-    
-    # didn't find the element corresponding to code_name
-    # this should not happen if the element is in 
-    # sidebar_ui_structure.json
-    if (is.null(element$type)) {
-        stop("UI element type not found, could not update")
-    }
-    if (!is.atomic(value)) {
-        stop("The value given to update_ui_element should be an atomic vector")
-    }
-
-    # if value is NULL, we need to determine on a widget type basis how to 
-    # clear the value. If it isn't, replace missingvals with ""
-    if (!is.null(value)) {
-        # replace missingvals with empty strings
-        missing_indexes <- value == missingval
-        if (any(missing_indexes)) {
-            value[missing_indexes] <- ""
-        }
-    } 
-
-    
-    if (element$type == "selectInput") {
-        # if value is a list (e.g. multiple crops selected in harvest_crop)
-        # turn it into a character vector
-        # if (is.list(value)) {
-        #     print("List was turned to vector when updating selectInput")
-        #     value <- value[[1]]
-        # }
-        if (is.null(value)) value <- ""
-        updateSelectInput(session, code_name, selected = value,  ...)
-    } else if (element$type == "dateInput") {
-        if (!is.null(value) && value == "") {
-            value <- NULL
-        } else {
-            value <- tryCatch(warning = function(cnd) NULL,
-                              as.Date(value, format = date_format_json))
-        }
-        updateDateInput(session, code_name, value = value, ...)
-    } else if (element$type == "textAreaInput") {
-        if (is.null(value)) value <- ""
-        updateTextAreaInput(session, code_name, value = value, ...)
-    #} else if (element$type == "checkboxInput") {
-    #    updateCheckboxInput(session, code_name, value = value, ...)
-    } else if (element$type == "actionButton") {
-        updateActionButton(session, code_name, ...)
-    } else if (element$type == "textInput") {
-        if (is.null(value)) value <- ""
-        updateTextInput(session, code_name, value = value, ...)
-    } else if (element$type == "numericInput") {
-        # if we are given a non-numeric value, we don't want to start converting
-        # it. Let's replace it with an empty string (the default value)
-        if (!is.numeric(value)) { value <- "" }
-        updateNumericInput(session, code_name, value = value, ...)
-    } else if (element$type == "dateRangeInput") {
-        
-        if (!is.null(value) & length(value) != 2) {
-            value <- NULL
-            warning(glue("Value supplied to the dateRangeInput was not of ", 
-                         "length 2, resetting it"))
-        }
-        
-        start <- if (is.null(value)) NULL else value[1]
-        end <- if (is.null(value)) NULL else value[2]
-
-        tryCatch(warning = function(cnd) {shinyjs::reset(code_name)},
-                 updateDateRangeInput(session, code_name, 
-                                      start = start, end = end))
-    }
-}
-
 # sets the specified input fields to their default states.
 # this doesn't reset the tables (e.g. harvest_crop_table) -- they reset 
 # themselves every time they become hidden
@@ -164,7 +86,7 @@ reset_input_fields <- function(session, input, fields_to_clear,
     for (code_name in fields_to_clear) {
         if (code_name %in% exceptions) next
         #shinyjs::reset(code_name)
-        update_ui_element(session, code_name, value = NULL)
+        update_ui_element(session, code_name, clear_value = TRUE)
     }
     
     # if the table_block selector is set to a specific block, mirror that
@@ -261,7 +183,7 @@ get_variable_table <- function(variable_name, only_rows = FALSE) {
     for (table_code_name in data_table_code_names) {
         table <- structure_lookup_list[[table_code_name]]
         
-        names_to_check <- table$rows
+        names_to_check <- unlist(table$rows)
         if (!only_rows) {
             names_to_check <- c(names_to_check, table$columns)
         }
@@ -297,6 +219,7 @@ ui <- fluidPage(theme = shinytheme("lumen"),
     
     h2(textOutput("frontpage_table_title")),
     
+    # selector to filter table data
     div(style="display: inline-block;vertical-align:middle;",
         textOutput("table_filter_text_1", inline = TRUE)),
     div(style="display: inline-block;vertical-align:middle;", 
@@ -388,13 +311,6 @@ ui <- fluidPage(theme = shinytheme("lumen"),
                                                       class = "btn-warning"))
                      ))
         )
-        
-        #mainPanel(width = 0
-                  #     h2(textOutput("editing_table_title")),
-                  #     br(),
-                  #     # table for showing already supplied information
-                  #     DT::dataTableOutput("editing_table")
-        #)
     ))
 
 )
@@ -408,9 +324,9 @@ if (!dev_mode) {
                      tags_bottom = selectInput("login_language", 
                                                label = "" , 
                                                choices = languages),
-                     tags_top = tagList(
-                         p("EXAMPLE USER site: ruukki, password: Ruukki1"),
-                         p("ADMIN site: shinymanager, password: 12345")),
+                     #tags_top = tagList(
+                         #p("EXAMPLE USER site: ruukki, password: Ruukki1"),
+                         #p("ADMIN site: shinymanager, password: 12345")),
                      theme = shinytheme("lumen"),
                      enable_admin = TRUE,
                      fab_position = "top-right")
@@ -515,7 +431,7 @@ server <- function(input, output, session) {
     # per session global variable, indicates whether the currently edited event
     # is visible in the front page table
     edited_event_visible <- TRUE
-    # what were the table view settings (table_block, table_activity, table_yea)
+    # what were the table view choices (table_block, table_activity, table_year)
     # before we started editing?
     pre_edit_table_view <- list()
     
@@ -540,40 +456,54 @@ server <- function(input, output, session) {
             # another
             
             # populate the input controls with the values corresponding to the 
-            # event
+            # event, and clear others
             for (variable_name in get_category_names("variable_name")) {
                 # Update the UI elements corresponding to the variable names
                 # to hold the data of the event. If no element is found 
                 # corresponding to that name, update_ui_element does nothing.
-                # this happens e.g. with date_ordering
-                
+
                 # if there is a table corresponding to the variable (it is on
                 # the rows of the table), this is its name
-                table_code_name <- get_variable_table(variable_name, 
-                                                      only_rows = TRUE)
+                #table_code_name <- get_variable_table(variable_name, 
+                #                                      only_rows = TRUE)
                 
-                # TODO: change to use reset_input_fields
                 # this clears up old values
-                if (!(variable_name %in% names(event_to_edit()))) {
-                    update_ui_element(session, variable_name, value = NULL)
-                    #shinyjs::reset(variable_name)
+                if (variable_name %in% names(event_to_edit())) {
+                    value <- event_to_edit()[[variable_name]]
+                    update_ui_element(session, variable_name, value = value)
+                } else {
+                    update_ui_element(session, variable_name, 
+                                      clear_value = TRUE)
                     
-                    if (!is.null(table_code_name)) {
-                        prefill_values[[table_code_name]](list())
+                    # if (!is.null(table_code_name)) {
+                    #     prefill_values[[table_code_name]](list())
+                    # }
+                    # next
+                }
+            }
+            
+            # then go through all the tables and see if any of them should be
+            # pre-filled. Other tables do not need to be cleared, as they do
+            # that by themselves when they become hidden.
+            filled_table <- FALSE
+            for (table_code_name in data_table_code_names) {
+                # go through all the variable names in the event. If a variable
+                # is found which is also present in a table (either on the rows
+                # or on the columns), pre-fill the table
+                for (variable in names(event_to_edit())) {
+                    
+                    variable_table <- get_variable_table(variable)
+                    
+                    if (!is.null(variable_table) && 
+                        variable_table == table_code_name) {
+                        prefill_values[[table_code_name]](event_to_edit())
+                        filled_table <- TRUE
+                        break
                     }
-                    next
+                    
                 }
                 
-                # now update all the UI elements to show the event info
-                value <- event_to_edit()[[variable_name]]
-                
-                # if there is a table corresponding to this variable, pre-fill
-                # it
-                if (!is.null(table_code_name)) {
-                    prefill_values[[table_code_name]](event_to_edit())
-                }
-                
-                update_ui_element(session, variable_name, value = value)
+                if (filled_table) break
             }
             
             # save table view to be restored when editing is over
@@ -951,12 +881,23 @@ server <- function(input, output, session) {
         for (variable_name in get_category_names("variable_name")) {
           
             # should the variable's value be read from a table?
-            read_from_table <- !is.null(table_to_read) && 
-                variable_name %in% table_to_read$columns
+            read_from_table <- if (!is.null(table_to_read)) {
+                # if it is in the table's columns, yes
+                if (variable_name %in% table_to_read$columns) {TRUE}
+                # if it is in a custom mode table (=fertilizer_element_table)
+                # then yes too
+                else if (is.null(table_to_read$columns) & 
+                         variable_name %in% unlist(table_to_read$rows)) {TRUE}
+                # if not, then it is in the rows of the table and we will read
+                # the value instead from a regular widget
+                else {FALSE}
+            }
+    
             
             # if this variable is not relevant, make sure it is not included
             # in the event data
             if (!(variable_name %in% relevant_variables) ||
+                # variable might be in skip_variables if it is read from table
                 variable_name %in% skip_variables & !read_from_table) {
                 event[variable_name] <- NULL
                 next
@@ -1215,30 +1156,46 @@ server <- function(input, output, session) {
                          FUN = function(data_table_code_name) {
         table_structure <- structure_lookup_list[[data_table_code_name]]
         
+        # are we in custom made, i.e. is this fertilizer_element_table
+        custom_mode <- is.null(table_structure$columns)
+        
         # what are the names of the rows? This can either be determined by
         # the choices of selectInput with multiple selections, or a numericInput
         # which represents the number of rows
         row_names <- reactive({
-            row_variable <- structure_lookup_list[[table_structure$rows]]
-            if (row_variable$type == "numericInput") {
+            if (!custom_mode) {
+                row_variable <- structure_lookup_list[[table_structure$rows]]
+                if (row_variable$type == "numericInput") {
+                    
+                    number_of_rows <- input[[row_variable$code_name]]
+                    
+                    if (!isTruthy(number_of_rows)) {
+                        NULL
+                    } else {
+                        number_of_rows <- max(ceiling(number_of_rows), 1)
+                        1:number_of_rows
+                    }
+                    
+                    
+                } else if (row_variable$type == "selectInput") {
+                    input[[row_variable$code_name]]
+                }
+            } else {
                 
-                number_of_rows <- input[[row_variable$code_name]]
+                # the following is hacky, but basically allows for determining
+                # when tables in custom mode (only fertilizer_element_table)
+                # are visible
                 
-                if (!isTruthy(number_of_rows)) {
-                    NULL
+                if (input$mgmt_operations_event == "fertilizer") {
+                    1:2
                 } else {
-                    number_of_rows <- max(ceiling(number_of_rows), 1)
-                    1:number_of_rows
+                    0
                 }
                 
-                
-            } else if (row_variable$type == "selectInput") {
-                input[[row_variable$code_name]]
             }
-            
         })
-        
-        # add observer to visibility condition of table
+                            
+        # add observer to visibility condition of table.
         # table is visible if the length of the variable presented on the rows
         # of the table is more than 1
         observeEvent(row_names(), ignoreNULL = FALSE, {

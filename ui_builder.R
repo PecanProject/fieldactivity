@@ -3,7 +3,7 @@
 # Otto Kuusela 2021
 
 structure_file_path <- "data/ui_structure.json"
-structure <- jsonlite::fromJSON(structure_file_path)
+structure <- jsonlite::fromJSON(structure_file_path, simplifyMatrix = FALSE)
 activity_options <- structure$sidebar$mgmt_operations_event$sub_elements
 
 # function which recursively applies a function to the elements of a list that
@@ -171,9 +171,14 @@ create_element <- function(element, override_label = NULL,
                     choices = element_choices, multiple = multiple,
                     selected = override_selected, ...)
     } else if (element$type == "textOutput") {
-        # these are inteded to look like helpTexts so make text gray
-        tagList(span(textOutput(element_code_name, ...), style = "color:gray"),
+        if (!is.null(element$style) && element$style == "label") {
+            textOutput(element_code_name, ...)
+        } else {
+            # these are inteded to look like helpTexts so make text gray
+            tagList(
+                span(textOutput(element_code_name, ...), style = "color:gray"),
                 br())
+        }
     } else if (element$type == "textInput") {
         textInput(inputId = element_code_name, label = element_label, 
                   value = element_value, placeholder = element_placeholder, ...)
@@ -249,6 +254,89 @@ get_selectInput_choices <- function(element_structure, language) {
     }
     
     return(choices)
+}
+
+# function for updating a UI element. The function determines the type of the
+# element and updates its value. The value should be an atomic vector.
+# if value is set to NULL, the value of the element is not touched.
+# If clear_value is set to TRUE, the value of the element is cleared
+update_ui_element <- function(session, code_name, value = NULL, 
+                              clear_value = FALSE, ...) {
+    # find the element from the UI structure lookup list, which has been
+    # generated in ui_builder.R 
+    element <- structure_lookup_list[[code_name]]
+    
+    # didn't find the element corresponding to code_name
+    # this should not happen if the element is in 
+    # sidebar_ui_structure.json
+    if (is.null(element$type)) {
+        stop("UI element type not found, could not update")
+    }
+    if (!is.atomic(value)) {
+        stop("The value given to update_ui_element should be an atomic vector")
+    }
+    
+    # if value is NULL, we need to determine on a widget type basis how to 
+    # clear the value. If it isn't, replace missingvals with ""
+    if (!is.null(value)) {
+        # replace missingvals with empty strings
+        missing_indexes <- value == missingval
+        if (any(missing_indexes)) {
+            value[missing_indexes] <- ""
+        }
+    } 
+    
+    
+    if (element$type == "selectInput") {
+        # if value is a list (e.g. multiple crops selected in harvest_crop)
+        # turn it into a character vector
+        # if (is.list(value)) {
+        #     print("List was turned to vector when updating selectInput")
+        #     value <- value[[1]]
+        # }
+        if (clear_value) value <- ""
+        # setting the selected value to NULL doesn't change the widget's value
+        updateSelectInput(session, code_name, selected = value,  ...)
+    } else if (element$type == "dateInput") {
+        # setting value to NULL will reset the date to the current date
+        value <- if (clear_value) {
+            NULL
+        } else {
+            tryCatch(expr = as.Date(value, format = date_format_json),
+                     warning = function(cnd) NULL)
+        }
+        updateDateInput(session, code_name, value = value, ...)
+    } else if (element$type == "textAreaInput") {
+        if (clear_value) value <- ""
+        updateTextAreaInput(session, code_name, value = value, ...)
+    #} else if (element$type == "checkboxInput") {
+    #    updateCheckboxInput(session, code_name, value = value, ...)
+    } else if (element$type == "actionButton") {
+        updateActionButton(session, code_name, ...)
+    } else if (element$type == "textInput") {
+        if (clear_value) value <- ""
+        updateTextInput(session, code_name, value = value, ...)
+    } else if (element$type == "numericInput") {
+        # if we are given a non-numeric value, we don't want to start converting
+        # it. Let's replace it with an empty string (the default value)
+        # if (!is.numeric(value)) {value <- ""}
+        if (clear_value) { value <- "" }
+        updateNumericInput(session, code_name, value = value, ...)
+    } else if (element$type == "dateRangeInput") {
+        
+        if (!is.null(value) & length(value) != 2) {
+            value <- NULL
+            warning(glue("Value supplied to the dateRangeInput was not of ", 
+                         "length 2, resetting it"))
+        }
+        
+        start <- if (is.null(value) | clear_value) NULL else value[1]
+        end <- if (is.null(value) | clear_value) NULL else value[2]
+        
+        tryCatch(warning = function(cnd) {shinyjs::reset(code_name)},
+                 updateDateRangeInput(session, code_name, 
+                                      start = start, end = end))
+    }
 }
 
 # checks whether the list x (corresponding to a UI element) has a specified
