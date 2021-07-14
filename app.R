@@ -516,7 +516,6 @@ server <- function(input, output, session) {
             pre_edit_table_view <<- list(activity = input$table_activity,
                                          block = input$table_block,
                                          year = input$table_year)
-            str(pre_edit_table_view)
         }
         
         # change view of the front page table
@@ -883,7 +882,7 @@ server <- function(input, output, session) {
                 }
             }
         }))
-
+        
         # determine whether we need to read some variables from a table or not
         table_to_read <- NULL
         for (table_code_name in data_table_code_names) {
@@ -895,7 +894,7 @@ server <- function(input, output, session) {
         
         # fill / update information
         for (variable_name in get_category_names("variable_name")) {
-          
+
             # should the variable's value be read from a table?
             read_from_table <- if (!is.null(table_to_read)) {
                 # if it is in the table's columns, yes
@@ -907,8 +906,7 @@ server <- function(input, output, session) {
                 # if not, then it is in the rows of the table and we will read
                 # the value instead from a regular widget
                 else {FALSE}
-            }
-    
+            } else {FALSE}
             
             # if this variable is not relevant, make sure it is not included
             # in the event data
@@ -941,6 +939,8 @@ server <- function(input, output, session) {
                 )
             }
             
+            ## TODO: add handling for file uploads here
+            
             # if the value is not defined or empty, replace with missingval
             if (length(value_to_save) == 0) {
                 value_to_save <- missingval
@@ -964,7 +964,7 @@ server <- function(input, output, session) {
             event[variable_name] <- value_to_save
         }
         
-        #print("ALL THE INFO FILLED:")
+        #message("ALL THE DATA FILLED:")
         #str(event)
         
         # load the json file corresponding to the new block selection (new as in

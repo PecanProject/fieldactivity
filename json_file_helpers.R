@@ -4,43 +4,52 @@
 # missing value in the ICASA standard
 missingval <- "-99.0"
 # relative path to json file folder
-#json_file_folder <- "data/management_events"
-json_file_folder <- "/data/fo-event-files"
+#json_file_base_folder <- "data/management_events"
+json_file_base_folder <- "/data/fo-event-files"
 
-create_json_file <- function(file_path) {
-    
-    # if the events directory (stored in json_file_folder) doesn't exist,
-    # create it
-    if (!file.exists(json_file_folder)) {
-        stop(glue("Could not find folder {json_file_folder}"))
-        #dir.create(json_file_folder, recursive = TRUE)
+# create_json_file <- function(file_path) {
+#     
+#     # if the events directory (stored in json_file_base_folder) doesn't exist,
+#     # stop
+#     if (!file.exists(json_file_base_folder)) {
+#         stop(glue("Could not find folder {json_file_base_folder}"))
+#         #dir.create(json_file_base_folder, recursive = TRUE)
+#     }
+#     
+#     if (!file.exists(file_path))
+#     
+#     # create structure with no events
+#     experiment <- list()
+#     experiment$management <- list()
+#     experiment$management$events <- list()
+#     
+#     # create file
+#     jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
+#                          null = 'list', auto_unbox = TRUE)
+#     
+# }
+
+create_file_folder <- function(site, block) {
+    # if the events directory (stored in json_file_base_folder) doesn't exist,
+    # stop
+    if (!dir.exists(json_file_base_folder)) {
+        stop(glue("Could not find folder {json_file_base_folder}"))
     }
     
-    # create structure with no events
-    experiment <- list()
-    experiment$management <- list()
-    experiment$management$events <- list()
-    
-    # create file
-    jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-                         null = 'null', auto_unbox = TRUE)
-    
+    folder_path <- file.path(json_file_base_folder, site, block)
+    if (!dir.exists(folder_path)) {
+        dir.create(folder_path, recursive = TRUE)
+    }
 }
 
-# write a given data frame to a json file, overwriting everything in it
-# this is used when editing previously entered entries
-write_json_file <- function(site_name, block, new_list) {
-    # corresponding file name: "sitename_block_events.json"
-    file_name <- paste(site_name, block, "events.json", sep = "_")
-    file_path <- file.path(json_file_folder, file_name)
+# write a given event list to a json file, overwriting everything in it
+write_json_file <- function(site, block, new_list) {
     
-    # if file doesn't exist, create it
-    if (!file.exists(file_path)) {
-        # this could happen when an entry's block is edited to be one that 
-        # does not yet have entries
-        create_json_file(file_path)
-    }
+    # this ensures that the folder to store this file exists
+    create_file_folder(site, block)
     
+    file_path <- file.path(json_file_base_folder, site, block, "events.json")
+
     # create appropriate structure
     experiment <- list()
     experiment$management <- list()
@@ -55,30 +64,26 @@ write_json_file <- function(site_name, block, new_list) {
     
     # create file
     jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-                         null = "list",
-                         auto_unbox = TRUE)
+                         null = "list", auto_unbox = TRUE)
 }
 
 # retrieve the events of a specific site and block and return as a NESTED LIST.
 # this retrieves the events in the same "format" as they will be saved back
 # later, i.e. with code names, "-99.0" for missing values etc.
-# the only difference is the block column, which will be removed when saving
+# the only difference is the block value, which will be removed when saving
 # back to a json file.
-retrieve_json_info <- function(site_name, block) {
-    
-    # corresponding file name: "sitename_block_events.json"
-    file_name <- paste(site_name, block, "events.json", sep = "_")
-    file_path <- file.path(json_file_folder, file_name)
+retrieve_json_info <- function(site, block) {
+    file_path <- file.path(json_file_base_folder, site, block, "events.json")
     
     # if file doesn't exist or given names are empty, can't read it
-    if (!file.exists(file_path) | site_name == "" | block == "") {
+    if (!file.exists(file_path) | site == "" | block == "") {
         return(list())
     }
     
     events <- jsonlite::fromJSON(file_path, 
                                  simplifyDataFrame = FALSE)$management$events
     
-    # if there are no rows, return an empty data frame
+    # if there are no events, return an empty list
     if (length(events) == 0) {
         return(list())
     }
