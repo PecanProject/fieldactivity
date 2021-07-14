@@ -3,7 +3,7 @@
 
 # missing value in the ICASA standard
 missingval <- "-99.0"
-log <- TRUE
+log <- FALSE
 
 # TODO: move these to the javascript file
 # javascript callback scripts must be wrapped inside a function for some reason
@@ -77,8 +77,6 @@ tableServer <- function(id, row_names, language, visible,
             variables <- table_structure$columns
             n_cols <- length(variables)
         }
-        
-        message(glue("Setup done ({id})"))
         
         # this unbinds the table elements before they are re-rendered.
         # Setting a higher priority ensures this runs before the table render
@@ -155,7 +153,7 @@ tableServer <- function(id, row_names, language, visible,
         observeEvent(row_names(), ignoreNULL = FALSE, {
             if (custom_mode) {
                 if (length(row_names()) == 2) {
-                    message("Triggering the row trigger in custom mode")
+                    if (log) message("Triggering row trigger in custom mode")
                     row_trigger(row_trigger() + 1)
                 }
                 return()
@@ -492,20 +490,19 @@ tableServer <- function(id, row_names, language, visible,
                     rownames = !custom_mode,
                     options = 
                         list(dom = "t",
-                             # here we defined columns 0 through n_cols unorderable
-                             # instead of n_cols - 1, because row names are visible
-                             columnDefs = list(
-                                 list(orderable = FALSE, targets = 0:(n_cols-1))),
+                             # hide sorting arrows
+                             ordering = FALSE,
                              # binds the inputs when drawing is done
                              drawCallback = JS(js_bind_script),
-                             # calls selectize() on all selectInputs, which makes them
-                             # look the way they should
+                             # calls selectize() on all selectInputs, which
+                             # makes them look the way they should. Also tell
+                             # the client to send the rendering done message.
                              initComplete = 
-                                 JS(paste0(
-                                     "function(settings, json) {",
-                                     "do_selectize('", NS(id, "table"), "'); ",
-                                     "rendering_done('", NS(id, "rendered"), "'); }"
-                                 ))
+                             JS(paste0(
+                                 "function(settings, json) {",
+                                 "do_selectize('", NS(id, "table"), "'); ",
+                                 "rendering_done('", NS(id, "rendered"), "'); }"
+                             ))
                         ))
             # if we are in custom mode, align cells vertically so that the
             # widgets are always in line

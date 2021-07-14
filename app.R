@@ -174,18 +174,32 @@ find_event_index <- function(event, event_list) {
 # if a variable is in a table (e.g. planting_depth is in a table when 
 # planted_crop has multiple values), return the code name of that table. 
 # Otherwise return NULL.
-# only_rows determines whether we seek the variable from the rows only, i.e.
-# get_variable_table("harvest_crop", only_rows = TRUE) returns 
-# "harvest_crop_table" and 
-# get_variable_table("harvest_cut_height", only_rows = TRUE) returns NULL
-get_variable_table <- function(variable_name, only_rows = FALSE) {
+# only_values determines which variables we seek:
+# TRUE: only return the table code name if the variable is one whose
+# value is entered in the table, e.g. all variables in fertilizer_element_table
+# but not harvests_crop in harvest_crop_table, since harvest_crop's value is
+# entered in a regular widget.
+# FALSE: return table code name if variable is present in the table in any
+# form, e.g. harvest_crop also returns harvest_crop_table since it is on the 
+# rows of that table
+get_variable_table <- function(variable_name, only_values = FALSE) {
     
     for (table_code_name in data_table_code_names) {
         table <- structure_lookup_list[[table_code_name]]
         
-        names_to_check <- unlist(table$rows)
-        if (!only_rows) {
-            names_to_check <- c(names_to_check, table$columns)
+        # determine the variable names to check if they match variable_name
+        names_to_check <- if (is.null(table$columns)) {
+            # if columns is not defined, the table is in custom mode (e.g. 
+            # fertilizer_element_table) and all variables (stored in rows) are
+            # to be checked
+            unlist(table$rows)
+        } else {
+            # in a normal table, the “value variables” are given in the columns
+            if (!only_values) {
+                c(table$rows, table$columns)
+            } else {
+                table$columns
+            }
         }
         
         if (variable_name %in% names_to_check) {
@@ -433,7 +447,7 @@ server <- function(input, output, session) {
     edited_event_visible <- TRUE
     # what were the table view choices (table_block, table_activity, table_year)
     # before we started editing?
-    pre_edit_table_view <- list()
+    pre_edit_table_view <- NULL
     
     observeEvent(event_to_edit(), ignoreNULL = FALSE, ignoreInit = TRUE, {
         
@@ -451,75 +465,68 @@ server <- function(input, output, session) {
                               selected = pre_edit_table_view$block)
             updateSelectInput(session, "table_year", 
                               selected = pre_edit_table_view$year)
-        } else {
-            # edit mode was enabled, or there was a switch from one event to
-            # another
+            # clear table view settings
+            pre_edit_table_view <<- NULL
+            return()
+        } 
+        
+        # edit mode was enabled, or there was a switch from one event to
+        # another
+        
+        # populate the input widgets with the values corresponding to the 
+        # event, and clear others
+        for (variable_name in get_category_names("variable_name")) {
             
-            # populate the input controls with the values corresponding to the 
-            # event, and clear others
-            for (variable_name in get_category_names("variable_name")) {
-                # Update the UI elements corresponding to the variable names
-                # to hold the data of the event. If no element is found 
-                # corresponding to that name, update_ui_element does nothing.
-
-                # if there is a table corresponding to the variable (it is on
-                # the rows of the table), this is its name
-                #table_code_name <- get_variable_table(variable_name, 
-                #                                      only_rows = TRUE)
-                
-                # this clears up old values
-                if (variable_name %in% names(event_to_edit())) {
-                    value <- event_to_edit()[[variable_name]]
-                    update_ui_element(session, variable_name, value = value)
-                } else {
-                    update_ui_element(session, variable_name, 
-                                      clear_value = TRUE)
-                    
-                    # if (!is.null(table_code_name)) {
-                    #     prefill_values[[table_code_name]](list())
-                    # }
-                    # next
-                }
+            # get the value corresponding to this variable from the event.
+            # might be NULL
+            value <- event_to_edit()[[variable_name]]
+            
+            # determine if this value should be filled in a table
+            # for now this is a sufficient condition
+            variable_table <- get_variable_table(variable_name, 
+                                                 only_values = TRUE)
+            value_in_table <- !is.null(variable_table) & length(value) > 1
+            
+            if (!(variable_name %in% names(event_to_edit())) | value_in_table) {
+                # clear widget if the event does not contain a value for it
+                # or value should be shown in a table instead
+                update_ui_element(session, variable_name, clear_value = TRUE)
+            } else {
+                update_ui_element(session, variable_name, value = value)
             }
+        }
+        
+        # then go through all the variables in the event and see if any of 
+        # them should be displayed in the table. If yes, fill the table.
+        # Other tables do not need to be cleared, as they do that by 
+        # themselves when they become hidden.
+        for (variable_name in names(event_to_edit())) {
+            variable_table <- get_variable_table(variable_name, 
+                                                 only_values = TRUE)
             
-            # then go through all the tables and see if any of them should be
-            # pre-filled. Other tables do not need to be cleared, as they do
-            # that by themselves when they become hidden.
-            filled_table <- FALSE
-            for (table_code_name in data_table_code_names) {
-                # go through all the variable names in the event. If a variable
-                # is found which is also present in a table (either on the rows
-                # or on the columns), pre-fill the table
-                for (variable in names(event_to_edit())) {
-                    
-                    variable_table <- get_variable_table(variable)
-                    
-                    if (!is.null(variable_table) && 
-                        variable_table == table_code_name) {
-                        prefill_values[[table_code_name]](event_to_edit())
-                        filled_table <- TRUE
-                        break
-                    }
-                    
-                }
-                
-                if (filled_table) break
+            if (!is.null(variable_table)) {
+                prefill_values[[variable_table]](event_to_edit())
+                break
             }
-            
-            # save table view to be restored when editing is over
+        }
+        
+        # save table view (to be restored when editing is over) if no settings
+        # have been saved previously
+        if (is.null(pre_edit_table_view)) {
             pre_edit_table_view <<- list(activity = input$table_activity,
                                          block = input$table_block,
                                          year = input$table_year)
-            
-            # change view of the front page table
-            updateSelectInput(session, "table_activity", 
-                              selected = event_to_edit()$mgmt_operations_event)
-            
-            shinyjs::show("delete")
-            shinyjs::show("sidebar")
-            shinyjs::disable("add_event")
-            shinyjs::enable("clone_event")
+            str(pre_edit_table_view)
         }
+        
+        # change view of the front page table
+        updateSelectInput(session, "table_activity", 
+                          selected = event_to_edit()$mgmt_operations_event)
+        
+        shinyjs::show("delete")
+        shinyjs::show("sidebar")
+        shinyjs::disable("add_event")
+        shinyjs::enable("clone_event")
         
     })
     
@@ -778,6 +785,15 @@ server <- function(input, output, session) {
         # clear all input fields
         reset_input_fields(session, input, get_category_names("variable_name"))
         shinyjs::disable("add_event")
+        
+        # if we were not editing previously and we were looking at a
+        # specific activity type in the table, copy that into the new event
+        if (is.null(event_to_edit())) {
+            if (input$table_activity != "activity_choice_all") {
+                update_ui_element(session, "mgmt_operations_event", 
+                                  value = input$table_activity)
+            }
+        }
         
         # exit edit mode if we were in it
         event_to_edit(NULL)
@@ -1044,10 +1060,9 @@ server <- function(input, output, session) {
     observeEvent(input$mgmt_operations_event, {
         
         required_checker <- function(element) {
+            # if required is defined, it is true
             if (!is.null(element$required)) {
                 return(element$code_name)
-            } else {
-                return(NULL)
             }
         }
         
@@ -1085,6 +1100,8 @@ server <- function(input, output, session) {
             
             table_code_name <- get_variable_table(required_variable)
             
+            # read the value from a table or a widget, depending on which one
+            # is appropriate
             current_val <- if (!is.null(table_code_name) && 
                                visible[[table_code_name]]) {
                 table_data[[table_code_name]]()[[required_variable]]
@@ -1092,8 +1109,11 @@ server <- function(input, output, session) {
                 input[[required_variable]]
             }
             
-            # is.Truthy essentially checks whether input is empty or null
-            is_filled <- sapply(current_val, isTruthy)
+            # is.Truthy essentially checks whether input is NULL, NA or "".
+            # Turning current_val into a list ensures that NULLs are evaluated
+            # correctly.
+            is_filled <- sapply(list(current_val), isTruthy)
+            
             if (!all(is_filled)) {
                 shinyjs::disable("save")
                 return()
