@@ -336,6 +336,16 @@ update_ui_element <- function(session, code_name, value = NULL,
         tryCatch(warning = function(cnd) {shinyjs::reset(code_name)},
                  updateDateRangeInput(session, code_name, 
                                       start = start, end = end))
+    } else if (element$type == "fileInput") {
+        session$sendCustomMessage(type = "fileInput-value",
+                                  message = list(id = code_name, 
+                                                 value = value))
+        if (hasArg(label)) {
+            label <- list(...)$label
+            session$sendCustomMessage(type = "fileInput-label",
+                                      message = list(id = code_name,
+                                                     value = label))
+        }
     }
 }
 

@@ -4,8 +4,8 @@
 # missing value in the ICASA standard
 missingval <- "-99.0"
 # relative path to json file folder
-#json_file_base_folder <- "data/management_events"
-json_file_base_folder <- "/data/fo-event-files"
+json_file_base_folder <- "data/management_events"
+#json_file_base_folder <- "/data/fo-event-files"
 
 # create_json_file <- function(file_path) {
 #     
@@ -94,4 +94,32 @@ retrieve_json_info <- function(site, block) {
     }
     
     return(events)
+}
+
+# date needs to be in yyyy-mm-dd format!
+# TODO: what if there are multiple imagges uploaded on the same day?
+move_uploaded_file <- function(tmp_filepath, variable_name, site, block, date) {
+    # ensures the folder for this site-block combo is there
+    create_file_folder(site, block)
+    
+    # base of the new file
+    file_base <- paste(date, site, block, variable_name, sep = "_")
+    file_base <- paste(file_base, tools::file_ext(tmp_filepath), sep = ".")
+    
+    tmp_file_base <- basename(tmp_filepath)
+    
+    relative_path <- file.path(site, block, variable_name)
+    filepath <- file.path(json_file_base_folder, relative_path)
+    if (!dir.exists(filepath)) {
+        dir.create(filepath)
+    }
+    
+    file.copy(from = tmp_filepath, to = filepath, copy.date = TRUE, 
+              overwrite = TRUE)
+    file.rename(file.path(filepath, tmp_file_base), 
+                file.path(filepath, file_base))
+    
+    #message(glue("new filepath is {file.path(variable_name, file_base)}"))
+    
+    return(file.path(variable_name, file_base))
 }

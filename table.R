@@ -10,12 +10,6 @@ log <- FALSE
 # EDIT: this makes sense also, see datatables API documentation for example
 js_bind_script <- "function() { Shiny.bindAll(this.api().table().node()); }"
 
-js_unbind_script <- paste(sep = "",
-          "Shiny.addCustomMessageHandler('unbind-table', function(id) {",
-          #alert($('#'+id).find('.shiny-input-container').length);
-          "Shiny.unbindAll($('#'+id).find('.shiny-input-container'));
-          })")
-
 # js_selectize_script <- function(ns) {
 #     paste(sep = "",
 #           "function() { ",
@@ -35,8 +29,8 @@ js_unbind_script <- paste(sep = "",
 
 tableInput <- function(id) {
     
-    tagList(includeScript("www/script.js"),
-            tags$head(tags$script(HTML(js_unbind_script))),
+    tagList(#includeScript("www/script.js"),
+            #tags$head(tags$script(HTML(js_unbind_script))),
             # tags$head(tags$script(HTML(paste(sep = "",
             #     "$(document).ready(function() {",
             #     "('#", NS(id, "table"), "').on('preDraw.dt', function() {",

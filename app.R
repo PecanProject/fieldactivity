@@ -11,6 +11,7 @@ library(shinythemes) # change theme for login UI (and possibly rest of app)
 library(DT) # fancier data table
 library(glue) # used for debug printing
 library(stringr) # used esp in evaluate_condition
+library(tools) # used to get file extension of uploaded images
 
 #### AUTHENTICATION STUFF
 
@@ -210,11 +211,20 @@ get_variable_table <- function(variable_name, only_values = FALSE) {
     return(NULL)
 }
 
+# js_unbind_script <- paste(sep = "",
+#                           "Shiny.addCustomMessageHandler('unbind-table', function(id) {",
+#                           #alert($('#'+id).find('.shiny-input-container').length);
+#                           "Shiny.unbindAll($('#'+id).find('.shiny-input-container'));
+#           })")
+
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
 # by create_ui in ui_builder.R
 ui <- fluidPage(theme = shinytheme("lumen"),
     useShinyjs(),  # enable shinyjs
+    
+    includeScript("www/script.js"),
+    #tags$head(tags$script(HTML(js_unbind_script))),
     
     selectInput("language", choices = languages, width = "120px", label = ""),
     
@@ -701,7 +711,8 @@ server <- function(input, output, session) {
                 fun = function(x) {
                     if (is.null(x$type) ||
                         x$type == "textOutput" ||
-                        x$type == "dataTable") {
+                        x$type == "dataTable" ||
+                        x$type == "fileInput") {
                         return(NULL)
                     } else {
                         return(x$code_name)
@@ -939,7 +950,20 @@ server <- function(input, output, session) {
                 )
             }
             
-            ## TODO: add handling for file uploads here
+            # file upload components have a value of class data.frame
+            if (class(value_to_save) == "data.frame") {
+                filepath <- value_to_save$datapath
+
+                # move the file into place and get the relative path
+                relative_path <- move_uploaded_file(
+                    filepath, 
+                    variable_name,
+                    input$site, 
+                    input$block, 
+                    format(input$date, date_format_json))
+                
+                value_to_save <- relative_path
+            }
             
             # if the value is not defined or empty, replace with missingval
             if (length(value_to_save) == 0) {
@@ -1387,6 +1411,8 @@ server <- function(input, output, session) {
                 updateDateRangeInput(session,
                                      code_name,
                                      label = label)
+            } else if (element$type == "fileInput") {
+                update_ui_element(session, code_name, label = label)
             }
 
         }
