@@ -4,8 +4,8 @@
 # missing value in the ICASA standard
 missingval <- "-99.0"
 # relative path to json file folder
-json_file_base_folder <- "data/management_events"
-#json_file_base_folder <- "/data/fo-event-files"
+#json_file_base_folder <- "data/management_events"
+json_file_base_folder <- "/data/fo-event-files"
 
 # create_json_file <- function(file_path) {
 #     
@@ -96,30 +96,111 @@ retrieve_json_info <- function(site, block) {
     return(events)
 }
 
-# date needs to be in yyyy-mm-dd format!
-# TODO: what if there are multiple imagges uploaded on the same day?
-move_uploaded_file <- function(tmp_filepath, variable_name, site, block, date) {
+# when a file is uploaded through a fileInput widget, it is saved to a temporary
+# folder. This function moves that file to an appropriate directory and also
+# renames it. The name will be of the format 
+# yyyy-mm-dd_site_block_variable_name_# where # is a number (0, 1, 2, ...) to
+# ensure that files have unique names. The date is the date of the event, and
+# it needs to be in yyyy-mm-dd format!
+# if filepath_is_relative is set to TRUE, the path in tmp_filepath should
+# be preceded by json_file-base_folder
+move_uploaded_file <- function(tmp_filepath, variable_name, site, block, date,
+                               filepath_is_relative = FALSE) {
     # ensures the folder for this site-block combo is there
     create_file_folder(site, block)
     
-    # base of the new file
+    # modify tmp_filepath if it is relative to events.json
+    if (filepath_is_relative) {
+        tmp_filepath <- file.path(json_file_base_folder, tmp_filepath)
+    }
+    
+    # check that the temporary file actually exists
+    if (!file.exists(tmp_filepath)) {
+        stop(glue("The file {tmp_filepath} to move does not exist"))
+    }
+    
+    file_extension <- tools::file_ext(tmp_filepath)
+    allowed_extensions <- c("jpg", "jpeg", "tif", "tiff", "png")
+    # if the image format is not supported, stop
+    if (!(file_extension %in% allowed_extensions)) {
+        stop("This file extension is not supported")
+    }
+    
+    # base of the new file name
     file_base <- paste(date, site, block, variable_name, sep = "_")
-    file_base <- paste(file_base, tools::file_ext(tmp_filepath), sep = ".")
     
-    tmp_file_base <- basename(tmp_filepath)
+    tmp_file_name <- basename(tmp_filepath)
     
-    relative_path <- file.path(site, block, variable_name)
-    filepath <- file.path(json_file_base_folder, relative_path)
+    # path to the final file folder
+    filepath <- file.path(json_file_base_folder, site, block, variable_name)
     if (!dir.exists(filepath)) {
         dir.create(filepath)
     }
     
-    file.copy(from = tmp_filepath, to = filepath, copy.date = TRUE, 
-              overwrite = TRUE)
-    file.rename(file.path(filepath, tmp_file_base), 
-                file.path(filepath, file_base))
+    # determine the number to add to the end of the file name to keep file names
+    # in the folder unique
+    number <- 0
+    while (TRUE) {
+        file_name <- paste(file_base, number, sep = "_")
+        file_name <- paste(file_name, file_extension, sep = ".")
+        if (!file.exists(file.path(filepath, file_name))) {
+            # we found a unique name. It will be available in file_name after
+            # the loop
+            break
+        }
+        number <- number + 1
+        
+        # don't loop forever
+        if (number >= 1000) {
+            stop("Could not find a unique name for the file")
+        }
+    }
     
-    #message(glue("new filepath is {file.path(variable_name, file_base)}"))
+    # if the filepath is relative, it means the file indicated by tmp_filepath
+    # is already under the json_file_base_folder, and therefore we do not need
+    # to copy the file there. However, if the file is in e.g. /tmp/..., we
+    # do need to copy first as directly renaming causes an error
+    if (filepath_is_relative) {
+        success <- tryCatch(expr = file.rename(
+                                        from = tmp_filepath,
+                                        to = file.path(filepath, file_name)),
+                            warning = function(cnd) {message(cnd); FALSE},
+                            error = function(cnd) {message(cnd); FALSE})
+    } else {
+        success <- tryCatch(expr = file.copy(from = tmp_filepath, 
+                                             to = filepath, copy.date = TRUE, 
+                                             overwrite = TRUE),
+                            warning = function(cnd) {message(cnd); FALSE},
+                            error = function(cnd) {message(cnd); FALSE})
+        
+        if (success) {
+            success <- tryCatch(expr = file.rename(
+                                    from = file.path(filepath, tmp_file_name), 
+                                    to = file.path(filepath, file_name)),
+                                warning = function(cnd) {message(cnd); FALSE},
+                                error = function(cnd) {message(cnd); FALSE})
+        }
+    }
     
-    return(file.path(variable_name, file_base))
+    if (success) {
+        message(glue("Moved file to {file.path(filepath, file_name)}"))
+        return(file.path(variable_name, file_name))
+    } else {
+        stop("Error in moving file")
+    }
+    
+}
+
+# delete the file with the relative path relative_filepath. This path is
+# relative to the events.json file, so we need to figure out the correct path
+# (either relative to app directory or an absolute path, depending on 
+# json_file_base_folder)
+delete_file <- function(relative_filepath, site, block) {
+    filepath <- file.path(json_file_base_folder, site, block, relative_filepath)
+    if (file.exists(filepath)) {
+        file.remove(filepath)
+        message(glue("Deleted file {filepath}"))
+    } else {
+        stop(glue("Could not delete file {filepath} because it was not found"))
+    }
 }

@@ -337,9 +337,24 @@ update_ui_element <- function(session, code_name, value = NULL,
                  updateDateRangeInput(session, code_name, 
                                       start = start, end = end))
     } else if (element$type == "fileInput") {
-        session$sendCustomMessage(type = "fileInput-value",
-                                  message = list(id = code_name, 
-                                                 value = value))
+        
+        if (!is.null(value)) {
+            #value <- "1 file uploaded"
+            session$sendCustomMessage(type = "fileInput-value",
+                                      message = list(id = code_name, 
+                                                     value = value))
+        }
+        
+        if (clear_value) { 
+            # this clears the text on the widget, but not is value
+            shinyjs::reset(code_name) 
+            # save current value. Whenever the save button is pressed, we check
+            # whether the current value then differs from this saved value. In
+            # this way this is equivalent to clearing the value
+            session$userData$previous_fileInput_value[[code_name]] <-
+                session$input[[code_name]]
+        }
+        
         if (hasArg(label)) {
             label <- list(...)$label
             session$sendCustomMessage(type = "fileInput-label",

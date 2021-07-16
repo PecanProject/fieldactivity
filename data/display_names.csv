@@ -356,11 +356,11 @@ harvest_residue_placement_choice,harvest_residue_placement_burned,Burned,Poltett
 harvest_residue_placement_choice,harvest_residue_placement_removed,Removed from the field,Poistettu pellolta
 OMCD,RE001,Generic crop residue,Yleinen kasvijäte
 OMCD,RE002,Green manure,Vihreä lanta
-OMCD,RE003,Barnyard manure,RE003-käännös
-OMCD,RE004,Liquid manure,RE004-käännös
-OMCD,RE005,Compost,RE005-käännös
-OMCD,RE006,Bark,RE006-käännös
-OMCD,RE101,Generic legume residue,RE101-käännös
+OMCD,RE003,Barnyard manure,Barnyard manure -käännös
+OMCD,RE004,Liquid manure,Liquid manure-käännös
+OMCD,RE005,Compost,Komposti
+OMCD,RE006,Bark,Bark-käännös
+OMCD,RE101,Generic legume residue,Generic legume residue-käännös
 #OMCD,RE102,Cowpea residue,RE102-käännös
 #OMCD,RE103,Mucuna residue,RE103-käännös
 #OMCD,RE104,Peanut residue,RE104-käännös
@@ -368,36 +368,36 @@ OMCD,RE101,Generic legume residue,RE101-käännös
 #OMCD,RE106,Soybean residue,RE106-käännös
 #OMCD,RE107,Alfalfa residue,RE107-käännös
 #OMCD,RE108,Chickpea forage,RE108-käännös
-OMCD,RE109,Faba bean,RE109-käännös
-OMCD,RE110,Pea residue,RE110-käännös
-OMCD,RE111,Hairy vetch,RE111-käännös
-OMCD,RE201,Generic cereal crop residue,RE201-käännös
+OMCD,RE109,Faba bean,Faba bean-käännös
+OMCD,RE110,Pea residue,Pea residue-käännös
+OMCD,RE111,Hairy vetch,Hairy vetch-käännös
+OMCD,RE201,Generic cereal crop residue,Generic cereal crop residue -käännös
 #OMCD,RE202,Pearl millet residue,RE202-käännös
 #OMCD,RE203,Maize residue,RE203-käännös
 #OMCD,RE204,Sorghum residue,RE204-käännös
-OMCD,RE205,Wheat residue,RE205-käännös
-OMCD,RE206,Barley,RE206-käännös
-OMCD,RE207,Rice,RE207-käännös
-OMCD,RE208,Rye,RE208-käännös
-OMCD,RE301,Generic grass,RE301-käännös
-OMCD,RE302,Bahiagrass,RE302-käännös
-OMCD,RE303,Bermudagrass,RE303-käännös
-OMCD,RE304,Switchgrass,RE304-käännös
-OMCD,RE305,brachiaria,RE305-käännös
-OMCD,RE306,forage grasses,RE306-käännös
-OMCD,RE401,Bush fallow residue,RE401-käännös
-OMCD,RE402,Sugarcane,RE402-käännös
-OMCD,RE403,Pineapple,RE403-käännös
-OMCD,RE999,Decomposed crop residue,RE999-käännös
-FEACD,AP001,"Broadcast, not incorporated",AP001-käännös
-FEACD,AP002,"Broadcast, incorporated",AP002-käännös
-FEACD,AP003,Banded on surface,AP003-käännös
-FEACD,AP004,Banded beneath surface,AP004-käännös
-FEACD,AP005,Applied in irrigation water,AP005-käännös
-FEACD,AP006,Foliar spray,AP006-käännös
-FEACD,AP007,Bottom of hole,AP007-käännös
-FEACD,AP008,On the seed,AP008-käännös
-FEACD,AP009,Injected,AP009-käännös
+OMCD,RE205,Wheat residue,Wheat residue -käännös
+OMCD,RE206,Barley,Ohra
+OMCD,RE207,Rice,Riisi
+OMCD,RE208,Rye,Ruis
+OMCD,RE301,Generic grass,Generic grass-käännös
+OMCD,RE302,Bahiagrass,Bahiagrass-käännös
+OMCD,RE303,Bermudagrass,Bermudagrass-käännös
+OMCD,RE304,Switchgrass,Switchgrass-käännös
+OMCD,RE305,brachiaria,brachiaria-käännös
+OMCD,RE306,forage grasses,forage grasses-käännös
+OMCD,RE401,Bush fallow residue,Bush fallow residue -käännös
+OMCD,RE402,Sugarcane,Sugarcane-käännös
+OMCD,RE403,Pineapple,Pineapple-käännös
+OMCD,RE999,Decomposed crop residue,Decomposed crop residue -käännös
+FEACD,AP001,"Broadcast, not incorporated","Broadcast, not incorporated -käännös""
+FEACD,AP002,"Broadcast, incorporated","Broadcast, incorporated -käännös""
+FEACD,AP003,Banded on surface,Banded on surface -käännös
+FEACD,AP004,Banded beneath surface,Banded beneath surface -käännös
+FEACD,AP005,Applied in irrigation water,Applied in irrigation water -käännös
+FEACD,AP006,Foliar spray,Foliar spray-käännös
+FEACD,AP007,Bottom of hole,Bottom of hole-käännös
+FEACD,AP008,On the seed,On the seed-käännös
+FEACD,AP009,Injected,Injected-käännös
 #   FEACD,AP011,"Broadcast on flooded/saturated soil, none in soil",AP011-käännös
 #   FEACD,AP012,"Broadcast on flooded/saturated soil, 15% in soil",AP012-käännös
 #   FEACD,AP013,"Broadcast on flooded/saturated soil, 30% in soil",AP013-käännös
@@ -406,16 +406,16 @@ FEACD,AP009,Injected,AP009-käännös
 #   FEACD,AP016,"Broadcast on flooded/saturated soil, 75% in soil",AP016-käännös
 #   FEACD,AP017,"Broadcast on flooded/saturated soil, 90% in soil",AP017-käännös
 #   FEACD,AP018,"Band on saturated soil, 2cm flood, 92% in soil",AP018-käännös
-FEACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil",AP019-käännös
-FEACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil",AP020-käännös
+FEACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil","Deeply placed urea super granules/pellets, 95% in soil -käännös"
+FEACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil","Deeply placed urea super granules/pellets, 100% in soil -käännös"
 FEACD,AP999,Method unknown/not given,Tapa ei tiedossa
 #   the following tillage_practice choices are not from ICASA
 tillage_practice_choice,tillage_practice_primary,Primary (residue incorporation),Perusmuokkaus
 tillage_practice_choice,tillage_practice_secondary,Secondary (seedbed),Kylvömuokkaus
 tillage_practice_choice,tillage_practice_tertiary,Tertiary (weed control),Rikkakasvien torjunta
 #TIIMP,TI001,V-Ripper,TI001-käännös
-TIIMP,TI002,Subsoiler,TI002-käännös
-TIIMP,TI003,Moldboard plough,TI003-käännös # in ICASA this is Moldboard plow 20cm depth, here we use it for all depths
+TIIMP,TI002,Subsoiler,Subsoiler-käännös
+TIIMP,TI003,Moldboard plough,Moldboard plough-käännös # in ICASA this is Moldboard plow 20cm depth, here we use it for all depths
 #TIIMP,TI004,"Chisel plow, sweeps",TI004-käännös
 #TIIMP,TI005,"Chisel plow, straight point",TI005-käännös
 #TIIMP,TI006,"Chisel plow, twisted shovels",TI006-käännös
@@ -423,29 +423,29 @@ TIIMP,TI003,Moldboard plough,TI003-käännös # in ICASA this is Moldboard plow 
 #TIIMP,TI008,"Disk, 1-way",TI008-käännös
 TIIMP,TI009,"Disk, tandem",Lautasäes
 #TIIMP,TI010,"Disk, double disk",TI010-käännös
-TIIMP,TI011,"Cultivator, field",TI011-käännös
+TIIMP,TI011,"Cultivator, field","Cultivator, field -käännös"
 #TIIMP,TI012,"Cultivator, row",TI012-käännös
 #TIIMP,TI013,"Cultivator, ridge till",TI013-käännös
 #TIIMP,TI014,"Harrow, spike",TI014-käännös
 TIIMP,TI015,"Harrow, tine",Joustopiikkiäes
-TIIMP,TI016,Lister,TI016-käännös
-#TIIMP,TI017,Bedder,TI017-käännös
-TIIMP,TI018,Blade cultivator,TI018-käännös
+TIIMP,TI016,Lister,Lister-käännös
+#TIIMP,TI017,Bedder,Bedder-käännös
+TIIMP,TI018,Blade cultivator,Blade cultivator -käännös
 #TIIMP,TI019,"Fertilizer applicator, anhydr",TI019-käännös
-TIIMP,TI020,Manure injector,TI020-käännös
+TIIMP,TI020,Manure injector,Manure injector -käännös
 #TIIMP,TI022,Mulch treader,TI022-käännös
 #TIIMP,TI023,Plank,TI023-käännös
-TIIMP,TI024,Roller packer,TI024-käännös
-TIIMP,TI025,"Drill, double-disk",TI025-käännös
+TIIMP,TI024,Roller packer,Roller packer -käännös
+TIIMP,TI025,"Drill, double-disk","Drill, double-disk -käännös"
 #TIIMP,TI026,"Drill, deep furrow",TI026-käännös
-TIIMP,TI031,"Drill, no-till",TI031-käännös
+TIIMP,TI031,"Drill, no-till","Drill, no-till -käännös"
 #TIIMP,TI032,"Drill, no-till (into sod)",TI032-käännös
-TIIMP,TI033,"Planter, row",TI033-käännös
+TIIMP,TI033,"Planter, row","Planter, row -käännös"
 #TIIMP,TI034,"Planter, no-till",TI034-käännös
 #TIIMP,TI035,Planting stick (hand),TI035-käännös
 #TIIMP,TI036,Matraca hand planter,TI036-käännös
 #TIIMP,TI037,Rod weeder,TI037-käännös
-TIIMP,TI038,Rotary hoe,TI038-käännös
+TIIMP,TI038,Rotary hoe,Rotary hoe -käännös
 #TIIMP,TI039,"Roller harrow, cultipacker",TI039-käännös
 #TIIMP,TI041,Moldboard plow 25cm,TI041-käännös
 #TIIMP,TI042,Moldboard plow 30 cm,TI042-käännös

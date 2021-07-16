@@ -16,7 +16,7 @@ library(tools) # used to get file extension of uploaded images
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- TRUE
+dev_mode <- FALSE
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -86,16 +86,9 @@ reset_input_fields <- function(session, input, fields_to_clear,
     
     for (code_name in fields_to_clear) {
         if (code_name %in% exceptions) next
-        #shinyjs::reset(code_name)
         update_ui_element(session, code_name, clear_value = TRUE)
     }
     
-    # if the table_block selector is set to a specific block, mirror that
-    # value in input$block. Otherwise don't change the block widget value
-    if (!is.null(input$table_block) &&
-        input$table_block != "block_choice_all") {
-        update_ui_element(session, "block", input$table_block)
-    }
 }
 
 # takes a list of events and makes a data table with given variables in columns.
@@ -371,7 +364,6 @@ server <- function(input, output, session) {
     
     # change login form language when requested
     observeEvent(input$login_language, {
-        
         #str(reactiveValuesToList(input))
         #updateTextInput(session, "auth-user_id", value = "oma1")
         #updateTextInput(session, "auth-user_pwd", value = "oma2")
@@ -458,6 +450,9 @@ server <- function(input, output, session) {
     # what were the table view choices (table_block, table_activity, table_year)
     # before we started editing?
     pre_edit_table_view <- NULL
+    # as fileInput values cannot be reset (even with shinyjs), we need to store 
+    # previous values here (by code_name) to check whether the value has changed
+    session$userData$previous_fileInput_value <- list()
     
     observeEvent(event_to_edit(), ignoreNULL = FALSE, ignoreInit = TRUE, {
         
@@ -465,6 +460,9 @@ server <- function(input, output, session) {
             # edit mode was disabled
             shinyjs::hide("delete")
             shinyjs::disable("clone_event")
+            #if (dev_mode || auth_result$admin == "TRUE") {
+            #    shinyjs::enable("site")
+            #}
             DT::selectRows(proxy = dataTableProxy("mgmt_events_table"), 
                            selected = NULL)
             exit_sidebar_mode()
@@ -536,6 +534,9 @@ server <- function(input, output, session) {
         shinyjs::show("sidebar")
         shinyjs::disable("add_event")
         shinyjs::enable("clone_event")
+        #if (dev_mode || auth_result$admin == "TRUE") {
+        #    shinyjs::disable("site")
+        #}
         
     })
     
@@ -570,6 +571,7 @@ server <- function(input, output, session) {
     
     # TODO: this can be sped up by keeping a up-to-date list of event years
     update_table_year_choices <- function() {
+        
         years <- NULL
         
         # find years present in event dates
@@ -598,9 +600,11 @@ server <- function(input, output, session) {
         
         updateSelectInput(session, "table_year", selected = current_choice,
                           choices = table_year_choices)
+
     }
     
     update_table_block_choices <- function() {
+        
         if (!isTruthy(input$site)) { return() }
         
         block_choices <- c("block_choice_all",
@@ -619,6 +623,7 @@ server <- function(input, output, session) {
     }
     
     update_table_activity_choices <- function() {
+        
         choices_for_table_activity <- 
             c("activity_choice_all", get_category_names(
                 "mgmt_operations_event_choice"))
@@ -686,6 +691,7 @@ server <- function(input, output, session) {
     
     # data to display in the table
     frontpage_table_data <- reactive({
+        
         if (!(isTruthy(input$table_activity) & 
               isTruthy(input$table_block) &
               isTruthy(input$table_year))) {
@@ -793,15 +799,23 @@ server <- function(input, output, session) {
     # show add event UI when requested
     observeEvent(input$add_event, {
         # clear all input fields
-        reset_input_fields(session, input, get_category_names("variable_name"))
+        #reset_input_fields(session, input, get_category_names("variable_name"))
         shinyjs::disable("add_event")
         
-        # if we were not editing previously and we were looking at a
-        # specific activity type in the table, copy that into the new event
+        # if we were not editing previously, copy current table view settings
+        # (block and activity) into the widgets if they are set to a specific
+        # value (not "all")
+        # note: event_to_edit() should be NULL as the add button is disabled
+        # during editing
         if (is.null(event_to_edit())) {
-            if (input$table_activity != "activity_choice_all") {
+            if (!is.null(input$table_activity) && 
+                input$table_activity != "activity_choice_all") {
                 update_ui_element(session, "mgmt_operations_event", 
                                   value = input$table_activity)
+            }
+            if (!is.null(input$table_block) &&
+                input$table_block != "block_choice_all") {
+                update_ui_element(session, "block", value = input$table_block)
             }
         }
         
@@ -841,6 +855,7 @@ server <- function(input, output, session) {
             list()
         }
         orig_block <- event$block
+        orig_date <- event$date
         
         # if we are editing, find the index of the event in the original 
         # block data list. Also, if the block has been changed, update that 
@@ -906,6 +921,9 @@ server <- function(input, output, session) {
         # fill / update information
         for (variable_name in get_category_names("variable_name")) {
 
+            # will be needed later with fileInputs
+            widget <- structure_lookup_list[[variable_name]]
+            
             # should the variable's value be read from a table?
             read_from_table <- if (!is.null(table_to_read)) {
                 # if it is in the table's columns, yes
@@ -924,19 +942,39 @@ server <- function(input, output, session) {
             if (!(variable_name %in% relevant_variables) ||
                 # variable might be in skip_variables if it is read from table
                 variable_name %in% skip_variables & !read_from_table) {
+                
+                # if this variable is a path to a file and it has a value 
+                # stored, we need to delete the file as it is no longer 
+                # relevant to the event
+                value <- event[[variable_name]]
+                if (widget$type == "fileInput" && 
+                    !is.null(value) && !identical(value, missingval)) {
+                    # delete the file
+                    tryCatch(expr = delete_file(value, input$site, event$block),
+                             error = function(cnd) {
+                                 message(glue("Could not delete file related ",
+                                              "to the edited event: {cnd}"))
+                             })
+                } 
+                
                 event[variable_name] <- NULL
                 next
             }
            
             # read value from table if it is available there, otherwise
-            # read the value from a regular input
+            # read the value from a regular input widget
             value_to_save <- if (read_from_table) {
                 table_data[[table_to_read$code_name]]()[[variable_name]]
             } else {
                 input[[variable_name]]
             }
             
-            # format date value to character string and replace with missingval
+            # if value is character, trim any whitespace around it
+            if (is.character(value_to_save)) {
+                value_to_save <- trimws(value_to_save)
+            }
+            
+            # format Date value to character string and replace with ""
             # if that fails for some reason
             if (class(value_to_save) == "Date") {
                 value_to_save <- tryCatch(
@@ -944,33 +982,105 @@ server <- function(input, output, session) {
                     error = function(cnd) {
                         message(glue("Unable to format date {value_to_save}",
                                      "into string when saving event,",
-                                     "replaced with {missingval}")) 
-                        missingval
+                                     "replaced with missingval")) 
+                        ""
                     }
                 )
             }
             
-            # file upload components have a value of class data.frame
-            if (class(value_to_save) == "data.frame") {
-                filepath <- value_to_save$datapath
+            # handle fileInputs that are relevant to the event
+            if (widget$type == "fileInput") {
 
-                # move the file into place and get the relative path
-                relative_path <- move_uploaded_file(
-                    filepath, 
-                    variable_name,
-                    input$site, 
-                    input$block, 
-                    format(input$date, date_format_json))
+                # the value of a fileInput cannot be reset, so we need to
+                # compare the current value to the old one to figure out if
+                # a new value has been entered
+                new_file_uploaded <- 
+                    !identical(value_to_save,
+                               session$userData$
+                                   previous_fileInput_value[[variable_name]])
+                old_value <- event[[variable_name]]
                 
-                value_to_save <- relative_path
+                if (!is.null(value_to_save) & new_file_uploaded) {
+                    filepath <- value_to_save$datapath
+                    # move the file into place and get the relative path
+                    relative_path <- 
+                        tryCatch(expr = 
+                                     move_uploaded_file(filepath, 
+                                                        variable_name,
+                                                        input$site, 
+                                                        input$block, 
+                                                        format(input$date, 
+                                                           date_format_json)),
+                                 error = function(cnd) {
+                                     showNotification(
+                                     "Could not save the image file correctly.", 
+                                         type = "warning")
+                                     message(glue("Error when saving image to ",
+                                                  "{variable_name}: {cnd}"))
+                                     ""
+                                 })
+                    
+                    # if the event already has a value in this field, we are 
+                    # replacing the file with a new one. We should therefore 
+                    # delete the old file.
+                    if (!is.null(old_value) && !identical(old_value, missingval)) {
+                        # delete the file
+                        tryCatch(expr = delete_file(old_value, input$site, 
+                                                    event$block),
+                                 error = function(cnd) {
+                                     message(glue("Could not delete file to ",
+                                                  "be replaced: {cnd}"))
+                                     })
+                    }
+                    
+                    value_to_save <- relative_path
+                } else {
+                    # a new file was not uploaded. 
+                    # However, if there is already a file uploaded, we might 
+                    # have to rename/move it as the event date or block might
+                    # have changed. We will therefore move the current file
+                    # like it was a new file.
+                    if (!is.null(old_value) && !identical(old_value, missingval)) {
+                        
+                        new_date <- format(input$date, date_format_json)
+                        if (input$block != orig_block | new_date != orig_date) {
+                            
+                            old_path <- file.path(input$site, orig_block, old_value)
+                            
+                            relative_path <- 
+                                tryCatch(expr = move_uploaded_file(
+                                    old_path, 
+                                    variable_name,
+                                    input$site, 
+                                    input$block, 
+                                    new_date,
+                                    filepath_is_relative = TRUE),
+                                    error = function(cnd) {
+                                        showNotification(
+                                            "Could not rename the image file.", 
+                                            type = "warning")
+                                        message(glue("Error when renaming ",
+                                                     "image ",
+                                                     "{variable_name}: {cnd}"))
+                                        old_value
+                                    })
+                            
+                            value_to_save <- relative_path
+                            
+                        } else {
+                            next
+                        }
+
+                    }
+                }
             }
+            
             
             # if the value is not defined or empty, replace with missingval
             if (length(value_to_save) == 0) {
                 value_to_save <- missingval
             } else {
-                missing_indexes <- is.na(value_to_save) | 
-                    trimws(value_to_save) == ""
+                missing_indexes <- is.na(value_to_save) | value_to_save == ""
                 if (any(missing_indexes)) {
                     value_to_save[missing_indexes] <- missingval
                 }
@@ -1034,6 +1144,24 @@ server <- function(input, output, session) {
             showNotification("Could not delete entry because it 
                              was not found in the event files.", type = "error")
             return()
+        }
+        
+        # if the event has image files associated with it (e.g. canopeo_image)
+        # delete those. For this we have to go through all the variables in
+        # the event and check if they correspond to a fileInput
+        for (variable in names(event)) {
+            widget <- structure_lookup_list[[variable]]
+            value <- event[[variable]]
+            
+            if (widget$type == "fileInput" & !identical(value, missingval)) {
+                # delete the file
+                tryCatch(expr = delete_file(value, input$site, event$block),
+                         error = function(cnd) {
+                             message(glue("Could not delete file related to ",
+                                          "the deleted event: {cnd}"))
+                                          
+                         })
+            }
         }
         
         # delete
@@ -1106,6 +1234,7 @@ server <- function(input, output, session) {
     
     # disable the save button if not all necessary info has been filled
     observe({
+        
         #if (!dev_mode) {req(auth_result$admin)}
         #req(auth_result$admin)
         
@@ -1149,7 +1278,7 @@ server <- function(input, output, session) {
     
     # render frontpage table when input$language or table data changes
     output$mgmt_events_table <- DT::renderDataTable(server = FALSE, {
-            
+        
         new_data_to_display <- replace_with_display_names(
             frontpage_table_data(), input$language)
         n_cols <- ncol(new_data_to_display)
@@ -1230,7 +1359,8 @@ server <- function(input, output, session) {
                 # when tables in custom mode (only fertilizer_element_table)
                 # are visible
                 
-                if (input$mgmt_operations_event == "fertilizer") {
+                if (isTruthy(input$mgmt_operations_event) && 
+                    input$mgmt_operations_event == "fertilizer") {
                     1:2
                 } else {
                     0
@@ -1309,7 +1439,7 @@ server <- function(input, output, session) {
     
     # change language when user requests it
     observeEvent(input$language, {
-        
+
         # we have to handle input and output elements in different ways
         
         # OUTPUT ELEMENTS:
