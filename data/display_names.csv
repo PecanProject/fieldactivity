@@ -311,6 +311,7 @@ element_label,weeding_notes_placeholder,"Any notes or observations about the eve
 element_label,bed_prep_notes_label,Notes on the preparation of raised beds:,Muistiinpanot kasvatuslaatikoiden valmistelusta:
 element_label,bed_prep_notes_placeholder,"Any notes or observations about the event, e.g. “used the beds from last year”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “käytettiin samoja kasvatuslaatikoita kuin edellisenä vuonna”"
 element_label,other_notes_label,Event notes*:,Muistiinpanoja tapahtumasta*:
+element_label,delete_uploaded_file_label,Delete,Poista
 #
 ############### others
 #

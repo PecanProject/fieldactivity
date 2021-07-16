@@ -77,15 +77,23 @@ structure_lookup_list <- build_structure_lookup_list()
 # help texts (technically textOutputs) have a different method of updating
 # when the language is changed because they are outputs rather than inputs,
 # and for that we need a list of the code names of these objects.
-# The same goes for data tables (although frontpage table and editing table are
-# not here)
+# The same goes for data tables (excluding event table).
+# We also need the code names of fileInput delete buttons to set up observers
+# for them
 text_output_code_names <- NULL
 data_table_code_names <- NULL
+fileInput_delete_code_names <- NULL
+fileInput_code_names <- NULL
 for (element in structure_lookup_list) {
     if (element$type == "textOutput") {
         text_output_code_names <- c(text_output_code_names, element$code_name)
     } else if (element$type == "dataTable") {
         data_table_code_names <- c(data_table_code_names, element$code_name)
+    } else if (element$type == "actionButton" && !is.null(element$fileInput)) {
+        fileInput_delete_code_names <- c(fileInput_delete_code_names, 
+                                         element$code_name)
+    } else if (element$type == "fileInput") {
+        fileInput_code_names <- c(fileInput_code_names, element$code_name)
     }
 }
 
@@ -199,15 +207,27 @@ create_element <- function(element, override_label = NULL,
     } else if (element$type == "dataTable") {
         tableInput(element_code_name)
     } else if (element$type == "fileInput") {
-        fileInput(element_code_name, 
-                  label = element_label,
-                  accept = element$accept, ...)
+        # create the fileInput and the corresponding delete button now so that
+        # they can be aligned properly
+        delete_button <- structure_lookup_list[[element$delete_button]]
+        div(style = "display: flex;",
+            div(style="flex-grow: 1;", 
+                fileInput(element_code_name, 
+                          label = element_label,
+                          accept = element$filetype, ...)),
+            div(style="margin-left: 5px; padding-top: 26px",
+                shinyjs::hidden(actionButton(delete_button$code_name,
+                                             label = delete_button$label, 
+                                             class = "btn-warning")))
+        )
     } else if (element$type == "dateRangeInput") {
         dateRangeInput(element_code_name, 
                        label = element_label,
                        separator = "-",
                        weekstart = 1,
                        max = Sys.Date())
+    } else if (element$type == "actionButton") {
+        # these are always fileInput delete buttons and are handled there
     }
     
     # put the new element in a conditionalPanel. If no condition is specified,
@@ -343,6 +363,9 @@ update_ui_element <- function(session, code_name, value = NULL,
             session$sendCustomMessage(type = "fileInput-value",
                                       message = list(id = code_name, 
                                                      value = value))
+            # show file delete button
+            #message(glue("Showing {element$delete_button}"))
+            shinyjs::show(element$delete_button)
         }
         
         if (clear_value) { 
@@ -353,6 +376,9 @@ update_ui_element <- function(session, code_name, value = NULL,
             # this way this is equivalent to clearing the value
             session$userData$previous_fileInput_value[[code_name]] <-
                 session$input[[code_name]]
+            # hide file delete button
+            #message(glue("Hiding {element$delete_button}"))
+            shinyjs::hide(element$delete_button)
         }
         
         if (hasArg(label)) {

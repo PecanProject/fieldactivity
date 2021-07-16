@@ -16,7 +16,7 @@ library(tools) # used to get file extension of uploaded images
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- FALSE
+dev_mode <- TRUE
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -712,16 +712,15 @@ server <- function(input, output, session) {
         # if we are only looking at a specific event type, show columns
         # appropriate to it
         if (input$table_activity != "activity_choice_all") {
+            hidden_widget_types <- c("textOutput", "dataTable", "fileInput", 
+                                     "actionButton")
             activity_variables <- unlist(rlapply(
                 activity_options[[input$table_activity]],
                 fun = function(x) {
-                    if (is.null(x$type) ||
-                        x$type == "textOutput" ||
-                        x$type == "dataTable" ||
-                        x$type == "fileInput") {
-                        return(NULL)
+                    if (is.null(x$type) || x$type %in% hidden_widget_types) {
+                        NULL
                     } else {
-                        return(x$code_name)
+                        x$code_name
                     }
                 }))
             table_variables <- c(table_variables, activity_variables)
@@ -1435,6 +1434,77 @@ server <- function(input, output, session) {
             text_to_show
         })
 
+    })
+    
+    # show file delete button when a new file is uploaded by the user
+    lapply(fileInput_code_names, FUN = function(fileInput_code_name) {
+        observeEvent(input[[fileInput_code_name]], {
+            # a new file was uploaded, so show delete button
+            fileInput_delete_button_name <- 
+                structure_lookup_list[[fileInput_code_name]]$delete_button
+            #message(glue("Showing {fileInput_delete_button_name}"))
+            shinyjs::show(fileInput_delete_button_name)
+        })
+    })
+    
+    # add observers to fileInput delete buttons
+    lapply(fileInput_delete_code_names, FUN = function(button_code_name) {
+        observeEvent(input[[button_code_name]], {
+            fileInput_code_name <- 
+                structure_lookup_list[[button_code_name]]$fileInput
+            # there are two types of deletions: 
+            # 1. the user has uploaded a new file and wants to delete it 
+            # (non-saved file)
+            # - there can be a previously saved file if we are editing an event,
+            # that should then be displayed
+            # 2. the user has not uploaded a new file, but the event has a 
+            # previously saved file the user wants to delete.
+            
+            # the value of a fileInput cannot be reset, so we need to
+            # compare the current value to the old one to figure out if
+            # a new value has been entered
+            new_file_uploaded <- 
+                !identical(input[[fileInput_code_name]],
+                           session$userData$
+                               previous_fileInput_value[[fileInput_code_name]])
+            event <- event_to_edit()
+            editing <- !is.null(event)
+            
+            if (new_file_uploaded) {
+                
+                # if we are editing, there might be a previous file
+                if (editing) {
+                    
+                    old_path <- event[[fileInput_code_name]]
+                    
+                    if (!is.null(old_path) & !identical(old_path, missingval)) {
+                        message(glue("Deleting new file and going back to ",
+                                     "{old_path}"))
+                    } else {
+                        message("Deleting new file, no previous files")
+                    }
+                    
+                } else {
+                    message("Deleting a newly uploaded file in add mode")
+                }
+                
+            } else {
+                
+                # new file was not uploaded. Check if we are editing and there
+                # is a previous file we should delete
+                old_path <- event[[fileInput_code_name]]
+                if (editing && !is.null(old_path) && 
+                    !identical(old_path, missingval)) {
+
+                    message(glue("Going to delete file {old_path}"))
+                    
+                } else {
+                    message("No new file uploaded and no old file to delete")
+                }
+                
+            }
+            
+        })
     })
     
     # change language when user requests it
