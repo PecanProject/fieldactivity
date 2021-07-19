@@ -480,7 +480,7 @@ tableServer <- function(id, row_names, language, visible,
                     table_to_display, 
                     escape = FALSE,
                     selection = "none",
-                    class = "compact",
+                    class = "table table-hover table-condensed",
                     rownames = !custom_mode,
                     options = 
                         list(dom = "t",
