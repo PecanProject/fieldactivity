@@ -238,7 +238,8 @@
                   "code_name" : "harvest_operat_component",
                   "type" : "selectInput",
                   "choices" : "HACOM",
-                  "label" : "harvest_operat_component_label"
+                  "label" : "harvest_operat_component_label",
+                  "hide_in_table" : true
                 },
 
                 "canopy_height_harvest" : {
@@ -278,21 +279,24 @@
                   "code_name" : "harvest_yield_harvest_dw",
                   "type" : "numericInput",
                   "label" : "harvest_yield_harvest_dw_label",
-                  "min" : "0"
+                  "min" : "0",
+                  "hide_in_table" : true
                 },
 
                 "harv_yield_harv_f_wt" : {
                   "code_name" : "harv_yield_harv_f_wt",
                   "type" : "numericInput",
                   "label" : "harv_yield_harv_f_wt_label",
-                  "min" : "0"
+                  "min" : "0",
+                  "hide_in_table" : true
                 },
                 
                 "yield_C_at_harvest" : {
                   "code_name" : "yield_C_at_harvest",
                   "type" : "numericInput",
                   "label" : "yield_C_at_harvest_label",
-                  "min" : "0"
+                  "min" : "0",
+                  "hide_in_table" : true
                 }
                 
               }
@@ -308,7 +312,8 @@
             "code_name" : "harvest_comments",
             "type" : "textAreaInput",
             "label" : "harvest_comments_label",
-            "placeholder" : "harvest_comments_placeholder"
+            "placeholder" : "harvest_comments_placeholder",
+            "hide_in_table" : true
           }
 
         },
@@ -459,97 +464,111 @@
               "code_name" : "N_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "N_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "phosphorus_applied_fert" : {
               "code_name" : "phosphorus_applied_fert",
               "type" : "numericInput",
               "label" : "phosphorus_applied_fert_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "fertilizer_K_applied" : {
               "code_name" : "fertilizer_K_applied",
               "type" : "numericInput",
               "label" : "fertilizer_K_applied_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "S_in_applied_fertilizer" : {
               "code_name" : "S_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "S_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "Ca_in_applied_fertilizer" : {
               "code_name" : "Ca_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Ca_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "Mg_in_applied_fertilizer" : {
               "code_name" : "Mg_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Mg_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "Na_in_applied_fertilizer" : {
               "code_name" : "Na_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Na_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "Cu_in_applied_fertilizer" : {
               "code_name" : "Cu_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Cu_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "Zn_in_applied_fertilizer" : {
               "code_name" : "Zn_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Zn_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "B_in_applied_fertilizer" : {
               "code_name" : "B_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "B_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "Mn_in_applied_fertilizer" : {
               "code_name" : "Mn_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Mn_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "Se_in_applied_fertilizer" : {
               "code_name" : "Se_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Se_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "Fe_in_applied_fertilizer" : {
               "code_name" : "Fe_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Fe_in_applied_fertilizer_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
             
             "other_element_in_applied_fertilizer" : {
               "code_name" : "other_element_in_applied_fertilizer",
               "type" : "textInput",
-              "label" : "other_element_in_applied_fertilizer_label"
+              "label" : "other_element_in_applied_fertilizer_label",
+              "hide_in_table" : true
             }
             
           },
@@ -776,7 +795,9 @@
               "label" : "soil_layer_count_label",
               "min" : "1",
               "step" : 1,
+              "hide_in_table" : true,
               "sub_elements" : {
+                  
                 "multiple" : {
                   "condition" : "input.soil_layer_count >= 2",
 
@@ -795,21 +816,24 @@
                     "code_name" : "soil_layer_top_depth",
                     "type" : "numericInput",
                     "label" : "soil_layer_top_depth_label",
-                    "min" : "0"
+                    "min" : "0",
+                    "hide_in_table" : true
                   },
 
                   "soil_layer_base_depth" : {
                     "code_name" : "soil_layer_base_depth",
                     "type" : "numericInput",
                     "label" : "soil_layer_base_depth_label",
-                    "min" : "0"
+                    "min" : "0",
+                    "hide_in_table" : true
                   },
 
                   "soil_classification_by_layer" : {
                     "code_name" : "soil_classification_by_layer",
                     "type" : "selectInput",
                     "label" : "soil_classification_by_layer_label",
-                    "choices" : "soil_classification_by_layer_choice"
+                    "choices" : "soil_classification_by_layer_choice",
+                    "hide_in_table" : true
                   }
 
                 }
@@ -827,7 +851,8 @@
               "code_name" : "soil_compactification_depth",
               "type" : "numericInput",
               "label" : "soil_compactification_depth_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "earthworm_count" : {
@@ -835,7 +860,8 @@
               "type" : "numericInput",
               "label" : "earthworm_count_label",
               "min" : "0",
-              "step" : "1"
+              "step" : "1",
+              "hide_in_table" : true
             },
 
             "soil_image" : {
@@ -862,7 +888,8 @@
               "code_name" : "growth_stage",
               "type" : "selectInput",
               "label" : "growth_stage_label",
-              "choices" : "growth_stage_choice"
+              "choices" : "growth_stage_choice",
+              "hide_in_table" : true
             },
 
             "plant_density" : {
@@ -876,7 +903,8 @@
               "code_name" : "specific_leaf_area",
               "type" : "numericInput",
               "label" : "specific_leaf_area_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "leaf_area_index" : {
@@ -890,7 +918,8 @@
               "code_name" : "canopy_height",
               "type" : "numericInput",
               "label" : "canopy_height_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "canopeo_reading" : {
@@ -923,14 +952,16 @@
               "code_name" : "floodwater_depth",
               "type" : "numericInput",
               "label" : "floodwater_depth_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             },
 
             "water_table_depth" : {
               "code_name" : "water_table_depth",
               "type" : "numericInput",
               "label" : "water_table_depth_label",
-              "min" : "0"
+              "min" : "0",
+              "hide_in_table" : true
             }
           },
 
@@ -942,7 +973,8 @@
               "type" : "numericInput",
               "label" : "plant_pop_reduct_cum_label",
               "min" : "0",
-              "max" : "100"
+              "max" : "100",
+              "hide_in_table" : true
             }
           },
 
