@@ -358,6 +358,11 @@ update_ui_element <- function(session, code_name, value = NULL,
                                       start = start, end = end))
     } else if (element$type == "fileInput") {
         
+        if (identical(value, "")) {
+            value <- NULL
+            clear_value <- TRUE
+        }
+        
         if (!is.null(value)) {
             #value <- "1 file uploaded"
             session$sendCustomMessage(type = "fileInput-value",
