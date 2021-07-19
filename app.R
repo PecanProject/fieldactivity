@@ -6,7 +6,7 @@ library(shiny)
 library(jsonlite)
 library(shinyjs) # shinyjs is used for e.g. disabling action buttons
 library(shinymanager) # for user authentication
-library(shinythemes) # change theme for login UI (and possibly rest of app)
+library(bslib) # change theme
 #library(keyring) # for interacting with system credential store to store db key
 library(DT) # fancier data table
 library(glue) # used for debug printing
@@ -213,7 +213,7 @@ get_variable_table <- function(variable_name, only_values = FALSE) {
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
 # by create_ui in ui_builder.R
-ui <- fluidPage(theme = shinytheme("lumen"),
+ui <- fluidPage(theme = bslib::bs_theme(version = 4, bootswatch = "lumen"),
     useShinyjs(),  # enable shinyjs
     
     includeScript("www/script.js"),
@@ -344,7 +344,7 @@ if (!dev_mode) {
                      #tags_top = tagList(
                          #p("EXAMPLE USER site: ruukki, password: Ruukki1"),
                          #p("ADMIN site: shinymanager, password: 12345")),
-                     theme = shinytheme("lumen"),
+                     theme = bslib::bs_theme(version = 4, bootswatch = "lumen"),
                      enable_admin = TRUE,
                      fab_position = "top-right")
 }
@@ -352,6 +352,9 @@ if (!dev_mode) {
 
 # Define server logic incl. save button action
 server <- function(input, output, session) {
+    
+    # run interactive themer
+    #bs_themer()
     
     # check_credentials returns a function to authenticate users
     # might have to use the hand-typed passphrase option for now when deploying
@@ -718,7 +721,8 @@ server <- function(input, output, session) {
             activity_variables <- unlist(rlapply(
                 activity_options[[input$table_activity]],
                 fun = function(x) {
-                    if (is.null(x$type) || x$type %in% hidden_widget_types) {
+                    if (is.null(x$type) || x$type %in% hidden_widget_types ||
+                        identical(x$hide_in_table, TRUE)) {
                         NULL
                     } else {
                         x$code_name
@@ -1329,6 +1333,8 @@ server <- function(input, output, session) {
                   selection = list(mode = "single", 
                                    selected = row_number),
                   rownames = FALSE, # hide row numbers
+                  class = "table table-hover",
+                  #autoHideNavigation = TRUE, doesn't work properly with dom
                   colnames = get_disp_name(names(new_data_to_display),
                                              language = input$language,
                                              is_variable_name = TRUE),
@@ -1343,7 +1349,16 @@ server <- function(input, output, session) {
                                      # hide sorting arrows
                                      list(orderable = FALSE, targets = 
                                               0:(n_cols - 2))),
-                                 pageLength = 25
+                                 pageLength = 15,
+                                 language = list(
+                                     emptyTable = get_disp_name(
+                                         "table_empty_label", input$language),
+                                     paginate = list(
+                                         "next" = get_disp_name(
+                                            "table_next_label", input$language), 
+                                         previous = get_disp_name(
+                                        "table_previous_label", input$language))
+                                 )
                   ))
     })
     
