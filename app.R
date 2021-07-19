@@ -16,7 +16,7 @@ library(tools) # used to get file extension of uploaded images
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- FALSE
+dev_mode <- TRUE
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -460,9 +460,7 @@ server <- function(input, output, session) {
             # edit mode was disabled
             shinyjs::hide("delete")
             shinyjs::disable("clone_event")
-            #if (dev_mode || auth_result$admin == "TRUE") {
-            #    shinyjs::enable("site")
-            #}
+            
             DT::selectRows(proxy = dataTableProxy("mgmt_events_table"), 
                            selected = NULL)
             exit_sidebar_mode()
@@ -534,9 +532,9 @@ server <- function(input, output, session) {
         shinyjs::show("sidebar")
         shinyjs::disable("add_event")
         shinyjs::enable("clone_event")
-        #if (dev_mode || auth_result$admin == "TRUE") {
-        #    shinyjs::disable("site")
-        #}
+        if (dev_mode || auth_result$admin == "TRUE") {
+           shinyjs::disable("site")
+        }
         
     })
     
@@ -549,6 +547,9 @@ server <- function(input, output, session) {
         # hide sidebar
         shinyjs::hide("sidebar")
         shinyjs::enable("add_event")
+        if (dev_mode || auth_result$admin == "TRUE") {
+            shinyjs::enable("site")
+        }
     }
     
     # load data from all the json files corresponding to a site and store it in
@@ -712,16 +713,15 @@ server <- function(input, output, session) {
         # if we are only looking at a specific event type, show columns
         # appropriate to it
         if (input$table_activity != "activity_choice_all") {
+            hidden_widget_types <- c("textOutput", "dataTable", "fileInput", 
+                                     "actionButton")
             activity_variables <- unlist(rlapply(
                 activity_options[[input$table_activity]],
                 fun = function(x) {
-                    if (is.null(x$type) ||
-                        x$type == "textOutput" ||
-                        x$type == "dataTable" ||
-                        x$type == "fileInput") {
-                        return(NULL)
+                    if (is.null(x$type) || x$type %in% hidden_widget_types) {
+                        NULL
                     } else {
-                        return(x$code_name)
+                        x$code_name
                     }
                 }))
             table_variables <- c(table_variables, activity_variables)
@@ -824,6 +824,10 @@ server <- function(input, output, session) {
         
         # show sidebar
         shinyjs::show("sidebar")
+        
+        if (dev_mode || auth_result$admin == "TRUE") {
+            shinyjs::disable("site")
+        }
     })
     
     observeEvent(input$clone_event, {
@@ -994,13 +998,19 @@ server <- function(input, output, session) {
                 # the value of a fileInput cannot be reset, so we need to
                 # compare the current value to the old one to figure out if
                 # a new value has been entered
-                new_file_uploaded <- 
-                    !identical(value_to_save,
-                               session$userData$
-                                   previous_fileInput_value[[variable_name]])
-                old_value <- event[[variable_name]]
+                prev_value <- 
+                    session$userData$previous_fileInput_value[[variable_name]]
+                # should currently saved file be deleted? We know this by
+                # the flag we set to session$userData when pressing the delete
+                # button
+                clear_value <- !is.null(prev_value$clear_value)
+                # is a new file uploaded?
+                new_file_uploaded <- !is.null(value_to_save) & 
+                    !identical(value_to_save, prev_value) &
+                    !clear_value
+                old_path <- event[[variable_name]]
                 
-                if (!is.null(value_to_save) & new_file_uploaded) {
+                if (new_file_uploaded) {
                     filepath <- value_to_save$datapath
                     # move the file into place and get the relative path
                     relative_path <- 
@@ -1023,9 +1033,9 @@ server <- function(input, output, session) {
                     # if the event already has a value in this field, we are 
                     # replacing the file with a new one. We should therefore 
                     # delete the old file.
-                    if (!is.null(old_value) && !identical(old_value, missingval)) {
+                    if (!is.null(old_path) && !identical(old_path, missingval)) {
                         # delete the file
-                        tryCatch(expr = delete_file(old_value, input$site, 
+                        tryCatch(expr = delete_file(old_path, input$site, 
                                                     event$block),
                                  error = function(cnd) {
                                      message(glue("Could not delete file to ",
@@ -1034,18 +1044,32 @@ server <- function(input, output, session) {
                     }
                     
                     value_to_save <- relative_path
+                } else if (clear_value) {
+                    # the file was deleted by the user using the delete button.
+                    # Let's actually delete the file and save changes
+                    tryCatch(expr = delete_file(old_path, input$site, 
+                                                event$block),
+                             error = function(cnd) {
+                                 message(glue("Could not delete file related ",
+                                              "to the event: {cnd}"))
+                             })
+                    
+                    value_to_save <- NULL
                 } else {
                     # a new file was not uploaded. 
                     # However, if there is already a file uploaded, we might 
                     # have to rename/move it as the event date or block might
                     # have changed. We will therefore move the current file
                     # like it was a new file.
-                    if (!is.null(old_value) && !identical(old_value, missingval)) {
+                    
+                    new_date <- format(input$date, date_format_json)
+                    if (editing && !identical(old_path, missingval)) {
                         
-                        new_date <- format(input$date, date_format_json)
                         if (input$block != orig_block | new_date != orig_date) {
-                            
-                            old_path <- file.path(input$site, orig_block, old_value)
+                            # we should rename and/or move the file
+ 
+                            old_path <- file.path(input$site, orig_block, 
+                                                  old_path)
                             
                             relative_path <- 
                                 tryCatch(expr = move_uploaded_file(
@@ -1062,15 +1086,21 @@ server <- function(input, output, session) {
                                         message(glue("Error when renaming ",
                                                      "image ",
                                                      "{variable_name}: {cnd}"))
-                                        old_value
+                                        old_path
                                     })
                             
                             value_to_save <- relative_path
                             
                         } else {
+                            # we did not have to move the file and therefore do
+                            # not need to change the current file path
                             next
                         }
 
+                    } else {
+                        # we are not editing (or path is missingval), so save 
+                        # missingval
+                        value_to_save <- NULL
                     }
                 }
             }
@@ -1091,11 +1121,12 @@ server <- function(input, output, session) {
             # it saves nicely into the event list
             # if we didn't do this, we'd get an error saying we have too many
             # replacement values
-            if (length(value_to_save) > 1) {
-                value_to_save <- list(value_to_save)
-            }
+            #if (length(value_to_save) > 1) {
+            #    value_to_save <- list(value_to_save)
+            #}
+            # EDIT: not needed as I changed what's below from [] to [[]]
             
-            event[variable_name] <- value_to_save
+            event[[variable_name]] <- value_to_save
         }
         
         #message("ALL THE DATA FILLED:")
@@ -1435,6 +1466,109 @@ server <- function(input, output, session) {
             text_to_show
         })
 
+    })
+    
+    # show file delete button when a new file is uploaded by the user.
+    # Also check the file immediately after it is uploaded, and if its extension
+    # is not correct, delete the file.
+    lapply(fileInput_code_names, FUN = function(fileInput_code_name) {
+        observeEvent(input[[fileInput_code_name]], {
+            # path to the uploaded file in temporary folder
+            tmp_path <- input[[fileInput_code_name]]$datapath
+            file_extension <- tools::file_ext(tmp_path)
+            allowed_extensions <- c("jpg", "jpeg", "tif", "tiff", "png")
+            # if the image format is not desired, delete file and clear field
+            if (!(file_extension %in% allowed_extensions)) {
+                delete_file(tmp_path, filepath_relative = FALSE)
+                
+                showNotification(
+                    glue("This file extension is not supported. ",
+                         "Upload a file with one of the ",
+                         "following extensions: ",
+                         paste(allowed_extensions, collapse = ", ")), 
+                    type = "error", duration = NULL)
+                update_ui_element(session, fileInput_code_name, 
+                                  clear_value = TRUE)
+                return()
+            }
+            
+            # a new file was uploaded, so show delete button
+            delete_button_name <- 
+                structure_lookup_list[[fileInput_code_name]]$delete_button
+            shinyjs::show(delete_button_name)
+        })
+    })
+    
+    # add observers to fileInput delete buttons
+    lapply(fileInput_delete_code_names, FUN = function(button_code_name) {
+        observeEvent(input[[button_code_name]], {
+            fileInput_code_name <- 
+                structure_lookup_list[[button_code_name]]$fileInput
+            # there are two types of deletions: 
+            # 1. the user has uploaded a new file and wants to delete it 
+            # (non-saved file)
+            # - there can be a previously saved file if we are editing an event,
+            # that should then be displayed
+            # 2. the user has not uploaded a new file, but the event has a 
+            # previously saved file the user wants to delete.
+            
+            # the value of a fileInput cannot be reset, so we need to
+            # compare the current value to the old one to figure out if
+            # a new value has been entered
+            new_file_uploaded <- 
+                !identical(input[[fileInput_code_name]],
+                           session$userData$
+                               previous_fileInput_value[[fileInput_code_name]])
+            event <- event_to_edit()
+            editing <- !is.null(event)
+            
+            if (new_file_uploaded) {
+                
+                # # if we are editing, there might be a previous file
+                # if (editing) {
+                #     
+                #     old_path <- event[[fileInput_code_name]]
+                #     
+                #     if (!is.null(old_path) & !identical(old_path, missingval)) {
+                #         message(glue("Deleting new file and going back to ",
+                #                      "{old_path}"))
+                #     } else {
+                #         message("Deleting new file, no previous files")
+                #     }
+                #     
+                # } else {
+                #     message("Deleting a newly uploaded file in add mode")
+                # }
+                
+                # clear fileInput
+                update_ui_element(session, fileInput_code_name, 
+                                  clear_value = TRUE)
+                # TODO: delete the actual file? 
+                
+            } else {
+                
+                # new file was not uploaded. Check if we are editing and there
+                # is a previous file we should delete
+                old_path <- event[[fileInput_code_name]]
+                if (editing && !is.null(old_path) && 
+                    !identical(old_path, missingval)) {
+                    
+                    # there is an old file we should delete when the changes
+                    # to the event are saved. To signal this, let's add a flag
+                    # to session$userData$previous_fileInput_value
+                    update_ui_element(session, fileInput_code_name, 
+                                      clear_value = TRUE)
+                    session$userData$previous_fileInput_value[[
+                        fileInput_code_name]] <- list(clear_value = TRUE)
+                    
+                } else {
+                    # the button should not be visible at this point
+                    message("No new file uploaded and no old file to delete")
+                }
+                
+            }
+            
+        })
     })
     
     # change language when user requests it

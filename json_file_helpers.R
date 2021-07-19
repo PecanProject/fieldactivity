@@ -4,8 +4,8 @@
 # missing value in the ICASA standard
 missingval <- "-99.0"
 # relative path to json file folder
-#json_file_base_folder <- "data/management_events"
-json_file_base_folder <- "/data/fo-event-files"
+json_file_base_folder <- "data/management_events"
+#json_file_base_folder <- "/data/fo-event-files"
 
 # create_json_file <- function(file_path) {
 #     
@@ -191,12 +191,15 @@ move_uploaded_file <- function(tmp_filepath, variable_name, site, block, date,
     
 }
 
-# delete the file with the relative path relative_filepath. This path is
-# relative to the events.json file, so we need to figure out the correct path
-# (either relative to app directory or an absolute path, depending on 
-# json_file_base_folder)
-delete_file <- function(relative_filepath, site, block) {
-    filepath <- file.path(json_file_base_folder, site, block, relative_filepath)
+# delete the file with the path filepath. If the path is relative to the 
+# events.json file, this should be indicated with filepath_relative so we can 
+# figure out the correct path
+delete_file <- function(filepath, 
+                        site = NULL, block = NULL, filepath_relative = TRUE) {
+    if (filepath_relative) {
+        filepath <- file.path(json_file_base_folder, site, block, filepath)
+    }
+    
     if (file.exists(filepath)) {
         file.remove(filepath)
         message(glue("Deleted file {filepath}"))
