@@ -112,14 +112,21 @@
             "multiple" : true,
             "required" : true,
             "sub_elements" : {
+                
               "multiple" : {
                 "condition" : "input.planted_crop.length > 1",
 
                 "planted_crop_table" : {
                   "code_name" : "planted_crop_table",
                   "type" : "dataTable",
-                  "columns" : ["planting_material_weight", "planting_depth", "planting_material_source"],
-                  "rows" : "planted_crop"
+                  "columns" : ["planting_material_weight", "planting_depth",
+                  "planting_material_source"],
+                  "rows" : {
+                      "crops" : {
+                          "row_variable" : "planted_crop",
+                          "type" : "dynamic"
+                      }
+                  }
                 }
               },
 
@@ -179,45 +186,63 @@
             "required" : true,
             "sub_elements" : {
 
-              "always" : {
-                "condition" : "true",
-                
-                "harvest_yield_harvest_dw_total" : {
-                  "code_name" : "harvest_yield_harvest_dw_total",
-                  "type" : "numericInput",
-                  "label" : "harvest_yield_harvest_dw_total_label",
-                  "min" : "0",
-                  "required" : true
-                },
-
-                "harv_yield_harv_f_wt_total" : {
-                  "code_name" : "harv_yield_harv_f_wt_total",
-                  "type" : "numericInput",
-                  "label" : "harv_yield_harv_f_wt_total_label",
-                  "min" : "0"
-                },
-        
-                "yield_C_at_harvest_total" : {
-                  "code_name" : "yield_C_at_harvest_total",
-                  "type" : "numericInput",
-                  "label" : "yield_C_at_harvest_total_label",
-                  "min" : "0"
-                }
-              },
-
               "multiple" : {
                 "condition"  : "input.harvest_crop.length > 1",
 
                 "harvest_crop_table" : {
                   "code_name" : "harvest_crop_table",
                   "type" : "dataTable",
-                  "columns" : ["harvest_yield_harvest_dw", "harv_yield_harv_f_wt", "yield_C_at_harvest", "harvest_moisture",  "harvest_method", "harvest_operat_component", "canopy_height_harvest", "harvest_cut_height", "plant_density_harvest", "harvest_residue_placement"],
-                  "rows" : "harvest_crop"
+                  "columns" : ["harvest_yield_harvest_dw", 
+                  "harv_yield_harv_f_wt", "yield_C_at_harvest", 
+                  "harvest_moisture",  "harvest_method", 
+                  "harvest_operat_component", "canopy_height_harvest", 
+                  "harvest_cut_height", "plant_density_harvest", 
+                  "harvest_residue_placement"],
+                  "rows" : {
+                      "crops" : {
+                        "row_variable" : "harvest_crop",
+                        "type" : "dynamic"
+                      },
+                      
+                      "total" : {
+                        "variables" : ["harvest_yield_harvest_dw_total", 
+                        "harv_yield_harv_f_wt_total", 
+                        "yield_C_at_harvest_total"],
+                        "type" : "static",
+                        "name" : "total_row_name",
+                        "hide_labels" : true
+                      }
+                  }
                 }
+                
               },
 
               "single" : {
                 "condition" : "input.harvest_crop.length <= 1",
+
+                "harvest_yield_harvest_dw_total" : {
+                  "code_name" : "harvest_yield_harvest_dw_total",
+                  "type" : "numericInput",
+                  "label" : "harvest_yield_harvest_dw_total_label",
+                  "min" : "0",
+                  "sum_of" : "harvest_yield_harvest_dw"
+                },
+
+                "harv_yield_harv_f_wt_total" : {
+                  "code_name" : "harv_yield_harv_f_wt_total",
+                  "type" : "numericInput",
+                  "label" : "harv_yield_harv_f_wt_total_label",
+                  "min" : "0",
+                  "sum_of" : "harv_yield_harv_f_wt"
+                },
+        
+                "yield_C_at_harvest_total" : {
+                  "code_name" : "yield_C_at_harvest_total",
+                  "type" : "numericInput",
+                  "label" : "yield_C_at_harvest_total_label",
+                  "min" : "0",
+                  "sum_of" : "yield_C_at_harvest"
+                },
 
                 "harvest_moisture" : {
                   "code_name" : "harvest_moisture",
@@ -454,7 +479,27 @@
           "fertilizer_element_table" : {
             "code_name" : "fertilizer_element_table",
             "type" : "dataTable",
-            "rows" : [["N_in_applied_fertilizer", "phosphorus_applied_fert", "fertilizer_K_applied", "S_in_applied_fertilizer", "Ca_in_applied_fertilizer", "Mg_in_applied_fertilizer", "Na_in_applied_fertilizer"], ["Cu_in_applied_fertilizer", "Zn_in_applied_fertilizer", "B_in_applied_fertilizer", "Mn_in_applied_fertilizer", "Se_in_applied_fertilizer", "Fe_in_applied_fertilizer", "other_element_in_applied_fertilizer"]]  
+            "rows" : {
+                
+                "row1" : {
+                  "variables" : ["N_in_applied_fertilizer", 
+                  "phosphorus_applied_fert", "fertilizer_K_applied", 
+                  "S_in_applied_fertilizer",  "Ca_in_applied_fertilizer", 
+                  "Mg_in_applied_fertilizer", "Na_in_applied_fertilizer"],
+                  "type" : "static"
+                },
+                
+                "row2" : {
+                  "variables" : ["Cu_in_applied_fertilizer", 
+                  "Zn_in_applied_fertilizer", "B_in_applied_fertilizer", 
+                  "Mn_in_applied_fertilizer", "Se_in_applied_fertilizer", 
+                  "Fe_in_applied_fertilizer", 
+                  "other_element_in_applied_fertilizer"],
+                  "type" : "static"
+                }
+                
+            }
+
           },
           
           "hidden" : {
@@ -597,7 +642,8 @@
             "code_name" : "grazing_species_age_group",
             "type" : "selectInput",
             "label" : "grazing_species_age_group_label",
-            "choices" : ["0-1","1-2","2-3","3-5","5-10","10+","grazing_species_age_group_mix"]
+            "choices" : ["0-1","1-2","2-3","3-5","5-10","10+",
+            "grazing_species_age_group_mix"]
           },
 
           "livestock_density" : {
@@ -804,8 +850,14 @@
                   "soil_layer_count_table" : {
                     "code_name" : "soil_layer_count_table",
                     "type" : "dataTable",
-                    "columns" : ["soil_layer_top_depth", "soil_layer_base_depth", "soil_classification_by_layer"],
-                    "rows" : "soil_layer_count"
+                    "columns" : ["soil_layer_top_depth", 
+                    "soil_layer_base_depth", "soil_classification_by_layer"],
+                    "rows" : {
+                      "soil_layers" : {
+                        "row_variable" : "soil_layer_count",
+                        "type" : "dynamic"
+                      }
+                    }
                   }
                 },
 

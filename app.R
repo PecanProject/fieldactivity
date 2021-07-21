@@ -16,7 +16,7 @@ library(tools) # used to get file extension of uploaded images
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- TRUE
+dev_mode <- FALSE
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -204,16 +204,11 @@ get_variable_table <- function(variable_name, only_values = FALSE) {
     return(NULL)
 }
 
-# js_unbind_script <- paste(sep = "",
-#                           "Shiny.addCustomMessageHandler('unbind-table', function(id) {",
-#                           #alert($('#'+id).find('.shiny-input-container').length);
-#                           "Shiny.unbindAll($('#'+id).find('.shiny-input-container'));
-#           })")
 
 # Define UI for the application
 # some of the UI (esp. additional options for activities) will be generated
 # by create_ui in ui_builder.R
-ui <- fluidPage(theme = bslib::bs_theme(version = 4, bootswatch = "lumen"),
+ui <- fluidPage(#theme = bslib::bs_theme(version = 4, bootswatch = "lumen"),
     useShinyjs(),  # enable shinyjs
     
     includeScript("www/script.js"),
@@ -344,7 +339,7 @@ if (!dev_mode) {
                      #tags_top = tagList(
                          #p("EXAMPLE USER site: ruukki, password: Ruukki1"),
                          #p("ADMIN site: shinymanager, password: 12345")),
-                     theme = bslib::bs_theme(version = 4, bootswatch = "lumen"),
+                     theme = bslib::bs_theme(version = 4),
                      enable_admin = TRUE,
                      fab_position = "top-right")
 }
@@ -938,8 +933,7 @@ server <- function(input, output, session) {
                 if (variable_name %in% table_to_read$columns) {TRUE}
                 # if it is in a custom mode table (=fertilizer_element_table)
                 # then yes too
-                else if (is.null(table_to_read$columns) & 
-                         variable_name %in% unlist(table_to_read$rows)) {TRUE}
+                else if (variable_name %in% unlist(table_to_read$rows)) {TRUE}
                 # if not, then it is in the rows of the table and we will read
                 # the value instead from a regular widget
                 else {FALSE}
@@ -1375,15 +1369,44 @@ server <- function(input, output, session) {
                          FUN = function(data_table_code_name) {
         table_structure <- structure_lookup_list[[data_table_code_name]]
         
-        # are we in custom made, i.e. is this fertilizer_element_table
-        custom_mode <- is.null(table_structure$columns)
+        # are we in static mode, i.e. are all row groups of type 'static'? If
+        # yes, we won't need to supply the row_variable_value reactive.
+        # Currently this only happens with fertilizer_element_table (the columns
+        # are not defined)
+        static_mode <- is.null(table_structure$columns)
         
-        # what are the names of the rows? This can either be determined by
+        # If we have row groups which depend on widget values in the main app,
+        # create a reactive from those values. This can either be determined by
         # the choices of selectInput with multiple selections, or a numericInput
-        # which represents the number of rows
-        row_names <- reactive({
-            if (!custom_mode) {
-                row_variable <- structure_lookup_list[[table_structure$rows]]
+        # which represents the number of rows.
+        row_variable_value <- reactive({
+            
+            if (static_mode) {
+                NULL
+                
+                # the following is hacky, but basically allows for determining
+                # when tables in custom mode (only fertilizer_element_table)
+                # are visible
+                
+                # if (isTruthy(input$mgmt_operations_event) && 
+                #     input$mgmt_operations_event == "fertilizer") {
+                #     1:2
+                # } else {
+                #     0
+                # }
+                
+            } else {
+                
+                # find the row variable
+                for (row_group in table_structure$rows) {
+                    # there is only one dynamic row group
+                    if (row_group$type == 'dynamic') {
+                        row_variable <- row_group$row_variable
+                        break
+                    }
+                }
+                
+                row_variable <- structure_lookup_list[[row_variable]]
                 if (row_variable$type == "numericInput") {
                     
                     number_of_rows <- input[[row_variable$code_name]]
@@ -1391,40 +1414,46 @@ server <- function(input, output, session) {
                     if (!isTruthy(number_of_rows)) {
                         NULL
                     } else {
-                        number_of_rows <- max(ceiling(number_of_rows), 1)
-                        1:number_of_rows
+                        #number_of_rows <- max(ceiling(number_of_rows), 1)
+                        #1:number_of_rows
+                        as.integer(number_of_rows)
                     }
-                    
                     
                 } else if (row_variable$type == "selectInput") {
                     input[[row_variable$code_name]]
-                }
-            } else {
-                
-                # the following is hacky, but basically allows for determining
-                # when tables in custom mode (only fertilizer_element_table)
-                # are visible
-                
-                if (isTruthy(input$mgmt_operations_event) && 
-                    input$mgmt_operations_event == "fertilizer") {
-                    1:2
-                } else {
-                    0
                 }
                 
             }
         })
                             
-        # add observer to visibility condition of table.
-        # table is visible if the length of the variable presented on the rows
-        # of the table is more than 1
-        observeEvent(row_names(), ignoreNULL = FALSE, {
-            visible[[data_table_code_name]] <- length(row_names()) > 1
-            #message(glue("Visibility for {data_table_code_name} is {visible[[data_table_code_name]]}"))
-        })
+        # Determine when the table is visible. The table module needs this 
+        # information.
+        if (static_mode) {
+            # since fertilizer_element_table is currently the only table
+            # utilising static mode, we can use this condition to determine
+            # its visibility.
+            observeEvent(input$mgmt_operations_event, ignoreNULL = FALSE, {
+                visible[[data_table_code_name]] <- 
+                    identical(input$mgmt_operations_event, "fertilizer")
+            })
+        } else {
+            # table is visible if the length of the variable presented on the rows
+            # of the table is more than 1, or if its numeric value is greater
+            # than 1
+            observeEvent(row_variable_value(), ignoreNULL = FALSE, {
+                visible[[data_table_code_name]] <- 
+                    if (is.numeric(row_variable_value())) {
+                        row_variable_value() > 1
+                    } else { 
+                        length(row_variable_value()) > 1 
+                    }
+                
+                #message(glue("Visibility for {data_table_code_name} is {visible[[data_table_code_name]]}"))
+            })
+        }
         
         prefill_values[[data_table_code_name]] <<- reactiveVal()
-        tableServer(data_table_code_name, row_names, reactive(input$language),
+        tableServer(data_table_code_name, row_variable_value, reactive(input$language),
                     visible = reactive(visible[[data_table_code_name]]),
                     override_values = prefill_values[[data_table_code_name]])
     }, USE.NAMES = TRUE, simplify = FALSE)

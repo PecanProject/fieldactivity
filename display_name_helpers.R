@@ -35,8 +35,8 @@ get_category_names <- function(category1, language = NULL) {
 # variable
 get_disp_name <- function(code_name, language = NULL, 
                           is_variable_name = FALSE) {
-    
-    if (is.null(language)) {return(code_name)}
+    if (is.null(code_name)) return(NULL)
+    if (is.null(language)) return(code_name)
     
     if (is_variable_name) {
         rows_to_check <- subset(display_names_dict, category == "variable_name")
