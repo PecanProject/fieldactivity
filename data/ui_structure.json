@@ -305,7 +305,8 @@
                   "type" : "numericInput",
                   "label" : "harvest_yield_harvest_dw_label",
                   "min" : "0",
-                  "hide_in_table" : true
+                  "hide_in_table" : true,
+                  "sum_to" : "harvest_yield_harvest_dw_total"
                 },
 
                 "harv_yield_harv_f_wt" : {
@@ -313,7 +314,8 @@
                   "type" : "numericInput",
                   "label" : "harv_yield_harv_f_wt_label",
                   "min" : "0",
-                  "hide_in_table" : true
+                  "hide_in_table" : true,
+                  "sum_to" : "harv_yield_harv_f_wt_total"
                 },
                 
                 "yield_C_at_harvest" : {
@@ -321,7 +323,8 @@
                   "type" : "numericInput",
                   "label" : "yield_C_at_harvest_label",
                   "min" : "0",
-                  "hide_in_table" : true
+                  "hide_in_table" : true,
+                  "sum_to" : "yield_C_at_harvest_total"
                 }
                 
               }
