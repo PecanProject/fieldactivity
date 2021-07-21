@@ -144,7 +144,7 @@ variable_name,other_notes,Notes,Muistiinpanot
 # labels for widgets, incl. help texts etc.
 #
 element_label,window_title,Enter Management Events,Syötä tilanhoitotapahtumia
-element_label,frontpage_text,Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.,Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä.
+element_label,frontpage_text,"Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.","Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä."
 element_label,frontpage_table_title,Events,Tapahtumat
 #   element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
 element_label,table_filter_text_1,"Showing ","Näytetään "
@@ -160,11 +160,6 @@ element_label,add_event_label,Add event,Lisää tapahtuma
 element_label,clone_event_label,Clone event,Monista tapahtuma
 element_label,required_variables_helptext,*Required,*Pakollinen
 element_label,site_label,Select the site*:,Valitse sijainti*:
-element_label,block_label,Select the block*:,Valitse lohko*:
-element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
-element_label,date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
-element_label,mgmt_event_notes_label,Description:,Kuvaus:
-element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. “first harvest of the year”, “spring fertilization” or “protection against rot”. This will appear on the event list.","Yleinen kuvaus tapahtumasta, esim. “vuoden ensimmäinen sadonkorjuu”, “kevätlannoitus” tai “suoja mädäntymistä vastaan”. Tämä tulee näkyviin tapahtumalistaan."
 element_label,save_label,Save,Tallenna
 element_label,cancel_label,Cancel,Peruuta
 element_label,delete_label,Delete,Poista
@@ -172,6 +167,16 @@ element_label,sidebar_title_edit,Edit event,Muokkaa tapahtumaa
 element_label,sidebar_title_add,Add event,Lisää tapahtuma
 element_label,file_input_button_label,Browse...,Selaa...
 element_label,file_input_placeholder,No file selected,Tiedostoa ei valittu
+element_label,delete_uploaded_file_label,Delete,Poista
+element_label,total_row_name,Total,Yhteensä
+#
+#
+#
+element_label,block_label,Select the block*:,Valitse lohko*:
+element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
+element_label,date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
+element_label,mgmt_event_notes_label,Description:,Kuvaus:
+element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. “first harvest of the year”, “spring fertilization” or “protection against rot”. This will appear on the event list.","Yleinen kuvaus tapahtumasta, esim. “vuoden ensimmäinen sadonkorjuu”, “kevätlannoitus” tai “suoja mädäntymistä vastaan”. Tämä tulee näkyviin tapahtumalistaan."
 element_label,planted_crop_label,Planted crop*:,Kylvetty kasvi*:
 element_label,planting_material_weight_label,Weight of seeds (kg/ha):,Siementen määrä (kg/ha):
 element_label,planting_depth_label,Sowing depth (mm):,Kylvösyvyys (mm):
@@ -314,7 +319,6 @@ element_label,weeding_notes_placeholder,"Any notes or observations about the eve
 element_label,bed_prep_notes_label,Notes on the preparation of raised beds:,Muistiinpanot kasvatuslaatikoiden valmistelusta:
 element_label,bed_prep_notes_placeholder,"Any notes or observations about the event, e.g. “used the beds from last year”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “käytettiin samoja kasvatuslaatikoita kuin edellisenä vuonna”"
 element_label,other_notes_label,Event notes*:,Muistiinpanoja tapahtumasta*:
-element_label,delete_uploaded_file_label,Delete,Poista
 #
 ############### others
 #

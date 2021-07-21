@@ -5,8 +5,10 @@
 missingval <- "-99.0"
 log <- FALSE
 
-# TODO: move these to the javascript file
-# javascript callback scripts must be wrapped inside a function for some reason
+# TODO: maybe a separate old_values() is not necessary? It works now, though,
+# so changing it is not a very high priority task.
+
+# javascript callback scripts must be wrapped inside a function.
 # EDIT: this makes sense also, see datatables API documentation for example
 js_bind_script <- "function() { Shiny.bindAll(this.api().table().node()); }"
 
@@ -27,28 +29,20 @@ js_bind_script <- "function() { Shiny.bindAll(this.api().table().node()); }"
 #           "})}")
 # }
 
+# define the module's UI
 tableInput <- function(id) {
-    
-    tagList(#includeScript("www/script.js"),
-            #tags$head(tags$script(HTML(js_unbind_script))),
-            # tags$head(tags$script(HTML(paste(sep = "",
-            #     "$(document).ready(function() {",
-            #     "('#", NS(id, "table"), "').on('preDraw.dt', function() {",
-            #     " Shiny.onInputChange('", NS(id, "rendered"), "', false); });",
-            #     "});"
-            # )))),
-            #tags$head(tags$script(HTML(js_selectize_script(NS(id, "table"))))),
-            DT::dataTableOutput(NS(id, "table")), 
+    tagList(DT::dataTableOutput(NS(id, "table")), 
             br()) 
 }
 
-# override values are to be supplied in the same format that the table returns,
-# i.e. a list with variable names and the values as vectors under those.
-# They also have to include a row_names component
-tableServer <- function(id, row_names, language, visible, 
-                        override_values = NULL) {
+# row_variable_value should be the value of the variable which determines the
+# rows for dynamic row groups. Override values are to be supplied in the same
+# format that the table returns, i.e. a list with variable names and the values
+# as vectors under those.
+tableServer <- function(id, row_variable_value, language, visible, 
+                        override_values) {
     
-    stopifnot(is.reactive(row_names))
+    stopifnot(is.reactive(row_variable_value))
     stopifnot(is.reactive(language))
     stopifnot(is.reactive(visible))
     stopifnot(is.reactive(override_values))
@@ -58,38 +52,71 @@ tableServer <- function(id, row_names, language, visible,
         # get corresponding element info to determine which widgets to add to
         # the table
         table_structure <- structure_lookup_list[[id]]
-        row_variable <- table_structure$rows
+        row_groups <- table_structure$rows
+        # can be NULL, in which case all row groups are of type 'static'
+        column_names <- table_structure$columns 
+        static_mode <- is.null(column_names)
+        
+        if (!static_mode) {
+            # find the row variable
+            for (row_group in row_groups) {
+                # there is only one dynamic row group
+                if (row_group$type == 'dynamic') {
+                    # row_variable will be available outside this loop
+                    row_variable <- row_group$row_variable
+                    break
+                }
+            }
+        }
+        
+        n_cols <- if (static_mode) {
+            max(sapply(row_groups, FUN = function(x) length(x$variables)))
+        } else {
+            length(column_names)
+        }
         
         # if the column variables are not defined, we are in custom mode. This
         # happens with fertilizer_element_table
-        custom_mode <- is.null(table_structure$columns)
-        if (custom_mode) {
-            n_cols <- max(sapply(row_variable, length))
-            n_rows <- length(row_variable)
-            variables <- unlist(row_variable)
-        } else {
-            variables <- table_structure$columns
-            n_cols <- length(variables)
-        }
+        # custom_mode <- is.null(table_structure$columns)
+        # if (custom_mode) {
+        #     # the number of columns is the largest of the rows' lengths
+        #     n_cols <- max(sapply(row_variable, length))
+        #     n_rows <- length(row_variable)
+        #     variables <- unlist(row_variable)
+        # } else {
+        #     variables <- table_structure$columns
+        #     n_cols <- length(variables)
+        # }
+        
+        # entered values before we e.g. add rows. This allows us to get the
+        # values back when generating a new table
+        old_values <- reactiveVal()
+        # current values of the table
+        table_values <-reactiveVal()
         
         # this unbinds the table elements before they are re-rendered.
         # Setting a higher priority ensures this runs before the table render
-        observe(priority = 1, {
+        observe(priority = 2, {
             # when to run observer
-            row_trigger()
             language()
             visible()
+            row_trigger()
             override_trigger()
-            # require this so that we know the table has already rendered
-            req(isolate(input$table_rows_current), visible())
-            #message("Sent unbind message")
+            # require this so that we know the table has already rendered and
+            # is still visible
+            # requiring rendered adds a layer of distance from visible:
+            # when visibility first goes to FALSE, rendered is still TRUE
+            # here because this observer has a higher priority than the one
+            # which sets rendered to FALSE
+            req(isolate(input$table_rows_current), isolate(rendered()))
             session$sendCustomMessage("unbind-table", NS(id, "table"))
+            if (log) message(glue("Sent unbind message ({id})"))
         })
         
         # whether the table is currently rendered or not
         rendered <- reactiveVal(FALSE)
         
-        # when the server sends a message that rendering is done, set rendered
+        # when the client sends a message that rendering is done, set rendered
         # to TRUE
         observeEvent(input$rendered, {
             rendered(TRUE)
@@ -97,8 +124,9 @@ tableServer <- function(id, row_names, language, visible,
                 "rendered set to TRUE ({id})"))
         })
         
-        # when we go hidden, set rendered to FALSE
-        observeEvent(visible(), ignoreNULL = FALSE, {
+        # when we go hidden, set rendered to FALSE and clear old values
+        observeEvent(visible(), ignoreNULL = FALSE, ignoreInit = TRUE ,
+                     priority = 1, {
             if (!visible()) {
                 if (log) message(glue("Rendered set to FALSE. ",
                     "Clearing old values ({id})"))
@@ -107,33 +135,15 @@ tableServer <- function(id, row_names, language, visible,
             }
         })
         
-        #n_rows <- reactive({
-            
-            # override_trigger()
-            # row_names()
-            # 
-            # if (!is.null(isolate(override_values()))) {
-            #     length(isolate(override_values()$row_names))
-            # } else {
-            #     length(row_names())
-            # }
-        #})
-        
-        # this is a trigger which triggers the update of table_data when
-        # we want to. We want to trigger when override_values changes to a non-
-        # NULL value, but not when we change it back to a NULL. The triggering
+        # this triggers the update of table_data when override_values are
+        # supplied and not when they are reset to NULL. The triggering
         # behaviour is controller in the observeEvent below
         override_trigger <- reactiveVal(0)
-        
-        # this is a flag which prevents updating the table once after values
-        # have been prefilled. This is to prevent the update that is caused
-        # by updating the widget corresponding to rows in the main app
-        # block_update <- reactiveVal(FALSE)
         
         # this is a trigger for updating the table widgets when rows change
         row_trigger <- reactiveVal(0)
         
-        # this ignores NULL values
+        # observeEvent ignores NULL values by default
         observeEvent(override_values(), {
             if (log) {
                 message(glue("Triggering value pre-filling, ",
@@ -143,24 +153,28 @@ tableServer <- function(id, row_names, language, visible,
             override_trigger(override_trigger() + 1)
         })
         
-        # this allows blocking extra updates
-        observeEvent(row_names(), ignoreNULL = FALSE, {
-            if (custom_mode) {
-                if (length(row_names()) == 2) {
-                    if (log) message("Triggering row trigger in custom mode")
-                    row_trigger(row_trigger() + 1)
-                }
-                return()
-            }
+        # this allows blocking extra updates caused by the widget in the main
+        # app changing its value after override_values have just been supplied.
+        observeEvent(row_variable_value(), ignoreNULL = FALSE, {
+            # if (custom_mode) {
+            #     if (length(row_variable_value()) == 2) {
+            #         if (log) message("Triggering row trigger in custom mode")
+            #         row_trigger(row_trigger() + 1)
+            #     }
+            #     return()
+            # }
             
-            #message("Row_names observer")
-            current_row_names <- table_values()[[row_variable]]
+            if (static_mode) return()
+            
+            current_row_variable_value <- table_values()[[row_variable]]
             # as.character is needed because sometimes row_names() are numeric
-            if (!identical(as.character(row_names()), 
-                           as.character(current_row_names))) {
-                if (log) message(glue("Triggering the row_trigger because ",
-                    "new rows are {paste(row_names(), collapse = ', ')} and ",
-                    "old ones are {paste(current_row_names, collapse = ', ')}",
+            if (!identical(as.character(row_variable_value()), 
+                           as.character(current_row_variable_value))) {
+                if (log) message(glue("Triggering the row_trigger because new ",
+                    "row variable value is ",
+                    "{paste(row_variable_value(), collapse = ', ')} and ",
+                    "old one is ",
+                    "{paste(current_row_variable_value, collapse = ', ')} ",
                     "({id})"))
                 row_trigger(row_trigger() + 1)
             } else {
@@ -169,17 +183,12 @@ tableServer <- function(id, row_names, language, visible,
             }
         })
         
-        # clear old data when visibility changes to hidden
-        # observeEvent(visible(), {
-        #     if (!visible()) {
-        #         vals <- list()
-        #         vals[[row_variable]] <- table_values()
-        #         old_values(table_values)
-        #         message("Cleared old values")
-        #     }
-        # })
-        
+        # calculates the widgets that should be in the table
         table_data <- reactive({
+            # when the widgets should be re-calculated.
+            # table_data also re-calculates when language changes if table has 
+            # selectInputs, text fields with placeholders or widgets 
+            # with labels (see below)
             override_trigger()
             row_trigger()
 
@@ -189,124 +198,198 @@ tableServer <- function(id, row_names, language, visible,
             do_override <- !is.null(override_vals)
             
             table_to_display <- data.frame(matrix(nrow = 0, ncol = n_cols))
-            names(table_to_display) <- variables
+            # column_names can be NULL
+            names(table_to_display) <- if (is.null(column_names)) {
+                rep("", n_cols)
+            } else {
+                column_names
+            }
             
-            # check that the variables in override values are correct
             if (do_override) {
-                #if (log) message("Doing override in table calculation")
                 # if we just want to clear the table, let's do that
                 if (identical(override_vals, list())) {
                     override_values(NULL)
                     return(table_to_display)
                 }
-                if (!all(variables %in% names(override_vals))) {
-                    message(glue("The override values supplied to table {id} ",
-                                 "are missing some variables, the table ",
-                                 "will not be rendered"))
-                    override_values(NULL)
-                    return(table_to_display)
-                }
+                # check that the variables in override values are correct
+                # if (!all(variables %in% names(override_vals))) {
+                #     message(glue("The override values supplied to table {id} ",
+                #                  "are missing some variables, the table ",
+                #                  "will not be rendered"))
+                #     override_values(NULL)
+                #     return(table_to_display)
+                # }
             }
 
-
-            rows <- if (do_override) {
+            current_row <- 1
+            for (row_group in row_groups) {
                 
-                # if overriding, determine the appropriate rows
-                row_variable_structure <- 
-                    structure_lookup_list[[row_variable]]
-                if (row_variable_structure$type == "numericInput") {
+                if (row_group$type == 'static') {
                     
-                    number_of_rows <- override_vals[[row_variable]]
+                    current_col <- 1
+                    for (variable in row_group$variables) {
+                        
+                        element <- structure_lookup_list[[variable]]
+                        code_name <- NS(id, variable)
+                        
+                        value <- if (do_override) {
+                            override_vals[[variable]]
+                        } else {
+                            isolate(old_values())[[variable]]
+                        }
+                        
+                        if (!isTruthy(value) || value == missingval) {
+                            value <- ""
+                        }
+                        
+                        #message(glue("Value for {code_name} is {value}"))
+                        
+                        # add choices in the correct language for selectInputs
+                        choices <- NULL
+                        if (element$type == "selectInput") {
+                            choices <- get_selectInput_choices(element, language())
+                        }
+                        
+                        placeholder <- NULL
+                        if (!is.null(element$placeholder)) {
+                            placeholder <- get_disp_name(element$placeholder, 
+                                                         language())
+                        }
+                        
+                        label <- ""
+                        if (is.null(row_group$hide_labels)) {
+                            label <- get_disp_name(element$label, language())
+                        }
+                        
+                        # as character makes the element HTML, which can then be
+                        # not escaped when rendering the table
+                        widget <- as.character(
+                            create_element(element,
+                                           #width = width,
+                                           override_code_name = code_name,
+                                           override_label = label,
+                                           override_value = value,
+                                           override_choices = choices,
+                                           override_selected = value,
+                                           override_placeholder = placeholder
+                            ))
+                        
+                        
+                        table_to_display[current_row, current_col] <- widget
+                        current_col <- current_col + 1
+                    }
                     
-                    if (!isTruthy(number_of_rows) ||
-                        number_of_rows == missingval) {
-                        NULL
+                    row_name <- ifelse(is.null(row_group$name), current_row, 
+                                       row_group$name)
+                    rownames(table_to_display)[current_row] <- row_name
+                    
+                    current_row <- current_row + 1
+                    
+                } else if (row_group$type == 'dynamic') {
+                    
+                    # determine the rows in this dynamic row group
+                    row_value <- if (do_override) {
+                        override_vals[[row_variable]]
                     } else {
-                        number_of_rows <- 
-                            max(ceiling(as.numeric(number_of_rows)), 1)
-                        1:number_of_rows
+                        isolate(row_variable_value())
+                    }
+                    row_variable_structure <- 
+                        structure_lookup_list[[row_variable]]
+                    rows <- if (row_variable_structure$type == "numericInput") {
+                        if (!isTruthy(row_value) || row_value == missingval) {
+                            NULL
+                        } else {
+                            1:as.integer(row_value)
+                        }
+                    } else if (row_variable_structure$type == "selectInput") {
+                        row_value
                     }
                     
-                } else if (row_variable_structure$type == "selectInput") {
-                    override_vals[[row_variable]]
-                }
-                
-            } else {
-                isolate(row_names())
-            }
-            
-            if (length(rows) == 0) {
-                override_values(NULL)
-                return(table_to_display)
-            }
-            
-            
-            for (variable_name in variables) {
-                element <- structure_lookup_list[[variable_name]]
-                
-                width <- if (element$type == "numericInput") {
-                    "80px"
-                } else if (element$type == "textInput") {
-                    "110px"
-                } else {
-                    "150px"
-                }
-                
-                for (row_number in 1:length(rows)) {
-                    
-                    # the code names for these elements are
-                    # variablename_rownumber
-                    code_name <- NS(id, 
-                                    paste(variable_name, row_number, sep = "_"))
-                    
-                    value <- if (do_override) {
-                        override_vals[[variable_name]][row_number]
-                    } else {
-                        old_row_number <- which(
-                            isolate(old_values())[[row_variable]] ==
-                                rows[row_number])
-                        isolate(old_values())[[variable_name]][old_row_number]
+                    for (row in rows) {
+                        # For dynamic row groups the variables on each row are 
+                        # determined by the columns of the table.
+                        # Go through each column and add widgets to the row.
+                        for (variable in column_names) {   
+                            
+                            element <- structure_lookup_list[[variable]]
+                            
+                            # width <- if (element$type == "numericInput") {
+                            #     "80px"
+                            # } else if (element$type == "textInput") {
+                            #     "110px"
+                            # } else {
+                            #     "150px"
+                            # }
+                            
+                            # the code names for these elements are
+                            # variablename_rownumber
+                            code_name <- NS(id, 
+                                            paste(variable, current_row, sep = "_"))
+                            # value to show in the widget initially
+                            value <- if (do_override) {
+                                override_vals[[variable]][current_row]
+                            } else {
+                                # fetch old value to show it after rows have changed
+                                old_row_number <- which(
+                                    isolate(old_values())[[row_variable]] ==
+                                        rows[current_row])
+                                isolate(old_values())[[variable]][old_row_number]
+                            }
+                            
+                            if (!isTruthy(value) || value == missingval) {
+                                value <- ""
+                            }
+                            
+                            #message(glue("Value for {code_name} is {value}"))
+                            
+                            # add choices in the correct language for selectInputs
+                            choices <- NULL
+                            if (element$type == "selectInput") {
+                                choices <- get_selectInput_choices(element, language())
+                            }
+                            
+                            placeholder <- NULL
+                            if (!is.null(element$placeholder)) {
+                                placeholder <- get_disp_name(element$placeholder, 
+                                                             language())
+                            }
+                            
+                            # as character makes the element HTML, which can then be
+                            # not escaped when rendering the table
+                            widget <- as.character(
+                                create_element(element,
+                                               #width = width,
+                                               override_code_name = code_name,
+                                               override_label = "",
+                                               override_value = value,
+                                               override_choices = choices,
+                                               override_selected = value,
+                                               override_placeholder = placeholder
+                                ))
+                            
+                            
+                            table_to_display[current_row, variable] <- widget
+                        }
+                        
+                        rownames(table_to_display)[current_row] <- row
+                        current_row <- current_row + 1
                     }
+                    
+                }
+                
+            }
+            
 
-                    if (!isTruthy(value) || value == missingval) {
-                        value <- ""
-                    }
-                    
-                    #message(glue("Value for {code_name} is {value}"))
-                    
-                    # add choices in the correct language for selectInputs
-                    choices <- NULL
-                    if (element$type == "selectInput") {
-                        choices <- get_selectInput_choices(element, language())
-                    }
-                    
-                    placeholder <- NULL
-                    if (!is.null(element$placeholder)) {
-                        placeholder <- get_disp_name(element$placeholder, 
-                                                     language())
-                    }
-                    
-                    # as character makes the element HTML, which can then be
-                    # not escaped when rendering the table
-                    widget <- as.character(
-                        create_element(element,
-                                       #width = width,
-                                       override_code_name = code_name,
-                                       override_label = "",
-                                       override_value = value,
-                                       override_choices = choices,
-                                       override_selected = value,
-                                       override_placeholder = placeholder
-                                       ))
-                    
-
-                    table_to_display[row_number, variable_name] <- widget
-                }
-            }
+            # # if there are no rows, return an empty data frame
+            # if (nrow(table_to_display) == 0) {
+            #     override_values(NULL)
+            #     return(table_to_display)
+            # }
+        
             
             # add code names to the row names. These will be changed to display
             # names when rendering
-            rownames(table_to_display) <- rows
+            #rownames(table_to_display) <- rows
             
             # if you want to add observers to these widgets here, you need to do
             # it like this using lapply
@@ -320,170 +403,108 @@ tableServer <- function(id, row_names, language, visible,
             # })
 
             # clear override_values
-            isolate(override_values(NULL))
+            override_values(NULL)
             if (log) message(glue("Calculated table, has ",
-                "{nrow(table_to_display)} rows"))
+                "{nrow(table_to_display)} rows ({id})"))
             table_to_display
+            
         })
         
         # this is just like the table_data reactive, but used for when the 
         # table is in custom mode
-        custom_table_data <- reactive({
-            override_trigger()
-            row_trigger()
-            
-            if (log) message(glue("Table calculation begins ({id})"))
-            
-            override_vals <- isolate(override_values())
-            do_override <- !is.null(override_vals)
-            
-            table_to_display <- 
-                data.frame(matrix(nrow = n_rows, ncol = n_cols))
-            names(table_to_display) <- rep("", n_cols)
-            
-            # check that the variables in override values are correct
-            if (do_override) {
-                #if (log) message("Doing override in table calculation")
-                # if we just want to clear the table, let's do that
-                if (identical(override_vals, list())) {
-                    override_values(NULL)
-                    return(table_to_display)
-                }
-                if (!all(variables %in% names(override_vals))) {
-                    message(glue("The override values supplied to table {id} ",
-                                 "are missing some variables, the table ",
-                                 "will not be rendered"))
-                    override_values(NULL)
-                    return(table_to_display)
-                }
-            }
-            
-            current_row <- 1
-            for (row in row_variable) {
-                current_col <- 1
-                for (variable in row) {
-                    
-                    element <- structure_lookup_list[[variable]]
-                    code_name <- NS(id, variable)
-                    
-                    value <- if (do_override) {
-                        override_vals[[variable]]
-                    } else {
-                        isolate(old_values())[[variable]]
-                    }
-                    
-                    if (!isTruthy(value) || value == missingval) {
-                        value <- ""
-                    }
-                    
-                    #message(glue("Value for {code_name} is {value}"))
-                    
-                    # add choices in the correct language for selectInputs
-                    choices <- NULL
-                    if (element$type == "selectInput") {
-                        choices <- get_selectInput_choices(element, language())
-                    }
-                    
-                    placeholder <- NULL
-                    if (!is.null(element$placeholder)) {
-                        placeholder <- get_disp_name(element$placeholder, 
-                                                     language())
-                    }
-                    
-                    # as character makes the element HTML, which can then be
-                    # not escaped when rendering the table
-                    widget <- as.character(
-                        create_element(element,
-                                       #width = width,
-                                       override_code_name = code_name,
-                                       override_label = get_disp_name(
-                                           element$label,isolate(language())),
-                                       override_value = value,
-                                       override_choices = choices,
-                                       override_selected = value,
-                                       override_placeholder = placeholder
-                        ))
-                    
-                    
-                    table_to_display[current_row, current_col] <- widget
-                    current_col <- current_col + 1
-                }
-                current_row <- current_row + 1
-            }
-            
-            # if you want to add observers to these widgets here, you need to do
-            # it like this using lapply
-            # lapply(1:n_rows, FUN = function(row_number) {
-            #     lapply(columns, FUN = function(column_name) {
-            #         code_name <- paste(column_name, row_number, sep = "_")
-            #         observeEvent(input[[code_name]], {
-            #             message(input[[code_name]])
-            #         })
-            #     })
-            # })
-            
-            # clear override_values
-            isolate(override_values(NULL))
-            if (log) message(glue("Calculated table, has ",
-                                  "{nrow(table_to_display)} rows"))
-            table_to_display
-        })
+        # custom_table_data <- reactive({
+        #     # when the widgets should be re-calculated.
+        #     # table_data also re-calculates when language changes if table has 
+        #     # selectInputs or text fields with placeholders (see below)
+        #     override_trigger()
+        #     row_trigger()
+        #     
+        #     if (log) message(glue("Table calculation begins ({id})"))
+        #     
+        #     override_vals <- isolate(override_values())
+        #     do_override <- !is.null(override_vals)
+        #     
+        #     table_to_display <- 
+        #         data.frame(matrix(nrow = n_rows, ncol = n_cols))
+        #     names(table_to_display) <- rep("", n_cols)
+        #     
+        #     if (do_override) {
+        #         # if we just want to clear the table, let's do that
+        #         if (identical(override_vals, list())) {
+        #             override_values(NULL)
+        #             return(table_to_display)
+        #         }
+        #         # check that the variables in override values are correct
+        #         if (!all(variables %in% names(override_vals))) {
+        #             message(glue("The override values supplied to table {id} ",
+        #                          "are missing some variables, the table ",
+        #                          "will not be rendered"))
+        #             override_values(NULL)
+        #             return(table_to_display)
+        #         }
+        #     }
+        #     
+        #     current_row <- 1
+        #     for (row in row_variable) {
+        #         
+        #     }
+        #     
+        #     # clear override_values
+        #     override_values(NULL)
+        #     if (log) message(glue("Calculated custom table, has ",
+        #                           "{nrow(table_to_display)} rows ({id})"))
+        #     table_to_display
+        # })
         
+        # TODO: this isn't necessary as we can simply add dependence on 
+        # language to the table reactive calculation. This might be more
+        # efficient though? In that case all language change related stuff
+        # should probably be done this way
+        #
         # narrow use case: update widget labels to match the correct
         # language. This is only needed in fertilizer_element_table, because
         # that is the only time we have labels on the widgets
-        observeEvent(language(), {
-            req(rendered(), custom_mode)
-            #str(reactiveValuesToList(input))
-            if (log) message(glue("Updating widget languages ({id})"))
-            for (variable in variables) {
-                element <- structure_lookup_list[[variable]]
-                update_ui_element(session, variable, label = 
-                                       get_disp_name(element$label, language()))
-            }
-        })
+        # observeEvent(language(), {
+        #     req(rendered(), custom_mode)
+        #     #str(reactiveValuesToList(input))
+        #     if (log) message(glue("Updating widget languages ({id})"))
+        #     for (variable in variables) {
+        #         element <- structure_lookup_list[[variable]]
+        #         update_ui_element(session, variable, label = 
+        #                                get_disp_name(element$label, language()))
+        #     }
+        # })
         
         output$table <- DT::renderDataTable({
-            
-            #message("Table rendering initiated")
-
+ 
             # added language here; does it cause issues?
-            
-            table_to_display <- if (custom_mode) {
-                req(visible(), custom_table_data(), language())
-                custom_table_data()
-            } else {
-                req(visible(), table_data(), language())
-                table_data()
-            }
-            
-            if (log) message(glue("Rendering table ({id})"))
+            # No, but why is it necessary?
+            req(visible(), table_data(), language())
+            table_to_display <- table_data()
             
             if (nrow(table_to_display) == 0) {
                 if (log) message(glue("No rows, didn't render ({id})"))
                 return()
+            } else {
+                if (log) message(glue("Rendering table ({id})"))
             }
             
-            if (!custom_mode) {
-                names(table_to_display) <- get_disp_name(variables,
-                                                         language = language(),
-                                                         is_variable_name = TRUE)
-                rownames(table_to_display) <- get_disp_name(
-                    rownames(table_to_display),
-                    language = language())
-            } else {
-                names(table_to_display) <- rep("", n_cols)
-            }
+            names(table_to_display) <- get_disp_name(names(table_to_display),
+                                                     language = language(),
+                                                     is_variable_name = TRUE)
+            rownames(table_to_display) <- get_disp_name(
+                rownames(table_to_display),
+                language = language())
             
             table_to_display <- 
-                datatable(
+                DT::datatable(
                     table_to_display, 
-                    escape = FALSE,
+                    escape = FALSE, # makes widgets actual widgets, IMPORTANT
                     selection = "none",
                     class = "table table-hover table-condensed",
-                    rownames = !custom_mode,
+                    rownames = !static_mode, # show rownames if not static mode
                     options = 
-                        list(dom = "t",
+                        list(dom = "t", # hide everything except table
                              # hide sorting arrows
                              ordering = FALSE,
                              # binds the inputs when drawing is done
@@ -500,7 +521,7 @@ tableServer <- function(id, row_names, language, visible,
                         ))
             # if we are in custom mode, align cells vertically so that the
             # widgets are always in line
-            if (custom_mode) {
+            if (static_mode) {
                 formatStyle(table_to_display, 0:(n_cols-1), 
                             'vertical-align' = 'bottom')
             } else {
@@ -508,46 +529,66 @@ tableServer <- function(id, row_names, language, visible,
             }
             
         }, server = FALSE)
-        
-        # entered values before we e.g. add rows. This allows us to fetch
-        # the back when generating a new table
-        old_values <- reactiveVal()
-        table_values <-reactiveVal()
+
         
         # return the values of the table widgets
         # has to run when visibility changes because input values are not
         # available otherwise
         observe({
-
+            # needed, because when we are given new override values, we want
+            # to know the row variable value ASAP so we are ready when the
+            # values in the main app widget are changed
+            override_trigger() 
+            
             value_list <- list()
-            if (custom_mode) {
-                if (!rendered()) {
-                    if (log) message(glue("Values observe blocked ({id})"))
-                    table_values(value_list)
-                    return()
-                }
-            } else {
-                value_list[[row_variable]] <- rownames(table_data())
-                if (length(value_list[[row_variable]]) == 0 | !rendered()) {
-                    #old_values(value_list)
-                    if (log) message(glue("Values observe blocked ({id})"))
-                    #return(value_list)
-                    table_values(value_list)
-                    return()
-                }
+            if (!static_mode) {
+                value_list[[row_variable]] <- 
+                    if (is.null(isolate(override_values()))) {
+                        isolate(row_variable_value())
+                    } else {
+                        isolate(override_values()[[row_variable]])
+                    }
             }
+            
+            if (!rendered() || 
+                (!static_mode && length(value_list[[row_variable]]) == 0)) {
+                if (log) message(glue("Values observe blocked ({id})"))
+                table_values(value_list)
+                return()
+            }
+            
+            # Add dependenvy on table_data() at this point. 
+            # Needed, so that when new widgets are calculated, we add a
+            # dependency on them
+            table_data()
             
             if (log) message(glue("Values observe running ({id})"))
             
-            for (variable in variables) {
-                values <- NULL
-                if (custom_mode) {
-                    values <- input[[variable]]
-                } else {
-                    for (row_number in 1:length(value_list[[row_variable]])) {
-                        element_name <- paste(variable, row_number, sep = "_")
-                        values <- c(values, input[[element_name]])
+            # fetch values from widgets in static row groups 
+            for (row_group in row_groups) {
+                if (row_group$type == 'static') {
+                    for (variable in row_group$variables) {
+                        value <- input[[variable]]
+                        value_list[[variable]] <- value
                     }
+                }
+            }
+            
+            if (!static_mode) {
+                row_value <- value_list[[row_variable]]
+                row_numbers <- if (is.numeric(row_value)) {
+                    1:row_value
+                } else {
+                    1: length(row_value)
+                }
+            }
+            # does not do anything if column names are undefined
+            for (variable in column_names) {
+                values <- NULL
+                
+                for (row_number in row_numbers) {
+                    element_name <- paste(variable, row_number, sep = "_")
+                    values <- c(values, input[[element_name]])
                 }
                 value_list[[variable]] <- values
             }
@@ -556,6 +597,7 @@ tableServer <- function(id, row_names, language, visible,
             table_values(value_list)
         })
 
+        # return table_values as reactive to the main app
         table_values
     })
 }
