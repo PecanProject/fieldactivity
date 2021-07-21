@@ -16,7 +16,7 @@ library(tools) # used to get file extension of uploaded images
 #### AUTHENTICATION STUFF
 
 # developer mode. If TRUE, logging in is disabled
-dev_mode <- FALSE
+dev_mode <- TRUE
 
 # failsafe: ask for the db key only if we really want to. Has to be set by hand
 set_db_key <- FALSE
@@ -54,10 +54,10 @@ date_format_json <- "%Y-%m-%d"
 #### / AUTHENTICATION STUFF
 
 # make helper functions and modules available
-source("display_name_helpers.R")
-source("table.R")
-source("ui_builder.R")
-source("json_file_helpers.R")
+source("display_name_helpers.R", local = TRUE)
+source("table.R", local = TRUE)
+source("ui_builder.R", local = TRUE)
+source("json_file_helpers.R", local = TRUE)
 
 # read the csv file containing the sites 
 sites_file_path <- "data/FOsites.csv"

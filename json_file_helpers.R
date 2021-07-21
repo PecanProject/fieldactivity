@@ -2,9 +2,14 @@
 # Otto Kuusela 2021
 
 # missing value in the ICASA standard
-missingval <- "-99.0"
+#missingval <- "-99.0"
 # relative path to json file folder
-json_file_base_folder <- "data/management_events"
+json_file_base_folder <- if (dev_mode) {
+    "data/management_events"
+} else {
+    "/data/fo-event-files"
+}
+#json_file_base_folder <- "data/management_events"
 #json_file_base_folder <- "/data/fo-event-files"
 
 # create_json_file <- function(file_path) {

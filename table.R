@@ -248,6 +248,9 @@ tableServer <- function(id, row_variable_value, language, visible,
                 # }
             }
 
+            # get all the column numbers with numericInputs so we can adjust
+            # the widths for these columns
+            numericInput_columns <- NULL
             current_row <- 1
             for (row_group in row_groups) {
                 
@@ -257,6 +260,13 @@ tableServer <- function(id, row_variable_value, language, visible,
                     for (variable in row_group$variables) {
                         
                         element <- structure_lookup_list[[variable]]
+                        
+                        if (element$type == "numericInput") {
+                            numericInput_columns <- 
+                                c(numericInput_columns,
+                                  current_col)
+                        }
+                        
                         code_name <- NS(id, variable)
                         
                         value <- if (do_override) {
@@ -340,6 +350,11 @@ tableServer <- function(id, row_variable_value, language, visible,
                             
                             element <- structure_lookup_list[[variable]]
                             
+                            if (element$type == "numericInput") {
+                                numericInput_columns <- 
+                                    c(numericInput_columns,
+                                      which(column_names == variable))
+                            }
                             # width <- if (element$type == "numericInput") {
                             #     "80px"
                             # } else if (element$type == "textInput") {
@@ -385,7 +400,8 @@ tableServer <- function(id, row_variable_value, language, visible,
                             # add choices in the correct language for selectInputs
                             choices <- NULL
                             if (element$type == "selectInput") {
-                                choices <- get_selectInput_choices(element, language())
+                                choices <- get_selectInput_choices(element, 
+                                                                   language())
                             }
                             
                             placeholder <- NULL
@@ -449,8 +465,8 @@ tableServer <- function(id, row_variable_value, language, visible,
             override_values(NULL)
             if (log) message(glue("Calculated table, has ",
                 "{nrow(table_to_display)} rows ({id})"))
-            table_to_display
-            
+            list(table = table_to_display, 
+                 numericInput_columns = unique(numericInput_columns))
         })
         
         # this is just like the table_data reactive, but used for when the 
@@ -523,7 +539,7 @@ tableServer <- function(id, row_variable_value, language, visible,
             # added language here; does it cause issues?
             # No, but why is it necessary?
             req(visible(), table_data(), language())
-            table_to_display <- table_data()
+            table_to_display <- table_data()$table
             
             if (nrow(table_to_display) == 0) {
                 if (log) message(glue("No rows, didn't render ({id})"))
@@ -538,6 +554,11 @@ tableServer <- function(id, row_variable_value, language, visible,
             rownames(table_to_display) <- get_disp_name(
                 rownames(table_to_display),
                 language = language())
+            
+            numericInput_columns <- table_data()$numericInput_columns
+            if (static_mode) {
+                numericInput_columns <- numericInput_columns - 1
+            }
             
             table_to_display <- 
                 DT::datatable(
@@ -560,7 +581,12 @@ tableServer <- function(id, row_variable_value, language, visible,
                                  "function(settings, json) {",
                                  "do_selectize('", NS(id, "table"), "'); ",
                                  "rendering_done('", NS(id, "rendered"), "'); }"
-                             ))
+                             )),
+                             scrollX = TRUE,
+                             autoWidth = TRUE,
+                             columnDefs = list(list(width = '35px', 
+                                                    targets = 
+                                                        numericInput_columns))
                         ))
             # if we are in custom mode, align cells vertically so that the
             # widgets are always in line
@@ -640,7 +666,8 @@ tableServer <- function(id, row_variable_value, language, visible,
                 if (!identical(previous_vals, values) && 
                     !is.null(total_variable) &&
                     !isolate(block_sum_calculation())) {
-                    message(glue("Initiating sum calculation for {total_variable}"))
+                    if (log) message(glue("Initiating sum calculation for ",
+                        "{total_variable}"))
                     calculate_sum(total_variable)
                 }
                 
