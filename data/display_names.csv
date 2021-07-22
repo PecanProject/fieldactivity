@@ -15,13 +15,13 @@ mgmt_operations_event_choice,Inorg_mul_rem,removal of inorganic mulch,epäorgaan
 #   mgmt_operations_event_choice,organic_material,organic material application,eloperäisen aineen levitys
 mgmt_operations_event_choice,other,other,muu
 #
-# the following are the “all” choices for frontpage selectors
+# the following are the “all” choices for frontpage table filters
 #
 activity_choice,activity_choice_all,all,kaikki
 block_choice,block_choice_all,all,kaikki
 year_choice,year_choice_all,all,kaikki
 #
-# variable names (these show up in the tables)
+# variable names (these show up in tables)
 #
 variable_name,block,Block,Lohko
 variable_name,mgmt_operations_event,Event,Tapahtuma
@@ -114,7 +114,7 @@ variable_name,root_depth,Root depth (m),Juurten syvyys (m)
 variable_name,soil_compactification_depth,Soil compactification depth (cm),Tiivistymän syvyys (cm)
 variable_name,earthworm_count,Number of earthworms,Lierojen lukumäärä
 variable_name,soil_image,Photo of soil,Kuva maaperästä
-variable_name,growth_stage,Plant growth stage,Kasvuvaihe
+variable_name,growth_stage,Plant growth stage,Kasvuaste
 variable_name,plant_density,Plant density (plants/m2),Kasvitiheys (kasveja/m2)
 variable_name,specific_leaf_area,Specific leaf area (cm2/g),Ominaislehtiala (cm2/g)
 variable_name,leaf_area_index,Leaf area index (m2/m2),Lehtialaindeksi (m2/m2)
@@ -150,9 +150,9 @@ element_label,frontpage_table_title,Events,Tapahtumat
 element_label,table_filter_text_1,"Showing ","Näytetään "
 element_label,table_filter_text_2," events from block "," tapahtumat lohkosta "
 element_label,table_filter_text_3," and from year "," ja vuodelta "
-element_label,table_activity_label,Choose which event types to display:,Valitse mitkä tapahtumatyypit näytetään:
-element_label,table_block_label,Choose which blocks' events to display:,Valitse minkä lohkojen tapahtumat näytetään:
-element_label,table_year_label,Choose which years' events to display:,Valitse minkä vuosien tapahtumat näytetään:
+#   element_label,table_activity_label,Choose which event types to display:,Valitse mitkä tapahtumatyypit näytetään:
+#   element_label,table_block_label,Choose which blocks' events to display:,Valitse minkä lohkojen tapahtumat näytetään:
+#   element_label,table_year_label,Choose which years' events to display:,Valitse minkä vuosien tapahtumat näytetään:
 element_label,table_empty_label,No events to display,Ei tapahtumia
 element_label,table_previous_label,Previous,Edellinen
 element_label,table_next_label,Next,Seuraava
@@ -288,7 +288,7 @@ element_label,root_depth_label,Root depth (m):,Juurten syvyys (m):
 element_label,soil_compactification_depth_label,Soil compactification depth (cm):,Tiivistymän syvyys (cm):
 element_label,earthworm_count_label,Number of earthworms:,Lierojen lukumäärä:
 element_label,soil_image_label,Photo of soil:,Kuva maaperästä:
-element_label,growth_stage_label,Plant growth stage:,Kasvuvaihe:
+element_label,growth_stage_label,Plant growth stage:,Kasvuaste:
 element_label,plant_density_label,Plant density (plants/m2):,Kasvitiheys (plants/m2):
 element_label,specific_leaf_area_label,Specific leaf area (cm2/g):,Ominaislehtiala (cm2/g):
 element_label,leaf_area_index_label,Leaf area index (m2/m2):,Lehtialaindeksi (m2/m2):
@@ -345,14 +345,14 @@ HACOM,silage,Silage,Säilörehu
 HACOM,tuber,"Tuber, root, etc.","Mukula, juuri, yms."
 HACOM,fruit,Fruit,Hedelmä
 #HACOM,fiber,Fiber,Kuitu
-#HACOM,seed_cotton,"Cotton boil, including lint","Puuvillakeite, myös nukka"
+#   HACOM,seed_cotton,"Cotton boil, including lint","Puuvillakeite, myös nukka"
 HACOM,stem,Stem,Varsi
 HARM,HM001,Combined,Leikkuupuimuri
-#HARM,HM002,"Hand cut, machine threshed","Leikattu käsin, puitu koneella"
-#HARM,HM003,"Hand cut, hand threshed","Leikattu käsin, puitu käsin"
+#   HARM,HM002,"Hand cut, machine threshed","Leikattu käsin, puitu koneella"
+#   HARM,HM003,"Hand cut, hand threshed","Leikattu käsin, puitu käsin"
 HARM,HM004,"Hand picked, no further processing","Poimittu käsin, ei muuta prosessointia"
 HARM,HM005,"Hand picked, machine processing","Poimittu käsin, prosessoitu koneella"
-#HARM,HM006,Cotton stripper,Puuvillakone
+#   HARM,HM006,Cotton stripper,Puuvillakone
 HARM,HM007,Hay,Heinä # not in ICASA
 HARM,HM008,Silage,Säilörehu # not in ICASA
 HARM,HM009,Potato harvester,Perunannostokone # not in ICASA
@@ -369,33 +369,33 @@ OMCD,RE004,Liquid manure,Lietelanta
 OMCD,RE005,Compost,Komposti
 OMCD,RE006,Bark,Kaarna
 OMCD,RE101,Generic legume residue,Palkokasvijäte
-#OMCD,RE102,Cowpea residue,RE102-käännös
-#OMCD,RE103,Mucuna residue,RE103-käännös
-#OMCD,RE104,Peanut residue,RE104-käännös
-#OMCD,RE105,Pigeon Pea residue,RE105-käännös
-#OMCD,RE106,Soybean residue,RE106-käännös
-#OMCD,RE107,Alfalfa residue,RE107-käännös
-#OMCD,RE108,Chickpea forage,RE108-käännös
+#   OMCD,RE102,Cowpea residue,RE102-käännös
+#   OMCD,RE103,Mucuna residue,RE103-käännös
+#   OMCD,RE104,Peanut residue,RE104-käännös
+#   OMCD,RE105,Pigeon Pea residue,RE105-käännös
+#   OMCD,RE106,Soybean residue,RE106-käännös
+#   OMCD,RE107,Alfalfa residue,RE107-käännös
+#   OMCD,RE108,Chickpea forage,RE108-käännös
 OMCD,RE109,Faba bean,Härkäpapu
 OMCD,RE110,Pea residue,Hernejäte
 OMCD,RE111,Hairy vetch,Ruisvirna
 OMCD,RE201,Generic cereal crop residue,Viljakasvijäte
-#OMCD,RE202,Pearl millet residue,RE202-käännös
-#OMCD,RE203,Maize residue,RE203-käännös
-#OMCD,RE204,Sorghum residue,RE204-käännös
+#   OMCD,RE202,Pearl millet residue,RE202-käännös
+#   OMCD,RE203,Maize residue,RE203-käännös
+#   OMCD,RE204,Sorghum residue,RE204-käännös
 OMCD,RE205,Wheat residue,Vehnäjäte
 OMCD,RE206,Barley,Ohra
-#OMCD,RE207,Rice,Riisi
+#   OMCD,RE207,Rice,Riisi
 OMCD,RE208,Rye,Ruis
 OMCD,RE301,Generic grass,Ruohokasvi
-#OMCD,RE302,Bahiagrass,Bahiagrass-käännös
+#   OMCD,RE302,Bahiagrass,Bahiagrass-käännös
 OMCD,RE303,Bermudagrass,Varvasheinä
 OMCD,RE304,Switchgrass,Lännenhirssi
 OMCD,RE305,brachiaria,viittaheinät
 OMCD,RE306,forage grasses,nurmikasvit
-#OMCD,RE401,Bush fallow residue,Bush fallow residue -käännös
-#OMCD,RE402,Sugarcane,Sokeriruoko
-#OMCD,RE403,Pineapple,Pineapple-käännös
+#   OMCD,RE401,Bush fallow residue,Bush fallow residue -käännös
+#   OMCD,RE402,Sugarcane,Sokeriruoko
+#   OMCD,RE403,Pineapple,Pineapple-käännös
 OMCD,RE999,Decomposed crop residue,Maatunut kasvijäte
 OMCD,REOTHER,Other,Muu
 FEACD,AP001,"Broadcast, not incorporated","Levitetty pinnalle, ei sekoitettu"
@@ -404,7 +404,7 @@ FEACD,AP003,Banded on surface,Nauhoina pinnalla
 FEACD,AP004,Banded beneath surface,Sijoituslannoitus
 FEACD,AP005,Applied in irrigation water,Kasteluveden mukana
 FEACD,AP006,Foliar spray,Suihkutettu lehdelle
-FEACD,AP007,Bottom of hole,Bottom of hole-käännös
+FEACD,AP007,Bottom of hole,Bottom of hole -käännös
 FEACD,AP008,On the seed,Siemenen pinnassa
 FEACD,AP009,Injected,Ruiskutettu pinnan alle
 #   FEACD,AP011,"Broadcast on flooded/saturated soil, none in soil",AP011-käännös
@@ -415,56 +415,57 @@ FEACD,AP009,Injected,Ruiskutettu pinnan alle
 #   FEACD,AP016,"Broadcast on flooded/saturated soil, 75% in soil",AP016-käännös
 #   FEACD,AP017,"Broadcast on flooded/saturated soil, 90% in soil",AP017-käännös
 #   FEACD,AP018,"Band on saturated soil, 2cm flood, 92% in soil",AP018-käännös
-#FEACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil","Deeply placed urea super granules/pellets, 95% in soil -käännös"
-#FEACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil","Deeply placed urea super granules/pellets, 100% in soil -käännös"
+#   FEACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil","Deeply placed urea super granules/pellets, 95% in soil -käännös"
+#   FEACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil","Deeply placed urea super granules/pellets, 100% in soil -käännös"
 FEACD,AP999,Method unknown/not given,Tapa ei tiedossa
 #   the following tillage_practice choices are not from ICASA
 tillage_practice_choice,tillage_practice_primary,Primary (residue incorporation),Perusmuokkaus
 tillage_practice_choice,tillage_practice_secondary,Secondary (seedbed),Kylvömuokkaus
 tillage_practice_choice,tillage_practice_tertiary,Tertiary (weed control),Rikkakasvien torjunta
-#TIIMP,TI001,V-Ripper,TI001-käännös
+#   TIIMP,TI001,V-Ripper,TI001-käännös
 TIIMP,TI002,Subsoiler,Jankkuri (subsoiler?)
 TIIMP,TI003,Mould-board plough,Mould-board plough-käännös # in ICASA this is Moldboard plow 20cm depth, here we use it for all depths
-#TIIMP,TI004,"Chisel plow, sweeps",TI004-käännös
-#TIIMP,TI005,"Chisel plow, straight point",TI005-käännös
-#TIIMP,TI006,"Chisel plow, twisted shovels",TI006-käännös
-#TIIMP,TI007,Disk plow,TI007-käännös
-#TIIMP,TI008,"Disk, 1-way",TI008-käännös
+#   TIIMP,TI004,"Chisel plow, sweeps",TI004-käännös
+#   TIIMP,TI005,"Chisel plow, straight point",TI005-käännös
+#   TIIMP,TI006,"Chisel plow, twisted shovels",TI006-käännös
+#   TIIMP,TI007,Disk plow,TI007-käännös
+#   TIIMP,TI008,"Disk, 1-way",TI008-käännös
 TIIMP,TI009,"Disk, tandem",Lautasäes
-#TIIMP,TI010,"Disk, double disk",TI010-käännös
+#   TIIMP,TI010,"Disk, double disk",TI010-käännös
 TIIMP,TI011,"Cultivator, field",Kultivaattori
-#TIIMP,TI012,"Cultivator, row",TI012-käännös
-#TIIMP,TI013,"Cultivator, ridge till",TI013-käännös
-#TIIMP,TI014,"Harrow, spike",TI014-käännös
+#   TIIMP,TI012,"Cultivator, row",TI012-käännös
+#   TIIMP,TI013,"Cultivator, ridge till",TI013-käännös
+#   TIIMP,TI014,"Harrow, spike",TI014-käännös
 TIIMP,TI015,"Harrow, tine",Joustopiikkiäes
 TIIMP,TI016,Lister,Lister-käännös
-#TIIMP,TI017,Bedder,Bedder-käännös
+#   TIIMP,TI017,Bedder,Bedder-käännös
 TIIMP,TI018,Blade cultivator,Blade cultivator -käännös
-#TIIMP,TI019,"Fertilizer applicator, anhydr",TI019-käännös
+#   TIIMP,TI019,"Fertilizer applicator, anhydr",TI019-käännös
 TIIMP,TI020,Manure injector,Lannansijoituskone (Manure injector?)
-#TIIMP,TI022,Mulch treader,TI022-käännös
-#TIIMP,TI023,Plank,TI023-käännös
+#   TIIMP,TI022,Mulch treader,TI022-käännös
+#   TIIMP,TI023,Plank,TI023-käännös
 TIIMP,TI024,Roller packer,Roller packer -käännös
 TIIMP,TI025,"Drill, double-disk","Drill, double-disk -käännös"
-#TIIMP,TI026,"Drill, deep furrow",TI026-käännös
+#   TIIMP,TI026,"Drill, deep furrow",TI026-käännös
 TIIMP,TI031,"Drill, no-till","Drill, no-till -käännös"
-#TIIMP,TI032,"Drill, no-till (into sod)",TI032-käännös
+#   TIIMP,TI032,"Drill, no-till (into sod)",TI032-käännös
 TIIMP,TI033,"Planter, row","Planter, row -käännös"
-#TIIMP,TI034,"Planter, no-till",TI034-käännös
-#TIIMP,TI035,Planting stick (hand),TI035-käännös
-#TIIMP,TI036,Matraca hand planter,TI036-käännös
-#TIIMP,TI037,Rod weeder,TI037-käännös
+#   TIIMP,TI034,"Planter, no-till",TI034-käännös
+#   TIIMP,TI035,Planting stick (hand),TI035-käännös
+#   TIIMP,TI036,Matraca hand planter,TI036-käännös
+#   TIIMP,TI037,Rod weeder,TI037-käännös
 TIIMP,TI038,Rotary hoe,Rotary hoe -käännös
-#TIIMP,TI039,"Roller harrow, cultipacker",TI039-käännös
-#TIIMP,TI041,Moldboard plow 25cm,TI041-käännös
-#TIIMP,TI042,Moldboard plow 30 cm,TI042-käännös
-#TIIMP,TI043,Strip tillage,TI043-käännös
+#   TIIMP,TI039,"Roller harrow, cultipacker",TI039-käännös
+#   TIIMP,TI041,Moldboard plow 25cm,TI041-käännös
+#   TIIMP,TI042,Moldboard plow 30 cm,TI042-käännös
+#   TIIMP,TI043,Strip tillage,TI043-käännös
 TIIMP,TI044,Tine weeder,Rikkaäes #not on ICASA
 TIIMP,TI999,Other,Muu #not on ICASA
 # the following fertilizer_type_choice tags are not in ICASA
 fertilizer_type_choice,fertilizer_type_organic,Organic,Eloperäinen lannoite
 fertilizer_type_choice,fertilizer_type_mineral,Mineral,Väkilannoite
 fertilizer_type_choice,fertilizer_type_soil_amendment,Soil amendment,Maanparannusaine
+#
 grazing_species_choice,grazing_species_cattle,Cattle,Nautakarja
 grazing_species_choice,grazing_species_sheep,Sheep,Lampaat
 grazing_species_choice,grazing_species_goat,Goats,Vuohet
@@ -472,12 +473,12 @@ grazing_species_choice,grazing_species_mix,Mix,Useita
 grazing_species_choice,grazing_species_other,Other,Muu
 grazing_species_age_group_choice,grazing_species_age_group_mix,Mix,Useita
 grazing_type_choice,grazing_type_continuous,Continuous,Jatkuva
-grazing_type_choice,grazing_type_rotation,Rotation,Kiertolaidunnus
-grazing_type_choice,grazing_type_mob_grazing,Mob grazing,Mob grazing -käännös
-grazing_type_choice,grazing_type_strip,Strip,Strip-käännös
-grazing_type_choice,grazing_type_multi_species,Multi-species,Multi-species-käännös
-grazing_type_choice,grazing_type_creep,Creep,Creep-käännös,
-grazing_type_choice,grazing_type_forward,Forward,Forward-käännös
+grazing_type_choice,grazing_type_rotation,Rotation,Lohkosyöttö
+grazing_type_choice,grazing_type_mob_grazing,Mob grazing,Intensiivinen lohkosyöttö
+grazing_type_choice,grazing_type_strip,Strip,Kaistasyöttö
+grazing_type_choice,grazing_type_multi_species,Multi-species,Sekalaidunnus
+grazing_type_choice,grazing_type_creep,Creep,Nuoret eläimet paremmalle lohkolle (Creep?)
+grazing_type_choice,grazing_type_forward,Forward,Kaksoislaidunnus
 grazing_type_choice,grazing_type_other,Other,Muu
 chemical_type_choice,chemical_type_insecticide,Insecticide,Hyönteismyrkky
 chemical_type_choice,chemical_type_herbicide,Herbicide,Rikkaruohomyrkky
@@ -670,8 +671,8 @@ CH_TARGETS,PSTDS,General pest and diseases losses (due to rot, tikka, leafminer,
 CH_TARGETS,PRP,Reduction in photosynthetic rate %,Lasku yhteyttämisnopeudessa %
 CH_TARGETS,WORM,Worm (generic),Madot
 CH_TARGETS,LEAF_MIN,Leafminer,Miinaajat
-CH_TARGETS,STINKB,Stink bug,Typpyluteet(?)
-CH_TARGETS,LOOPER,Looper,Looper-käännös
+CH_TARGETS,STINKB,Stink bug,Typpyluteet (Stink bug?)
+CH_TARGETS,LOOPER,Looper,Yökkösentoukat (Looper?)
 CH_TARGETS,CATERP,Caterpillar,Perhostoukat
 CH_TARGETS,INSECT,Insect (generic),Hyönteiset
 CH_TARGETS,RABBIT,Rabbit,Jänikset
@@ -709,33 +710,33 @@ growth_stage_choice,growth_stage_budding,Budding,Budding-käännös
 growth_stage_choice,growth_stage_blooming,Blooming,Blooming-käännös
 growth_stage_choice,growth_stage_seeding,Seeding,Seeding-käännös
 growth_stage_choice,growth_stage_maturity,Maturity,Maturity-käännös
-IROP,IR001,Furrow,Furrow-käännös
-IROP,IR002,Alternating furrows,Alternating furrows-käännös
+IROP,IR001,Furrow,Vakokastelu
+IROP,IR002,Alternating furrows,Vuorotteleva vakokastelu (alternating furrows?)
 IROP,IR003,Flood,Tulva
 IROP,IR004,Sprinkler,Sadetin
-IROP,IR005,Drip or trickle,Drip or trickle -käännös
-#IROP,IR006,Flood depth,
-#IROP,IR007,Water table depth,
-#IROP,IR008,Percolation rate,
-#IROP,IR009,Bund height,
-#IROP,IR010,Puddling (for Rice only)
-#IROP,IR011,Constant flood depth,
-IROP,IR012,Subsurface (buried) drip,Subsurface (buried) drip -käännös
+IROP,IR005,Drip or trickle,Tihkukastelu
+#   IROP,IR006,Flood depth,
+#   IROP,IR007,Water table depth,
+#   IROP,IR008,Percolation rate,
+#   IROP,IR009,Bund height,
+#   IROP,IR010,Puddling (for Rice only)
+#   IROP,IR011,Constant flood depth,
+IROP,IR012,Subsurface (buried) drip,Maanalainen tihkukastelu
 IROP,IR999,Unknown/not given,Ei tiedossa
-MLTP,MT001,Polyethylene sheet - solid,Katemuovi (PE) (Polyethylene sheet?)
-MLTP,MT002,Polyethylene sheet - perforated,Rei'itetty katemuovi (PE) (Polyethylene sheet - perforated?)
+MLTP,MT001,Polyethylene sheet - solid,Katemuovi (PE)
+MLTP,MT002,Polyethylene sheet - perforated,Rei'itetty katemuovi (PE)
 MLTP,MT003,Landscape fabric,Maisemointikangas
 MLTP,MT004,Paper,Paperi
 MLTP,MT005,Grass clippings,Leikattu ruoho
 MLTP,MT006,Pine needles,Männynneulaset
 MLTP,MT007,Straw,Olki
-MLTP,MT008,Foil,Foil-käännös
-MLTP,MT009,Foil coated plastic,Foil coated with plastic -käännös
-MLTP,MT010,Photodegradable plastic,Photodegradable plastic -käännös
+MLTP,MT008,Foil,Folio (foil?)
+MLTP,MT009,Foil coated plastic,Muovipäällysteinen folio (foil coated with plastic?)
+MLTP,MT010,Photodegradable plastic,Valohajoava muovi
 MLTP,MT999,Not given/unknown,Ei tiedossa
 MLCOL,MC001,Transparent,Läpinäkyvä
 MLCOL,MC002,White,Valkoinen
 MLCOL,MC003,Black,Musta
 MLCOL,MC004,Brown,Ruskea
-MLCOL,MC005,Gray,Harmaa
+MLCOL,MC005,Grey,Harmaa
 MLCOL,MC006,Light straw color,Olki
