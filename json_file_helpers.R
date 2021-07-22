@@ -48,24 +48,40 @@ create_file_folder <- function(site, block) {
 }
 
 # write a given event list to a json file, overwriting everything in it
-write_json_file <- function(site, block, new_list) {
+write_json_file <- function(site, block, event_list) {
     
     # this ensures that the folder to store this file exists
     create_file_folder(site, block)
     
     file_path <- file.path(json_file_base_folder, site, block, "events.json")
 
+    
+    # if there are events in the list, do the following:
+    # - erase block information in each event
+    # - apply exceptions
+    if (length(event_list) > 0) {
+        for (i in 1:length(event_list)) {
+            event_list[[i]]$block <- NULL
+            
+            ##### EXCEPTIONS
+            event <- event_list[[i]]
+                
+            # if the event type is fertilizer application and the fertilizer
+            # type is organic, change mgmt_operations_event to organic_material
+            # to conform to the ICASA standard
+            if (identical(event$mgmt_operations_event, "fertilizer") &&
+                identical(event$fertilizer_type, "fertilizer_type_organic")) {
+                event_list[[i]]$mgmt_operations_event <- "organic_material"    
+            }
+            
+            #####
+        }
+    }
+    
     # create appropriate structure
     experiment <- list()
     experiment$management <- list()
-    experiment$management$events <- new_list
-    
-    # erase block information in each event if there are any events in the list
-    if (length(experiment$management$events) > 0) {
-        for (i in 1:length(experiment$management$events)) {
-            experiment$management$events[[i]]$block <- NULL
-        }
-    }
+    experiment$management$events <- event_list
     
     # create file
     jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
@@ -75,8 +91,6 @@ write_json_file <- function(site, block, new_list) {
 # retrieve the events of a specific site and block and return as a NESTED LIST.
 # this retrieves the events in the same "format" as they will be saved back
 # later, i.e. with code names, "-99.0" for missing values etc.
-# the only difference is the block value, which will be removed when saving
-# back to a json file.
 retrieve_json_info <- function(site, block) {
     file_path <- file.path(json_file_base_folder, site, block, "events.json")
     
@@ -93,9 +107,18 @@ retrieve_json_info <- function(site, block) {
         return(list())
     }
     
-    # add block information to each event
+    # add block information and apply exceptions to each event
     for (i in 1:length(events)) {
         events[[i]]$block <- block
+        
+        ##### EXCEPTIONS
+        
+        # if mgmt_operations_event is organic_material, change it to fertilizer
+        if (identical(events[[i]]$mgmt_operations_event, "organic_material")) {
+            events[[i]]$mgmt_operations_event <- "fertilizer"
+        }
+        
+        #####
     }
     
     return(events)
