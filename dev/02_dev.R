@@ -15,7 +15,7 @@
 
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
-usethis::use_package("shinymanager")
+usethis::use_package("shinymanager", min_version = TRUE)
 usethis::use_package("bslib")
 usethis::use_package("jsonlite")
 usethis::use_package("shinyjs")
