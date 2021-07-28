@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+dev/dev_events/
+inst/extdata/database.sqlite
