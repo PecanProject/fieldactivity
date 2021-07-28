@@ -24,12 +24,12 @@ golem::fill_desc(
   pkg_description = "An app for keeping track of field activity in the Field
   Observatory project. Built using Shiny, the application allows farmers to 
   enter information about common farming events like tillage, sowing and 
-  harvest. These event data are stored in json files, which mostly follow the 
+  harvest. These event data are stored in .json files, which mostly follow the 
   ICASA standards for agricultural data.", # The Description of the package containing the App 
   author_first_name = "Otto", # Your First Name
   author_last_name = "Kuusela", # Your Last Name
   author_email = "otto.kuusela@helsinki.fi", # Your Email
-  repo_url = "https://github.com/Ottis1/fo_management_data_input/" # The URL of the GitHub Repo (optional) 
+  repo_url = "https://github.com/Ottis1/fieldactivity" # The URL of the GitHub Repo (optional) 
 )     
 
 ## Set {golem} options ----

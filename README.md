@@ -7,18 +7,14 @@
 
 <!-- badges: end -->
 
-This is an application with the purpose of allowing farmers to enter
-information about management events. This information could be harvest
-yields or type of tillage performed, for example. The app is a part of
-the [Field Observatory](https://www.fieldobservatory.org) project.
-
-The app produces a .json file based on the given data. These files
-largely follow the ICASA standard for variables.
-
-This app employs the excellent [Shiny](http://shiny.rstudio.com/)
-package and the [Golem](https://thinkr-open.github.io/golem/) framework
-for developing Shiny
-applications.
+An app for keeping track of field activity in the [Field
+Observatory](https://www.fieldobservatory.org) project. Built using
+[Shiny](http://shiny.rstudio.com/) and
+[Golem](https://thinkr-open.github.io/golem/), the application allows
+farmers to enter information about common farming events like tillage,
+sowing and harvest. These event data are stored in .json files, which
+mostly follow the ICASA standards for agricultural
+data.
 
 ## Installation
 
@@ -33,7 +29,7 @@ You can install the app from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Ottis1/fo_management_data_input")
+devtools::install_github("Ottis1/fieldactivity")
 ```
 
 ## Example
