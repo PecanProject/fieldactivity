@@ -1,0 +1,38 @@
+Package: fieldactivity
+Title: An app for keeping track of field activity
+Version: 0.0.0.9000
+Authors@R: person('Otto', 'Kuusela', email = 'otto.kuusela@helsinki.fi', role = c('cre', 'aut'))
+Description: An app for keeping track of field activity in the Field
+  Observatory project. Built using Shiny, the application allows farmers to 
+  enter information about common farming events like tillage, sowing and 
+  harvest. These event data are stored in json files, which mostly follow the 
+  ICASA standards for agricultural data.
+License: MIT + file LICENSE
+Imports: 
+    attempt,
+    bslib,
+    config (>= 0.3.1),
+    DT,
+    glue,
+    golem (>= 0.3.1),
+    htmltools,
+    htmlwidgets,
+    jsonlite,
+    methods,
+    pkgload,
+    processx,
+    shiny (>= 1.6.0),
+    shinyjs,
+    shinymanager,
+    stringr,
+    tools
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+URL: https://github.com/Ottis1/fo_management_data_input/
+BugReports: https://github.com/Ottis1/fo_management_data_input/issues
+Suggests: 
+    spelling,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Language: en-US
