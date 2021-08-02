@@ -37,10 +37,12 @@ devtools::install_github("Ottis1/fieldactivity")
 ```
 ## Example
 
-To run the app, call run_app with a named argument to supply the folder to store the generated files:
+To run the app, call run_app with the following arguments to define the json file directory, the user database and the passphrase to the user database:
 ```{r example, eval=FALSE}
 library(fieldactivity)
-run_app(json_file_path = "~/my_json_file_folder")
+run_app(json_file_path = "~/my_json_file_folder", 
+        user_db_path = "~/my_user_database",
+        user_db_passphrase = "password123")
 ```
 
 <!-- What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
