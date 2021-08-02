@@ -4,6 +4,7 @@
 #' ui_structure.json) and evaluates it in R.
 #'
 #' @param js_condition The javascript condition to evaluate as a string
+#' @param session Current Shiny session in which to evaluate
 #' @return Returns either TRUE or FALSE. If the condition could not be
 #'   evaluated, returns NULL.
 #'

@@ -1,5 +1,8 @@
 #' Run the Shiny Application
 #'
+#' @param json_file_path Path to a folder used to store the generated .json files
+#' @param user_db_path Path to a Shinymanager user database
+#' @param user_db_passphrase The passphrase of the user database
 #' @param ... arguments to pass to golem_opts. 
 #' See `?golem::get_golem_options` for more details.
 #' @inheritParams shiny::shinyApp
@@ -8,6 +11,9 @@
 #' @importFrom shiny shinyApp
 #' @importFrom golem with_golem_options 
 run_app <- function(
+  json_file_path,
+  user_db_path,
+  user_db_passphrase,
   onStart = NULL,
   options = list(), 
   enableBookmarking = NULL,
@@ -40,6 +46,8 @@ run_app <- function(
       enableBookmarking = enableBookmarking, 
       uiPattern = uiPattern
     ), 
-    golem_opts = list(...)
+    golem_opts = list(json_file_path = json_file_path,
+                      user_db_path = user_db_path,
+                      user_db_passphrase = user_db_passphrase, ...)
   )
 }

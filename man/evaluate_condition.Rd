@@ -8,6 +8,8 @@ evaluate_condition(js_condition, session)
 }
 \arguments{
 \item{js_condition}{The javascript condition to evaluate as a string}
+
+\item{session}{Current Shiny session in which to evaluate}
 }
 \value{
 Returns either TRUE or FALSE. If the condition could not be
