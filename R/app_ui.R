@@ -12,7 +12,8 @@ app_ui <- function(request) {
     selectInput("language", choices = languages, width = "120px", label = ""),
     
     # adding "" to the choices makes the default choice empty
-    shinyjs::hidden(selectInput("site", label = "", 
+    shinyjs::hidden(selectInput("site", 
+                                label = get_disp_name("site_label", init_lang), 
                                 choices = c("", sites$site))),
     
     # set web page title
@@ -50,75 +51,17 @@ app_ui <- function(request) {
     # add a little space between the elements
     br(),
     
-    actionButton("add_event", label = ""), 
-    shinyjs::disabled(actionButton("clone_event", label = "")),
+    actionButton("add_event", label = get_disp_name("add_event_label", init_lang)), 
+    shinyjs::disabled(actionButton("clone_event", 
+                             label = get_disp_name("clone_event_label", init_lang))),
     
     br(),
     br(),
     
-    # create a sidebar layout
-    #shinyjs::hidden(div(id = "sidebar", sidebarLayout(
-    shinyjs::hidden(div(id = "sidebar", wellPanel(
-      # the sidebar contains the selectors for entering information
-      # about the event
-      #sidebarPanel(width = 12,
-      fluidRow(
-        column(width = 3,
-               h3(textOutput("sidebar_title"), 
-                  style = "margin-bottom = 0px; margin-top = 0px; 
-                   margin-block-start = 0px"),
-               
-               # in general the choices and labels don't have to be 
-               # defined for  selectInputs, as they will be 
-               # populated when the language is changed 
-               # (which also happens when the app starts)
-               
-               span(textOutput("required_variables_helptext"), 
-                    style = "color:gray"),
-               br(),
-               
-               selectInput("block", label = "", choices = ""),
-               
-               selectInput("mgmt_operations_event", label = "", 
-                           choices = ""),
-               
-               # setting max disallows inputting future events
-               dateInput(
-                 "date",
-                 format = "dd/mm/yyyy",
-                 label = "",
-                 max = Sys.Date(),
-                 value = Sys.Date(),
-                 weekstart = 1
-               ),
-               
-               textAreaInput(
-                 "mgmt_event_notes",
-                 label = "",
-                 placeholder = "",
-                 resize = "vertical",
-                 height = "70px"
-               )
-        ),
-        
-        column(width = 9, 
-               # show a detailed options panel for the 
-               # different activities
-               # activity_options is defined in ui_builder.R
-               create_ui(activity_options, create_border = FALSE)
-        )),
-      
-      fluidRow(
-        column(width = 12,
-               actionButton("save", label = "Save"),
-               
-               actionButton("cancel", label = "Cancel"),
-               
-               shinyjs::hidden(actionButton("delete", label = "Delete", 
-                                            class = "btn-warning"))
-        ))
-    )
-    ))
+    # add form for entering and viewing information
+    shinyjs::hidden(div(id = "form_panel", wellPanel(
+      mod_form_ui("form")
+    )))
   )
   
   tagList(
