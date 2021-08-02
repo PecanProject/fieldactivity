@@ -107,7 +107,6 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         js_message <- "$('##code_name').attr('maxlength', #maxlength)"
         js_message <- gsub("#code_name", ns(element$code_name), js_message)
         js_message <- gsub("#maxlength", element$maxlength, js_message)
-        message(js_message)
         shinyjs::runjs(js_message)
       }
     }

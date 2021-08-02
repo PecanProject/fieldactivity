@@ -20,6 +20,7 @@ find_event_index <- function(event, event_list) {
   for (i in 1:length(event_list)) {
     
     list_event <- event_list[[i]]
+    # sort the items in this particular list event, to allow comparison
     list_event <- list_event[order(names(list_event))]
     
     if (identical(event, list_event)) {
@@ -238,6 +239,9 @@ app_server <- function(input, output, session) {
     }
   }
   
+  #' Update year choices in event list filter
+  #' 
+  #' Adds as choices all the years for which events have been recorded
   update_table_year_choices <- function() {
     
     years <- NULL
@@ -271,6 +275,9 @@ app_server <- function(input, output, session) {
     
   }
   
+  #' Update block choices in event list filter
+  #' 
+  #' Add all blocks of the current site as choices
   update_table_block_choices <- function() {
     
     if (!isTruthy(input$site)) { return() }
@@ -290,6 +297,9 @@ app_server <- function(input, output, session) {
                       choices = block_choices)
   }
   
+  #' Update activity choices in event list filter
+  #' 
+  #' Only used when the language is changed.
   update_table_activity_choices <- function() {
     
     choices_for_table_activity <- 
@@ -466,6 +476,28 @@ app_server <- function(input, output, session) {
     # fetch the event to be cloned
     event <- event_to_edit()
     
+    # if the event has files associated with it, those need to be duplicated
+    for (fileInput_code_name in fileInput_code_names) {
+      
+      path <- event[[fileInput_code_name]]
+      path_exists <- !is.null(path) & !identical(path, missingval)
+      
+      if (path_exists) {
+        # path is relative to events.json. This path is relative to 
+        # json_file_base_folder() :
+        relative_path <- file.path(input$site, event$block, path)
+        
+        clone_file_path <- copy_file(orig_filepath = relative_path,
+                                     variable_name = fileInput_code_name,
+                                     site = input$site,
+                                     block = event$block,
+                                     date = event$date,
+                                     filepath_is_relative = TRUE)
+        event[[fileInput_code_name]] <- clone_file_path
+      }
+      
+    }
+    
     block_data <- retrieve_json_info(input$site, event$block)
     
     block_data[[length(block_data) + 1]] <- event
@@ -545,7 +577,8 @@ app_server <- function(input, output, session) {
           orig_path_exists) {
         
         # delete the file
-        tryCatch(expr = delete_file(orig_path, input$site, orig_event$block),
+        tryCatch(expr = delete_file(orig_path, input$site, orig_event$block,
+                                    filepath_relative = TRUE),
                  error = function(cnd) {
                    message(glue("Could not delete file related ",
                                 "to the edited event: {cnd}"))
@@ -569,11 +602,11 @@ app_server <- function(input, output, session) {
         # (SCENARIO 3i/2iii)
         relative_path <- 
           tryCatch(expr = 
-                     move_uploaded_file(filepath, 
-                                        variable_name = fileInput_code_name,
-                                        site = input$site, 
-                                        block = event$block, 
-                                        date = event$date),
+                     copy_file(filepath, 
+                               variable_name = fileInput_code_name,
+                               site = input$site, 
+                               block = event$block, 
+                               date = event$date),
                    error = function(cnd) {
                      showNotification(
                        "Could not save the image file correctly.", 
@@ -589,7 +622,8 @@ app_server <- function(input, output, session) {
         if (orig_path_exists) {
           # delete the file
           tryCatch(expr = delete_file(orig_path, input$site, 
-                                      orig_event$block),
+                                      orig_event$block, 
+                                      filepath_relative = TRUE),
                    error = function(cnd) {
                      message(glue("Could not delete file to ",
                                   "be replaced: {cnd}"))
@@ -601,7 +635,7 @@ app_server <- function(input, output, session) {
         # the file was deleted by the user using the delete button.
         # Let's actually delete the file and save changes
         tryCatch(expr = delete_file(orig_path, input$site, 
-                                    orig_event$block),
+                                    orig_event$block, filepath_relative = TRUE),
                  error = function(cnd) {
                    message(glue("Could not delete file related ",
                                 "to the event: {cnd}"))
@@ -626,13 +660,14 @@ app_server <- function(input, output, session) {
                                   orig_path)
             
             relative_path <- 
-              tryCatch(expr = move_uploaded_file(
+              tryCatch(expr = copy_file(
                 orig_relative_path, 
                 variable_name = fileInput_code_name,
                 site = input$site, 
                 block = event$block, 
                 date = event$date,
-                filepath_is_relative = TRUE),
+                filepath_is_relative = TRUE,
+                delete_original = TRUE),
                 error = function(cnd) {
                   showNotification(
                     "Could not rename the image file.", 
@@ -721,7 +756,8 @@ app_server <- function(input, output, session) {
       
       if (fileInput_code_name %in% names(event) & path_exists) {
         # delete the file
-        tryCatch(expr = delete_file(value, input$site, event$block),
+        tryCatch(expr = delete_file(value, input$site, event$block, 
+                                    filepath_relative = TRUE),
                  error = function(cnd) {
                    message(glue("Could not delete file related to ",
                                 "the deleted event: {cnd}"))

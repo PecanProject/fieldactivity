@@ -117,31 +117,42 @@ retrieve_json_info <- function(site, block) {
   return(events)
 }
 
-# when a file is uploaded through a fileInput widget, it is saved to a temporary
-# folder. This function moves that file to an appropriate directory and also
-# renames it. The name will be of the format 
-# yyyy-mm-dd_site_block_variable_name_# where # is a number (0, 1, 2, ...) to
-# ensure that files have unique names. The date is the date of the event, and
-# it needs to be in yyyy-mm-dd format!
-# if filepath_is_relative is set to TRUE, the path in tmp_filepath should
-# be preceded by json_file-base_folder
+#' Copy a file related to an event and name it appropriately
+#' 
+#' When a file (image) is uploaded through a fileInput widget, it is saved to a
+#' temporary folder. This function copies that file to an appropriate directory
+#' and name. The file does not have to be originally in a temporary
+#' folder, any file path is ok. This means this function can also be used e.g.
+#' when cloning and event and the images associated with it need to be
+#' duplicated.
+#' @param orig_filepath The path of the file to copy
+#' @param variable_name Which variable is this file for? E.g. canopeo_image
+#' @param site The site where the event took place
+#' @param block The block where the event took place
+#' @param date The day of the event, the format must be yyyy-mm-dd
+#' @param filepath_is_relative If TRUE, json_file_base_folder will be added to
+#'   the beginning of filepath
+#' @param delete_original Should the original file be deleted after copying?
+#' @details The name will be of the format 
+#' yyyy-mm-dd_site_block_variable_name_# where # is a number (0, 1, 2, ...) to
+#' ensure that files have unique names. 
 #' @importFrom glue glue
-move_uploaded_file <- function(tmp_filepath, variable_name, site, block, date,
-                               filepath_is_relative = FALSE) {
+copy_file <- function(orig_filepath, variable_name, site, block, date,
+                      filepath_is_relative = FALSE, delete_original = FALSE) {
   # ensures the folder for this site-block combo is there
   create_file_folder(site, block)
   
-  # modify tmp_filepath if it is relative to events.json
+  # add json_file_base_folder to filepath if requested
   if (filepath_is_relative) {
-    tmp_filepath <- file.path(json_file_base_folder(), tmp_filepath)
+    orig_filepath <- file.path(json_file_base_folder(), orig_filepath)
   }
   
   # check that the temporary file actually exists
-  if (!file.exists(tmp_filepath)) {
-    stop(glue("The file {tmp_filepath} to move does not exist"))
+  if (!file.exists(orig_filepath)) {
+    stop(glue("The file {orig_filepath} to copy does not exist"))
   }
   
-  file_extension <- tools::file_ext(tmp_filepath)
+  file_extension <- tools::file_ext(orig_filepath)
   allowed_extensions <- c("jpg", "jpeg", "tif", "tiff", "png")
   # if the image format is not supported, stop
   if (!(file_extension %in% allowed_extensions)) {
@@ -150,9 +161,7 @@ move_uploaded_file <- function(tmp_filepath, variable_name, site, block, date,
   
   # base of the new file name
   file_base <- paste(date, site, block, variable_name, sep = "_")
-  
-  tmp_file_name <- basename(tmp_filepath)
-  
+
   # path to the final file folder
   filepath <- file.path(json_file_base_folder(), site, block, variable_name)
   if (!dir.exists(filepath)) {
@@ -178,34 +187,22 @@ move_uploaded_file <- function(tmp_filepath, variable_name, site, block, date,
     }
   }
   
-  # if the filepath is relative, it means the file indicated by tmp_filepath
-  # is already under the json_file_base_folder, and therefore we do not need
-  # to copy the file there. However, if the file is in e.g. /tmp/..., we
-  # do need to copy first as directly renaming causes an error
-  if (filepath_is_relative) {
-    success <- tryCatch(expr = file.rename(
-      from = tmp_filepath,
-      to = file.path(filepath, file_name)),
-      warning = function(cnd) {message(cnd); FALSE},
-      error = function(cnd) {message(cnd); FALSE})
-  } else {
-    success <- tryCatch(expr = file.copy(from = tmp_filepath, 
-                                         to = filepath, copy.date = TRUE, 
-                                         overwrite = TRUE),
-                        warning = function(cnd) {message(cnd); FALSE},
-                        error = function(cnd) {message(cnd); FALSE})
-    
-    if (success) {
-      success <- tryCatch(expr = file.rename(
-        from = file.path(filepath, tmp_file_name), 
-        to = file.path(filepath, file_name)),
-        warning = function(cnd) {message(cnd); FALSE},
-        error = function(cnd) {message(cnd); FALSE})
-    }
+  success <- tryCatch(expr = file.copy(from = orig_filepath, 
+                                       to = file.path(filepath, file_name),
+                                       copy.date = TRUE, 
+                                       overwrite = FALSE),
+                      warning = function(cnd) {message(cnd); FALSE},
+                      error = function(cnd) {message(cnd); FALSE})
+
+  # if we succeeded in renaming, delete the original file if requested 
+  if (success & delete_original) {
+    deleted_original <- tryCatch(expr = file.remove(orig_filepath),
+                                 warning = function(cnd) {message(cnd)},
+                                 error = function(cnd) {message(cnd)})
   }
   
   if (success) {
-    message(glue("Moved file to {file.path(filepath, file_name)}"))
+    message(glue("Copied file to {file.path(filepath, file_name)}"))
     return(file.path(variable_name, file_name))
   } else {
     stop("Error in moving file")
@@ -213,12 +210,19 @@ move_uploaded_file <- function(tmp_filepath, variable_name, site, block, date,
   
 }
 
-# delete the file with the path filepath. If the path is relative to the 
-# events.json file, this should be indicated with filepath_relative so we can 
-# figure out the correct path
+#' Delete a file
+#'
+#' Delete the file with the path filepath. Used to delete files (images)
+#' associated with events, e.g. canopeo_image
+#' @param filepath The path to the file which should be deleted.
+#' @param filepath_relative Set to TRUE and supply site and block if filepath is
+#'   relative to the events.json file. This allows the function to figure out
+#'   the correct path to the file.
+#' @param site The site where the event took place
+#' @param block The block where the event took place
 #' @importFrom glue glue
 delete_file <- function(filepath, 
-                        site = NULL, block = NULL, filepath_relative = TRUE) {
+                        site = NULL, block = NULL, filepath_relative = FALSE) {
   if (filepath_relative) {
     filepath <- file.path(json_file_base_folder(), site, block, filepath)
   }
