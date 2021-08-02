@@ -50,9 +50,8 @@ app_server <- function(input, output, session) {
   # might have to use the hand-typed passphrase option for now when deploying
   # the app
   credential_checker <- shinymanager::check_credentials(
-    system.file("extdata", "database.sqlite", package = "fieldactivity"),
-    # passphrase = key_get("FO-mgmt-events-key", "FO-mgmt-events-user")
-    passphrase = "salasana"
+    db = golem::get_golem_options("user_db_path"),
+    passphrase = golem::get_golem_options("user_db_passphrase")
   )
   
   # change login form language when requested
@@ -513,10 +512,8 @@ app_server <- function(input, output, session) {
   # save input to a file when save button is pressed
   # we are either creating a new event or editing an older one
   observeEvent(form$values$save(), {
-    
+    # fetch new values from the form
     event <- form$values$data()
-    str(event)
-    
     # are we editing an existing event or creating a new one?
     orig_event <- event_to_edit()
     editing <- !is.null(orig_event)
@@ -697,10 +694,7 @@ app_server <- function(input, output, session) {
       
     }
     
-    
-    
-    message("ALL THE DATA FILLED:")
-    str(event)
+    #str(event)
     
     # load the json file corresponding to the new block selection (new as in
     # the current event$block value). We load from the file because it might

@@ -5,6 +5,9 @@
 \title{Run the Shiny Application}
 \usage{
 run_app(
+  json_file_path,
+  user_db_path,
+  user_db_passphrase,
   onStart = NULL,
   options = list(),
   enableBookmarking = NULL,
@@ -13,6 +16,12 @@ run_app(
 )
 }
 \arguments{
+\item{json_file_path}{Path to a folder used to store the generated .json files}
+
+\item{user_db_path}{Path to a Shinymanager user database}
+
+\item{user_db_passphrase}{The passphrase of the user database}
+
 \item{onStart}{A function that will be called before the app is actually run.
 This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}
 case, a \code{global.R} file can be used for this purpose.}

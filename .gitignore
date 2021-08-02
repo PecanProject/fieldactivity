@@ -4,4 +4,5 @@
 .httr-oauth
 .DS_Store
 dev/dev_events/
-inst/extdata/database.sqlite
+dev/database.sqlite
+app.R
