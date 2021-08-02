@@ -22,3 +22,7 @@ sites$blocks <- sapply(sites$blocks, blocks_to_vector)
 # the \U codes are UTF-8 flag emojis
 languages <- c("English \U0001f1ec\U0001f1e7" = "disp_name_eng",
                "suomi \U0001f1eb\U0001f1ee" = "disp_name_fin")
+init_lang <- languages[1]
+
+# whether to print debug information (short for debug print)
+dp <- function() TRUE && golem::app_dev()

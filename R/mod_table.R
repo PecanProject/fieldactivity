@@ -25,13 +25,15 @@ mod_table_ui <- function(id){
 #' table Server Functions
 #' @import glue
 #' @noRd 
-mod_table_server <- function(id, row_variable_value, language, visible, 
-                             override_values) {
+mod_table_server <- function(id, table_code_name, row_variable_value, 
+                             language, visible, override_values) {
   moduleServer(id, function(input, output, session) {
+    
+    ns <- session$ns
     
     # get corresponding element info to determine which widgets to add to
     # the table
-    table_structure <- structure_lookup_list[[id]]
+    table_structure <- structure_lookup_list[[table_code_name]]
     row_groups <- table_structure$rows
     # can be NULL, in which case all row groups are of type 'static'
     column_names <- table_structure$columns 
@@ -59,7 +61,7 @@ mod_table_server <- function(id, row_variable_value, language, visible,
     # values back when generating a new table
     old_values <- reactiveVal()
     # current values of the table
-    table_values <-reactiveVal()
+    table_values <- reactiveVal()
     
     # this unbinds the table elements before they are re-rendered.
     # Setting a higher priority ensures this runs before the table render
@@ -76,7 +78,7 @@ mod_table_server <- function(id, row_variable_value, language, visible,
       # here because this observer has a higher priority than the one
       # which sets rendered to FALSE
       req(isolate(input$table_rows_current), isolate(rendered()))
-      session$sendCustomMessage("unbind-table", NS(id, "table"))
+      session$sendCustomMessage("unbind-table", ns("table"))
       if (table_log) message(glue("Sent unbind message ({id})"))
     })
     
@@ -92,15 +94,15 @@ mod_table_server <- function(id, row_variable_value, language, visible,
     })
     
     # when we go hidden, set rendered to FALSE and clear old values
-    observeEvent(visible(), ignoreNULL = FALSE, ignoreInit = TRUE ,
+    observeEvent(visible(), ignoreNULL = FALSE, ignoreInit = TRUE,
                  priority = 1, {
-                   if (!visible()) {
-                     if (table_log) message(glue("Rendered set to FALSE. ",
-                                           "Clearing old values ({id})"))
-                     rendered(FALSE)
-                     old_values(list())
-                   }
-                 })
+      if (!visible()) {
+        if (table_log) message(glue("Rendered set to FALSE. ",
+                                    "Clearing old values ({id})"))
+        rendered(FALSE)
+        old_values(list())
+      }
+   })
     
     # this triggers the update of table_data when override_values are
     # supplied and not when they are reset to NULL. The triggering
@@ -150,6 +152,7 @@ mod_table_server <- function(id, row_variable_value, language, visible,
     # this allows blocking extra updates caused by the widget in the main
     # app changing its value after override_values have just been supplied.
     observeEvent(row_variable_value(), ignoreNULL = FALSE, {
+      
       if (static_mode) return()
       current_row_variable_value <- table_values()[[row_variable]]
       # as.character is needed because sometimes row_names() are numeric
@@ -225,7 +228,7 @@ mod_table_server <- function(id, row_variable_value, language, visible,
                   current_col)
             }
             
-            code_name <- NS(id, variable)
+            code_name <- variable
             
             value <- if (do_override) {
               override_vals[[variable]]
@@ -259,7 +262,8 @@ mod_table_server <- function(id, row_variable_value, language, visible,
             # as character makes the element HTML, which can then be
             # not escaped when rendering the table
             widget <- as.character(
-              create_element(element,
+              create_widget(element,
+                            ns = ns,
                              #width = width,
                              override_code_name = code_name,
                              override_label = label,
@@ -371,10 +375,10 @@ mod_table_server <- function(id, row_variable_value, language, visible,
               # as character makes the element HTML, which can then be
               # not escaped when rendering the table
               widget <- as.character(
-                create_element(element,
+                create_widget(element,
+                              ns = ns,
                                #width = width,
-                               override_code_name = 
-                                 NS(id, code_name),
+                               override_code_name = code_name,
                                override_label = "",
                                override_value = value,
                                override_choices = choices,
@@ -424,7 +428,6 @@ mod_table_server <- function(id, row_variable_value, language, visible,
     # })
     
     output$table <- DT::renderDataTable({
-      
       # added language here; does it cause issues?
       # No, but why is it necessary?
       req(visible(), table_data(), language())
@@ -448,7 +451,6 @@ mod_table_server <- function(id, row_variable_value, language, visible,
       if (static_mode) {
         numericInput_columns <- numericInput_columns - 1
       }
-      
       table_to_display <- 
         DT::datatable(
           table_to_display, 
@@ -468,8 +470,8 @@ mod_table_server <- function(id, row_variable_value, language, visible,
                  initComplete = 
                    htmlwidgets::JS(paste0(
                      "function(settings, json) {",
-                     "do_selectize('", NS(id, "table"), "'); ",
-                     "rendering_done('", NS(id, "rendered"), "'); }"
+                     "do_selectize('", ns("table"), "'); ",
+                     "rendering_done('", ns("rendered"), "'); }"
                    )),
                  scrollX = TRUE,
                  autoWidth = TRUE,

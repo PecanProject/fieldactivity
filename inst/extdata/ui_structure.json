@@ -923,15 +923,7 @@
               "code_name" : "soil_image",
               "type" : "fileInput",
               "filetype" : "image/*",
-              "label" : "soil_image_label",
-              "delete_button" : "soil_image_delete"
-            },
-            
-            "soil_image_delete" : {
-              "code_name" : "soil_image_delete",
-              "type" : "actionButton",
-              "label" : "delete_uploaded_file_label",
-              "fileInput" : "soil_image"
+              "label" : "soil_image_label"
             }
             
           },
@@ -988,16 +980,9 @@
               "code_name" : "canopeo_image",
               "type" : "fileInput",
               "filetype" : "image/*",
-              "label" : "canopeo_image_label",
-              "delete_button" : "canopeo_image_delete"
-            },
-            
-            "canopeo_image_delete" : {
-              "code_name" : "canopeo_image_delete",
-              "type" : "actionButton",
-              "label" : "delete_uploaded_file_label",
-              "fileInput" : "canopeo_image"
+              "label" : "canopeo_image_label"
             }
+            
           },
 
           "water" : {

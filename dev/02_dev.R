@@ -25,13 +25,17 @@ usethis::use_package("methods")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module( name = "table" ) # Name of the module
-golem::add_module( name = "name_of_module2" ) # Name of the module
+golem::add_module( name = "table") # Name of the module
+golem::add_module( name = "form" ) # Name of the module
+golem::add_module(name = "fileInput")
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
 golem::add_fct( "json" ) 
 golem::add_utils("global")
+golem::add_fct("evaluate_js", module = "form")
+golem::add_fct("event_list")
+golem::add_utils("find_table", module = "table")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www
@@ -45,7 +49,7 @@ usethis::use_data_raw( name = "my_dataset", open = FALSE )
 
 ## Tests ----
 ## Add one line by test you want to create
-usethis::use_test( "app" )
+usethis::use_test("language")
 
 # Documentation
 
