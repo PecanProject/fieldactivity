@@ -24,5 +24,6 @@ Set the specified input fields to their default empty values.
 }
 \note{
 This doesn't reset the tables (e.g. harvest_crop_table) -- they reset 
-  themselves every time they become hidden.
+  themselves every time they become hidden. Also doesn't reset fileInputs,
+  they have their own way of clearing their value.
 }

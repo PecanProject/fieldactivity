@@ -322,12 +322,6 @@ update_ui_element <- function(session, code_name, value = NULL,
   
   
   if (element$type == "selectInput") {
-    # if value is a list (e.g. multiple crops selected in harvest_crop)
-    # turn it into a character vector
-    # if (is.list(value)) {
-    #     print("List was turned to vector when updating selectInput")
-    #     value <- value[[1]]
-    # }
     if (clear_value) value <- ""
     # setting the selected value to NULL doesn't change the widget's value
     updateSelectInput(session, code_name, selected = value,  ...)
@@ -388,8 +382,8 @@ update_ui_element <- function(session, code_name, value = NULL,
 #'   names but there are a few that should not be cleared.
 #' @return None, used for side effects.
 #' @note This doesn't reset the tables (e.g. harvest_crop_table) -- they reset 
-#'   themselves every time they become hidden.
-# TODO: make sure this is always used
+#'   themselves every time they become hidden. Also doesn't reset fileInputs,
+#'   they have their own way of clearing their value.
 # TODO: is exceptions necessary?
 reset_input_fields <- function(session, fields_to_clear, exceptions = c("")) {
   
@@ -402,21 +396,3 @@ reset_input_fields <- function(session, fields_to_clear, exceptions = c("")) {
   }
   
 }
-
-# checks whether the list x (corresponding to a UI element) has a specified
-# code name, and if yes, return it
-# this function is used in app.R to find the element corresponding to a
-# given code name when updating UI language
-code_name_checker <- function(x, code_name) {
-  if (is.null(x$code_name)) {
-    return(NULL)
-  }
-  
-  if (x$code_name == code_name) {
-    return(x)
-  } else {
-    return(NULL)
-  }
-}
-
-
