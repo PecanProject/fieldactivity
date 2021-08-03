@@ -28,6 +28,7 @@ usethis::use_package("methods")
 golem::add_module( name = "table") # Name of the module
 golem::add_module( name = "form" ) # Name of the module
 golem::add_module(name = "fileInput")
+golem::add_module(name = "event_list")
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
