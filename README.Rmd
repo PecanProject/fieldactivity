@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # R Shiny app for management data input
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/Ottis1/fieldactivity/workflows/R-CMD-check/badge.svg)](https://github.com/Ottis1/fieldactivity/actions)
 <!-- badges: end -->
 
 An app for keeping track of field activity in the [Field Observatory](https://www.fieldobservatory.org) project. Built using [Shiny](http://shiny.rstudio.com/) and [Golem](https://thinkr-open.github.io/golem/), the application allows farmers to enter information about common farming events like tillage, sowing and harvest. These event data are stored in .json files, which mostly follow the ICASA standards for agricultural data.
