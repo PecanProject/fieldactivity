@@ -22,6 +22,7 @@ usethis::use_package("shinyjs")
 usethis::use_package("tools")
 usethis::use_package("htmlwidgets")
 usethis::use_package("methods")
+usethis::use_package("shinyvalidate")
 
 ## Add modules ----
 ## Create a module infrastructure in R/

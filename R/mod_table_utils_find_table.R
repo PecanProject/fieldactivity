@@ -1,38 +1,46 @@
-# if a variable is in a table (e.g. planting_depth is in a table when 
-# planted_crop has multiple values), return the code name of that table. 
-# Otherwise return NULL.
-# only_values determines which variables we seek:
-# TRUE: only return the table code name if the variable is one whose
-# value is entered in the table, e.g. all variables in fertilizer_element_table
-# but not harvests_crop in harvest_crop_table, since harvest_crop's value is
-# entered in a regular widget.
-# FALSE: return table code name if variable is present in the table in any
-# form, e.g. harvest_crop also returns harvest_crop_table since it is on the 
-# rows of that table
-get_variable_table <- function(variable_name, only_values = FALSE) {
+#' Find the table matching a variable name
+#' 
+#' If a variable's value is entered in a table, return the name of that table
+#' @param variable_name The name of the variable of interest
+#' @return The code name of the table where the variable is entered, or NULL
+#'   if not found.
+get_variable_table <- function(variable_name) {
   
   for (table_code_name in data_table_code_names) {
     table <- structure_lookup_list[[table_code_name]]
     
-    # determine the variable names to check if they match variable_name
-    names_to_check <- if (is.null(table$columns)) {
-      # if columns is not defined, the table is in custom mode (e.g. 
-      # fertilizer_element_table) and all variables (stored in rows) are
-      # to be checked
-      unlist(table$rows)
-    } else {
-      # in a normal table, the “value variables” are given in the columns
-      if (!only_values) {
-        c(table$rows, table$columns)
-      } else {
-        table$columns
-      }
-    }
+    table_variables <- get_table_variables(table_code_name)
     
-    if (variable_name %in% names_to_check) {
+    if (variable_name %in% table_variables) {
       return(table_code_name)
     }
   }
   
   return(NULL)
+}
+
+#' Find the variables whose value can be entered through a given table
+#'
+#' @param table_code_name The name of the table whose variables to fetch.
+#' @return A vector of variable names whose values are entered in a table.
+#' @note If a table has a dynamic row group whose rows are determined by an
+#'   input widget's value, that widget's variable name will not be returned even
+#'   though it could be read from the list returned by the table module.
+get_table_variables <- function(table_code_name) {
+  structure <- structure_lookup_list[[table_code_name]]
+  variables <- NULL
+  
+  # if a table has a dynamic row group, add the variables present on the columns
+  if (!is.null(structure$columns)) {
+    variables <- c(variables, structure$columns)
+  }
+  
+  # add the variables from all static row groups
+  for (row_group in structure$rows) {
+    if (row_group$type == "static") {
+      variables <- c(variables, row_group$variables)
+    }
+  }
+  
+  return(variables)
 }

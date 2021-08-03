@@ -87,6 +87,7 @@ mod_form_ui <- function(id){
     
 #' form Server Functions
 #'
+#' @import shinyvalidate
 #' @noRd 
 mod_form_server <- function(id, site, set_values, reset_values, edit_mode, 
                             language) {
@@ -99,6 +100,12 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    ##### EXPERIMENTAL
+    iv <- InputValidator$new()
+    iv$add_rule("mgmt_operations_event", sv_required())
+    iv$enable()
+    ######
     
     # go through all fields and set maxLength if requested in ui_structure.json
     # TODO: do with validation instead
@@ -295,6 +302,56 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
     })
     
+    # When requested, calculate a vector with the names of relevant variables. A
+    # variable is relevant when it is visible in some form, either as a regular
+    # widget or in a table module. Relevant variables are ones which we want to
+    # save to a json file given the current choices of the user. For example,
+    # when the user is making a soil observation event, the variables under that
+    # umbrella are relevant while other observation variables are not.
+    relevant_variables <- reactive({
+      
+      # these are the variables among which the relevant variables are
+      all_variables <- get_category_names("variable_name")
+      
+      # find all widgets that are currently hidden in the UI. This includes
+      # regular widgets but also e.g. tables. Note that not all of these are
+      # irrelevant; we might have to read them from a table instead. This vector
+      # includes also tables because that way we can check whether a table is
+      # actually hidden. We also apply this to all activity options instead of
+      # only widget_list for the same reason: some tables that are “visible”
+      # (i.e. tables[[table_code_name]]$visible() is TRUE) are actually not, and
+      # that might include tables from other activity types (e.g. first user
+      # makes soil structure table visible, then changes to fill out a harvest
+      # event. The soil structure table is still “visible” even though it's
+      # actually not)
+      hidden_widgets <- unlist(rlapply(activity_options, fun = function(x) {
+        if (!is.null(x$condition)) {
+          relevant <- evaluate_condition(x$condition, session)
+          if (!is.null(relevant) && !identical(relevant, TRUE)) {
+            rlapply(x, fun = function(x) x$code_name)
+          }
+        }
+      }))
+      
+      # find variables which are relevant and being entered through a table
+      table_variables <- NULL
+      for (table_code_name in data_table_code_names) {
+        if (tables[[table_code_name]]$visible() && 
+            # see hidden_widgets comment above
+            !(table_code_name %in% hidden_widgets)) {
+          table_variables <- c(table_variables, 
+                                get_table_variables(table_code_name))
+          # currently only one tables is visible at a time
+          break
+        }
+      }
+      
+      # we get the relevant variables by removing from all variables the widgets
+      # that are hidden, and then adding back the table variables which are 
+      # always relevant
+      union(setdiff(all_variables, hidden_widgets), table_variables)
+    })
+    
     # when requested, prepare the entered data
     form_data <- reactive({
       
@@ -347,10 +404,6 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
           break
         }
       }
-      
-      # print(activity_widgets)
-      # print(hidden_widgets)
-      # print(table_to_read)
       
       # fill / update information
       for (variable_name in get_category_names("variable_name")) {
@@ -541,11 +594,6 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       }
     )
     
-    # observeEvent(files$canopeo_image$value$filepath(), ignoreNULL = FALSE, {
-    #   print(files$canopeo_image$value$filepath())
-    #   print(files$canopeo_image$value$new_file())
-    # })
-    
     # update each of the text outputs automatically, including language changes
     # and the dynamic updating in editing table title etc. 
     # TODO: refactor
@@ -629,11 +677,17 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
       if (dp()) message("Required variables observe")
       
+      
+      
       # make sure site is filled
       if (!isTruthy(site())) {
         shinyjs::disable("save")
         return()
       }
+      
+      
+      print(relevant_variables())
+      return()
       
       #if (!dev_mode) {req(auth_result$admin)}
       #req(auth_result$admin)

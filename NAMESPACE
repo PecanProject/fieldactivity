@@ -3,6 +3,7 @@
 export(run_app)
 import(glue)
 import(shiny)
+import(shinyvalidate)
 importFrom(glue,glue)
 importFrom(golem,activate_js)
 importFrom(golem,add_resource_path)

@@ -24,12 +24,16 @@ mod_table_ui <- function(id){
     
 #' table Server Functions
 #' @import glue
+#' @import shinyvalidate
 #' @noRd 
 mod_table_server <- function(id, table_code_name, row_variable_value, 
                              language, visible, override_values) {
   moduleServer(id, function(input, output, session) {
     
     ns <- session$ns
+    iv <- InputValidator$new()
+    iv$add_rule("harvest_moisture_1", sv_required())
+    iv$enable()
     
     # get corresponding element info to determine which widgets to add to
     # the table

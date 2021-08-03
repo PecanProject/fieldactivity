@@ -24,6 +24,7 @@ Imports:
     shiny (>= 1.6.0),
     shinyjs,
     shinymanager (>= 1.0.400),
+    shinyvalidate (>= 0.1.1),
     stringr,
     tools
 Encoding: UTF-8
