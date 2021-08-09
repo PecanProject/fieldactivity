@@ -14,7 +14,7 @@ js_bind_script <- "function() { Shiny.bindAll(this.api().table().node()); }"
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_table_ui <- function(id){
+mod_table_ui <- function(id) {
   ns <- NS(id)
   tagList(
     DT::dataTableOutput(ns("table")), 
@@ -23,21 +23,38 @@ mod_table_ui <- function(id){
 }
     
 #' table Server Functions
+#' 
 #' @import glue
 #' @import shinyvalidate
 #' @noRd 
-mod_table_server <- function(id, table_code_name, row_variable_value, 
+mod_table_server <- function(id, row_variable_value, 
                              language, visible, override_values) {
   moduleServer(id, function(input, output, session) {
     
     ns <- session$ns
+
     iv <- InputValidator$new()
-    iv$add_rule("harvest_moisture_1", sv_required())
+    # find required variables in this table so we can add validators
+    required_variables <- unlist(
+      sapply(get_table_variables(id), 
+             FUN = function(variable) {
+               if (identical(structure_lookup_list[[variable]]$required, 
+                             TRUE)) {
+                 variable
+               }
+             }, USE.NAMES = FALSE))
+    # add requirement for each required variable. Note that this only works
+    # for variables in static row groups for now
+    for (required_variable in required_variables) {
+      iv$add_rule(required_variable, sv_required(message = ""))
+    }
+    
+    # start showing validation messages
     iv$enable()
     
     # get corresponding element info to determine which widgets to add to
     # the table
-    table_structure <- structure_lookup_list[[table_code_name]]
+    table_structure <- structure_lookup_list[[id]]
     row_groups <- table_structure$rows
     # can be NULL, in which case all row groups are of type 'static'
     column_names <- table_structure$columns 
@@ -138,7 +155,7 @@ mod_table_server <- function(id, table_code_name, row_variable_value,
         row_numbers <- if (is.numeric(row_value)) {
           1:row_value
         } else {
-          1: length(row_value)
+          1:length(row_value)
         }
       }
       
@@ -497,7 +514,9 @@ mod_table_server <- function(id, table_code_name, row_variable_value,
     
     # return the values of the table widgets
     # has to run when visibility changes because input values are not
-    # available otherwise
+    # available otherwise.
+    # This observer also calculates the sum on the total row in 
+    # harvest_crop_table
     observe({
       # needed, because when we are given new override values, we want
       # to know the row variable value ASAP so we are ready when the
@@ -533,8 +552,7 @@ mod_table_server <- function(id, table_code_name, row_variable_value,
       for (row_group in row_groups) {
         if (row_group$type == 'static') {
           for (variable in row_group$variables) {
-            value <- input[[variable]]
-            value_list[[variable]] <- value
+            value_list[[variable]] <- input[[variable]]
           }
         }
       }
@@ -544,7 +562,7 @@ mod_table_server <- function(id, table_code_name, row_variable_value,
         row_numbers <- if (is.numeric(row_value)) {
           1:row_value
         } else {
-          1: length(row_value)
+          1:length(row_value)
         }
       }
       # does not do anything if column names are undefined
@@ -556,10 +574,11 @@ mod_table_server <- function(id, table_code_name, row_variable_value,
           values <- c(values, input[[element_name]])
         }
         
+        # handle calculating the total values when new values are entered
         previous_vals <- isolate(table_values())[[variable]]
         total_variable <- structure_lookup_list[[variable]]$sum_to
-        if (!identical(previous_vals, values) && 
-            !is.null(total_variable) &&
+        if (!is.null(total_variable) &&
+            !identical(previous_vals, values) &&
             !isolate(block_sum_calculation())) {
           if (table_log) message(glue("Initiating sum calculation for ",
                                 "{total_variable}"))
@@ -574,14 +593,14 @@ mod_table_server <- function(id, table_code_name, row_variable_value,
       table_values(value_list)
     })
     
-    # return table_values as reactive to the main app
-    table_values
+    ################## RETURN VALUE
+    
+    list(
+      values = table_values,
+      valid = reactive(iv$is_valid())
+    )
+    
   })
     
 }
     
-## To be copied in the UI
-# mod_table_ui("table_ui_1")
-    
-## To be copied in the server
-# mod_table_server("table_ui_1")

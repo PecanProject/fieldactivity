@@ -38,6 +38,7 @@ golem::add_utils("global")
 golem::add_fct("evaluate_js", module = "form")
 golem::add_fct("event_list")
 golem::add_utils("find_table", module = "table")
+golem::add_utils("validation")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

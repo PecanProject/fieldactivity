@@ -145,7 +145,7 @@ app_server <- function(input, output, session) {
     form$reset_values(TRUE)
     
     # hide sidebar
-    shinyjs::hide("form_panel")
+    shinyjs::hide("form_panel", anim = TRUE, animType = "slide")
     shinyjs::enable("add_event")
     shinyjs::disable("clone_event")
     if (golem::app_dev() || auth_result$admin == "TRUE") {
@@ -154,7 +154,7 @@ app_server <- function(input, output, session) {
   }
   
   show_form <- function() {
-    shinyjs::show("form_panel")
+    shinyjs::show("form_panel", anim = TRUE, animType = "slide")
     shinyjs::disable("add_event")
     shinyjs::enable("clone_event")
     if (golem::app_dev() || auth_result$admin == "TRUE") {
@@ -257,6 +257,12 @@ app_server <- function(input, output, session) {
   observeEvent(form$values$save(), {
     # fetch new values from the form
     event <- form$values$data()
+    
+    if (is.null(event)) {
+      if (dp()) message("All validation rules have not been met")
+      return()
+    }
+    
     # are we editing an existing event or creating a new one?
     orig_event <- event_to_edit()
     editing <- !is.null(orig_event)
@@ -437,7 +443,7 @@ app_server <- function(input, output, session) {
       
     }
     
-    #str(event)
+    str(event)
     
     # load the json file corresponding to the new block selection (new as in
     # the current event$block value). We load from the file because it might
