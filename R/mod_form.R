@@ -103,11 +103,14 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     
     # add input validators
     main_iv <- InputValidator$new()
-    lapply(get_category_names("variable_name"), function(variable) {
+    lapply(get_category_names("variable_name"), FUN = function(variable) {
+      
       widget <- structure_lookup_list[[variable]]
+      iv <- InputValidator$new()
+      added_rules <- FALSE
+      
+      # add required rule
       if (identical(widget$required, TRUE)) {
-        iv <- InputValidator$new()
-        
         if (widget$type == "dateRangeInput") {
           iv$add_rule(variable, sv_required(message = "", 
                                             test = valid_dateRangeInput))
@@ -115,25 +118,60 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
           iv$add_rule(variable, sv_required(message = "")) 
         }
         
+        added_rules <- TRUE
+      }
+      
+      # add minimum rule
+      if (!is.null(widget$min)) {
+        iv$add_rule(variable, sv_gte(widget$min, allow_na = TRUE, 
+                                     message_fmt = ""))
+        added_rules <- TRUE
+      }
+      
+      # add maximum rule
+      # using [[ here because $ does partial matching and catches onto
+      # maxlength
+      if (!is.null(widget[["max"]])) {
+        iv$add_rule(variable, sv_lte(widget[["max"]], allow_na = TRUE,
+                                     message_fmt = ""))
+        added_rules <- TRUE
+      }
+      
+      # add integer rule
+      if (identical(widget$step, as.integer(1))) {
+        iv$add_rule(variable, sv_integer(message = "", allow_na = TRUE))
+        added_rules <- TRUE
+      }
+      
+      # add max length rule
+      if (!is.null(widget$maxlength)) {
+        iv$add_rule(variable, function(x) {
+          if (nchar(x) <= widget$maxlength) NULL else ""
+        })
+        added_rules <- TRUE
+      }
+      
+      if (added_rules) {
         # the validator is only active when it is in the current list of 
-        # required variables
-        iv$condition(reactive({ variable %in% required_variables()$regular }))
-        
+        # relevant, regular widgets
+        iv$condition(reactive({ variable %in% relevant_variables()$regular }))
         main_iv$add_validator(iv)
       }
+      
     })
+    # start showing validation messages
     main_iv$enable()
     
     # go through all fields and set maxLength if requested in ui_structure.json
     # TODO: do with validation instead
-    for (element in structure_lookup_list) {
-      if (!is.null(element$maxlength)) {
-        js_message <- "$('##code_name').attr('maxlength', #maxlength)"
-        js_message <- gsub("#code_name", ns(element$code_name), js_message)
-        js_message <- gsub("#maxlength", element$maxlength, js_message)
-        shinyjs::runjs(js_message)
-      }
-    }
+    # for (element in structure_lookup_list) {
+    #   if (!is.null(element$maxlength)) {
+    #     js_message <- "$('##code_name').attr('maxlength', #maxlength)"
+    #     js_message <- gsub("#code_name", ns(element$code_name), js_message)
+    #     js_message <- gsub("#maxlength", element$maxlength, js_message)
+    #     shinyjs::runjs(js_message)
+    #   }
+    # }
     
     
     # initialise the table server for each of the dynamically added tables
@@ -173,19 +211,23 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                                }
                              }
                              
-                             row_variable <- structure_lookup_list[[row_variable]]
-                             if (row_variable$type == "numericInput") {
+                             row_variable_type <- 
+                               structure_lookup_list[[row_variable]]$type
+                             if (row_variable_type == "numericInput") {
                                
-                               number_of_rows <- input[[row_variable$code_name]]
+                               number_of_rows <- input[[row_variable]]
                                
-                               if (!isTruthy(number_of_rows)) {
+                               # check status of validator. If it is NULL all is
+                               # ok
+                               if (!is.null(main_iv$validate()[[ns(row_variable)]]) ||
+                                   !isTruthy(number_of_rows)) {
                                  NULL
                                } else {
                                  as.integer(number_of_rows)
                                }
-                               
-                             } else if (row_variable$type == "selectInput") {
-                               input[[row_variable$code_name]]
+                             
+                             } else if (row_variable_type == "selectInput") {
+                               input[[row_variable]]
                              }
                              
                            }
