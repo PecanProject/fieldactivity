@@ -225,7 +225,8 @@
                   "type" : "numericInput",
                   "label" : "harvest_yield_harvest_dw_total_label",
                   "min" : "0",
-                  "sum_of" : "harvest_yield_harvest_dw"
+                  "sum_of" : "harvest_yield_harvest_dw",
+                  "required" : true
                 },
 
                 "harv_yield_harv_f_wt_total" : {
