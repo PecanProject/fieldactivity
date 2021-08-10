@@ -41,10 +41,14 @@ database:
 ``` r
 library(fieldactivity)
 run_app(json_file_path = "~/my_json_file_folder", 
-        user_db_path = "~/my_user_database",
+        user_db_path = "~/my_user_database.sqlite",
         user_db_passphrase = "password123")
 ```
 
+Check out the documentation of
+[Shinymanager](https://datastorm-open.github.io/shinymanager/) (the user
+authentication system used in the app) to find out how to create the
+user database.
 <!-- What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
 
 
