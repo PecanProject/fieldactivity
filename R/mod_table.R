@@ -1,5 +1,5 @@
 # Print messages to console
-table_log <- FALSE
+table_log <- TRUE
 
 # javascript callback scripts must be wrapped inside a function.
 # EDIT: this makes sense also, see datatables API documentation for example
@@ -34,19 +34,41 @@ mod_table_server <- function(id, row_variable_value,
     ns <- session$ns
 
     iv <- InputValidator$new()
-    # find required variables in this table so we can add validators
-    required_variables <- unlist(
-      sapply(get_table_variables(id), 
-             FUN = function(variable) {
-               if (identical(structure_lookup_list[[variable]]$required, 
-                             TRUE)) {
-                 variable
-               }
-             }, USE.NAMES = FALSE))
-    # add requirement for each required variable. Note that this only works
-    # for variables in static row groups for now
-    for (required_variable in required_variables) {
-      iv$add_rule(required_variable, sv_required(message = ""))
+    # which widgets have we already added rules for?
+    rules_added <- NULL
+    # Add validation rules for the specified set of widgets. widgets and
+    # variables should have the same length; the latter has "pure" variable
+    # names which correspond to the former row-numbered widget names.
+    add_validation_rules <- function(widgets, variables) {
+      lapply(1:length(widgets), FUN = function(i) {
+        
+        widget_name <- widgets[i]
+        widget <- structure_lookup_list[[variables[i]]]
+        
+        if (widget_name %in% rules_added) return()
+        
+        # add required rule
+        if (identical(widget$required, TRUE)) {
+          iv$add_rule(widget_name, sv_required(message = "")) 
+        }
+        
+        # add minimum rule
+        if (!is.null(widget$min)) {
+          iv$add_rule(widget_name, sv_gte(widget$min, allow_na = TRUE, 
+                                       message_fmt = ""))
+        }
+        
+        # add maximum rule
+        # using [[ here because $ does partial matching and catches onto
+        # maxlength
+        if (!is.null(widget[["max"]])) {
+          iv$add_rule(widget_name, sv_lte(widget[["max"]], allow_na = TRUE,
+                                       message_fmt = ""))
+          
+        }
+
+      })
+      rules_added <- c(rules_added, widgets)
     }
     
     # start showing validation messages
@@ -63,10 +85,10 @@ mod_table_server <- function(id, row_variable_value,
     if (!static_mode) {
       # find the row variable
       for (row_group in row_groups) {
-        # there is only one dynamic row group
         if (row_group$type == 'dynamic') {
           # row_variable will be available outside this loop
           row_variable <- row_group$row_variable
+          # there is only one dynamic row group
           break
         }
       }
@@ -220,14 +242,6 @@ mod_table_server <- function(id, row_variable_value,
           override_values(NULL)
           return(table_to_display)
         }
-        # check that the variables in override values are correct
-        # if (!all(variables %in% names(override_vals))) {
-        #     message(glue("The override values supplied to table {id} ",
-        #                  "are missing some variables, the table ",
-        #                  "will not be rendered"))
-        #     override_values(NULL)
-        #     return(table_to_display)
-        # }
       }
       
       # get all the column numbers with numericInputs so we can adjust
@@ -294,6 +308,8 @@ mod_table_server <- function(id, row_variable_value,
                              override_placeholder = placeholder
               ))
             
+            add_validation_rules(code_name, variable)
+            
             
             table_to_display[current_row, current_col] <- widget
             current_col <- current_col + 1
@@ -338,30 +354,10 @@ mod_table_server <- function(id, row_variable_value,
                   c(numericInput_columns,
                     which(column_names == variable))
               }
-              # width <- if (element$type == "numericInput") {
-              #     "80px"
-              # } else if (element$type == "textInput") {
-              #     "110px"
-              # } else {
-              #     "150px"
-              # }
               
               # the code names for these elements are
               # variablename_rownumber
               code_name <- paste(variable, current_row, sep = "_")
-              
-              # add observer to sum values if requested
-              # if (!is.null(element$sum_to)) {
-              #     message(glue("Adding observer for {code_name}, {element$sum_to}"))
-              #     lapply(list(list(widget = code_name, 
-              #                 total_variable = element$sum_to)), 
-              #            FUN = function(x) {
-              #         observeEvent(input[[x$widget]], su, {
-              #             message(glue("Observe for {x$widget},",
-              #                 "{x$total_variable}"))
-              #             calculate_sum(x$total_variable)
-              #     })})
-              # }
               
               # value to show in the widget initially
               value <- if (do_override) {
@@ -407,6 +403,7 @@ mod_table_server <- function(id, row_variable_value,
                                override_placeholder = placeholder
                 ))
               
+              add_validation_rules(code_name, variable)
               
               table_to_display[current_row, variable] <- widget
             }
@@ -521,7 +518,7 @@ mod_table_server <- function(id, row_variable_value,
       # needed, because when we are given new override values, we want
       # to know the row variable value ASAP so we are ready when the
       # values in the main app widget are changed
-      override_trigger() 
+      override_trigger()
       
       value_list <- list()
       did_override <- !is.null(isolate(override_values()))

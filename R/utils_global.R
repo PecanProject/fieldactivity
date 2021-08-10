@@ -25,4 +25,5 @@ languages <- c("English \U0001f1ec\U0001f1e7" = "disp_name_eng",
 init_lang <- languages[1]
 
 # whether to print debug information (short for debug print)
-dp <- function() TRUE && golem::app_dev()
+# set the boolean value below to FALSE to suppress prints
+dp <- function() FALSE && golem::app_dev()
