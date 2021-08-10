@@ -44,3 +44,25 @@ get_table_variables <- function(table_code_name) {
   
   return(variables)
 }
+
+#' Determine the dynamic rows based on row variable value
+#' 
+#' This is used to go from the value of a variable determining the rows in a
+#' dynamic row group to the rows themselves. If the row variable is a
+#' selectInput, the rows equal the value, but if the row variable is a
+#' numericInput, a vector of rows is generated instead
+#' 
+#' @return An atomic vector of rows, either option code names or numbers
+get_dynamic_rows_from_value <- function(variable, value) {
+  row_variable_structure <- structure_lookup_list[[variable]]
+  
+  if (row_variable_structure$type == "numericInput") {
+    if (!isTruthy(value) || value == missingval) {
+      NULL
+    } else {
+      1:as.integer(value)
+    }
+  } else if (row_variable_structure$type == "selectInput") {
+    value
+  }
+}

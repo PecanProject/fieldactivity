@@ -197,12 +197,13 @@ create_widget <- function(element, ns = NS(NULL),
                 selected = override_selected, ...)
   } else if (element$type == "textOutput") {
     if (!is.null(element$style) && element$style == "label") {
-      textOutput(element_code_name, ...)
+      strong(textOutput(element_code_name, ...))
     } else {
       # these are inteded to look like helpTexts so make text gray
       tagList(
         span(textOutput(element_code_name, ...), style = "color:gray"),
-        br())
+        br()
+      )
     }
   } else if (element$type == "textInput") {
     textInput(inputId = element_code_name, label = element_label, 

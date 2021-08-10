@@ -43,7 +43,7 @@ mod_event_list_ui <- function(id) {
     
 #' event_list Server Functions
 #'
-#' @noRd 
+#' @noRd
 mod_event_list_server <- function(id, events, language, site) {
   
   stopifnot(is.reactive(events))

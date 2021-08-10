@@ -134,7 +134,7 @@ app_server <- function(input, output, session) {
     
     # fill values on the form and show it
     form$set_values(event_to_edit())
-    show_form()
+    show_form(edit_mode = TRUE)
     
   })
   
@@ -153,10 +153,10 @@ app_server <- function(input, output, session) {
     }
   }
   
-  show_form <- function() {
+  show_form <- function(edit_mode = FALSE) {
     shinyjs::show("form_panel", anim = TRUE, animType = "slide")
     shinyjs::disable("add_event")
-    shinyjs::enable("clone_event")
+    if (edit_mode) shinyjs::enable("clone_event")
     if (golem::app_dev() || auth_result$admin == "TRUE") {
       shinyjs::disable("site")
     }
@@ -260,6 +260,9 @@ app_server <- function(input, output, session) {
     
     if (is.null(event)) {
       if (dp()) message("All validation rules have not been met")
+      showNotification(paste("Some of the entered information is not valid.",
+                             "Please check the fields highlighted in red."),
+                       type = "warning")
       return()
     }
     
