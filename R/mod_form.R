@@ -191,6 +191,20 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                          # are not defined)
                          static_mode <- is.null(table_structure$columns)
                          
+                         # find the row variable. This will be used in the
+                         # reactive below
+                         if (!static_mode) {
+                           for (row_group in table_structure$rows) {
+                             # there is only one dynamic row group
+                             if (row_group$type == 'dynamic') {
+                               row_variable <- row_group$row_variable
+                               row_variable_type <- 
+                                 structure_lookup_list[[row_variable]]$type
+                               break
+                             }
+                           }
+                         }
+                         
                          # If we have row groups which depend on widget values
                          # in the main app, create a reactive from those values.
                          # This can either be determined by the choices of
@@ -199,38 +213,27 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                          row_variable_value <- reactive({
                            
                            if (static_mode) {
-                             NULL
-                           } else {
-                             
-                             # find the row variable
-                             for (row_group in table_structure$rows) {
-                               # there is only one dynamic row group
-                               if (row_group$type == 'dynamic') {
-                                 row_variable <- row_group$row_variable
-                                 break
-                               }
-                             }
-                             
-                             row_variable_type <- 
-                               structure_lookup_list[[row_variable]]$type
-                             if (row_variable_type == "numericInput") {
-                               
-                               number_of_rows <- input[[row_variable]]
-                               
-                               # check status of validator. If it is NULL all is
-                               # ok
-                               if (!is.null(main_iv$validate()[[ns(row_variable)]]) ||
-                                   !isTruthy(number_of_rows)) {
-                                 NULL
-                               } else {
-                                 as.integer(number_of_rows)
-                               }
-                             
-                             } else if (row_variable_type == "selectInput") {
-                               input[[row_variable]]
-                             }
-                             
+                             return(NULL)
                            }
+                           
+                           
+                           if (row_variable_type == "numericInput") {
+                             number_of_rows <- input[[row_variable]]
+                             
+                             # check status of validator. If it is NULL all is
+                             # ok
+                             if (!is.null(
+                               main_iv$validate()[[ns(row_variable)]]) ||
+                               !isTruthy(number_of_rows)) {
+                               NULL
+                             } else {
+                               as.integer(number_of_rows)
+                             }
+                             
+                           } else if (row_variable_type == "selectInput") {
+                             input[[row_variable]]
+                           }
+                           
                          })
                          
                          # Determine when the table is visible. The table module
@@ -242,9 +245,11 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                            # condition to determine its visibility.
                            observeEvent(input$mgmt_operations_event, 
                                         ignoreNULL = FALSE, {
-                             visible(identical(input$mgmt_operations_event, 
-                                               "fertilizer"))
-                           })
+                                          visible(
+                                            identical(
+                                              input$mgmt_operations_event, 
+                                              "fertilizer"))
+                                        })
                          } else {
                            # table is visible if the length of the variable
                            # presented on the rows of the table is more than 1,
@@ -265,10 +270,10 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                          # save this list for every data table
                          list(
                            result = mod_table_server(table_code_name, 
-                                                   row_variable_value, 
-                                                   language,
-                                                   visible = visible,
-                                                   override_values = override_values),
+                                                     row_variable_value, 
+                                                     language,
+                                                     visible,
+                                                     override_values),
                            visible = visible,
                            set_values = override_values
                          )

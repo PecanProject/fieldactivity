@@ -250,7 +250,7 @@
                   "type" : "numericInput",
                   "label" : "harvest_moisture_label",
                   "min" : 0,
-                  "max" : 0
+                  "max" : 100
                 },
                 
                 "harvest_method" : {
