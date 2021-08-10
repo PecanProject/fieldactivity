@@ -216,15 +216,14 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                              return(NULL)
                            }
                            
-                           
                            if (row_variable_type == "numericInput") {
                              number_of_rows <- input[[row_variable]]
                              
                              # check status of validator. If it is NULL all is
                              # ok
-                             if (!is.null(
-                               main_iv$validate()[[ns(row_variable)]]) ||
-                               !isTruthy(number_of_rows)) {
+                             if (!isTruthy(number_of_rows) || 
+                                 !is.null(isolate(
+                                   main_iv$validate()[[ns(row_variable)]]))) {
                                NULL
                              } else {
                                as.integer(number_of_rows)
@@ -236,35 +235,6 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                            
                          })
                          
-                         # Determine when the table is visible. The table module
-                         # needs this information.
-                         visible <- reactiveVal()
-                         if (static_mode) {
-                           # since fertilizer_element_table is currently the
-                           # only table utilising static mode, we can use this
-                           # condition to determine its visibility.
-                           observeEvent(input$mgmt_operations_event, 
-                                        ignoreNULL = FALSE, {
-                                          visible(
-                                            identical(
-                                              input$mgmt_operations_event, 
-                                              "fertilizer"))
-                                        })
-                         } else {
-                           # table is visible if the length of the variable
-                           # presented on the rows of the table is more than 1,
-                           # or if its numeric value is greater than 1
-                           observeEvent(row_variable_value(), ignoreNULL = FALSE, {
-                             visible(
-                               if (is.numeric(row_variable_value())) {
-                                 row_variable_value() > 1
-                               } else { 
-                                 length(row_variable_value()) > 1 
-                               }
-                             )
-                           })
-                         }
-                         
                          override_values <- reactiveVal()
                          
                          # save this list for every data table
@@ -272,9 +242,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                            result = mod_table_server(table_code_name, 
                                                      row_variable_value, 
                                                      language,
-                                                     visible,
                                                      override_values),
-                           visible = visible,
                            set_values = override_values
                          )
                          
@@ -376,6 +344,11 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         files[[fileInput_code_name]]$reset_path(TRUE)
       }
       
+      # fertilizer_element_table is an exception in that it doesn't clear 
+      # itself (it is in "static mode"). Let's clear it by hand:
+      # TODO: make this automatic too
+      tables[["fertilizer_element_table"]]$set_values(list())
+      
       # set value back to FALSE so this can be triggered later as well
       # observeEvent ignores FALSE values by default
       reset_values(FALSE)
@@ -437,8 +410,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
     })
     
-    # TODO: refactor, maybe create a generic element module which handles
-    # language changes
+    # TODO: add ignoreInit = TRUE
     observeEvent(language(), {
       
       # get a list of all input elements which we have to relabel
