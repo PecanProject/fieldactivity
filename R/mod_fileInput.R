@@ -101,7 +101,7 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
       file_extension <- tools::file_ext(tmp_path)
       allowed_extensions <- c("jpg", "jpeg", "tif", "tiff", "png")
       # if the image format is not desired, delete file and clear field
-      if (!(file_extension %in% allowed_extensions)) {
+      if (!(tolower(file_extension) %in% allowed_extensions)) {
         delete_file(tmp_path)
         
         showNotification(
