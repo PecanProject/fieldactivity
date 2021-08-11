@@ -6,10 +6,13 @@
 \usage{
 valid_dateRangeInput(value)
 }
+\arguments{
+\item{value}{The value of the dataRangeInput to validate}
+}
 \value{
 TRUE if value is valid, FALSE if not
 }
 \description{
 Both dates need to be supplied for the value to be considered
-  valid
+  valid, and the start date needs to be on or before the end date
 }

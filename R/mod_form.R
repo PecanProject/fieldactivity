@@ -87,8 +87,19 @@ mod_form_ui <- function(id){
     
 #' form Server Functions
 #'
+#' @param id The id of the corresponding UI element
+#' @param site A reactive expression holding the current site name
+#' @param set_values Changing the value of this reactive expression sets the
+#'   values in the form
+#' @param reset_values A reactive expression. If set to TRUE, clears the values
+#'   on the form
+#' @param edit_mode A reactive expression holding a boolean value which
+#'   indicates whether the app is editing an event (TRUE) or creating a purely
+#'   new one (FALSE)
+#' @param language A reactive expression holding the current UI language
+#'
 #' @import shinyvalidate
-#' @noRd 
+#' @noRd
 mod_form_server <- function(id, site, set_values, reset_values, edit_mode, 
                             language) {
   

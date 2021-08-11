@@ -40,9 +40,13 @@ mod_event_list_ui <- function(id) {
     DT::dataTableOutput(ns("table"))
   )
 }
-    
+
 #' event_list Server Functions
 #'
+#' @param id The id of the corresponding UI element
+#' @param events A reactive expression holding a list of events to display in the event list
+#' @param language A reactive expression holding the current UI language
+#' @param site A reactive expression holding the current site name
 #' @noRd
 mod_event_list_server <- function(id, events, language, site) {
   
@@ -145,9 +149,11 @@ mod_event_list_server <- function(id, events, language, site) {
       update_table_year_choices()
     })
     
-    # update table activity choices when the language changes
+    # update table activity, block and year choices when the language changes
     observeEvent(language(), {
       update_table_activity_choices()
+      update_table_block_choices()
+      update_table_year_choices()
     })
     
     # update block choices when site changes
@@ -363,43 +369,7 @@ mod_event_list_server <- function(id, events, language, site) {
         
         if (dp()) message(glue("Rendering text for {text_output_code_name}"))
         
-        text_to_show <- get_disp_name(text_output_code_name, language())
-        
-        # get element from the UI structure lookup list
-        element <- structure_lookup_list[[text_output_code_name]]
-        # if the text should be updated dynamically, do that
-        if (!is.null(element$dynamic)) {
-          
-          # there are currently two modes of dynamic text
-          if (element$dynamic$mode == "input") {
-            # the -1 removes the mode element, we don't want it
-            patterns <- names(element$dynamic)[-1]
-            # use lapply here to get the dependency on input correctly
-            replacements <- lapply(patterns, function(pattern) {
-              replacement <- input[[ element$dynamic[[pattern]] ]]
-              replacement <- get_disp_name(replacement,
-                                           language())
-              text_to_show <<- gsub(pattern, replacement, 
-                                    text_to_show)
-              replacement
-            })
-            
-            # if one of the replacements is empty, we don't want to
-            # see the text at all
-            if ("" %in% replacements) { text_to_show <- "" }
-            
-          } else if (element$dynamic$mode == "edit_mode") {
-            
-            text_to_show <- if (!is.null(event_to_edit())) {
-              element$dynamic[["TRUE"]]
-            } else {
-              element$dynamic[["FALSE"]]
-            }
-            text_to_show <- get_disp_name(text_to_show, language())
-            
-          }
-        }
-        text_to_show
+        get_disp_name(text_output_code_name, language())
       })
       
     })

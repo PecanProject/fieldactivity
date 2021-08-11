@@ -23,11 +23,25 @@ mod_table_ui <- function(id) {
 }
     
 #' table Server Functions
-#' 
+#'
+#' @param id The id of the corresponding UI element
+#' @param row_variable_value A reactive expression holding the value of the
+#'   variable which determines the rows in a dynamic row group. If there are no
+#'   dynamic row groups in the table, a reactive expression holding the value
+#'   NULL.
+#' @param language A reactive expression holding the current UI language
+#' @param override_values Changing the value of this reactive expression sets
+#'   the values in the table
+#'
 #' @import shinyvalidate
-#' @noRd 
+#' @noRd
 mod_table_server <- function(id, row_variable_value, 
                              language, override_values) {
+  
+  stopifnot(is.reactive(row_variable_value))
+  stopifnot(is.reactive(language))
+  stopifnot(is.reactive(override_values))
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     

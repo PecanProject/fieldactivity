@@ -52,6 +52,10 @@ get_table_variables <- function(table_code_name) {
 #' selectInput, the rows equal the value, but if the row variable is a
 #' numericInput, a vector of rows is generated instead
 #' 
+#' @param variable The name of the variable which functions as a row variable in
+#'   a table
+#' @param value The value of the variable
+#'   
 #' @return An atomic vector of rows, either option code names or numbers
 get_dynamic_rows_from_value <- function(variable, value) {
   row_variable_structure <- structure_lookup_list[[variable]]

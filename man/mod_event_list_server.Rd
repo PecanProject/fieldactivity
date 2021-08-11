@@ -6,6 +6,15 @@
 \usage{
 mod_event_list_server(id, events, language, site)
 }
+\arguments{
+\item{id}{The id of the corresponding UI element}
+
+\item{events}{A reactive expression holding a list of events to display in the event list}
+
+\item{language}{A reactive expression holding the current UI language}
+
+\item{site}{A reactive expression holding the current site name}
+}
 \description{
 event_list Server Functions
 }
