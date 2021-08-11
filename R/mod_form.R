@@ -157,6 +157,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       # add max length rule
       if (!is.null(widget$maxlength)) {
         iv$add_rule(variable, function(x) {
+          if (!isTruthy(x)) return(NULL)
           if (nchar(x) <= widget$maxlength) NULL else ""
         })
         added_rules <- TRUE
