@@ -1,5 +1,6 @@
-# read the csv file containing the display names
-#display_name_dict_path <- "data/display_names.csv"
+# Functions for finding the display names of things in different languages
+# Otto Kuusela 2021
+
 # the path is wrapped inside a function because of this: 
 # https://developer.r-project.org/Blog/public/2019/02/14/staged-install/index.html
 # see: “Paths hard-coded in R code”
@@ -10,10 +11,21 @@ display_names_dict <- read.csv(display_name_dict_path(), comment.char = "#")
 date_format_json <- "%Y-%m-%d"
 date_format_display <- "%d/%m/%Y"
 
-# find all code names and display names belonging to a given category
-# display names are set as the names, code names are the values
-# if language is NULL, only code names are returned
-get_category_names <- function(category1, language = NULL) {
+#' Find code and display names belonging to a given category
+#'
+#' The categories are defined in the display_names.csv file. If language is
+#' undefined, only code names will be returned. If a language is also supplied,
+#' then the corresponding display names are set as the names of the vector of
+#' code names.
+#'
+#' @param category The category (e.g. "variable_name") to find the names for
+#' @param language (optional) The language of the display names
+#'
+#' @return A vector of code names. If language was supplied, the display names
+#'   corresponding to the code names will be the names of the vector.
+get_category_names <- function(category, language = NULL) {
+  # rename argument to make it work with subset
+  category1 <- category
   
   category_names <- subset(display_names_dict, 
                            display_names_dict$category == category1)
@@ -27,14 +39,24 @@ get_category_names <- function(category1, language = NULL) {
   return(code_names)
 }
 
-# get the display name(s) corresponding to a code name (/names)
-# returns the display names(s) as a value
-# if display name is not found, the code name is returned
-# if is_variable_name is set to true, then only variable names will be looked
-# at, otherwise only non-variable names will be looked at. This is because
-# there might be clashes between the variable and non-variable code names
-# e.g. organic_material is both an option in mgmt_operations_event and a 
-# variable
+#' Get the display names corresponding to given code names
+#'
+#' @param code_name A vector of code names to get the display names for
+#' @param language The language ("disp_name_eng" or "disp_name_fin") of the
+#'   resulting display names
+#' @param is_variable_name If set to TRUE, then only variable names will be
+#'   searched for display names. If FALSE (the default), only non-variable names
+#'   will be searched.
+#'
+#' @details is_variable_name is needed because there might be clashes between
+#'   the variable and non-variable code names. E.g. organic_material is both an
+#'   option in mgmt_operations_event and a variable. The language names
+#'   ("disp_name_eng" and "disp_name_fin") correspond to the names of the
+#'   columns in the display_names.csv file.
+#'
+#' @return The display name(s) as a vector of character strings in the same
+#'   order as the code names. If a display name is not found or language is
+#'   undefined, the code name is returned.
 get_disp_name <- function(code_name, language = NULL, 
                           is_variable_name = FALSE) {
   if (is.null(code_name)) return(NULL)
@@ -58,8 +80,16 @@ get_disp_name <- function(code_name, language = NULL,
   return(display_name)
 }
 
-# replace code names with display names in an event data frame
-# also replaces missingvals
+#' Replace code names with display names in an event data frame
+#'
+#' Also replaces missingvals with "".
+#'
+#' @param events_with_code_names The data frame with code names that should be
+#'   turned to display names
+#' @param language The language of the display names
+#'
+#' @return A data frame of the same size but with entries with code names
+#'   replaced with display names
 replace_with_display_names <- function(events_with_code_names, language) {
   events_with_display_names <- events_with_code_names
   
@@ -68,9 +98,8 @@ replace_with_display_names <- function(events_with_code_names, language) {
     element <- structure_lookup_list[[variable_name]]
     
     if (is.null(element$type)) {
+      # this could be e.g. the date_ordering or event column
       next
-      #stop(paste("Could not find element of name",variable_name,
-      #           "in sidebar_ui_structure.json file. Check it!"))
     }
     
     if (element$type == "selectInput") {
@@ -86,9 +115,8 @@ replace_with_display_names <- function(events_with_code_names, language) {
                  }
                  name
                })
-    } else if (element$type == "textAreaInput" | 
-               element$type == "textInput" | 
-               element$type == "numericInput") {
+    } else if (element$type %in% 
+               c("textAreaInput", "textInput", "numericInput")) {
       events_with_display_names[[variable_name]] <-
         sapply(events_with_code_names[[variable_name]],
                FUN = function(x) {

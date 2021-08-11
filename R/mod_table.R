@@ -1,3 +1,14 @@
+# Table module
+# Otto Kuusela 2021
+#
+# Word of warning: this is (unfortunately) a fickle beast. The main problem
+# underlying all difficulties related to this module is binding / unbinding the
+# widgets presented in the table. Each time the table is changed (rows are added
+# / removed or language changes) the previous inputs must be unbound before the
+# table disappears and the new inputs appear. These new inputs must then be
+# bound after they have been rendered. This sounds simple, but has caused me
+# endless trouble. So tread carefully here, things break easily!
+
 # Print messages to console
 table_log <- FALSE
 
@@ -86,7 +97,6 @@ mod_table_server <- function(id, row_variable_value,
         if (!is.null(widget[["max"]])) {
           iv$add_rule(widget_name, sv_lte(widget[["max"]], allow_na = TRUE,
                                        message_fmt = ""))
-          
         }
 
       })
