@@ -12,6 +12,10 @@
 #'   js_condition doesn't have any typos. eval(parse(...)) is dangerous if it is
 #'   used directly with user input, but here that is not the case. The user has
 #'   no access to the ui_structure.json file.
+#'   
+#'   Running this function in a reactive context will create reactive
+#'   dependencies. This is actually useful, because then we know exactly when
+#'   e.g. relevant variables need to be recalculated.
 evaluate_condition <- function(js_condition, session) {
   
   if (is.null(js_condition) || !is.character(js_condition)) {
