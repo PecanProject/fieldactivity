@@ -174,7 +174,7 @@ app_server <- function(input, output, session) {
     # go through the blocks and save events from the corresponding json file
     # to events$by_block
     for (block in site_blocks) {
-      events$by_block[[block]] <- retrieve_json_info(site1, block)
+      events$by_block[[block]] <- read_json_file(site1, block)
     }
   }
   
@@ -240,7 +240,7 @@ app_server <- function(input, output, session) {
       
     }
     
-    block_data <- retrieve_json_info(input$site, event$block)
+    block_data <- read_json_file(input$site, event$block)
     
     block_data[[length(block_data) + 1]] <- event
     
@@ -276,7 +276,7 @@ app_server <- function(input, output, session) {
     # replacing the old event with the updated one.
     if (editing) {
       
-      orig_block_data <- retrieve_json_info(input$site, orig_event$block)
+      orig_block_data <- read_json_file(input$site, orig_event$block)
       event_index <- find_event_index(orig_event, orig_block_data)
       
       if (is.null(event_index)) {
@@ -454,7 +454,7 @@ app_server <- function(input, output, session) {
     # load the json file corresponding to the new block selection (new as in
     # the current event$block value). We load from the file because it might
     # have changed and events$by_block might be out of date
-    new_block_data <- retrieve_json_info(input$site, event$block)
+    new_block_data <- read_json_file(input$site, event$block)
     
     # if editing and block didn't change, replace event. 
     # Otherwise append event to the list
@@ -485,7 +485,7 @@ app_server <- function(input, output, session) {
     event <- event_to_edit()
     
     # retrieve up to date information from the json file
-    block_data <- retrieve_json_info(input$site, event$block)
+    block_data <- read_json_file(input$site, event$block)
     
     # find the index of the event to be deleted from the event list
     event_index <- find_event_index(event, block_data)

@@ -4,7 +4,13 @@
 \alias{delete_file}
 \title{Delete a file}
 \usage{
-delete_file(filepath, site = NULL, block = NULL, filepath_relative = FALSE)
+delete_file(
+  filepath,
+  site = NULL,
+  block = NULL,
+  filepath_relative = FALSE,
+  base_folder = json_file_base_folder()
+)
 }
 \arguments{
 \item{filepath}{The path to the file which should be deleted.}
@@ -16,6 +22,9 @@ delete_file(filepath, site = NULL, block = NULL, filepath_relative = FALSE)
 \item{filepath_relative}{Set to TRUE and supply site and block if filepath is
 relative to the events.json file. This allows the function to figure out
 the correct path to the file.}
+
+\item{base_folder}{Included for testing reasons, the default value should
+otherwise be used}
 }
 \description{
 Delete the file with the path filepath. Used to delete files (images)
