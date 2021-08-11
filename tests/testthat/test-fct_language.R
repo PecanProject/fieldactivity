@@ -31,5 +31,5 @@ test_that("code names are translated correctly", {
                  english[i])
     
   }
-
+  
 })
