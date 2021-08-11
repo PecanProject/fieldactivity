@@ -6,6 +6,12 @@
 \usage{
 get_dynamic_rows_from_value(variable, value)
 }
+\arguments{
+\item{variable}{The name of the variable which functions as a row variable in
+a table}
+
+\item{value}{The value of the variable}
+}
 \value{
 An atomic vector of rows, either option code names or numbers
 }

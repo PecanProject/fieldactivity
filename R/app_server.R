@@ -446,7 +446,10 @@ app_server <- function(input, output, session) {
       
     }
     
-    str(event)
+    if (dp()) {
+      message("The finished event:")
+      utils::str(event)
+    }
     
     # load the json file corresponding to the new block selection (new as in
     # the current event$block value). We load from the file because it might
