@@ -27,26 +27,8 @@ app_ui <- function(request) {
     
     h2(textOutput("frontpage_table_title")),
     
-    # selector to filter table data
-    div(style="display: inline-block;vertical-align:middle;",
-        textOutput("table_filter_text_1", inline = TRUE)),
-    div(style="display: inline-block;vertical-align:middle;", 
-        selectInput("table_activity", label = "", choices = c(""), 
-                    width = "150px")),
-    div(style="display: inline-block;vertical-align:middle;",
-        textOutput("table_filter_text_2", inline = TRUE)),
-    div(style="display: inline-block;vertical-align:middle;", 
-        selectInput("table_block", label = "", choices = c(""),
-                    width = "100px")),
-    div(style="display: inline-block;vertical-align:middle;",
-        textOutput("table_filter_text_3", inline = TRUE)),
-    div(style="display: inline-block;vertical-align:middle;", 
-        selectInput("table_year", label = "", choices = c(""),
-                    width = "100px")),
-    div(style="display: inline-block;vertical-align:middle;", "."),
-    
-    # front page data table
-    DT::dataTableOutput("mgmt_events_table"),
+    # event list module UI
+    mod_event_list_ui("event_list"),
     
     # add a little space between the elements
     br(),

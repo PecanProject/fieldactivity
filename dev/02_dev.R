@@ -22,12 +22,14 @@ usethis::use_package("shinyjs")
 usethis::use_package("tools")
 usethis::use_package("htmlwidgets")
 usethis::use_package("methods")
+usethis::use_package("shinyvalidate")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module( name = "table") # Name of the module
 golem::add_module( name = "form" ) # Name of the module
 golem::add_module(name = "fileInput")
+golem::add_module(name = "event_list")
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
@@ -36,6 +38,7 @@ golem::add_utils("global")
 golem::add_fct("evaluate_js", module = "form")
 golem::add_fct("event_list")
 golem::add_utils("find_table", module = "table")
+golem::add_utils("validation")
 
 ## External resources
 ## Creates .js and .css files at inst/app/www

@@ -136,14 +136,14 @@
                 "planting_material_weight" : {
                   "code_name" : "planting_material_weight",
                   "type" : "numericInput",
-                  "min" : "0",
+                  "min" : 0,
                   "label" : "planting_material_weight_label"
                 },
 
                 "planting_depth" : {
                   "code_name" : "planting_depth",
                   "type" : "numericInput",
-                  "min" : "0",
+                  "min" : 0,
                   "label" : "planting_depth_label"
                 },
 
@@ -173,7 +173,7 @@
             "code_name" : "harvest_area",
             "type" : "numericInput",
             "label" : "harvest_area_label",
-            "min" : "0",
+            "min" : 0,
             "required" : true
           },
 
@@ -224,15 +224,16 @@
                   "code_name" : "harvest_yield_harvest_dw_total",
                   "type" : "numericInput",
                   "label" : "harvest_yield_harvest_dw_total_label",
-                  "min" : "0",
-                  "sum_of" : "harvest_yield_harvest_dw"
+                  "min" : 0,
+                  "sum_of" : "harvest_yield_harvest_dw",
+                  "required" : true
                 },
 
                 "harv_yield_harv_f_wt_total" : {
                   "code_name" : "harv_yield_harv_f_wt_total",
                   "type" : "numericInput",
                   "label" : "harv_yield_harv_f_wt_total_label",
-                  "min" : "0",
+                  "min" : 0,
                   "sum_of" : "harv_yield_harv_f_wt"
                 },
         
@@ -240,7 +241,7 @@
                   "code_name" : "yield_C_at_harvest_total",
                   "type" : "numericInput",
                   "label" : "yield_C_at_harvest_total_label",
-                  "min" : "0",
+                  "min" : 0,
                   "sum_of" : "yield_C_at_harvest"
                 },
 
@@ -248,8 +249,8 @@
                   "code_name" : "harvest_moisture",
                   "type" : "numericInput",
                   "label" : "harvest_moisture_label",
-                  "min" : "0",
-                  "max" : "100"
+                  "min" : 0,
+                  "max" : 100
                 },
                 
                 "harvest_method" : {
@@ -271,21 +272,21 @@
                   "code_name" : "canopy_height_harvest",
                   "type" : "numericInput",
                   "label" : "canopy_height_harvest_label",
-                  "min" : "0"
+                  "min" : 0
                 },
 
                 "harvest_cut_height" : {
                   "code_name" : "harvest_cut_height",
                   "type" : "numericInput",
                   "label" : "harvest_cut_height_label",
-                  "min" : "0"
+                  "min" : 0
                 },
 
                 "plant_density_harvest" : {
                   "code_name" : "plant_density_harvest",
                   "type" : "numericInput",
                   "label" : "plant_density_harvest_label",
-                  "min" : "0"
+                  "min" : 0
                 },
 
                 "harvest_residue_placement" : {
@@ -304,7 +305,7 @@
                   "code_name" : "harvest_yield_harvest_dw",
                   "type" : "numericInput",
                   "label" : "harvest_yield_harvest_dw_label",
-                  "min" : "0",
+                  "min" : 0,
                   "hide_in_table" : true,
                   "sum_to" : "harvest_yield_harvest_dw_total"
                 },
@@ -313,7 +314,7 @@
                   "code_name" : "harv_yield_harv_f_wt",
                   "type" : "numericInput",
                   "label" : "harv_yield_harv_f_wt_label",
-                  "min" : "0",
+                  "min" : 0,
                   "hide_in_table" : true,
                   "sum_to" : "harv_yield_harv_f_wt_total"
                 },
@@ -322,7 +323,7 @@
                   "code_name" : "yield_C_at_harvest",
                   "type" : "numericInput",
                   "label" : "yield_C_at_harvest_label",
-                  "min" : "0",
+                  "min" : 0,
                   "hide_in_table" : true,
                   "sum_to" : "yield_C_at_harvest_total"
                 }
@@ -368,7 +369,7 @@
             "code_name" : "tillage_operations_depth",
             "type" : "numericInput",
             "label" : "tillage_operations_depth_label",
-            "min" : "0"
+            "min" : 0
           },
 
           "tillage_treatment_notes" : {
@@ -403,16 +404,16 @@
                   "code_name" : "org_matter_moisture_conc",
                   "type" : "numericInput",
                   "label" : "org_matter_moisture_conc_label",
-                  "min" : "0",
-                  "max" : "100"
+                  "min" : 0,
+                  "max" : 100
                 },
 
                 "org_matter_carbon_conc" : {
                   "code_name" : "org_matter_carbon_conc",
                   "type": "numericInput",
                   "label" : "org_matter_carbon_conc_label",
-                  "min" : "0",
-                  "max" : "100"
+                  "min" : 0,
+                  "max" : 100
                 }
               },
 
@@ -462,14 +463,14 @@
             "code_name" : "application_depth_fert",
             "type" : "numericInput",
             "label" : "application_depth_fert_label",
-            "min" : "0"
+            "min" : 0
           },
 
           "fertilizer_total_amount" : {
             "code_name" : "fertilizer_total_amount",
             "type" : "numericInput",
             "label" : "fertilizer_total_amount_label",
-            "min" : "0",
+            "min" : 0,
             "required" : true
           },
           
@@ -512,7 +513,7 @@
               "code_name" : "N_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "N_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -520,7 +521,7 @@
               "code_name" : "phosphorus_applied_fert",
               "type" : "numericInput",
               "label" : "phosphorus_applied_fert_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -528,7 +529,7 @@
               "code_name" : "fertilizer_K_applied",
               "type" : "numericInput",
               "label" : "fertilizer_K_applied_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -536,7 +537,7 @@
               "code_name" : "S_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "S_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -544,7 +545,7 @@
               "code_name" : "Ca_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Ca_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -552,7 +553,7 @@
               "code_name" : "Mg_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Mg_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -560,7 +561,7 @@
               "code_name" : "Na_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Na_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -568,7 +569,7 @@
               "code_name" : "Cu_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Cu_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -576,7 +577,7 @@
               "code_name" : "Zn_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Zn_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -584,7 +585,7 @@
               "code_name" : "B_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "B_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -592,7 +593,7 @@
               "code_name" : "Mn_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Mn_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -600,7 +601,7 @@
               "code_name" : "Se_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Se_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -608,7 +609,7 @@
               "code_name" : "Fe_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "Fe_in_applied_fertilizer_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
             
@@ -729,7 +730,7 @@
             "code_name" : "mowed_area",
             "type" : "numericInput",
             "label" : "mowed_area_label",
-            "min" : "0"
+            "min" : 0
           },
 
           "mowing_method" : {
@@ -743,14 +744,14 @@
             "code_name" : "mowing_canopy_height",
             "type" : "numericInput",
             "label" : "mowing_canopy_height_label",
-            "min" : "0"
+            "min" : 0
           },
 
           "mowing_cut_height" : {
             "code_name" : "mowing_cut_height",
             "type" : "numericInput",
             "label" : "mowing_cut_height_label",
-            "min" : "0"
+            "min" : 0
           },
 
           "mowing_notes" : {
@@ -842,7 +843,8 @@
               "code_name" : "soil_layer_count",
               "type" : "numericInput",
               "label" : "soil_layer_count_label",
-              "min" : "1",
+              "min" : 1,
+              "max" : 10,
               "step" : 1,
               "hide_in_table" : true,
               "sub_elements" : {
@@ -871,7 +873,7 @@
                     "code_name" : "soil_layer_top_depth",
                     "type" : "numericInput",
                     "label" : "soil_layer_top_depth_label",
-                    "min" : "0",
+                    "min" : 0,
                     "hide_in_table" : true
                   },
 
@@ -879,7 +881,7 @@
                     "code_name" : "soil_layer_base_depth",
                     "type" : "numericInput",
                     "label" : "soil_layer_base_depth_label",
-                    "min" : "0",
+                    "min" : 0,
                     "hide_in_table" : true
                   },
 
@@ -899,14 +901,14 @@
               "code_name" : "root_depth",
               "type" : "numericInput",
               "label" : "root_depth_label",
-              "min" : "0"
+              "min" : 0
             },
 
             "soil_compactification_depth" : {
               "code_name" : "soil_compactification_depth",
               "type" : "numericInput",
               "label" : "soil_compactification_depth_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -914,8 +916,8 @@
               "code_name" : "earthworm_count",
               "type" : "numericInput",
               "label" : "earthworm_count_label",
-              "min" : "0",
-              "step" : "1",
+              "min" : 0,
+              "step" : 1,
               "hide_in_table" : true
             },
 
@@ -943,14 +945,14 @@
               "code_name" : "plant_density",
               "type" : "numericInput",
               "label" : "plant_density_label",
-              "min" : "0"
+              "min" : 0
             },
 
             "specific_leaf_area" : {
               "code_name" : "specific_leaf_area",
               "type" : "numericInput",
               "label" : "specific_leaf_area_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -958,14 +960,14 @@
               "code_name" : "leaf_area_index",
               "type" : "numericInput",
               "label" : "leaf_area_index_label",
-              "min" : "0"
+              "min" : 0
             },
 
             "canopy_height" : {
               "code_name" : "canopy_height",
               "type" : "numericInput",
               "label" : "canopy_height_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -973,7 +975,7 @@
               "code_name" : "canopeo_reading",
               "type" : "numericInput",
               "label" : "canopeo_reading_label",
-              "min" : "0"
+              "min" : 0
             },
 
             "canopeo_image" : {
@@ -992,7 +994,7 @@
               "code_name" : "floodwater_depth",
               "type" : "numericInput",
               "label" : "floodwater_depth_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             },
 
@@ -1000,7 +1002,7 @@
               "code_name" : "water_table_depth",
               "type" : "numericInput",
               "label" : "water_table_depth_label",
-              "min" : "0",
+              "min" : 0,
               "hide_in_table" : true
             }
           },
@@ -1012,8 +1014,8 @@
               "code_name" : "plant_pop_reduct_cum",
               "type" : "numericInput",
               "label" : "plant_pop_reduct_cum_label",
-              "min" : "0",
-              "max" : "100",
+              "min" : 0,
+              "max" : 0,
               "hide_in_table" : true
             }
           },
@@ -1025,7 +1027,7 @@
               "code_name" : "fuel_amount",
               "type" : "numericInput",
               "label" : "fuel_amount_label",
-              "min" : "0"
+              "min" : 0
             }
           },
 
@@ -1179,7 +1181,7 @@
       "type" : "textAreaInput",
       "label" : "mgmt_event_notes_label",
       "placeholder" : "mgmt_event_notes_placeholder",
-      "maxlength" : "80"
+      "maxlength" : 80
     },
 
     "save" : {

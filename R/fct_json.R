@@ -152,7 +152,7 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
     stop(glue("The file {orig_filepath} to copy does not exist"))
   }
   
-  file_extension <- tools::file_ext(orig_filepath)
+  file_extension <- tolower(tools::file_ext(orig_filepath))
   allowed_extensions <- c("jpg", "jpeg", "tif", "tiff", "png")
   # if the image format is not supported, stop
   if (!(file_extension %in% allowed_extensions)) {

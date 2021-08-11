@@ -1,38 +1,3 @@
-#' Find the index of an event in a list
-#' 
-#' Find the first index corresponding to the given event in a list of events.
-#' An event is considered equal to another if they have exactly the same
-#' variables (though not necessarily in the same order) and these variables
-#' have exactly the same values.
-#' 
-#' @param event The event whose index to identify
-#' @param event_list The list of events where event is to be found
-#' 
-#' @return The index if found, NULL otherwise
-find_event_index <- function(event, event_list) {
-  
-  if (length(event_list) == 0) { return(NULL) }
-  
-  # sort the items in the lists to the same order (alphabetical)
-  event <- event[order(names(event))]
-  
-  # go through all rows in the event list and check if any of them match
-  for (i in 1:length(event_list)) {
-    
-    list_event <- event_list[[i]]
-    # sort the items in this particular list event, to allow comparison
-    list_event <- list_event[order(names(list_event))]
-    
-    if (identical(event, list_event)) {
-      return(i)
-    }
-    
-  }
-  
-  # We didn't find a match, so return NULL
-  return(NULL)
-}
-
 #' The application server-side
 #' 
 #' @param input,output,session Internal parameters for {shiny}. 
@@ -47,8 +12,6 @@ app_server <- function(input, output, session) {
   if (dp()) message("Initializing server function")
   
   # check_credentials returns a function to authenticate users
-  # might have to use the hand-typed passphrase option for now when deploying
-  # the app
   credential_checker <- shinymanager::check_credentials(
     db = golem::get_golem_options("user_db_path"),
     passphrase = golem::get_golem_options("user_db_passphrase")
@@ -128,17 +91,18 @@ app_server <- function(input, output, session) {
     shinyjs::show("site")
   }
   
-  # initialise in the normal (non-edit) mode
-  event_to_edit <- reactiveVal()
   # lists of events by block on the currently viewed site
   # accessed like events$by_block[["0"]]
+  # has to be done this way, because you can't remove values from reactiveValues
   events <- reactiveValues(by_block = list())
-  # per session global variable, indicates whether the currently edited event
-  # is visible in the front page table
-  edited_event_visible <- TRUE
-  # what were the table view choices (table_block, table_activity, table_year)
-  # before we started editing?
-  pre_edit_table_view <- NULL
+
+  # start server for the event list
+  event_list <- mod_event_list_server("event_list",
+                                      events = reactive(events$by_block),
+                                      language = reactive(input$language),
+                                      site = reactive(input$site))
+  # a reactiveVal which holds the currently edited event
+  event_to_edit <- event_list$current
   
   form <- list(
     # change this to change the values of widgets in the form
@@ -161,64 +125,40 @@ app_server <- function(input, output, session) {
     
     if (is.null(event_to_edit())) {
       # edit mode was disabled
-      shinyjs::disable("clone_event")
-      # clear event list selection (might be clear already though)
-      DT::selectRows(proxy = DT::dataTableProxy("mgmt_events_table"), 
-                     selected = NULL)
-      # hide form and clear values
+      # hide the form and clear values
       exit_form()
-      
-      # restore table view settings
-      updateSelectInput(session, "table_activity", 
-                        selected = pre_edit_table_view$activity)
-      updateSelectInput(session, "table_block", 
-                        selected = pre_edit_table_view$block)
-      updateSelectInput(session, "table_year", 
-                        selected = pre_edit_table_view$year)
-      # clear table view settings
-      pre_edit_table_view <<- NULL
-      
       return()
     } 
     
     ### edit mode was enabled, or there was a switch from one event to  another
     
-    # fill values on the form
+    # fill values on the form and show it
     form$set_values(event_to_edit())
-    
-    # save table view (to be restored when editing is over) if no settings
-    # have been saved previously
-    if (is.null(pre_edit_table_view)) {
-      pre_edit_table_view <<- list(activity = input$table_activity,
-                                   block = input$table_block,
-                                   year = input$table_year)
-    }
-    
-    # change view of the front page table
-    updateSelectInput(session, "table_activity", 
-                      selected = event_to_edit()$mgmt_operations_event)
-    
-    shinyjs::show("form_panel")
-    shinyjs::disable("add_event")
-    shinyjs::enable("clone_event")
-    if (golem::app_dev() || auth_result$admin == "TRUE") {
-      shinyjs::disable("site")
-    }
+    show_form(edit_mode = TRUE)
     
   })
   
   # exit sidebar mode
   # this is called when saving and when pressing cancel
-  # TODO: make obsolete
   exit_form <- function() {
     # reset all input fields
     form$reset_values(TRUE)
     
     # hide sidebar
-    shinyjs::hide("form_panel")
+    shinyjs::hide("form_panel", anim = TRUE, animType = "slide")
     shinyjs::enable("add_event")
+    shinyjs::disable("clone_event")
     if (golem::app_dev() || auth_result$admin == "TRUE") {
       shinyjs::enable("site")
+    }
+  }
+  
+  show_form <- function(edit_mode = FALSE) {
+    shinyjs::show("form_panel", anim = TRUE, animType = "slide")
+    shinyjs::disable("add_event")
+    if (edit_mode) shinyjs::enable("clone_event")
+    if (golem::app_dev() || auth_result$admin == "TRUE") {
+      shinyjs::disable("site")
     }
   }
   
@@ -238,192 +178,6 @@ app_server <- function(input, output, session) {
     }
   }
   
-  #' Update year choices in event list filter
-  #' 
-  #' Adds as choices all the years for which events have been recorded
-  update_table_year_choices <- function() {
-    
-    years <- NULL
-    
-    # find years present in event dates
-    for (event_list in events$by_block) {
-      for (event in event_list) {
-        
-        # this shouldn't happen
-        if (is.null(event$date)) next
-        
-        year <- format(as.Date(event$date, date_format_json), "%Y")
-        
-        if (!(year %in% years)) { years <- c(years, year) }
-      }
-    }
-    
-    years <- sort(years, decreasing = TRUE)
-    table_year_choices <- c("year_choice_all", years)
-    names(table_year_choices) <- get_disp_name(table_year_choices, 
-                                               input$language)
-    
-    # retain current selection if possible
-    current_choice <- input$table_year
-    if (!isTruthy(current_choice) || !(current_choice %in% years)) {
-      current_choice <- "year_choice_all"
-    }
-    
-    updateSelectInput(session, "table_year", selected = current_choice,
-                      choices = table_year_choices)
-    
-  }
-  
-  #' Update block choices in event list filter
-  #' 
-  #' Add all blocks of the current site as choices
-  update_table_block_choices <- function() {
-    
-    if (!isTruthy(input$site)) { return() }
-    
-    block_choices <- c("block_choice_all",
-                       subset(sites, sites$site == input$site)$blocks[[1]])
-    # the following assumes that no block name is a code name for something
-    # else
-    names(block_choices) <- get_disp_name(block_choices, input$language)
-    
-    current_choice <- input$table_block
-    if (!isTruthy(current_choice) || !(current_choice %in% block_choices)) {
-      current_choice <- "block_choice_all"
-    }
-    
-    updateSelectInput(session, "table_block", selected = current_choice,
-                      choices = block_choices)
-  }
-  
-  #' Update activity choices in event list filter
-  #' 
-  #' Only used when the language is changed.
-  update_table_activity_choices <- function() {
-    
-    choices_for_table_activity <- 
-      c("activity_choice_all", get_category_names(
-        "mgmt_operations_event_choice"))
-    names(choices_for_table_activity) <- 
-      get_disp_name(choices_for_table_activity, input$language)
-    
-    current_choice <- input$table_activity
-    if (!isTruthy(current_choice)) {
-      current_choice <- "activity_choice_all"
-    }
-    
-    updateSelectInput(session, "table_activity", selected = current_choice,
-                      choices = choices_for_table_activity)
-  }
-  
-  # update year choices when events change
-  observeEvent(events$by_block, {
-    update_table_year_choices()
-  })
-  
-  # data to display in the table
-  frontpage_table_data <- reactive({
-    
-    if (dp()) message("frontpage_table_data reactive running")
-    
-    if (!(isTruthy(input$table_activity) & 
-          isTruthy(input$table_block) &
-          isTruthy(input$table_year))) {
-      default_variables <- c("block", "mgmt_operations_event",
-                             "date", "mgmt_event_notes")
-      return(get_data_table(list(), default_variables))
-    }
-    
-    # determine the columns displayed in the table
-    table_variables <- c("date", "mgmt_event_notes")
-    if (input$table_activity == "activity_choice_all") {
-      table_variables <- c("mgmt_operations_event", table_variables)
-    }
-    if (input$table_block == "block_choice_all") {
-      table_variables <- c("block", table_variables)
-    }
-    
-    # if we are only looking at a specific event type, show columns
-    # appropriate to it
-    if (input$table_activity != "activity_choice_all") {
-      hidden_widget_types <- c("textOutput", "dataTable", "fileInput", 
-                               "actionButton")
-      activity_variables <- unlist(rlapply(
-        activity_options[[input$table_activity]],
-        fun = function(x) {
-          if (is.null(x$type) || x$type %in% hidden_widget_types ||
-              identical(x$hide_in_table, TRUE)) {
-            NULL
-          } else {
-            x$code_name
-          }
-        }))
-      table_variables <- c(table_variables, activity_variables)
-    }
-    
-    # create an event list filtered by user choices
-    # filter by block
-    if (input$table_block == "block_choice_all") {
-      event_list <- list()
-      for (block_data in events$by_block) {
-        event_list <- c(event_list, block_data)
-      }
-    } else {
-      event_list <- events$by_block[[input$table_block]]
-    }
-    
-    # filter by activity type
-    if (input$table_activity != "activity_choice_all") {
-      event_list <- rlapply(event_list, fun = function(x)
-        if (x$mgmt_operations_event == input$table_activity) {x})
-    }
-    
-    # filter by year
-    if (input$table_year != "year_choice_all") {
-      event_list <- rlapply(event_list, fun = function(x) {
-        event_year <- format(as.Date(x$date, date_format_json), "%Y")
-        if (event_year == input$table_year) {x}
-      })
-    }
-    
-    # make event list into a table
-    data <- get_data_table(event_list, table_variables)
-    data
-    
-    # update currently displayed data
-    #new_data_to_display <- replace_with_display_names(data, input$language)
-    #DTproxy <- DT::dataTableProxy("mgmt_events_table", session = session)
-    #DT::replaceData(DTproxy, new_data_to_display, rownames = FALSE, 
-    #                clearSelection = "none")
-  })
-  
-  # enable editing of old entries
-  observeEvent(input$mgmt_events_table_rows_selected, ignoreNULL = FALSE,
-               ignoreInit = TRUE, {
-    
-    if (dp()) message("Change of row selection in event list")
-    
-    row_index <- input$mgmt_events_table_rows_selected
-    
-    if (is.null(row_index)) {
-      # if it was the user de-selecting the event, exit edit mode
-      # (the other alternative is that the currently edited event is not
-      # visible in the table and therefore no element can be selected)
-      if (edited_event_visible) {
-        event_to_edit(NULL)
-      }
-      return()
-    }
-    
-    # fetch the event data of the selected row
-    selected_event_data <- frontpage_table_data()[[row_index, "event"]]
-    
-    # set edit mode on. This saves the event we want to edit so that it is
-    # preserved even if front page table view is changed
-    event_to_edit(selected_event_data)
-    
-  })
-  
   # cancel means we exit edit mode and hide the form
   observeEvent(form$values$cancel(), {
     if (is.null(event_to_edit())) {
@@ -435,42 +189,31 @@ app_server <- function(input, output, session) {
   
   # show add event UI when requested
   observeEvent(input$add_event, {
-    shinyjs::disable("add_event")
-    
+    # note: event_to_edit() should be NULL at this point as the add button is
+    # disabled during editing
+    if (!is.null(event_to_edit())) return()
+      
     # if we were not editing previously, copy current table view settings
     # (block and activity) into the widgets if they are set to a specific
     # value (not "all")
-    # note: event_to_edit() should be NULL at this point as the add button is
-    # disabled during editing
-
-    if (is.null(event_to_edit())) {
-      
-      new_values <- list()
-      
-      if (!is.null(input$table_activity) && 
-          input$table_activity != "activity_choice_all") {
-        new_values$mgmt_operations_event <- input$table_activity
-      }
-      if (!is.null(input$table_block) &&
-          input$table_block != "block_choice_all") {
-        new_values$block <- input$table_block
-      }
-      
-      if (!identical(new_values, list())) form$set_values(new_values)
+    new_values <- list()
+    table_activity <- event_list$filters()$activity
+    table_block <- event_list$filters()$block
+    
+    if (!is.null(table_activity) && 
+        table_activity != "activity_choice_all") {
+      new_values$mgmt_operations_event <- table_activity
+    }
+    if (!is.null(table_block) &&
+        table_block != "block_choice_all") {
+      new_values$block <- table_block
     }
     
-    # exit edit mode if we were in it
-    event_to_edit(NULL)
+    if (!identical(new_values, list())) form$set_values(new_values)
     
-    # show the form
-    shinyjs::show("form_panel")
-    
-    if (golem::app_dev() || auth_result$admin == "TRUE") {
-      shinyjs::disable("site")
-    }
+    show_form()
   })
   
-  # TODO: what if the event has a file associated with it?
   observeEvent(input$clone_event, {
     # fetch the event to be cloned
     event <- event_to_edit()
@@ -514,6 +257,15 @@ app_server <- function(input, output, session) {
   observeEvent(form$values$save(), {
     # fetch new values from the form
     event <- form$values$data()
+    
+    if (is.null(event)) {
+      if (dp()) message("All validation rules have not been met")
+      showNotification(paste("Some of the entered information is not valid.",
+                             "Please check the fields highlighted in red."),
+                       type = "warning")
+      return()
+    }
+    
     # are we editing an existing event or creating a new one?
     orig_event <- event_to_edit()
     editing <- !is.null(orig_event)
@@ -694,7 +446,10 @@ app_server <- function(input, output, session) {
       
     }
     
-    #str(event)
+    if (dp()) {
+      message("The finished event:")
+      utils::str(event)
+    }
     
     # load the json file corresponding to the new block selection (new as in
     # the current event$block value). We load from the file because it might
@@ -774,80 +529,21 @@ app_server <- function(input, output, session) {
     event_to_edit(NULL)
   })
   
-  # change available blocks depending on the site and load the site event
-  # data into memory (events$by_block)
+  # load the site event data into memory (events$by_block)
   observeEvent(input$site, ignoreNULL = FALSE, {
     
     if (dp()) message("input$site was changed")
     
     if (!isTruthy(input$site)) {
-      shinyjs::disable("table_block")
       shinyjs::disable("add_event")
       return()
     } 
     
-    shinyjs::enable("table_block")
     shinyjs::enable("add_event")
-    
-    update_table_block_choices()
 
     if (dp()) message(glue::glue("Loading data for site {input$site}"))
     # load the events corresponding to this site into memory
     load_json_data(input$site)
-    
-  })
-
-  # render frontpage table when input$language or table data changes
-  output$mgmt_events_table <- DT::renderDataTable(server = FALSE, {
-    
-    if (dp()) message("Rendering event list")
-    
-    new_data_to_display <- replace_with_display_names(
-      frontpage_table_data(), input$language)
-    n_cols <- ncol(new_data_to_display)
-    
-    # select the row which we are currently editing
-    row_number <- NULL
-    if (!is.null(isolate(event_to_edit()))) {
-      row_number <- find_event_index(isolate(event_to_edit()), 
-                                     new_data_to_display$event)
-      # if we couldn't find the currently edited event in the table,
-      # prevent clearing the event
-      edited_event_visible <<- !is.null(row_number)
-    }
-    
-    DT::datatable(new_data_to_display, 
-              # allow selection of a single row
-              selection = list(mode = "single", 
-                               selected = row_number),
-              rownames = FALSE, # hide row numbers
-              class = "table table-hover",
-              #autoHideNavigation = TRUE, doesn't work properly with dom
-              colnames = get_disp_name(names(new_data_to_display),
-                                       language = input$language,
-                                       is_variable_name = TRUE),
-              options = list(dom = 'tp', # hide unnecessary controls
-                             # order chronologically by hidden column
-                             order = list(n_cols - 1, 'desc'), 
-                             columnDefs = list(
-                               # hide all other columns except
-                               # event, date and notes
-                               list(visible = FALSE, 
-                                    targets = (n_cols - 2):(n_cols - 1)),
-                               # hide sorting arrows
-                               list(orderable = FALSE, targets = 
-                                      0:(n_cols - 2))),
-                             pageLength = 15,
-                             language = list(
-                               emptyTable = get_disp_name(
-                                 "table_empty_label", input$language),
-                               paginate = list(
-                                 "next" = get_disp_name(
-                                   "table_next_label", input$language), 
-                                 previous = get_disp_name(
-                                   "table_previous_label", input$language))
-                             )
-              ))
   })
   
   # update each of the text outputs automatically, including language changes
@@ -992,10 +688,6 @@ app_server <- function(input, output, session) {
       }
       
     }
-    
-    # update table selector choices separately
-    update_table_block_choices()
-    update_table_activity_choices()
-    update_table_year_choices()
+
   })
 }

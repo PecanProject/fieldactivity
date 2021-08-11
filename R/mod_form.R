@@ -87,7 +87,19 @@ mod_form_ui <- function(id){
     
 #' form Server Functions
 #'
-#' @noRd 
+#' @param id The id of the corresponding UI element
+#' @param site A reactive expression holding the current site name
+#' @param set_values Changing the value of this reactive expression sets the
+#'   values in the form
+#' @param reset_values A reactive expression. If set to TRUE, clears the values
+#'   on the form
+#' @param edit_mode A reactive expression holding a boolean value which
+#'   indicates whether the app is editing an event (TRUE) or creating a purely
+#'   new one (FALSE)
+#' @param language A reactive expression holding the current UI language
+#'
+#' @import shinyvalidate
+#' @noRd
 mod_form_server <- function(id, site, set_values, reset_values, edit_mode, 
                             language) {
   
@@ -100,26 +112,181 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # add input validators
+    main_iv <- InputValidator$new()
+    lapply(get_category_names("variable_name"), FUN = function(variable) {
+      
+      widget <- structure_lookup_list[[variable]]
+      iv <- InputValidator$new()
+      added_rules <- FALSE
+      
+      # add required rule
+      if (identical(widget$required, TRUE)) {
+        if (widget$type == "dateRangeInput") {
+          iv$add_rule(variable, sv_required(message = "", 
+                                            test = valid_dateRangeInput))
+        } else {
+          iv$add_rule(variable, sv_required(message = "")) 
+        }
+        
+        added_rules <- TRUE
+      }
+      
+      # add minimum rule
+      if (!is.null(widget$min)) {
+        iv$add_rule(variable, sv_gte(widget$min, allow_na = TRUE, 
+                                     message_fmt = ""))
+        added_rules <- TRUE
+      }
+      
+      # add maximum rule
+      # using [[ here because $ does partial matching and catches onto
+      # maxlength
+      if (!is.null(widget[["max"]])) {
+        iv$add_rule(variable, sv_lte(widget[["max"]], allow_na = TRUE,
+                                     message_fmt = ""))
+        added_rules <- TRUE
+      }
+      
+      # add integer rule
+      if (identical(widget$step, as.integer(1))) {
+        iv$add_rule(variable, sv_integer(message = "", allow_na = TRUE))
+        added_rules <- TRUE
+      }
+      
+      # add max length rule
+      if (!is.null(widget$maxlength)) {
+        iv$add_rule(variable, function(x) {
+          if (nchar(x) <= widget$maxlength) NULL else ""
+        })
+        added_rules <- TRUE
+      }
+      
+      if (added_rules) {
+        # the validator is only active when it is in the current list of 
+        # relevant, regular widgets
+        iv$condition(reactive({ variable %in% relevant_variables()$regular }))
+        main_iv$add_validator(iv)
+      }
+      
+    })
+    # start showing validation messages
+    main_iv$enable()
+    
     # go through all fields and set maxLength if requested in ui_structure.json
     # TODO: do with validation instead
-    for (element in structure_lookup_list) {
-      if (!is.null(element$maxlength)) {
-        js_message <- "$('##code_name').attr('maxlength', #maxlength)"
-        js_message <- gsub("#code_name", ns(element$code_name), js_message)
-        js_message <- gsub("#maxlength", element$maxlength, js_message)
-        shinyjs::runjs(js_message)
-      }
-    }
+    # for (element in structure_lookup_list) {
+    #   if (!is.null(element$maxlength)) {
+    #     js_message <- "$('##code_name').attr('maxlength', #maxlength)"
+    #     js_message <- gsub("#code_name", ns(element$code_name), js_message)
+    #     js_message <- gsub("#maxlength", element$maxlength, js_message)
+    #     shinyjs::runjs(js_message)
+    #   }
+    # }
+    
+    
+    # initialise the table server for each of the dynamically added tables
+    # sapply with simplify = FALSE is equivalent to lapply
+    # the values from the table can be accessed ilke
+    # tables[[table_code_name]]$result$values()
+    tables <- sapply(data_table_code_names, USE.NAMES = TRUE, 
+                     simplify = FALSE, FUN = 
+                       function(table_code_name) {
+                         
+                         table_structure <- structure_lookup_list[[table_code_name]]
+                         
+                         # are we in static mode, i.e. are all row groups of
+                         # type 'static'? If yes, we won't need to supply the
+                         # row_variable_value reactive. Currently this only
+                         # happens with fertilizer_element_table (the columns
+                         # are not defined)
+                         static_mode <- is.null(table_structure$columns)
+                         
+                         # find the row variable. This will be used in the
+                         # reactive below
+                         if (!static_mode) {
+                           for (row_group in table_structure$rows) {
+                             # there is only one dynamic row group
+                             if (row_group$type == 'dynamic') {
+                               row_variable <- row_group$row_variable
+                               row_variable_type <- 
+                                 structure_lookup_list[[row_variable]]$type
+                               break
+                             }
+                           }
+                         }
+                         
+                         # If we have row groups which depend on widget values
+                         # in the main app, create a reactive from those values.
+                         # This can either be determined by the choices of
+                         # selectInput with multiple selections, or a
+                         # numericInput which represents the number of rows.
+                         row_variable_value <- reactive({
+                           
+                           if (static_mode) {
+                             return(NULL)
+                           }
+                           
+                           if (row_variable_type == "numericInput") {
+                             number_of_rows <- input[[row_variable]]
+                             
+                             # check status of validator. If it is NULL all is
+                             # ok
+                             if (!isTruthy(number_of_rows) || 
+                                 !is.null(isolate(
+                                   main_iv$validate()[[ns(row_variable)]]))) {
+                               NULL
+                             } else {
+                               as.integer(number_of_rows)
+                             }
+                             
+                           } else if (row_variable_type == "selectInput") {
+                             input[[row_variable]]
+                           }
+                           
+                         })
+                         
+                         override_values <- reactiveVal()
+                         
+                         # save this list for every data table
+                         list(
+                           result = mod_table_server(table_code_name, 
+                                                     row_variable_value, 
+                                                     language,
+                                                     override_values),
+                           set_values = override_values
+                         )
+                         
+                       })
+    
+    # start server for all fileInput modules
+    files <- sapply(fileInput_code_names, USE.NAMES = TRUE, 
+                    simplify = FALSE, FUN = 
+                      function(fileInput_code_name) {
+                        
+                        set_path <- reactiveVal()
+                        reset_path <- reactiveVal()
+                        
+                        list(value = mod_fileInput_server(id = fileInput_code_name, 
+                                                          language = language,
+                                                          set_path = set_path,
+                                                          reset_path = reset_path),
+                             set_path = set_path,
+                             reset_path = reset_path)
+                      }
+    )
     
     # when site setting is changed, update the block choices on the form
     observeEvent(site(), ignoreNULL = FALSE, {
       
       if (!isTruthy(site())) {
         shinyjs::disable("block")
+        shinyjs::disable("save")
         return()
       } 
       
       shinyjs::enable("block")
+      shinyjs::enable("save")
       
       # update table_block choices.
       # table_block choices are also updated in the observeEvent for
@@ -136,27 +303,26 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
       # populate the input widgets with the values corresponding to the 
       # event, and clear others
-      for (variable_name in get_category_names("variable_name")) {
+      for (variable in get_category_names("variable_name")) {
         
         # get the value corresponding to this variable from the event.
         # might be NULL
-        value <- values[[variable_name]]
-        widget <- structure_lookup_list[[variable_name]]
+        value <- values[[variable]]
+        widget <- structure_lookup_list[[variable]]
         
         # determine if this value should be filled in a table
         # for now this is a sufficient condition
-        variable_table <- get_variable_table(variable_name, 
-                                             only_values = TRUE)
+        variable_table <- get_variable_table(variable)
         value_in_table <- !is.null(variable_table) & length(value) > 1
         
-        if (!(variable_name %in% names(values)) | value_in_table) {
+        if (!(variable %in% names(values)) | value_in_table) {
           # clear widget if the event does not contain a value for it
           # or value should be shown in a table instead
-          update_ui_element(session, variable_name, clear_value = TRUE)
+          update_ui_element(session, variable, clear_value = TRUE)
         } else if (widget$type == "fileInput") {
-          files[[variable_name]]$set_path(value)
+          files[[variable]]$set_path(value)
         } else {
-          update_ui_element(session, variable_name, value = value)
+          update_ui_element(session, variable, value = value)
         }
       }
       
@@ -164,9 +330,8 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       # them should be displayed in the table. If yes, fill the table.
       # Other tables do not need to be cleared, as they do that by 
       # themselves when they become hidden.
-      for (variable_name in names(values)) {
-        variable_table <- get_variable_table(variable_name, 
-                                             only_values = TRUE)
+      for (variable in names(values)) {
+        variable_table <- get_variable_table(variable)
         
         if (!is.null(variable_table)) {
           tables[[variable_table]]$set_values(values)
@@ -190,6 +355,11 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         files[[fileInput_code_name]]$reset_path(TRUE)
       }
       
+      # fertilizer_element_table is an exception in that it doesn't clear 
+      # itself (it is in "static mode"). Let's clear it by hand:
+      # TODO: make this automatic too
+      tables[["fertilizer_element_table"]]$set_values(list())
+      
       # set value back to FALSE so this can be triggered later as well
       # observeEvent ignores FALSE values by default
       reset_values(FALSE)
@@ -200,8 +370,58 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       shinyjs::toggle("delete", condition = edit_mode())
     })
     
-    # TODO: refactor, maybe create a generic element module which handles
-    # language changes
+    # update each of the text outputs automatically, including language changes
+    # and the dynamic updating in editing table title etc. 
+    # TODO: refactor
+    lapply(text_output_code_names, FUN = function(text_output_code_name) {
+      
+      # render text
+      output[[text_output_code_name]] <- renderText({
+        
+        if (dp()) message(glue("Rendering text for {text_output_code_name}"))
+        
+        text_to_show <- get_disp_name(text_output_code_name, language())
+        
+        #get element from the UI structure lookup list
+        element <- structure_lookup_list[[text_output_code_name]]
+        #if the text should be updated dynamically, do that
+        if (!is.null(element$dynamic)) {
+          
+          # there are currently two modes of dynamic text
+          if (element$dynamic$mode == "input") {
+            # the -1 removes the mode element, we don't want it
+            patterns <- names(element$dynamic)[-1]
+            # use lapply here to get the dependency on input correctly
+            replacements <- lapply(patterns, function(pattern) {
+              replacement <- input[[ element$dynamic[[pattern]] ]]
+              replacement <- get_disp_name(replacement,
+                                           language())
+              text_to_show <<- gsub(pattern, replacement, 
+                                    text_to_show)
+              replacement
+            })
+            
+            # if one of the replacements is empty, we don't want to
+            # see the text at all
+            if ("" %in% replacements) { text_to_show <- "" }
+            
+          } else if (element$dynamic$mode == "edit_mode") {
+            
+            text_to_show <- if (edit_mode()) {
+              element$dynamic[["TRUE"]]
+            } else {
+              element$dynamic[["FALSE"]]
+            }
+            text_to_show <- get_disp_name(text_to_show, language())
+            
+          }
+        }
+        text_to_show
+      })
+      
+    })
+    
+    # TODO: add ignoreInit = TRUE
     observeEvent(language(), {
       
       # get a list of all input elements which we have to relabel
@@ -300,94 +520,35 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
       if (dp()) message("Calculating form data")
       
-      event <- list()
-      
-      # find variables that correspond to the selected activity and save
-      # only those
-      widget_list <- activity_options[[input$mgmt_operations_event]]
-
-      # these are the variables among which the relevant variables are.
-      # Includes also tables and textOutputs
-      activity_widgets <- unlist(rlapply(widget_list,
-                                           fun = function(x) x$code_name))
-      activity_widgets <- c("block", 
-                            "mgmt_operations_event",
-                            "date",
-                            "mgmt_event_notes",
-                            activity_widgets)
-      
-      # find all widgets that are currently hidden in the UI. This includes
-      # regular widgets but also e.g. tables. Note that not all of these are
-      # irrelevant; we might have to read them from a table instead. This vector
-      # includes also tables because that way we can check whether a table is
-      # actually hidden. We also apply this to all activity options instead of
-      # only widget_list for the same reason: some tables that are “visible”
-      # (i.e. tables[[table_code_name]]$visible() is TRUE) are actually not, and
-      # that might include tables from other activity types (e.g. first user
-      # makes soil structure table visible, then changes to fill out a harvest
-      # event. The soil structure table is still “visible” even though it's
-      # actually not)
-      hidden_widgets <- unlist(rlapply(activity_options, fun = function(x) {
-        if (!is.null(x$condition)) {
-          relevant <- evaluate_condition(x$condition, session)
-          if (!is.null(relevant) && !identical(relevant, TRUE)) {
-            rlapply(x, fun = function(x) x$code_name)
-          }
-        }
-      }))
-      
-      # determine whether we need to read some variables from a table or not
-      table_to_read <- NULL
-      for (table_code_name in data_table_code_names) {
-        if (tables[[table_code_name]]$visible() && 
-            # see hidden_widgets comment above
-            !(table_code_name %in% hidden_widgets)) {
-          table_to_read <- structure_lookup_list[[table_code_name]]
-          # currently only one tables is visible at a time
-          break
-        }
+      relevant <- relevant_variables()
+      relevant_table <- if (identical(relevant$table_code_name, character(0))) {
+        NULL
+      } else {
+        tables[[relevant$table_code_name]]$result
       }
       
-      # print(activity_widgets)
-      # print(hidden_widgets)
-      # print(table_to_read)
+      # check that the form and table validation rules have been met
+      if (!main_iv$is_valid() || 
+          (!is.null(relevant_table) && !relevant_table$valid())) {
+        return(NULL)
+      }
       
-      # fill / update information
-      for (variable_name in get_category_names("variable_name")) {
-        
-        # will be needed later with fileInputs
-        widget <- structure_lookup_list[[variable_name]]
-        
-        # should the variable's value be read from a table?
-        read_from_table <- if (!is.null(table_to_read)) {
-          # if it is in the table's columns, yes
-          if (variable_name %in% table_to_read$columns) {TRUE}
-          # if it is in a static row group (e.g. fertilizer_element_table)
-          # then yes too
-          else if (variable_name %in% unlist(table_to_read$rows)) {TRUE}
-          # if not, then it is in the rows of the table and we will read
-          # the value instead from a regular widget
-          else {FALSE}
-        } else {FALSE}
-        
-        # if this variable is not relevant, make sure it is not included
-        # in the event data
-        if (!(variable_name %in% activity_widgets) ||
-            # variable might be in skip_variables if it is read from table
-            (variable_name %in% hidden_widgets & !read_from_table)) {
-          
-          event[variable_name] <- NULL
-          next
-        }
+      event <- list()
+      # fill information
+      for (variable in c(relevant$regular, relevant$table)) {
+
+        # is the variable a fileInput?
+        is_fileInput <- identical(structure_lookup_list[[variable]]$type, 
+                                  "fileInput")
         
         # read value from table if it is available there, otherwise from either
         # a fileInput module or a regular input widget
-        value_to_save <- if (read_from_table) {
-          tables[[table_to_read$code_name]]$data()[[variable_name]]
-        } else if (widget$type == "fileInput") {
-          files[[variable_name]]$value()
+        value_to_save <- if (variable %in% relevant$table) {
+          relevant_table$values()[[variable]]
+        } else if (is_fileInput) {
+          files[[variable]]$value()
         } else {
-          input[[variable_name]]
+          input[[variable]]
         }
         
         # if value is character, trim any whitespace around it
@@ -395,8 +556,8 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
           value_to_save <- trimws(value_to_save)
         }
         
-        # format Date value to character string and replace with ""
-        # if that fails for some reason
+        # format Date value to character string and replace with "" if that
+        # fails for some reason
         if (class(value_to_save) == "Date") {
           value_to_save <- tryCatch(
             expr = format(value_to_save, date_format_json),
@@ -419,265 +580,85 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
           }
         }
         
-        event[[variable_name]] <- value_to_save
+        event[[variable]] <- value_to_save
       }
       
       # return event data
       event
     })
     
-
-    # initialise the table server for each of the dynamically added tables
-    # sapply with simplify = FALSE is equivalent to lapply
-    # the values from the table can be accessed ilke
-    # tables[[data_table_code_name]]$data
-    tables <- sapply(data_table_code_names, USE.NAMES = TRUE, 
-                         simplify = FALSE, FUN = 
-      function(data_table_code_name) {
-                             
-        table_structure <- structure_lookup_list[[data_table_code_name]]
-                             
-        # are we in static mode, i.e. are all row groups of
-        # type 'static'? If yes, we won't need to supply the
-        # row_variable_value reactive. Currently this only
-        # happens with fertilizer_element_table (the columns
-        # are not defined)
-        static_mode <- is.null(table_structure$columns)
-         
-        # If we have row groups which depend on widget values
-        # in the main app, create a reactive from those values.
-        # This can either be determined by the choices of
-        # selectInput with multiple selections, or a
-        # numericInput which represents the number of rows.
-        row_variable_value <- reactive({
-         
-         if (static_mode) {
-           NULL
-           
-         } else {
-           
-           # find the row variable
-           for (row_group in table_structure$rows) {
-             # there is only one dynamic row group
-             if (row_group$type == 'dynamic') {
-               row_variable <- row_group$row_variable
-               break
-             }
-           }
-           
-           row_variable <- structure_lookup_list[[row_variable]]
-           if (row_variable$type == "numericInput") {
-             
-             number_of_rows <- input[[row_variable$code_name]]
-             
-             if (!isTruthy(number_of_rows)) {
-               NULL
-             } else {
-               as.integer(number_of_rows)
-             }
-             
-           } else if (row_variable$type == "selectInput") {
-             input[[row_variable$code_name]]
-           }
-           
-         }
-        })
-        
-        # Determine when the table is visible. The table module
-        # needs this information.
-        visible <- reactiveVal()
-        if (static_mode) {
-         # since fertilizer_element_table is currently the
-         # only table utilising static mode, we can use this
-         # condition to determine its visibility.
-         observeEvent(input$mgmt_operations_event, ignoreNULL = FALSE, {
-           visible(identical(input$mgmt_operations_event, "fertilizer"))
-         })
-        } else {
-         # table is visible if the length of the variable
-         # presented on the rows of the table is more than 1,
-         # or if its numeric value is greater than 1
-         observeEvent(row_variable_value(), ignoreNULL = FALSE, {
-           visible(
-             if (is.numeric(row_variable_value())) {
-               row_variable_value() > 1
-             } else { 
-               length(row_variable_value()) > 1 
-             }
-           )
-         })
-        }
-        
-        override_values <- reactiveVal()
-        
-        # save this list for every data table
-        list(
-          data = mod_table_server(data_table_code_name, 
-                                  table_code_name = data_table_code_name,
-                                  row_variable_value, 
-                                  language,
-                                  visible = visible,
-                                  override_values = override_values),
-          visible = visible,
-          set_values = override_values
-        )
-        
-    })
-    
-    # start server for all fileInput modules
-    files <- sapply(fileInput_code_names, USE.NAMES = TRUE, 
-                    simplify = FALSE, FUN = 
-      function(fileInput_code_name) {
-       
-       set_path <- reactiveVal()
-       reset_path <- reactiveVal()
-       
-       list(value = mod_fileInput_server(id = fileInput_code_name, 
-                                         language = language,
-                                         set_path = set_path,
-                                         reset_path = reset_path),
-            set_path = set_path,
-            reset_path = reset_path)
-      }
-    )
-    
-    # observeEvent(files$canopeo_image$value$filepath(), ignoreNULL = FALSE, {
-    #   print(files$canopeo_image$value$filepath())
-    #   print(files$canopeo_image$value$new_file())
-    # })
-    
-    # update each of the text outputs automatically, including language changes
-    # and the dynamic updating in editing table title etc. 
-    # TODO: refactor
-    lapply(text_output_code_names, FUN = function(text_output_code_name) {
+    # When requested, calculate a vector with the names of relevant variables. A
+    # variable is relevant when it is visible in some form, either as a regular
+    # widget or in a table module. Relevant variables are ones which we want to
+    # save to a json file given the current choices of the user. For example,
+    # when the user is making a soil observation event, the variables related
+    # to that are relevant while other observation variables are not.
+    # This only works when the form is already open.
+    relevant_variables <- reactive({
       
-      # render text
-      output[[text_output_code_name]] <- renderText({
-        
-        if (dp()) message(glue("Rendering text for {text_output_code_name}"))
-        
-        text_to_show <- get_disp_name(text_output_code_name, language())
-        
-        #get element from the UI structure lookup list
-        element <- structure_lookup_list[[text_output_code_name]]
-        #if the text should be updated dynamically, do that
-        if (!is.null(element$dynamic)) {
-          
-          # there are currently two modes of dynamic text
-          if (element$dynamic$mode == "input") {
-            # the -1 removes the mode element, we don't want it
-            patterns <- names(element$dynamic)[-1]
-            # use lapply here to get the dependency on input correctly
-            replacements <- lapply(patterns, function(pattern) {
-              replacement <- input[[ element$dynamic[[pattern]] ]]
-              replacement <- get_disp_name(replacement,
-                                           language())
-              text_to_show <<- gsub(pattern, replacement, 
-                                    text_to_show)
-              replacement
-            })
-            
-            # if one of the replacements is empty, we don't want to
-            # see the text at all
-            if ("" %in% replacements) { text_to_show <- "" }
-            
-          } else if (element$dynamic$mode == "edit_mode") {
-            
-            text_to_show <- if (edit_mode()) {
-              element$dynamic[["TRUE"]]
-            } else {
-              element$dynamic[["FALSE"]]
-            }
-            text_to_show <- get_disp_name(text_to_show, language())
-            
+      # these are the variables among which the relevant variables are
+      all_variables <- get_category_names("variable_name")
+      
+      # find all widgets that are currently hidden in the UI. This includes
+      # regular widgets but also e.g. tables. Note that not all of these are
+      # irrelevant; the regular form of a widget might be hidden because we want
+      # to read its values from a table instead. This vector includes also
+      # tables because that way we can check whether a table is actually hidden.
+      hidden_widgets <- unlist(rlapply(activity_options, fun = function(x) {
+        if (!is.null(x$condition)) {
+          relevant <- evaluate_condition(x$condition, session)
+          if (!is.null(relevant) && !identical(relevant, TRUE)) {
+            rlapply(x, fun = function(x) x$code_name)
           }
         }
-        text_to_show
-      })
+      }))
       
+      # find variables which are relevant and being entered through a table
+      table_variables <- NULL
+      for (table_code_name in data_table_code_names) {
+        if (!(table_code_name %in% hidden_widgets)) {
+          table_variables <- c(table_variables, 
+                               get_table_variables(table_code_name))
+          # currently only one table is visible at a time
+          break
+        }
+      }
+      
+      # Report relevant widgets for regular and table widgets separately.
+      # We get the relevant variables by removing from all variables the widgets
+      # that are hidden.
+      # Also report the name of the table which is currently relevant. 
+      list(
+        regular = setdiff(all_variables, hidden_widgets),
+        table = table_variables,
+        table_code_name = setdiff(data_table_code_names, hidden_widgets)
+      )
     })
     
-    required_variables <- reactiveVal(list("block", "date",
-                                           "mgmt_operations_event"))
-    
-    # change required variables when activity is changed
-    # TODO: maybe make required_variables into a reactive?
-    # TODO: and improve! Now doesn't recognize all required variables
-    observeEvent(input$mgmt_operations_event, {
+    # When requested, list as a vector the variables among the currently 
+    # relevant variables which are compulsory to be filled out.
+    required_variables <- reactive({
+      required_widgets <- NULL
+      required_table_widgets <- NULL
       
-      required_checker <- function(element) {
-        if (identical(element$required, TRUE)) {
-          return(element$code_name)
+      relevant <- relevant_variables()
+      
+      for (variable in relevant$regular) {
+        if (identical(structure_lookup_list[[variable]]$required, TRUE)) {
+          required_widgets <- c(required_widgets, variable)
+        }
+      }
+      for (variable in relevant$table) {
+        if (identical(structure_lookup_list[[variable]]$required, TRUE)) {
+          required_table_widgets <- c(required_table_widgets, variable)
         }
       }
       
-      # find the variables that are compulsory for this activity type
-      variables <- unlist(rlapply(
-        activity_options[[input$mgmt_operations_event]],
-        fun = required_checker))
-      variables <- c("block", 
-                     "mgmt_operations_event",
-                     "date",
-                     variables)
-      # save to a reactiveval. The inputs are compared against this list of
-      # variables in an observe()
-      required_variables(variables)
-    })
-    
-    # disable the save button if not all necessary info has been filled
-    observe({
+      list(
+        regular = required_widgets, 
+        table = required_table_widgets
+      )
       
-      if (dp()) message("Required variables observe")
-      
-      # make sure site is filled
-      if (!isTruthy(site())) {
-        shinyjs::disable("save")
-        return()
-      }
-      
-      #if (!dev_mode) {req(auth_result$admin)}
-      #req(auth_result$admin)
-      
-      # run whenever any of the inputs change. I know this is not ideal, but
-      # reactivity to input values doesn't work when we dynamically generate
-      # which inputs we want to access
-      reactiveValuesToList(input)
-      
-      # if (dev_mode || auth_result$admin == "TRUE") {
-      # if we are in admin or dev mode, 
-      # we don't care about required variables
-      # return()
-      # }
-      
-      for (required_variable in required_variables()) {
-        
-        table_code_name <- get_variable_table(required_variable)
-        
-        # read the value from a table or a widget, depending on which one
-        # is appropriate
-        current_val <- if (!is.null(table_code_name) && 
-                           tables[[table_code_name]]$visible()) {
-          tables[[table_code_name]]$data()[[required_variable]]
-        } else {
-          input[[required_variable]]
-        }
-        
-        # is.Truthy essentially checks whether input is NULL, NA or "".
-        # Turning current_val into a list ensures that NULLs are evaluated
-        # correctly.
-        is_filled <- if (is.null(current_val)) {
-          FALSE
-        } else {
-          sapply(current_val, isTruthy)
-        }
-        
-        if (!all(is_filled)) {
-          shinyjs::disable("save")
-          return()
-        }
-      }
-      
-      shinyjs::enable("save")
     })
   
     ################## RETURN VALUE
