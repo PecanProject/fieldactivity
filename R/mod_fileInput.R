@@ -246,9 +246,3 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
     
   })
 }
-    
-## To be copied in the UI
-# mod_fileInput_ui("fileInput_ui_1")
-    
-## To be copied in the server
-# mod_fileInput_server("fileInput_ui_1")
