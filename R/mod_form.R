@@ -121,6 +121,9 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     ns <- session$ns
     
     # add input validators
+    # the idea is that each widget has its own validator. This validator is
+    # active whenever that widget is in relevant variables. These individual
+    # validators are then added as subvalidators to main_iv
     main_iv <- InputValidator$new()
     lapply(get_category_names("variable_name"), FUN = function(variable) {
       
@@ -158,7 +161,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
       # add integer rule
       if (identical(widget$step, as.integer(1))) {
-        iv$add_rule(variable, sv_integer(message = "The value should be an integer!", allow_na = TRUE))
+        iv$add_rule(variable, sv_integer(message = "", allow_na = TRUE))
         added_rules <- TRUE
       }
       
@@ -166,7 +169,8 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       if (!is.null(widget$maxlength)) {
         iv$add_rule(variable, function(x) {
           if (!isTruthy(x)) return(NULL)
-          if (nchar(x) <= widget$maxlength) NULL else ""
+          if (nchar(x) <= widget$maxlength) NULL 
+          else glue("Max. {widget$maxlength} characters")
         })
         added_rules <- TRUE
       }
@@ -175,6 +179,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         # the validator is only active when it is in the current list of 
         # relevant, regular widgets
         iv$condition(reactive({ variable %in% relevant_variables()$regular }))
+        # add widget validator to main validator
         main_iv$add_validator(iv)
       }
       

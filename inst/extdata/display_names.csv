@@ -484,6 +484,8 @@ chemical_type_choice,chemical_type_insecticide,Insecticide,Hyönteismyrkky
 chemical_type_choice,chemical_type_herbicide,Herbicide,Rikkaruohomyrkky
 chemical_type_choice,chemical_type_fungicide,Fungicide,Sienimyrkky
 chemical_type_choice,chemical_type_growth_regulator,Growth regulator,Kasvunsääde
+# source for active substances (in Finnish): 
+# https://www.kemidigi.fi/kasvinsuojeluainerekisteri/haku
 active_substance,AS001,(E,E)-8,10-dodekadien-1-oli,(E,E)-8,10-dodekadien-1-oli
 active_substance,AS002,(Z)-11-tetradeken-1-yyliasetaatti,(Z)-11-tetradeken-1-yyliasetaatti
 active_substance,AS003,"1,4-dimetyylinaftaleeni","1,4-dimetyylinaftaleeni"

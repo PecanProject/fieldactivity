@@ -71,6 +71,8 @@ mod_event_list_server <- function(id, events, language, site) {
     #' Adds as choices all the years for which events have been recorded
     update_table_year_choices <- function() {
       
+      if (dp()) message("Updating table_year choices")
+      
       years <- NULL
       
       # find years present in event dates
@@ -109,6 +111,8 @@ mod_event_list_server <- function(id, events, language, site) {
       
       if (!isTruthy(site())) { return() }
       
+      if (dp()) message("Updating table_block choices")
+      
       block_choices <- c("block_choice_all",
                          subset(sites, sites$site == site())$blocks[[1]])
       # the following assumes that no block name is a code name for something
@@ -128,6 +132,8 @@ mod_event_list_server <- function(id, events, language, site) {
     #' 
     #' Only used when the language is changed.
     update_table_activity_choices <- function() {
+      
+      if (dp()) message("Updating table_activity choices")
       
       choices_for_table_activity <- 
         c("activity_choice_all", get_category_names(
