@@ -7,7 +7,7 @@ Description: An app for keeping track of field activity in the Field
   enter information about common farming events like tillage, sowing and 
   harvest. These event data are stored in .json files, which mostly follow the 
   ICASA standards for agricultural data.
-License: MIT + file LICENSE
+License: BSD_3_clause + file LICENSE
 Imports: 
     attempt,
     bslib,
