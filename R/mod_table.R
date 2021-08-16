@@ -338,8 +338,8 @@ mod_table_server <- function(id, row_variable_value,
             
             # add choices in the correct language for selectInputs
             choices <- NULL
-            if (element$type == "selectInput") {
-              choices <- get_selectInput_choices(element, language())
+            if (identical(element$type, "selectInput")) {
+              choices <- get_selectInput_choices(variable, language())
             }
             
             placeholder <- NULL
@@ -428,9 +428,8 @@ mod_table_server <- function(id, row_variable_value,
               
               # add choices in the correct language for selectInputs
               choices <- NULL
-              if (element$type == "selectInput") {
-                choices <- get_selectInput_choices(element, 
-                                                   language())
+              if (identical(element$type, "selectInput")) {
+                choices <- get_selectInput_choices(variable, language())
               }
               
               placeholder <- NULL

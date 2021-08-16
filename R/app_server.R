@@ -582,7 +582,7 @@ app_server <- function(input, output, session) {
       if (element$type == "selectInput") {
         
         # fetch choices for the selectInput
-        choices <- get_selectInput_choices(element, input$language)
+        choices <- get_selectInput_choices(code_name, input$language)
         
         # make sure we don't change the selected value
         current_value <- input[[code_name]]
