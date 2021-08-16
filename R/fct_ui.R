@@ -176,7 +176,7 @@ create_widget <- function(element, ns = NS(NULL),
     element_value <- override_value
   }
   
-  element_choices <- get_selectInput_choices(element, init_lang)
+  element_choices <- get_selectInput_choices(element$code_name, init_lang)
   if (!is.null(override_choices)) {
     element_choices <- override_choices
   }
@@ -249,9 +249,15 @@ create_widget <- function(element, ns = NS(NULL),
   return(new_element)
 }
 
-# return choices for a selectInput given its structure 
-# (as read from ui_structure.json)
-get_selectInput_choices <- function(element_structure, language) {
+#' Find the choices for a selectInput given its code name
+#'
+#' @param selectInput_code_name The code name of the selectInput
+#' @param language The language to show the options in. This will be passed to
+#'   get_disp_name
+#'
+#' @return A vector of choices (code names). If language was supplied, the names
+#'   will be the names of the vector.
+get_selectInput_choices <- function(selectInput_code_name, language) {
   # the choices for a selectInput element can be stored in
   # three ways: 
   # 1) the code names of the choices are given as a vector
@@ -260,13 +266,18 @@ get_selectInput_choices <- function(element_structure, language) {
   # 3) the category name for the choices is given.
   # in the following if-statement, these are handled
   # in this same order
-  if (is.null(element_structure$choices)) {
-    choices <- NULL
-  } else if (length(element_structure$choices) > 1) {
+  
+  element_structure <- structure_lookup_list[[selectInput_code_name]]
+
+  if (!identical(element_structure$type, "selectInput") || 
+      is.null(element_structure$choices)) {
+    return(NULL)
+  }
+  
+  if (length(element_structure$choices) > 1) {
     choices <- c("", element_structure$choices)
-    names(choices) <- c("", get_disp_name(
-      element_structure$choices,
-      language = language))
+    names(choices) <- c("", get_disp_name(element_structure$choices,
+                                          language = language))
   } else if (element_structure$choices == "IGNORE") {
     choices <- NULL
   } else {

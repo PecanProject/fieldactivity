@@ -6,3 +6,4 @@
 dev/dev_events/
 dev/database.sqlite
 app.R
+inst/doc

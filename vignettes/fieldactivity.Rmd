@@ -1,0 +1,112 @@
+---
+title: "fieldactivity package for developers"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fieldactivity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Files: what is where
+
+### The root folder
+- `DESCRIPTION`, `LICENCE`, `NAMESPACE`, `LICENSE.md` are metadata files related to R packages
+
+### `dev`
+Contains files related to the development of the app.
+
+You should create:
+
+- a folder (e.g. `dev/dev_events`) for event files in the development phase. Change the call to `run_app` in `run_dev.R` to indicate the path to this folder
+- a user database (you can use `create_user_db.R` for this). This too should be indicated in `run_dev.R`
+
+`01_start.R`, `02_dev.R` and `03_deploy.R` contain useful commands related to app development. These are files created by the Golem framework. `02_dev.R` is the most useful of these, it can be used to indicate dependencies to other packages, create new modules etc.
+
+run_dev.R is the script that `golem::run_dev()` runs (note, you should always use this command to run the app when developing it). It sets up the app for running it while developing the app. Here you can indicate whether you want the app to run in production or development mode.
+
+### `inst`
+
+- `golem-config.yml` is a configuration file related to Golem. Note, don't change the version number by hand here; see `dev/02_dev.R` instead.
+- `inst/app/www/script.js` is a javascript file the app uses. It is added as a head tag to the app html. It is mostly related to the table and fileInput modules.
+
+#### `inst/extdata`
+
+This folder is home to three important files.
+
+##### `ui_structure.json`
+
+Contains the structure of each UI element. Each item in this file has at least
+the following fields:
+
+- `code_name` is the name used to refer to the widget in the app
+- `type` is the type of the widget. This is one of the following (listed under each type are the possible fields related to the type):
+  - `selectInput`
+    - `choices`: a list of choices, a category in `display_names.csv` or `"IGNORE"`. See the documentation for the function `get_selectInput_choices` defined in `fct_ui.R`.
+    - `multiple`: are multiple choices allowed? Defaults to `false`.
+  - `numericInput`
+    - `min`: The smallest acceptable value (inclusive)
+    - `max`: The largest acceptable value (inclusive)
+    - `step`: If set to 1, only integer values are allowed
+    - `sum_to`, `sum_of`: related to the calculation of yield sums in `harvest_crop_table`
+  - `fileInput`
+    - `filetype`: The type of files that should be accepeted. See Shiny documentation for the fileInput widget. This is not necessarily enforced.
+  - `textInput`
+    - `placeholder`: Code name of placeholder
+  - `textAreaInput`
+    - `placeholder`: Code name of placeholder
+    - `maxlength`: The maximum acceptable length (in characters) of the value
+  - `textOutput`
+    - `dynamic`: If defined, indicates how the text should be adjusted during the execution of app. See `sidebar_title` for an illustrative (and only) example.
+    - `style`: `"label"` if the text should look like a widget label.
+  - `actionButton`
+  - `dateInput`
+  - `dateRangeInput`
+  - `dataTable`
+    - `columns`: The columns of the table in case it has a dynamic row group
+    - `rows`: A list of row groups. There are two types of row groups: dynamic and static. There can be at most one dynamic row group and it comes first. There can be multiple static row groups. For dynamic row groups the `row_variable` field indicates the widget which determines the rows of the dynamic row group. For static rows the variable names of the desired widgets are listed under `variables` and `hide_labels` can be used to hide the labels of these widgets (labels of the widgets in the dynamic row group are automatically hidden). The name of a static row can be defined in `name`.
+  
+Other fields:
+
+- `label`: the code name of the label of the widget (this will be found from `display_names.csv`)
+- `required`: is it compulsory to fill the widget before the event can be saved? Defaults to `false`.
+- `hide_in_event_list`: should this variable be hidden in the event list (when viewing a specific activity type)? Defaults to `false`. 
+- `condition`: this isn't specified for single widgets but for groups of widgets. This is the condition (in javascript) which determines whether the widget group in question should be visible or not. This is given to a Shiny element called ConditionalPanel.
+  
+  
+##### `display_names.csv`
+
+A csv file with four columns: `category`, `code_name`, `disp_name_eng` and `disp_name_fin`. Each row is a translation of a code name into the different languages. The category can be used to e.g. point a set of these names as the choices of a selectInput widget.
+
+##### `FOsites.csv`
+
+A csv file which contains the sites and their blocks. Note, the user names in the user database should match the names of these sites exactly (including case).
+  
+  
+### `man`, `vignettes`
+
+`man` contains the function documentation generated by Roxygen2, `vignettes` contains this vignette.
+
+### `tests`
+
+All tests should be placed under `tests/testthat`. The testthat package is used.
+
+### `R`
+
+This is the folder which contains the actual bulk of the application. `run_app.R` defines the function which launches the app. `app_server.R` and `app_ui.R` define the server and UI functions of the main app. `fct_` and `utils_` files contain helper functions. Files starting with `mod_` are either modules or files directly related to modules.
+
+## The structure of the app
+
+
+  
+## Useful resources
+- For Shiny: [Mastering Shiny](https://mastering-shiny.org) and [Shiny function reference](https://shiny.rstudio.com/reference/shiny/)
+- For R packages: [R Packages](https://r-pkgs.org) and [R package primer](https://kbroman.org/pkg_primer/)
+- For R: [Advanced R](https://adv-r.hadley.nz)
+- For Golem and Shiny app development: [Engineering Production-Grade Shiny Apps](https://engineering-shiny.org)

@@ -35,6 +35,9 @@ BugReports: https://github.com/Ottis1/fieldactivity/issues
 Suggests: 
     spelling,
     testthat (>= 3.0.0),
-    shinytest
+    shinytest,
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
 Language: en-US
+VignetteBuilder: knitr

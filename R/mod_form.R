@@ -47,8 +47,7 @@ mod_form_ui <- function(id){
                          label = get_disp_name("mgmt_operations_event_label", 
                                                init_lang), 
                          choices = get_selectInput_choices(
-                           structure_lookup_list[["mgmt_operations_event"]],
-                           init_lang)
+                           "mgmt_operations_event", init_lang)
                          ),
              
              # setting max disallows inputting future events
@@ -402,21 +401,21 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
           
           # there are currently two modes of dynamic text
           if (element$dynamic$mode == "input") {
-            # the -1 removes the mode element, we don't want it
-            patterns <- names(element$dynamic)[-1]
-            # use lapply here to get the dependency on input correctly
-            replacements <- lapply(patterns, function(pattern) {
-              replacement <- input[[ element$dynamic[[pattern]] ]]
-              replacement <- get_disp_name(replacement,
-                                           language())
-              text_to_show <<- gsub(pattern, replacement, 
-                                    text_to_show)
-              replacement
-            })
-            
-            # if one of the replacements is empty, we don't want to
-            # see the text at all
-            if ("" %in% replacements) { text_to_show <- "" }
+            # # the -1 removes the mode element, we don't want it
+            # patterns <- names(element$dynamic)[-1]
+            # # use lapply here to get the dependency on input correctly
+            # replacements <- lapply(patterns, function(pattern) {
+            #   replacement <- input[[ element$dynamic[[pattern]] ]]
+            #   replacement <- get_disp_name(replacement,
+            #                                language())
+            #   text_to_show <<- gsub(pattern, replacement, 
+            #                         text_to_show)
+            #   replacement
+            # })
+            # 
+            # # if one of the replacements is empty, we don't want to
+            # # see the text at all
+            # if ("" %in% replacements) { text_to_show <- "" }
             
           } else if (element$dynamic$mode == "edit_mode") {
             
@@ -456,7 +455,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         if (element$type == "selectInput") {
           
           # fetch choices for the selectInput
-          choices <- get_selectInput_choices(element, language())
+          choices <- get_selectInput_choices(code_name, language())
           
           # make sure we don't change the selected value
           current_value <- input[[code_name]]
