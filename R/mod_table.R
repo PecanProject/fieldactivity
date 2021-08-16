@@ -349,7 +349,7 @@ mod_table_server <- function(id, row_variable_value,
             }
             
             label <- ""
-            if (is.null(row_group$hide_labels)) {
+            if (!identical(row_group$hide_labels, TRUE)) {
               label <- get_disp_name(element$label, language())
             }
             
