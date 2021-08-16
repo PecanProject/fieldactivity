@@ -1,20 +1,20 @@
 # A script to create a new shinymanager user database for the app
-# Most of this is copied from shinymanager's website:
+# This follows instructions from shinymanager's website:
 # https://datastorm-open.github.io/shinymanager/
-# the site also illustrates how the keyring package could be used to store the
+# the site illustrates how the keyring package could be used to store the
 # database passphrase
 
-# define some credentials
+# Define initial credentials (more can be added later through the admin UI)
 credentials <- data.frame(
-  user = c("shiny", "shinymanager"), # mandatory
-  password = c("azerty", "12345"), # mandatory
-  start = c("2019-04-15"), # optinal (all others)
-  expire = c(NA, "2019-12-31"),
+  user = c("user", "admin"),
+  password = c("User1", "12345"),
+  start = c(NA, NA), # start and expire are optional
+  expire = c(NA, NA),
   admin = c(FALSE, TRUE),
   stringsAsFactors = FALSE
 )
 
-# Init the database
+# Create the database
 shinymanager::create_db(
   credentials_data = credentials,
   sqlite_path = "path/to/database.sqlite", # will be created
