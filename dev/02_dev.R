@@ -24,6 +24,7 @@ usethis::use_package("htmlwidgets")
 usethis::use_package("methods")
 usethis::use_package("shinyvalidate")
 
+
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module( name = "table") # Name of the module

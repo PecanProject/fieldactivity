@@ -39,16 +39,23 @@ mod_form_ui <- function(id){
                   style = "color:gray"),
              br(),
              
-             selectInput(ns("block"), label = "", choices = ""),
-             
-             selectInput(ns("mgmt_operations_event"), label = "", 
+             selectInput(ns("block"), label = get_disp_name("block_label", 
+                                                            init_lang),
                          choices = ""),
+             
+             selectInput(ns("mgmt_operations_event"), 
+                         label = get_disp_name("mgmt_operations_event_label", 
+                                               init_lang), 
+                         choices = get_selectInput_choices(
+                           structure_lookup_list[["mgmt_operations_event"]],
+                           init_lang)
+                         ),
              
              # setting max disallows inputting future events
              dateInput(
                ns("date"),
                format = "dd/mm/yyyy",
-               label = "",
+               label = get_disp_name("date_label", init_lang),
                max = Sys.Date(),
                value = Sys.Date(),
                weekstart = 1
@@ -56,8 +63,9 @@ mod_form_ui <- function(id){
              
              textAreaInput(
                ns("mgmt_event_notes"),
-               label = "",
-               placeholder = "",
+               label = get_disp_name("mgmt_event_notes_label", init_lang),
+               placeholder = get_disp_name("mgmt_event_notes_placeholder", 
+                                           init_lang),
                resize = "vertical",
                height = "70px"
              )
@@ -150,7 +158,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
       # add integer rule
       if (identical(widget$step, as.integer(1))) {
-        iv$add_rule(variable, sv_integer(message = "", allow_na = TRUE))
+        iv$add_rule(variable, sv_integer(message = "The value should be an integer!", allow_na = TRUE))
         added_rules <- TRUE
       }
       
@@ -194,7 +202,8 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                      simplify = FALSE, FUN = 
                        function(table_code_name) {
                          
-                         table_structure <- structure_lookup_list[[table_code_name]]
+                         table_structure <- 
+                           structure_lookup_list[[table_code_name]]
                          
                          # are we in static mode, i.e. are all row groups of
                          # type 'static'? If yes, we won't need to supply the
@@ -289,9 +298,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       shinyjs::enable("block")
       shinyjs::enable("save")
       
-      # update table_block choices.
-      # table_block choices are also updated in the observeEvent for
-      # input$language to make the block_choice_all name translate
+      # update block choices
       block_choices <- subset(sites, sites$site == site())$blocks[[1]]
       updateSelectInput(session, "block", choices = block_choices)
       
@@ -422,8 +429,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
     })
     
-    # TODO: add ignoreInit = TRUE
-    observeEvent(language(), {
+    observeEvent(language(), ignoreInit = TRUE, {
       
       # get a list of all input elements which we have to relabel
       input_element_names <- names(reactiveValuesToList(input))
@@ -508,7 +514,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                                code_name,
                                label = label)
         } else if (element$type == "fileInput") {
-          #update_ui_element(session, code_name, label = label)
+          # fileInput modules do their own language changing
         }
         
       }

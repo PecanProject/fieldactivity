@@ -26,4 +26,4 @@ init_lang <- languages[1]
 
 # whether to print debug information (short for debug print)
 # set the boolean value below to FALSE to suppress prints
-dp <- function() FALSE && golem::app_dev()
+dp <- function() TRUE && golem::app_dev()

@@ -549,55 +549,16 @@ app_server <- function(input, output, session) {
   # update each of the text outputs automatically, including language changes
   # and the dynamic updating in editing table title etc. 
   lapply(text_output_code_names, FUN = function(text_output_code_name) {
-    
     # render text
     output[[text_output_code_name]] <- renderText({
-      
       if (dp()) message(glue("Rendering text for {text_output_code_name}"))
       
-      text_to_show <- get_disp_name(text_output_code_name, input$language)
-      
-      #get element from the UI structure lookup list
-      element <- structure_lookup_list[[text_output_code_name]]
-      #if the text should be updated dynamically, do that
-      if (!is.null(element$dynamic)) {
-        
-        # there are currently two modes of dynamic text
-        if (element$dynamic$mode == "input") {
-          # the -1 removes the mode element, we don't want it
-          patterns <- names(element$dynamic)[-1]
-          # use lapply here to get the dependency on input correctly
-          replacements <- lapply(patterns, function(pattern) {
-            replacement <- input[[ element$dynamic[[pattern]] ]]
-            replacement <- get_disp_name(replacement,
-                                         input$language)
-            text_to_show <<- gsub(pattern, replacement, 
-                                  text_to_show)
-            replacement
-          })
-          
-          # if one of the replacements is empty, we don't want to
-          # see the text at all
-          if ("" %in% replacements) { text_to_show <- "" }
-          
-        } else if (element$dynamic$mode == "edit_mode") {
-          
-          text_to_show <- if (!is.null(event_to_edit())) {
-            element$dynamic[["TRUE"]]
-          } else {
-            element$dynamic[["FALSE"]]
-          }
-          text_to_show <- get_disp_name(text_to_show, input$language)
-          
-        }
-      }
-      text_to_show
+      get_disp_name(text_output_code_name, input$language)
     })
-    
   })
   
   # change language when user requests it
-  observeEvent(input$language, {
+  observeEvent(input$language, ignoreInit = TRUE, {
     
     if (dp()) message("input$language changed")
     
@@ -639,52 +600,10 @@ app_server <- function(input, output, session) {
                             selected = current_value)
         }
         
-        
-      } else if (element$type == "dateInput") {
-        #language_code <- if (input$language == "disp_name_fin") {
-        #    "fi"
-        #} else {
-        #    "en"
-        #}
-        updateDateInput(session, 
-                        code_name, 
-                        label = label,
-                        #language = language_code
-        )
-      } else if (element$type == "textAreaInput") {
-        updateTextAreaInput(session,
-                            code_name,
-                            label = label,
-                            placeholder = 
-                              get_disp_name(
-                                element$placeholder, 
-                                input$language))
       } else if (element$type == "actionButton") {
         updateActionButton(session,
                            code_name,
                            label = label)
-      } else if (element$type == "checkboxInput") {
-        updateCheckboxInput(session,
-                            code_name,
-                            label = label)
-      } else if (element$type == "textInput") {
-        updateTextInput(session, 
-                        code_name, 
-                        label = label,
-                        placeholder = 
-                          get_disp_name(
-                            element$placeholder, 
-                            input$language))
-      } else if (element$type == "numericInput") {
-        updateNumericInput(session,
-                           code_name,
-                           label = label)
-      } else if (element$type == "dateRangeInput") {
-        updateDateRangeInput(session,
-                             code_name,
-                             label = label)
-      } else if (element$type == "fileInput") {
-        #update_ui_element(session, code_name, label = label)
       }
       
     }

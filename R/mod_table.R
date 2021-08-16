@@ -624,4 +624,4 @@ mod_table_server <- function(id, row_variable_value,
   })
     
 }
-    
+

@@ -10,8 +10,8 @@ mgmt_operations_event_choice,irrigation,irrigation,kastelu
 mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
 mgmt_operations_event_choice,observation,observation,havainto
 mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
-mgmt_operations_event_choice,inorg_mulch,placement of inorganic mulch,epäorgaanisen katteen levitys
-mgmt_operations_event_choice,Inorg_mul_rem,removal of inorganic mulch,epäorgaanisen katteen poisto
+mgmt_operations_event_choice,inorg_mulch,placement of mulch,epäorgaanisen katteen levitys
+mgmt_operations_event_choice,Inorg_mul_rem,removal of mulch,epäorgaanisen katteen poisto
 #   mgmt_operations_event_choice,organic_material,organic material application,eloperäisen aineen levitys
 mgmt_operations_event_choice,other,other,muu
 #
@@ -667,7 +667,7 @@ active_substance,AS180,viherminttuöljy,viherminttuöljy
 CH_TARGETS,BIRD,Birds,Linnut
 CH_TARGETS,PCLA,Defoliation %,Lehtikato
 CH_TARGETS,PDLA,Diseased leaf area %,Tautia lehdissä
-CH_TARGETS,PSTDS,General pest and diseases losses (due to rot, tikka, leafminer, etc.),Yleiset tuhoeläin- ja tautivahingot (mätä, miinaajat jne.)
+CH_TARGETS,PSTDS,"General pest and diseases losses (due to rot, tikka, leafminer, etc.)","Yleiset tuhoeläin- ja tautivahingot (mätä, miinaajat jne.)"
 CH_TARGETS,PRP,Reduction in photosynthetic rate %,Lasku yhteyttämisnopeudessa %
 CH_TARGETS,WORM,Worm (generic),Madot
 CH_TARGETS,LEAF_MIN,Leafminer,Miinaajat
