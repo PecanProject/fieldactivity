@@ -103,7 +103,22 @@ This is the folder which contains the actual bulk of the application. `run_app.R
 
 ## The structure of the app
 
+The structure of the app can be summarised as follows:
 
+- the main app consists of `app_server.R` and `app_ui.R`. The UI includes (in order)
+  - the language and site selectors
+  - the title and introduction text
+  - **the event list module** (`mod_event_list.R`)
+    - the event list includes a table showing a list of events and selectors to filter which events are displayed
+  - buttons to create a new event and to clone an event
+  - **the form module** (`mod_form.R`)
+    - this contains all the widgets for entering information about an event and the save, cancel and delete event buttons
+    - the default widgets (block, activity, date and description) are hard-coded in the UI function of the module. The activity-specific widgets are created by calling the `create_ui` function (defined in `fct_ui.R`) in that same UI function.
+    - the widgets include standard Shiny widgets as well as **table modules** (`mod_table.R`) and **fileInput modules** (`mod_fileInput.R`).
+    
+Modules are a tool to make Shiny apps more, well, modular. Each module includes a UI function, which creates user interface components, and a server function which defines how those components should behave. 
+
+A module (more specifically, its server function) can be given input values which are usually reactives (reactive is a Shiny term. Reactive expressions can be thought of as functions which store their value and only recalculate it when it is no longer valid.). For example, the language chosen in the main app is passed on to other modules as a reactive expression -- when the language is changed by the user, that reactive can be used to access the latest language in the modules. Modules can also return values, and these values are usually reactive as well. For example, the form module returns the values of widgets to the main app server function, which goes on to edit or create a json file based on this information.
   
 ## Useful resources
 - For Shiny: [Mastering Shiny](https://mastering-shiny.org) and [Shiny function reference](https://shiny.rstudio.com/reference/shiny/)
