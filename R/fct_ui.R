@@ -161,7 +161,7 @@ create_widget <- function(element, ns = NS(NULL),
   # display_name, but this is okay as the server will update this as the
   # language changes (which also happens when the program starts)
   # the following allows overwriting the label through ...
-  element_label <- element$label
+  element_label <- get_disp_name(element$label, init_lang)
   if (!is.null(override_label)) {
     element_label <- override_label
   }
@@ -176,12 +176,12 @@ create_widget <- function(element, ns = NS(NULL),
     element_value <- override_value
   }
   
-  element_choices <- ""
+  element_choices <- get_selectInput_choices(element, init_lang)
   if (!is.null(override_choices)) {
     element_choices <- override_choices
   }
   
-  element_placeholder <- element$placeholder
+  element_placeholder <- get_disp_name(element$placeholder, init_lang)
   if (!is.null(override_placeholder)) {
     element_placeholder <- override_placeholder
   }
@@ -315,7 +315,7 @@ update_ui_element <- function(session, code_name, value = NULL,
   # clear the value. If it isn't, replace missingvals with ""
   if (!is.null(value)) {
     # replace missingvals with empty strings
-    missing_indexes <- value == missingval
+    missing_indexes <- identical(value, missingval)
     if (any(missing_indexes)) {
       value[missing_indexes] <- ""
     }

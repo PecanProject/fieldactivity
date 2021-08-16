@@ -29,9 +29,6 @@ run_app <- function(
       tags_bottom = selectInput("login_language",
                                 label = "" ,
                                 choices = languages),
-      #tags_top = tagList(
-      #p("EXAMPLE USER site: ruukki, password: Ruukki1"),
-      #p("ADMIN site: shinymanager, password: 12345")),
       theme = bslib::bs_theme(version = 4),
       enable_admin = TRUE,
       fab_position = "top-right")

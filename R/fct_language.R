@@ -8,9 +8,6 @@ display_name_dict_path <- function() system.file("extdata", "display_names.csv",
                                       package = "fieldactivity")
 display_names_dict <- read.csv(display_name_dict_path(), comment.char = "#")
 
-date_format_json <- "%Y-%m-%d"
-date_format_display <- "%d/%m/%Y"
-
 #' Find code and display names belonging to a given category
 #'
 #' The categories are defined in the display_names.csv file. If language is

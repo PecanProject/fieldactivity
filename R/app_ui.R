@@ -7,7 +7,7 @@
 app_ui <- function(request) {
   
   # Define the UI of the application
-  ui <- fluidPage(#theme = bslib::bs_theme(version = 4, bootswatch = "lumen"),
+  ui <- fluidPage(#theme = bslib::bs_theme(),
 
     selectInput("language", choices = languages, width = "120px", label = ""),
     
