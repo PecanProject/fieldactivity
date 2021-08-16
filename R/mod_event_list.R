@@ -238,7 +238,7 @@ mod_event_list_server <- function(id, events, language, site) {
           activity_options[[input$table_activity]],
           fun = function(x) {
             if (is.null(x$type) || x$type %in% hidden_widget_types ||
-                identical(x$hide_in_table, TRUE)) {
+                identical(x$hide_in_event_list, TRUE)) {
               NULL
             } else {
               x$code_name
