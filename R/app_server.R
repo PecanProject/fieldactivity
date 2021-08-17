@@ -17,6 +17,14 @@ app_server <- function(input, output, session) {
     passphrase = golem::get_golem_options("user_db_passphrase")
   )
   
+  # call the server part of shinymanager
+  # weird observation: this has to be after the observeEvent block
+  # which observes the auth_result$user. If it isn't the site selectInput
+  # selection is not updated to match the username.
+  # UPDATE: moved it back and doesn't do anything weird anymore
+  auth_result <- shinymanager::secure_server(check_credentials = 
+                                               credential_checker)
+  
   # change login form language when requested
   observeEvent(input$login_language, {
     #str(reactiveValuesToList(input))
@@ -24,39 +32,14 @@ app_server <- function(input, output, session) {
     #updateTextInput(session, "auth-user_pwd", value = "oma2")
     #shinyjs::click("auth-go_auth") # doesn't work
     
-    # yes we are overwriting the English language. This is by far
-    # the simplest method
-    
     if (dp()) message("input$login_language")
     
-    if (input$login_language == "disp_name_fin") {
-      shinymanager::set_labels(
-        language = "en",
-        # the \U codes are UTF-8 codes for Finnish letters a and o with dots
-        "Please authenticate" = "Kirjaudu sy\U00f6tt\U00e4\U00e4ksesi tapahtumia",
-        "Username:" = "Sijainti",
-        "Password:" = "Salasana",
-        "Login" = "Kirjaudu",
-        "Logout" = "Kirjaudu ulos"
-      )
-    } else if (input$login_language == "disp_name_eng") {
-      shinymanager::set_labels(
-        language = "en",
-        "Please authenticate" = "Log in to enter management events",
-        "Username:" = "Site",
-        "Password:" = "Password",
-        "Login" = "Login",
-        "Logout" = "Logout"
-      )
-    }
+    # this function is defined in fct_language.R
+    set_login_language(input$login_language)
     
     # TODO: make the language setting communicate to main app
-    # PROBLEM: session userData doesn't seem to be saved after
-    # logging in is complete
-    
-    # change the value of the session-specific variable default_language to
-    # match the login language selector
-    # session$userData$default_language <- input$login_language
+    # PROBLEM: shinymanager isolates the app pretty well, so for instance
+    # communication through session$userData doesn't work
     
     # this seems to refresh the authentication UI
     auth_result <- shinymanager::secure_server(check_credentials = 
@@ -66,7 +49,7 @@ app_server <- function(input, output, session) {
   # runs when logged in
   observeEvent(auth_result$user, {
     
-    if (dp()) message("auth_result$user")
+    if (dp()) message("auth_result$user changed")
     
     if (auth_result$admin == "FALSE") {
       updateSelectInput(session, "site", selected = auth_result$user)
@@ -75,21 +58,14 @@ app_server <- function(input, output, session) {
       shinyjs::enable("site")
       shinyjs::show("site")
     }
-    
-    # here would be good to somehow fetch the language selection from the
-    # login UI, but it's difficult
+
   })
-  
-  # call the server part of shinymanager
-  # weird observation: this has to be after the observeEvent block
-  # which observes the auth_result$user. If it isn't the site selectInput
-  # selection is not updated to match the username.
-  auth_result <- shinymanager::secure_server(check_credentials = 
-                                               credential_checker)
-  
+
   if (golem::app_dev()) {
     shinyjs::show("site")
   }
+  
+  ################
   
   # lists of events by block on the currently viewed site
   # accessed like events$by_block[["0"]]
