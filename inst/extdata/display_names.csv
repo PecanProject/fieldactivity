@@ -10,8 +10,8 @@ mgmt_operations_event_choice,irrigation,irrigation,kastelu
 mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
 mgmt_operations_event_choice,observation,observation,havainto
 mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
-mgmt_operations_event_choice,inorg_mulch,placement of mulch,epäorgaanisen katteen levitys
-mgmt_operations_event_choice,Inorg_mul_rem,removal of mulch,epäorgaanisen katteen poisto
+mgmt_operations_event_choice,inorg_mulch,placement of mulch,katteen levitys
+mgmt_operations_event_choice,Inorg_mul_rem,removal of mulch,katteen poisto
 #   mgmt_operations_event_choice,organic_material,organic material application,eloperäisen aineen levitys
 mgmt_operations_event_choice,other,other,muu
 #
@@ -44,7 +44,7 @@ variable_name,harv_yield_harv_f_wt,"Yield, fresh weight (t/ha)","Sato, märkäpa
 variable_name,yield_C_at_harvest,Carbon (C) in yield (kg/ha),Hiilen (C) määrä sadossa (kg/ha) # not in ICASA
 variable_name,harvest_moisture,Yield moisture (%),Sadon kosteus (%)
 variable_name,harvest_method,Harvest method,Korjuutapa
-variable_name,harvest_cut_height,Height of cut (cm),Niittokorkeus (cm)
+variable_name,harvest_cut_height,Height of cut (cm),Leikkuukorkeus (cm)
 variable_name,plant_density_harvest,Plant density at harvest (plants/m2),Kasvitiheys korjuuhetkellä (kasveja/m2)
 variable_name,harvest_residue_placement,Harvest residue placement,Korjuutähteiden sijoituspaikka
 variable_name,harvest_comments,Harvest comments,Sadonkorjuukommentit
@@ -191,7 +191,7 @@ element_label,yield_C_at_harvest_total_label,"Carbon (C) in yield, total (kg/ha)
 element_label,harvest_crop_label,Harvested crop*:,Korjattu laji*:
 element_label,harvest_operat_component_label,Crop component harvested:,Kerätty kasvinosa:
 element_label,canopy_height_harvest_label,Canopy height at harvest (m):,Kasvuston korkeus korjuuhetkellä (m):
-element_label,harvest_cut_height_label,Height of cut (cm):,Niittokorkeus (cm):
+element_label,harvest_cut_height_label,Height of cut (cm):,Leikkuukorkeus (cm):
 element_label,harvest_yield_harvest_dw_label,"Yield, dry weight (kg/ha):","Sato, kuivapaino (kg/ha):"
 element_label,harv_yield_harv_f_wt_label,"Yield, fresh weight (t/ha):","Sato, märkäpaino (t/ha):"
 element_label,harvest_moisture_label,"Yield moisture (%):","Sadon kosteus (%):"
@@ -441,8 +441,8 @@ tillage_practice_choice,tillage_practice_primary,Primary (residue incorporation)
 tillage_practice_choice,tillage_practice_secondary,Secondary (seedbed),Kylvömuokkaus
 tillage_practice_choice,tillage_practice_tertiary,Tertiary (weed control),Rikkakasvien torjunta
 #   TIIMP,TI001,V-Ripper,TI001-käännös
-TIIMP,TI002,Subsoiler,Jankkuri (subsoiler?)
-TIIMP,TI003,Mould-board plough,Mould-board plough-käännös # in ICASA this is Moldboard plow 20cm depth, here we use it for all depths
+TIIMP,TI002,Subsoiler,Jankkuri
+TIIMP,TI003,Mould-board plough,Kyntöaura # in ICASA this is Moldboard plow 20cm depth, here we use it for all depths
 #   TIIMP,TI004,"Chisel plow, sweeps",TI004-käännös
 #   TIIMP,TI005,"Chisel plow, straight point",TI005-käännös
 #   TIIMP,TI006,"Chisel plow, twisted shovels",TI006-käännös
@@ -455,9 +455,9 @@ TIIMP,TI011,"Cultivator, field",Kultivaattori
 #   TIIMP,TI013,"Cultivator, ridge till",TI013-käännös
 #   TIIMP,TI014,"Harrow, spike",TI014-käännös
 TIIMP,TI015,"Harrow, tine",Joustopiikkiäes
-TIIMP,TI016,Lister,Lister-käännös
+TIIMP,TI016,Lister,Multain
 #   TIIMP,TI017,Bedder,Bedder-käännös
-TIIMP,TI018,Blade cultivator,Blade cultivator -käännös
+TIIMP,TI018,Blade cultivator,Hara
 #   TIIMP,TI019,"Fertilizer applicator, anhydr",TI019-käännös
 TIIMP,TI020,Manure injector,Lannansijoituskone (Manure injector?)
 #   TIIMP,TI022,Mulch treader,TI022-käännös
@@ -498,9 +498,9 @@ grazing_type_choice,grazing_type_multi_species,Multi-species,Sekalaidunnus
 grazing_type_choice,grazing_type_creep,Creep,Nuoret eläimet paremmalle lohkolle (Creep?)
 grazing_type_choice,grazing_type_forward,Forward,Kaksoislaidunnus
 grazing_type_choice,grazing_type_other,Other,Muu
-chemical_type_choice,chemical_type_insecticide,Insecticide,Hyönteismyrkky
-chemical_type_choice,chemical_type_herbicide,Herbicide,Rikkaruohomyrkky
-chemical_type_choice,chemical_type_fungicide,Fungicide,Sienimyrkky
+chemical_type_choice,chemical_type_insecticide,Insecticide,Hyönteistorjunta-aine
+chemical_type_choice,chemical_type_herbicide,Herbicide,Rikkakasvien torjunta-aine
+chemical_type_choice,chemical_type_fungicide,Fungicide,Sienitautien torjunta-aine
 chemical_type_choice,chemical_type_growth_regulator,Growth regulator,Kasvunsääde
 # source for active substances (in Finnish): 
 # https://www.kemidigi.fi/kasvinsuojeluainerekisteri/haku
@@ -684,7 +684,7 @@ active_substance,AS177,Tritikonatsoli,Tritikonatsoli
 active_substance,AS178,Tritosulfuroni,Tritosulfuroni
 active_substance,AS179,Urea,Urea
 active_substance,AS180,viherminttuöljy,viherminttuöljy
-CH_TARGETS,BIRD,Birds,Linnut
+#   CH_TARGETS,BIRD,Birds,Linnut # this is apparently illegal
 CH_TARGETS,PCLA,Defoliation %,Lehtikato
 CH_TARGETS,PDLA,Diseased leaf area %,Tautia lehdissä
 CH_TARGETS,PSTDS,"General pest and diseases losses (due to rot, tikka, leafminer, etc.)","Yleiset tuhoeläin- ja tautivahingot (mätä, miinaajat jne.)"
