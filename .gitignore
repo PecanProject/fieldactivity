@@ -5,3 +5,4 @@
 .DS_Store
 app.R
 inst/doc
+dev/database.sqlite
