@@ -176,7 +176,7 @@ element_label,block_label,Select the block*:,Valitse lohko*:
 element_label,mgmt_operations_event_label,Select the activity*:,Valitse tapahtuma*:
 element_label,date_label,Select the date when the activity was performed*:,Valitse päivä jolloin tapahtuma tapahtui*:
 element_label,mgmt_event_notes_label,Description:,Kuvaus:
-element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. “first harvest of the year”, “spring fertilization” or “protection against rot”. This will appear on the event list.","Yleinen kuvaus tapahtumasta, esim. “vuoden ensimmäinen sadonkorjuu”, “kevätlannoitus” tai “suoja mädäntymistä vastaan”. Tämä tulee näkyviin tapahtumalistaan."
+element_label,mgmt_event_notes_placeholder,"A high level description of the event, e.g. “first harvest of the year” or “spring fertilization”. This will appear on the event list.","Yleinen kuvaus tapahtumasta, esim. “vuoden ensimmäinen sadonkorjuu” tai “kevätlannoitus”. Tämä tulee näkyviin tapahtumalistaan."
 element_label,planted_crop_label,Planted crop*:,Kylvetty kasvi*:
 element_label,planting_material_weight_label,Weight of seeds (kg/ha):,Siementen määrä (kg/ha):
 element_label,planting_depth_label,Sowing depth (mm):,Kylvösyvyys (mm):
