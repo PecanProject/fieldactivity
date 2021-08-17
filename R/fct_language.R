@@ -138,3 +138,38 @@ replace_with_display_names <- function(events_with_code_names, language) {
   
   return(events_with_display_names)
 }
+
+#' This function sets the labels on the shinymanager login UI
+#'
+#' @param language The language which should be displayed (either
+#'   "disp_name_fin" or disp_name_eng) 
+#'   
+# TODO: move the actual labels to display_names.csv?
+set_login_language <- function(language) {
+  
+  # remove possible names from language vector
+  language <- unname(language)
+
+  # yes we are overwriting the English language. This is by far
+  # the simplest method
+  if (identical(language, "disp_name_fin")) {
+    shinymanager::set_labels(
+      language = "en",
+      # the \U codes are UTF-8 codes for Finnish letters a and o with dots
+      "Please authenticate" = "Kirjaudu sy\U00f6tt\U00e4\U00e4ksesi tapahtumia",
+      "Username:" = "Sijainti",
+      "Password:" = "Salasana",
+      "Login" = "Kirjaudu",
+      "Logout" = "Kirjaudu ulos"
+    )
+  } else if (identical(language, "disp_name_eng")) {
+    shinymanager::set_labels(
+      language = "en",
+      "Please authenticate" = "Log in to enter management events",
+      "Username:" = "Site",
+      "Password:" = "Password",
+      "Login" = "Login",
+      "Logout" = "Logout"
+    )
+  }
+}

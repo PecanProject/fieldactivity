@@ -23,6 +23,9 @@ run_app <- function(
   
   ui <- app_ui
   if (golem::app_prod()) {
+    # set the language of the login UI before it is displayed
+    set_login_language(init_lang)
+    # wrap the UI in shinymanager to display the login UI
     ui <- shinymanager::secure_app(
       ui,
       # language selector for login page

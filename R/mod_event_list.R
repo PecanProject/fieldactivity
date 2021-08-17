@@ -151,7 +151,7 @@ mod_event_list_server <- function(id, events, language, site) {
     }
     
     # update year choices when events change
-    observeEvent(events(), {
+    observeEvent(events(), ignoreInit = TRUE, {
       update_table_year_choices()
     })
     
