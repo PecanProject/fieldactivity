@@ -19,15 +19,6 @@
 #   the filepath is therefore absolute)
 
 
-# when an event's information is given to the module, store the filepath
-# somewhere. When saving the values, if a new file is uploaded, the temp
-# path should be returned to the main app. It then moves the file and
-# changes the path. If no new file is uploaded, return the old path (if
-# the path should be updated, the main app will update the path and move the
-# file). If the file is to be deleted, return an empty path and the main app 
-# will delete the file
-
-
 #' fileInput UI Function
 #'
 #' @description A shiny Module.
@@ -74,16 +65,17 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
     # is the value in current_path pointing to a new file in a temp directory?
     new_file <- reactiveVal(FALSE)
     
+    ############# FUNCTIONS TO MODIFY THE FILEINPUT COMPONENT
+    
     # set new_text to NULL to clear the value
     update_value_text <- function(new_text) {
       if (is.null(new_text)) {
-        # this clears the text on the widget, but not its value
-        shinyjs::reset("file")
-      } else {
-        session$sendCustomMessage(type = "fileInput-value",
-                                  message = list(id = ns("file"), 
-                                                 value = new_text))
+        new_text <- get_disp_name("file_input_placeholder", language())
       }
+        
+      session$sendCustomMessage(type = "fileInput-value",
+                                message = list(id = ns("file"), 
+                                               value = new_text))
     }
     
     update_label <- function(new_label) {
@@ -91,6 +83,25 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
                                 message = list(id = ns("file"),
                                                value = new_label))
     }
+    
+    update_button_label <- function(new_label) {
+      session$sendCustomMessage(type = "fileInput-button-label",
+                                message = list(id = ns("file"),
+                                               value = new_label))
+    }
+    
+    hide_progressbar <- function() {
+      session$sendCustomMessage(type = "fileInput-hide-progressbar",
+                                message = list(id = ns("file")))
+    }
+    
+    update_progressbar_label <- function(new_label) {
+      session$sendCustomMessage(type = "fileInput-progressbar-label",
+                                message = list(id = ns("file"),
+                                               value = new_label))
+    }
+    
+    #############
     
     # Check the file immediately after it is uploaded, and if its extension
     # is not correct, delete the file.
@@ -114,6 +125,9 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
         return()
       }
       
+      update_progressbar_label(get_disp_name(
+        "file_input_progressbar_complete_label", language()))
+      
       # the file is valid, so save its path
       current_path(tmp_path)
       new_file(TRUE)
@@ -122,12 +136,23 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
     
     # when language changes, update labels
     observeEvent(language(), {
+      # update label of widget
       label <- structure_lookup_list[[id]]$label
       update_label(get_disp_name(label, language()))
+      # update label on the browse button
+      update_button_label(get_disp_name("file_input_button_label", language()))
       # update delete button label
       updateActionButton(session, "delete", 
                          label = get_disp_name("delete_uploaded_file_label",
                                                language()))
+      # update progress bar complete label (in case it is visible)
+      update_progressbar_label(get_disp_name(
+        "file_input_progressbar_complete_label", language()))
+      
+      # if no file is uploaded, translate the value text
+      if (is.null(current_path())) {
+        update_value_text(NULL)
+      }
     })
     
     # when a new relative path is supplied, store it
@@ -156,6 +181,7 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
       shinyjs::toggle("delete", condition = !is.null(current_path()))
       if (is.null(current_path())) {
         update_value_text(NULL)
+        hide_progressbar()
       }
     })
     
@@ -167,6 +193,8 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
         shinyjs::hide("delete")
         return()
       }
+      
+      hide_progressbar()
       
       current_path(NULL)
       new_file(FALSE)

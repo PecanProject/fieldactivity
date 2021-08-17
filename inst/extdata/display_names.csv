@@ -167,6 +167,7 @@ element_label,sidebar_title_edit,Edit event,Muokkaa tapahtumaa
 element_label,sidebar_title_add,Add event,Lisää tapahtuma
 element_label,file_input_button_label,Browse...,Selaa...
 element_label,file_input_placeholder,No file selected,Tiedostoa ei valittu
+element_label,file_input_progressbar_complete_label,Upload complete,Tiedosto ladattu
 element_label,delete_uploaded_file_label,Delete,Poista
 element_label,total_row_name,Total,Yhteensä
 #

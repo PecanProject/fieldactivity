@@ -3,7 +3,6 @@
 .Rdata
 .httr-oauth
 .DS_Store
-dev/dev_events/
-dev/database.sqlite
 app.R
 inst/doc
+dev/database.sqlite
