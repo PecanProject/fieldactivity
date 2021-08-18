@@ -119,6 +119,20 @@ The structure of the app can be summarised as follows:
 Modules are a tool to make Shiny apps more, well, modular. Each module includes a UI function, which creates user interface components, and a server function which defines how those components should behave. 
 
 A module (more specifically, its server function) can be given input values which are usually reactives (reactive is a Shiny term. Reactive expressions can be thought of as functions which store their value and only recalculate it when it is no longer valid.). For example, the language chosen in the main app is passed on to other modules as a reactive expression -- when the language is changed by the user, that reactive can be used to access the latest language in the modules. Modules can also return values, and these values are usually reactive as well. For example, the form module returns the values of widgets to the main app server function, which goes on to edit or create a json file based on this information.
+
+### The startup process
+
+A few words about the process of starting the app, as that became a bit more complex recently. The app is started by a call to the `run_app` function, defined in `R/run_app.R`. The app can be started in two modes, production mode or developer mode. This is controlled by the option `golem.app.prod`:
+```{r eval=FALSE, include=TRUE}
+options(golem.app.prod = TRUE) # use production mode and hence user authentication
+options(golem.app.prod = FALSE) # skip authentication
+# run_app(...)
+```
+It is in this `run_app.R` file where the app is "wrapped in shinymanager" to display the authentication UI if the app is in production mode.
+
+When the app starts, the `app_server` server function in `R\app_server.R` is initialised. It is here that the event list module server is initialised as well. However, calling the server function of the form module is delayed until a site is specified (either by logging in to a user account specific to a site or in admin mode where the site selector is visible). This is done to decrease the time it takes for the main app UI to be displayed. However, this causes a small delay in the loading of events in the event list. 
+
+The form server is initialised by calling the function `initialise_form` defined within the `app_server` function. Furthermore, when the form server function is initialised, it does not yet initialise the server function of table or fileInput modules on the form. Instead, they are initialised the first time the form is shown. Their initialisation happens by sending an initialisation signal to the form through a reactive (`init_signal`), which is being listened to by the form server function.
   
 ## Useful resources
 - For Shiny: [Mastering Shiny](https://mastering-shiny.org) and [Shiny function reference](https://shiny.rstudio.com/reference/shiny/)
