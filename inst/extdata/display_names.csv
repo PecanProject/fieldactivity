@@ -143,9 +143,9 @@ variable_name,other_notes,Notes,Muistiinpanot
 #
 # labels for widgets, incl. help texts etc.
 #
-element_label,window_title,Enter Management Events,Syötä tilanhoitotapahtumia
+element_label,frontpage_title,Enter Management Events,Syötä tilanhoitotapahtumia
 element_label,frontpage_text,"Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.","Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä."
-element_label,frontpage_table_title,Events,Tapahtumat
+element_label,event_list_title,Events,Tapahtumat
 #   element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
 element_label,table_filter_text_1,"Showing ","Näytetään "
 element_label,table_filter_text_2," events from block "," tapahtumat lohkosta "
@@ -163,8 +163,8 @@ element_label,site_label,Select the site*:,Valitse sijainti*:
 element_label,save_label,Save,Tallenna
 element_label,cancel_label,Cancel,Peruuta
 element_label,delete_label,Delete,Poista
-element_label,sidebar_title_edit,Edit event,Muokkaa tapahtumaa
-element_label,sidebar_title_add,Add event,Lisää tapahtuma
+element_label,form_title_edit,Edit event,Muokkaa tapahtumaa
+element_label,form_title_add,Add event,Lisää tapahtuma
 element_label,file_input_button_label,Browse...,Selaa...
 element_label,file_input_placeholder,No file selected,Tiedostoa ei valittu
 element_label,file_input_progressbar_complete_label,Upload complete,Tiedosto ladattu

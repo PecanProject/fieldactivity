@@ -4,7 +4,12 @@
 \alias{get_disp_name}
 \title{Get the display names corresponding to given code names}
 \usage{
-get_disp_name(code_name, language = NULL, is_variable_name = FALSE)
+get_disp_name(
+  code_name,
+  language = NULL,
+  is_variable_name = FALSE,
+  as_names = FALSE
+)
 }
 \arguments{
 \item{code_name}{A vector of code names to get the display names for}
@@ -15,11 +20,15 @@ resulting display names}
 \item{is_variable_name}{If set to TRUE, then only variable names will be
 searched for display names. If FALSE (the default), only non-variable names
 will be searched.}
+
+\item{as_names}{Should the display names be set as the names of the vector
+of code names? Default is FALSE.}
 }
 \value{
 The display name(s) as a vector of character strings in the same
   order as the code names. If a display name is not found or language is
-  undefined, the code name is returned.
+  undefined, the code name is returned. If as_names is TRUE, the display
+  names are the names of the vector and code names are the values.
 }
 \description{
 Get the display names corresponding to given code names

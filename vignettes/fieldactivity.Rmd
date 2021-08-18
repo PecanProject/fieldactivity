@@ -63,7 +63,7 @@ the following fields:
     - `placeholder`: Code name of placeholder
     - `maxlength`: The maximum acceptable length (in characters) of the value
   - `textOutput`
-    - `dynamic`: If defined, indicates how the text should be adjusted during the execution of app. See `sidebar_title` for an illustrative (and only) example.
+    - `dynamic`: If defined, indicates how the text should be adjusted during the execution of app. See `form_title` for an illustrative (and only) example.
     - `style`: `"label"` if the text should look like a widget label.
   - `actionButton`
   - `dateInput`

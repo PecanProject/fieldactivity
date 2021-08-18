@@ -5,7 +5,7 @@
 structure_file_path <- function() system.file("extdata", "ui_structure.json", 
                                    package = "fieldactivity")
 structure <- jsonlite::fromJSON(structure_file_path(), simplifyMatrix = FALSE)
-activity_options <- structure$sidebar$mgmt_operations_event$sub_elements
+activity_options <- structure$form$mgmt_operations_event$sub_elements
 
 
 #' Recursively apply function to lists in a list

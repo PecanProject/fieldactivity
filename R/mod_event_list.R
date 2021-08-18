@@ -22,17 +22,25 @@ mod_event_list_ui <- function(id) {
     div(style="display: inline-block;vertical-align:middle;",
         textOutput(ns("table_filter_text_1"), inline = TRUE)),
     div(style="display: inline-block;vertical-align:middle;", 
-        selectInput(ns("table_activity"), label = "", choices = c(""), 
+        selectInput(ns("table_activity"), label = "", 
+                    choices = get_disp_name(
+                      c("activity_choice_all",
+                        get_category_names("mgmt_operations_event_choice")),
+                      init_lang, as_names = TRUE), 
                     width = "150px")),
     div(style="display: inline-block;vertical-align:middle;",
         textOutput(ns("table_filter_text_2"), inline = TRUE)),
     div(style="display: inline-block;vertical-align:middle;", 
-        selectInput(ns("table_block"), label = "", choices = c(""),
+        selectInput(ns("table_block"), label = "", 
+                    choices = get_disp_name("block_choice_all", init_lang,
+                                            as_names = TRUE),
                     width = "100px")),
     div(style="display: inline-block;vertical-align:middle;",
         textOutput(ns("table_filter_text_3"), inline = TRUE)),
     div(style="display: inline-block;vertical-align:middle;", 
-        selectInput(ns("table_year"), label = "", choices = c(""),
+        selectInput(ns("table_year"), label = "", 
+                    choices = get_disp_name("year_choice_all", init_lang, 
+                                            as_names = TRUE),
                     width = "100px")),
     div(style="display: inline-block;vertical-align:middle;", "."),
     
@@ -156,7 +164,7 @@ mod_event_list_server <- function(id, events, language, site) {
     })
     
     # update table activity, block and year choices when the language changes
-    observeEvent(language(), {
+    observeEvent(language(), ignoreInit = TRUE, {
       update_table_activity_choices()
       update_table_block_choices()
       update_table_year_choices()
@@ -215,8 +223,6 @@ mod_event_list_server <- function(id, events, language, site) {
     # data to display in the table
     table_data <- reactive({
       
-      if (dp()) message("event_list table_data reactive running")
-      
       # if any of the filters does not have a value, return an empty table
       if (!(isTruthy(input$table_activity) & 
             isTruthy(input$table_block) &
@@ -225,6 +231,8 @@ mod_event_list_server <- function(id, events, language, site) {
                                "date", "mgmt_event_notes")
         return(get_data_table(list(), default_variables))
       }
+      
+      if (dp()) message("event_list table_data reactive running")
       
       # determine the columns displayed in the table
       table_variables <- c("date", "mgmt_event_notes")

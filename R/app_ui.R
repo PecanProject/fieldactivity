@@ -20,12 +20,12 @@ app_ui <- function(request) {
     titlePanel("", windowTitle = "Field Observatory"),
     
     # title to be displayed on the page
-    h1(textOutput("window_title")),
+    h1(textOutput("frontpage_title")),
     
     # show instructions
     div(style = "max-width:500px;", textOutput("frontpage_text")),
     
-    h2(textOutput("frontpage_table_title")),
+    h2(textOutput("event_list_title")),
     
     # event list module UI
     mod_event_list_ui("event_list"),
