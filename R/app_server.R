@@ -489,16 +489,14 @@ app_server <- function(input, output, session) {
     # (block and activity) into the widgets if they are set to a specific
     # value (not "all")
     new_values <- list()
-    table_activity <- event_list$filters()$activity
-    table_block <- event_list$filters()$block
+    activity <- event_list$filters()$activity
+    block <- event_list$filters()$block
     
-    if (!is.null(table_activity) && 
-        table_activity != "activity_choice_all") {
-      new_values$mgmt_operations_event <- table_activity
+    if (!is.null(activity) && activity != "activity_choice_all") {
+      new_values$mgmt_operations_event <- activity
     }
-    if (!is.null(table_block) &&
-        table_block != "block_choice_all") {
-      new_values$block <- table_block
+    if (!is.null(block) && block != "block_choice_all") {
+      new_values$block <- block
     }
     
     if (!identical(new_values, list())) form$set_values(new_values)

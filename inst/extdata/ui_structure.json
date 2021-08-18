@@ -39,20 +39,20 @@
       "type" : "textOutput"
     },
 
-    "table_activity" : {
-      "code_name" : "table_activity",
+    "event_list_activity_filter" : {
+      "code_name" : "event_list_activity_filter",
       "type" : "selectInput",
       "choices" : "IGNORE"
     },
 
-    "table_block" : {
-      "code_name" : "table_block",
+    "event_list_block_filter" : {
+      "code_name" : "event_list_block_filter",
       "type" : "selectInput",
       "choices" : "IGNORE"
     },
 
-    "table_year" : {
-      "code_name" : "table_year",
+    "event_list_year_filter" : {
+      "code_name" : "event_list_year_filter",
       "type" : "selectInput",
       "choices" : "IGNORE"
     },

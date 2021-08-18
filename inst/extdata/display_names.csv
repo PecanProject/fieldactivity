@@ -150,9 +150,6 @@ element_label,event_list_title,Events,Tapahtumat
 element_label,table_filter_text_1,"Showing ","Näytetään "
 element_label,table_filter_text_2," events from block "," tapahtumat lohkosta "
 element_label,table_filter_text_3," and from year "," ja vuodelta "
-#   element_label,table_activity_label,Choose which event types to display:,Valitse mitkä tapahtumatyypit näytetään:
-#   element_label,table_block_label,Choose which blocks' events to display:,Valitse minkä lohkojen tapahtumat näytetään:
-#   element_label,table_year_label,Choose which years' events to display:,Valitse minkä vuosien tapahtumat näytetään:
 element_label,table_empty_label,No events to display,Ei tapahtumia
 element_label,table_previous_label,Previous,Edellinen
 element_label,table_next_label,Next,Seuraava
