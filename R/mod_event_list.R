@@ -22,7 +22,7 @@ mod_event_list_ui <- function(id) {
     div(style="display: inline-block;vertical-align:middle;",
         textOutput(ns("table_filter_text_1"), inline = TRUE)),
     div(style="display: inline-block;vertical-align:middle;", 
-        selectInput(ns("table_activity"), label = "", 
+        selectInput(ns("event_list_activity_filter"), label = "", 
                     choices = get_disp_name(
                       c("activity_choice_all",
                         get_category_names("mgmt_operations_event_choice")),
@@ -31,14 +31,14 @@ mod_event_list_ui <- function(id) {
     div(style="display: inline-block;vertical-align:middle;",
         textOutput(ns("table_filter_text_2"), inline = TRUE)),
     div(style="display: inline-block;vertical-align:middle;", 
-        selectInput(ns("table_block"), label = "", 
+        selectInput(ns("event_list_block_filter"), label = "", 
                     choices = get_disp_name("block_choice_all", init_lang,
                                             as_names = TRUE),
                     width = "100px")),
     div(style="display: inline-block;vertical-align:middle;",
         textOutput(ns("table_filter_text_3"), inline = TRUE)),
     div(style="display: inline-block;vertical-align:middle;", 
-        selectInput(ns("table_year"), label = "", 
+        selectInput(ns("event_list_year_filter"), label = "", 
                     choices = get_disp_name("year_choice_all", init_lang, 
                                             as_names = TRUE),
                     width = "100px")),
@@ -70,16 +70,17 @@ mod_event_list_server <- function(id, events, language, site) {
     # is the currently edited event visible in the event list (or has it been
     # filtered out)?
     current_event_visible <- TRUE
-    # what were the table view choices (table_block, table_activity, table_year)
+    # what were the table view choices (event_list_block_filter, 
+    # event_list_activity_filter, event_list_year_filter)
     # before we started editing?
     pre_edit_table_view <- NULL
     
     #' Update year choices in event list filter
     #' 
     #' Adds as choices all the years for which events have been recorded
-    update_table_year_choices <- function() {
+    update_event_list_year_filter_choices <- function() {
       
-      if (dp()) message("Updating table_year choices")
+      if (dp()) message("Updating event_list_year_filter choices")
       
       years <- NULL
       
@@ -97,88 +98,87 @@ mod_event_list_server <- function(id, events, language, site) {
       }
       
       years <- sort(years, decreasing = TRUE)
-      table_year_choices <- c("year_choice_all", years)
-      names(table_year_choices) <- get_disp_name(table_year_choices, 
-                                                 language())
+      choices <- get_disp_name(c("year_choice_all", years),
+                               language(), as_names = TRUE)
       
       # retain current selection if possible
-      current_choice <- input$table_year
+      current_choice <- input$event_list_year_filter
       if (!isTruthy(current_choice) || !(current_choice %in% years)) {
         current_choice <- "year_choice_all"
       }
       
-      updateSelectInput(session, "table_year", selected = current_choice,
-                        choices = table_year_choices)
+      updateSelectInput(session, "event_list_year_filter", selected = current_choice,
+                        choices = choices)
       
     }
     
     #' Update block choices in event list filter
     #' 
     #' Add all blocks of the current site as choices
-    update_table_block_choices <- function() {
+    update_event_list_block_filter_choices <- function() {
       
       if (!isTruthy(site())) { return() }
       
-      if (dp()) message("Updating table_block choices")
+      if (dp()) message("Updating event_list_block_filter choices")
       
-      block_choices <- c("block_choice_all",
-                         subset(sites, sites$site == site())$blocks[[1]])
+      choices <- c("block_choice_all",
+                   subset(sites, sites$site == site())$blocks[[1]])
       # the following assumes that no block name is a code name for something
       # else
-      names(block_choices) <- get_disp_name(block_choices, language())
+      choices <- get_disp_name(choices, language(), as_names = TRUE)
       
-      current_choice <- input$table_block
-      if (!isTruthy(current_choice) || !(current_choice %in% block_choices)) {
+      current_choice <- input$event_list_block_filter
+      if (!isTruthy(current_choice) || !(current_choice %in% choices)) {
         current_choice <- "block_choice_all"
       }
       
-      updateSelectInput(session, "table_block", selected = current_choice,
-                        choices = block_choices)
+      updateSelectInput(session, "event_list_block_filter", 
+                        selected = current_choice,
+                        choices = choices)
     }
     
     #' Update activity choices in event list filter
     #' 
     #' Only used when the language is changed.
-    update_table_activity_choices <- function() {
+    update_event_list_activity_filter_choices <- function() {
       
-      if (dp()) message("Updating table_activity choices")
+      if (dp()) message("Updating event_list_activity_filter choices")
       
-      choices_for_table_activity <- 
-        c("activity_choice_all", get_category_names(
-          "mgmt_operations_event_choice"))
-      names(choices_for_table_activity) <- 
-        get_disp_name(choices_for_table_activity, language())
+      choices <- c("activity_choice_all",
+                   get_category_names("mgmt_operations_event_choice"))
+      choices <- get_disp_name(choices, language(), as_names = TRUE)
       
-      current_choice <- input$table_activity
+      current_choice <- input$event_list_activity_filter
       if (!isTruthy(current_choice)) {
         current_choice <- "activity_choice_all"
       }
       
-      updateSelectInput(session, "table_activity", selected = current_choice,
-                        choices = choices_for_table_activity)
+      updateSelectInput(session, "event_list_activity_filter", 
+                        selected = current_choice,
+                        choices = choices)
     }
     
     # update year choices when events change
     observeEvent(events(), ignoreInit = TRUE, {
-      update_table_year_choices()
+      update_event_list_year_filter_choices()
     })
     
     # update table activity, block and year choices when the language changes
     observeEvent(language(), ignoreInit = TRUE, {
-      update_table_activity_choices()
-      update_table_block_choices()
-      update_table_year_choices()
+      update_event_list_activity_filter_choices()
+      update_event_list_block_filter_choices()
+      update_event_list_year_filter_choices()
     })
     
     # update block choices when site changes
     observeEvent(site(), {
       if (!isTruthy(site())) {
-        shinyjs::disable("table_block")
+        shinyjs::disable("event_list_block_filter")
         return()
       } 
       
-      shinyjs::enable("table_block")
-      update_table_block_choices()
+      shinyjs::enable("event_list_block_filter")
+      update_event_list_block_filter_choices()
     })
     
     observeEvent(current_event(), ignoreNULL = FALSE, ignoreInit = TRUE, {
@@ -193,11 +193,11 @@ mod_event_list_server <- function(id, events, language, site) {
         }
         
         # restore table view settings
-        updateSelectInput(session, "table_activity", 
+        updateSelectInput(session, "event_list_activity_filter", 
                           selected = pre_edit_table_view$activity)
-        updateSelectInput(session, "table_block", 
+        updateSelectInput(session, "event_list_block_filter", 
                           selected = pre_edit_table_view$block)
-        updateSelectInput(session, "table_year", 
+        updateSelectInput(session, "event_list_year_filter", 
                           selected = pre_edit_table_view$year)
         # clear table view settings
         pre_edit_table_view <<- NULL
@@ -210,13 +210,14 @@ mod_event_list_server <- function(id, events, language, site) {
       # save table view (to be restored when editing is over) if no settings
       # have been saved previously
       if (is.null(pre_edit_table_view)) {
-        pre_edit_table_view <<- list(activity = input$table_activity,
-                                     block = input$table_block,
-                                     year = input$table_year)
+        pre_edit_table_view <<- list(activity = input$event_list_activity_filter,
+                                     block = input$event_list_block_filter,
+                                     year = input$event_list_year_filter)
       }
       
-      # change view of the front page table by changing table_activity selector
-      updateSelectInput(session, "table_activity", 
+      # change view of the front page table by changing the
+      # event_list_activity_filter selector
+      updateSelectInput(session, "event_list_activity_filter", 
                         selected = current_event()$mgmt_operations_event)
     })
     
@@ -224,9 +225,9 @@ mod_event_list_server <- function(id, events, language, site) {
     table_data <- reactive({
       
       # if any of the filters does not have a value, return an empty table
-      if (!(isTruthy(input$table_activity) & 
-            isTruthy(input$table_block) &
-            isTruthy(input$table_year))) {
+      if (!(isTruthy(input$event_list_activity_filter) & 
+            isTruthy(input$event_list_block_filter) &
+            isTruthy(input$event_list_year_filter))) {
         default_variables <- c("block", "mgmt_operations_event",
                                "date", "mgmt_event_notes")
         return(get_data_table(list(), default_variables))
@@ -236,20 +237,20 @@ mod_event_list_server <- function(id, events, language, site) {
       
       # determine the columns displayed in the table
       table_variables <- c("date", "mgmt_event_notes")
-      if (input$table_activity == "activity_choice_all") {
+      if (input$event_list_activity_filter == "activity_choice_all") {
         table_variables <- c("mgmt_operations_event", table_variables)
       }
-      if (input$table_block == "block_choice_all") {
+      if (input$event_list_block_filter == "block_choice_all") {
         table_variables <- c("block", table_variables)
       }
       
       # if we are only looking at a specific event type, show columns
       # appropriate to it
-      if (input$table_activity != "activity_choice_all") {
+      if (input$event_list_activity_filter != "activity_choice_all") {
         hidden_widget_types <- c("textOutput", "dataTable", "fileInput", 
                                  "actionButton")
         activity_variables <- unlist(rlapply(
-          activity_options[[input$table_activity]],
+          activity_options[[input$event_list_activity_filter]],
           fun = function(x) {
             if (is.null(x$type) || x$type %in% hidden_widget_types ||
                 identical(x$hide_in_event_list, TRUE)) {
@@ -263,26 +264,26 @@ mod_event_list_server <- function(id, events, language, site) {
       
       # create an event list filtered by user choices
       # filter by block
-      if (input$table_block == "block_choice_all") {
+      if (input$event_list_block_filter == "block_choice_all") {
         event_list <- list()
         for (block_data in events()) {
           event_list <- c(event_list, block_data)
         }
       } else {
-        event_list <- events()[[input$table_block]]
+        event_list <- events()[[input$event_list_block_filter]]
       }
       
       # filter by activity type
-      if (input$table_activity != "activity_choice_all") {
+      if (input$event_list_activity_filter != "activity_choice_all") {
         event_list <- rlapply(event_list, fun = function(x)
-          if (x$mgmt_operations_event == input$table_activity) {x})
+          if (x$mgmt_operations_event == input$event_list_activity_filter) {x})
       }
       
       # filter by year
-      if (input$table_year != "year_choice_all") {
+      if (input$event_list_year_filter != "year_choice_all") {
         event_list <- rlapply(event_list, fun = function(x) {
           event_year <- format(as.Date(x$date, date_format_json), "%Y")
-          if (event_year == input$table_year) {x}
+          if (event_year == input$event_list_year_filter) {x}
         })
       }
       
@@ -393,9 +394,9 @@ mod_event_list_server <- function(id, events, language, site) {
     list(
       current = current_event,
       filters = reactive(list(
-        activity = input$table_activity,
-        block = input$table_block,
-        year = input$table_year))
+        activity = input$event_list_activity_filter,
+        block = input$event_list_block_filter,
+        year = input$event_list_year_filter))
     )
     
   })
