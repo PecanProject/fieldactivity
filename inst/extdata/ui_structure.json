@@ -1,7 +1,16 @@
 {
   "frontpage" : {
-    "window_title" : {
-      "code_name" : "window_title",
+    
+    "site": {
+      "code_name": "site",
+      "type": "selectInput",
+      "label": "site_label",
+      "choices": "IGNORE",
+      "required" : true
+    },
+    
+    "frontpage_title" : {
+      "code_name" : "frontpage_title",
       "type" : "textOutput"
     },
 
@@ -10,8 +19,8 @@
       "type" : "textOutput"
     },
 
-    "frontpage_table_title" : {
-      "code_name" : "frontpage_table_title",
+    "event_list_title" : {
+      "code_name" : "event_list_title",
       "type" : "textOutput"
     },
 
@@ -61,28 +70,20 @@
     }
   },
 
-  "sidebar" : {
-    "sidebar_title": {
-      "code_name" : "sidebar_title",
+  "form" : {
+    "form_title": {
+      "code_name" : "form_title",
       "type" : "textOutput",
       "dynamic" : {
         "mode" : "edit_mode",
-        "TRUE" : "sidebar_title_edit",
-        "FALSE" : "sidebar_title_add"
+        "TRUE" : "form_title_edit",
+        "FALSE" : "form_title_add"
       }
     },
 
     "required_variables_helptext" : {
       "code_name" : "required_variables_helptext",
       "type" : "textOutput"
-    },
-
-    "site": {
-      "code_name": "site",
-      "type": "selectInput",
-      "label": "site_label",
-      "choices": "IGNORE",
-      "required" : true
     },
 
     "block": {

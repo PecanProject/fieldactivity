@@ -26,7 +26,7 @@ mod_form_ui <- function(id){
     # about the event
     fluidRow(
       column(width = 3,
-             h3(textOutput(ns("sidebar_title")), 
+             h3(textOutput(ns("form_title")), 
                 style = "margin-bottom = 0px; margin-top = 0px; 
                    margin-block-start = 0px"),
              
@@ -108,16 +108,19 @@ mod_form_ui <- function(id){
 #' @import shinyvalidate
 #' @noRd
 mod_form_server <- function(id, site, set_values, reset_values, edit_mode, 
-                            language) {
+                            language, init_signal) {
   
   stopifnot(is.reactive(site))
   stopifnot(is.reactive(set_values))
   stopifnot(is.reactive(reset_values))
   stopifnot(is.reactive(edit_mode))
   stopifnot(is.reactive(language))
+  stopifnot(is.reactive(init_signal))
   
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    if (dp()) message("Initialising form server function")
     
     # add input validators
     # the idea is that each widget has its own validator. This validator is
@@ -132,6 +135,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
       # add required rule
       if (identical(widget$required, TRUE)) {
+        
         if (widget$type == "dateRangeInput") {
           iv$add_rule(variable, sv_required(message = "", 
                                             test = valid_dateRangeInput))
@@ -197,99 +201,6 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     #   }
     # }
     
-    
-    # initialise the table server for each of the dynamically added tables
-    # sapply with simplify = FALSE is equivalent to lapply
-    # the values from the table can be accessed ilke
-    # tables[[table_code_name]]$result$values()
-    tables <- sapply(data_table_code_names, USE.NAMES = TRUE, 
-                     simplify = FALSE, FUN = 
-                       function(table_code_name) {
-                         
-                         table_structure <- 
-                           structure_lookup_list[[table_code_name]]
-                         
-                         # are we in static mode, i.e. are all row groups of
-                         # type 'static'? If yes, we won't need to supply the
-                         # row_variable_value reactive. Currently this only
-                         # happens with fertilizer_element_table (the columns
-                         # are not defined)
-                         static_mode <- is.null(table_structure$columns)
-                         
-                         # find the row variable. This will be used in the
-                         # reactive below
-                         if (!static_mode) {
-                           for (row_group in table_structure$rows) {
-                             # there is only one dynamic row group
-                             if (row_group$type == 'dynamic') {
-                               row_variable <- row_group$row_variable
-                               row_variable_type <- 
-                                 structure_lookup_list[[row_variable]]$type
-                               break
-                             }
-                           }
-                         }
-                         
-                         # If we have row groups which depend on widget values
-                         # in the main app, create a reactive from those values.
-                         # This can either be determined by the choices of
-                         # selectInput with multiple selections, or a
-                         # numericInput which represents the number of rows.
-                         row_variable_value <- reactive({
-                           
-                           if (static_mode) {
-                             return(NULL)
-                           }
-                           
-                           if (row_variable_type == "numericInput") {
-                             number_of_rows <- input[[row_variable]]
-                             
-                             # check status of validator. If it is NULL all is
-                             # ok
-                             if (!isTruthy(number_of_rows) || 
-                                 !is.null(isolate(
-                                   main_iv$validate()[[ns(row_variable)]]))) {
-                               NULL
-                             } else {
-                               as.integer(number_of_rows)
-                             }
-                             
-                           } else if (row_variable_type == "selectInput") {
-                             input[[row_variable]]
-                           }
-                           
-                         })
-                         
-                         override_values <- reactiveVal()
-                         
-                         # save this list for every data table
-                         list(
-                           result = mod_table_server(table_code_name, 
-                                                     row_variable_value, 
-                                                     language,
-                                                     override_values),
-                           set_values = override_values
-                         )
-                         
-                       })
-    
-    # start server for all fileInput modules
-    files <- sapply(fileInput_code_names, USE.NAMES = TRUE, 
-                    simplify = FALSE, FUN = 
-                      function(fileInput_code_name) {
-                        
-                        set_path <- reactiveVal()
-                        reset_path <- reactiveVal()
-                        
-                        list(value = mod_fileInput_server(id = fileInput_code_name, 
-                                                          language = language,
-                                                          set_path = set_path,
-                                                          reset_path = reset_path),
-                             set_path = set_path,
-                             reset_path = reset_path)
-                      }
-    )
-    
     # when site setting is changed, update the block choices on the form
     observeEvent(site(), ignoreNULL = FALSE, {
       
@@ -310,6 +221,8 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     
     # when set_values is changed, update the values in the form
     observeEvent(set_values(), {
+      
+      if (dp()) message("Filling the form with values")
       
       values <- set_values()
       
@@ -360,6 +273,11 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     
     # when reset_values is signaled, reset the values of all widgets
     observeEvent(reset_values(), {
+      
+      if (identical(reset_values(), FALSE)) return()
+      
+      if (dp()) message("Resetting form values")
+      
       reset_input_fields(session, get_category_names("variable_name"))
       
       # clear fileInput fields separately
@@ -526,6 +444,111 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
     })
     
+    # initialise the tables list (wihout yet starting the table servers) so 
+    # that we can pre-supply the values to the tables
+    # sapply with simplify = FALSE is equivalent to lapply
+    tables <- sapply(data_table_code_names, USE.NAMES = TRUE, simplify = FALSE,
+                     FUN = function(table_code_name) {
+                       set_values <- reactiveVal()
+                       list(set_values = set_values)
+                     })
+    
+    # do the same thing with fileInput modules
+    files <- sapply(fileInput_code_names, USE.NAMES = TRUE, simplify = FALSE, 
+                    FUN = function(fileInput_code_name) {
+                      
+                      set_path <- reactiveVal()
+                      reset_path <- reactiveVal()
+                      
+                      list(set_path = set_path,
+                           reset_path = reset_path)
+                    })
+    
+    # when we get the init_signal, initialise table and fileInput module server
+    # functions. This "staged" initialisation is done to improve startup speed.
+    observeEvent(init_signal(), {
+      
+      if (dp()) message("Initialising table and fileInput server functions")
+      
+      # initialise the table server for each of the dynamically added tables
+      # the values from the table can be accessed ilke
+      # tables[[table_code_name]]$result$values()
+      sapply(data_table_code_names, FUN = function(table_code_name) {
+        
+        table_structure <- 
+          structure_lookup_list[[table_code_name]]
+        
+        # are we in static mode, i.e. are all row groups of
+        # type 'static'? If yes, we won't need to supply the
+        # row_variable_value reactive. Currently this only
+        # happens with fertilizer_element_table (the columns
+        # are not defined)
+        static_mode <- is.null(table_structure$columns)
+        
+        # find the row variable. This will be used in the
+        # reactive below
+        if (!static_mode) {
+          for (row_group in table_structure$rows) {
+            # there is only one dynamic row group
+            if (row_group$type == 'dynamic') {
+              row_variable <- row_group$row_variable
+              row_variable_type <- 
+                structure_lookup_list[[row_variable]]$type
+              break
+            }
+          }
+        }
+        
+        # If we have row groups which depend on widget values
+        # in the main app, create a reactive from those values.
+        # This can either be determined by the choices of
+        # selectInput with multiple selections, or a
+        # numericInput which represents the number of rows.
+        row_variable_value <- reactive({
+          
+          if (static_mode) {
+            return(NULL)
+          }
+          
+          if (row_variable_type == "numericInput") {
+            number_of_rows <- input[[row_variable]]
+            
+            # check status of validator. If it is NULL all is
+            # ok
+            if (!isTruthy(number_of_rows) || 
+                !is.null(isolate(
+                  main_iv$validate()[[ns(row_variable)]]))) {
+              NULL
+            } else {
+              as.integer(number_of_rows)
+            }
+            
+          } else if (row_variable_type == "selectInput") {
+            input[[row_variable]]
+          }
+          
+        })
+        
+        # start the server function
+        tables[[table_code_name]]$result <<- 
+          mod_table_server(table_code_name, 
+                           row_variable_value, 
+                           language,
+                           tables[[table_code_name]]$set_values)
+      })
+      
+      # start server for all fileInput modules
+      sapply(fileInput_code_names, FUN = function(fileInput_code_name) {
+        
+        files[[fileInput_code_name]]$value <<-  
+          mod_fileInput_server(id = fileInput_code_name, 
+                               language = language,
+                               set_path = files[[fileInput_code_name]]$set_path,
+                               reset_path = files[[fileInput_code_name]]$reset_path)
+      })
+      
+    })
+    
     # when requested, prepare the entered data
     form_data <- reactive({
       
@@ -607,6 +630,8 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     # This only works when the form is already open.
     relevant_variables <- reactive({
       
+      if (dp()) message("Calculating relevant variables")
+      
       # these are the variables among which the relevant variables are
       all_variables <- get_category_names("variable_name")
       
@@ -649,6 +674,9 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     # When requested, list as a vector the variables among the currently 
     # relevant variables which are compulsory to be filled out.
     required_variables <- reactive({
+      
+      if (dp()) message("Calculating required variables")
+      
       required_widgets <- NULL
       required_table_widgets <- NULL
       

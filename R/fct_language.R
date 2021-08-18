@@ -44,6 +44,8 @@ get_category_names <- function(category, language = NULL) {
 #' @param is_variable_name If set to TRUE, then only variable names will be
 #'   searched for display names. If FALSE (the default), only non-variable names
 #'   will be searched.
+#' @param as_names Should the display names be set as the names of the vector
+#'   of code names? Default is FALSE.
 #'
 #' @details is_variable_name is needed because there might be clashes between
 #'   the variable and non-variable code names. E.g. organic_material is both an
@@ -53,9 +55,10 @@ get_category_names <- function(category, language = NULL) {
 #'
 #' @return The display name(s) as a vector of character strings in the same
 #'   order as the code names. If a display name is not found or language is
-#'   undefined, the code name is returned.
+#'   undefined, the code name is returned. If as_names is TRUE, the display
+#'   names are the names of the vector and code names are the values.
 get_disp_name <- function(code_name, language = NULL, 
-                          is_variable_name = FALSE) {
+                          is_variable_name = FALSE, as_names = FALSE) {
   if (is.null(code_name)) return(NULL)
   if (is.null(language)) return(code_name)
   
@@ -73,6 +76,11 @@ get_disp_name <- function(code_name, language = NULL,
   # replace missing display names with the corresponding code names
   display_name[is.na(display_name)] <- code_name[is.na(display_name)]
   display_name[display_name == missingval] <- ""
+  
+  if (as_names) {
+    names(code_name) <- display_name
+    display_name <- code_name
+  }
   
   return(display_name)
 }
