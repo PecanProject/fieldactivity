@@ -233,7 +233,7 @@ mod_event_list_server <- function(id, events, language, site) {
         return(get_data_table(list(), default_variables))
       }
       
-      if (dp()) message("event_list table_data reactive running")
+      if (dp()) message("event list table_data reactive running")
       
       # determine the columns displayed in the table
       table_variables <- c("date", "mgmt_event_notes")

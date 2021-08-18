@@ -12,7 +12,7 @@
 ###################################
 
 # change version number
-golem::set_golem_version(version = "0.2.0")
+golem::set_golem_version(version = "0.2.1")
 # if golem_wd in inst/golem-config.yml changes to anything other than 
 # here::here(), this will change it back
 golem::set_golem_wd()
