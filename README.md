@@ -33,41 +33,36 @@ You can install the app from [GitHub](https://github.com/) with:
 devtools::install_github("Ottis1/fieldactivity")
 ```
 
-## Example
+## Running the app
 
-To run the app, call run\_app with the following arguments to define the
-json file directory, the user database and the passphrase to the user
+To run the app, call `run_app` with the following arguments to define
+the json file directory, the user database and the passphrase to the
+user
 database:
 
 ``` r
-library(fieldactivity)
-run_app(json_file_path = "~/my_json_file_folder", 
-        user_db_path = "~/my_user_database.sqlite",
-        user_db_passphrase = "password123")
+options(golem.app.prod = TRUE) # run in production mode to enable user authentication
+
+fieldactivity::run_app(json_file_path = "~/my_json_file_folder", 
+                       user_db_path = "~/my_user_database.sqlite",
+                       user_db_passphrase = "password123")
 ```
 
 Check out the documentation of
 [Shinymanager](https://datastorm-open.github.io/shinymanager/) (the user
 authentication system used in the app) to find out how to create the
-user database.
-<!-- What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+user database. You can also use the supplied R script in
+`dev/create_user_db.R` for this purpose.
 
+## Modifyind the code
 
-```r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+To modify the code, clone the repository and set the working directory
+in R to the package folder (or open the RStudio project file
+`fieldactivity.Rproj`). You should now be able to run the app by running
+
+``` r
+golem::run_dev()
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/master/examples>.
-
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN. -->
+Modify `dev/run_dev.R` if necessary, this is the file which
+`golem::run_dev()` runs.
