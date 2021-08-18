@@ -54,7 +54,7 @@ authentication system used in the app) to find out how to create the
 user database. You can also use the supplied R script in
 `dev/create_user_db.R` for this purpose.
 
-## Modifyind the code
+## Modifying the code
 
 To modify the code, clone the repository and set the working directory
 in R to the package folder (or open the RStudio project file

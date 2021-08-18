@@ -1,6 +1,6 @@
 default:
   golem_name: fieldactivity
-  golem_version: 0.2.0
+  golem_version: 0.2.1
   app_prod: no
 production:
   app_prod: yes
