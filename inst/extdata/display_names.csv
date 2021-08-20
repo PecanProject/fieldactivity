@@ -7,7 +7,7 @@ mgmt_operations_event_choice,chemicals,chemicals application,kemikaalin levitys
 mgmt_operations_event_choice,grazing,grazing,laidunnus # not ICASA
 mgmt_operations_event_choice,weeding,mechanical extraction of weeds,rikkaruohojen kitkeminen
 mgmt_operations_event_choice,irrigation,irrigation,kastelu
-mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
+mgmt_operations_event_choice,mowing,mowing,niitto
 mgmt_operations_event_choice,observation,observation,havainto
 mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
 mgmt_operations_event_choice,inorg_mulch,placement of mulch,katteen levitys
