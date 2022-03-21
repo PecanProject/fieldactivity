@@ -143,7 +143,7 @@ variable_name,other_notes,Notes,Muistiinpanot
 #
 # labels for widgets, incl. help texts etc.
 #
-element_label,frontpage_title,Enter Management Events,Syötä tilanhoitotapahtumia
+element_label,frontpage_title,Enter Field Management Events,Syötä tilanhoitotapahtumia
 element_label,frontpage_text,"Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.","Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä."
 element_label,event_list_title,Events,Tapahtumat
 #   element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
