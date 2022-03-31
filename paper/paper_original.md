@@ -7,27 +7,14 @@ tags:
   - Field management event
   - Carbon cycle
   - Golem
-authors:
-  - name: Henri Kajasilta
-    orcid: 0000-0003-0872-xxxx
-    affiliation: 1 # (Multiple affiliations must be quoted) "1,2"
-  - name: Otto Kuusela
-    orcid: 0000-0000-0000-0000
-    affiliation: 2
-  - name: Istem Fer
-    affiliation: 1
-affiliations:
- - name: Finnish Meteorological Institute
-   index: 1
- - name: Institution 2
-   index: 2
-citation_author: Kajasilta et. al.
 date: 29 March 2022
-year: 2022
+output: pdf_document
+author: Henri Kajasilta^[Co-first author]
 bibliography: paper.bib
-output: rticles::joss_article
-csl: apa.csl
-journal: JOSS
+aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
+aas-journal: Astrophysical Journal <- The name of the AAS journal.
+affiliations:Henri Kajasilta, Finnish Meteorological Institute, Finland
+
 ---
 
 # Summary
