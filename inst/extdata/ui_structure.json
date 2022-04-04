@@ -174,8 +174,8 @@
             "code_name" : "harvest_area",
             "type" : "numericInput",
             "label" : "harvest_area_label",
-            "min" : 0,
-            "required" : true
+            "min" : 0
+            //"required" : true
           },
 
           "harvest_crop" : {
@@ -226,8 +226,8 @@
                   "type" : "numericInput",
                   "label" : "harvest_yield_harvest_dw_total_label",
                   "min" : 0,
-                  "sum_of" : "harvest_yield_harvest_dw",
-                  "required" : true
+                  "sum_of" : "harvest_yield_harvest_dw"
+                  //"required" : true
                 },
 
                 "harv_yield_harv_f_wt_total" : {

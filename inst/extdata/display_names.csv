@@ -7,7 +7,7 @@ mgmt_operations_event_choice,chemicals,chemicals application,kemikaalin levitys
 mgmt_operations_event_choice,grazing,grazing,laidunnus # not ICASA
 mgmt_operations_event_choice,weeding,mechanical extraction of weeds,rikkaruohojen kitkeminen
 mgmt_operations_event_choice,irrigation,irrigation,kastelu
-mgmt_operations_event_choice,mowing,mowing,ruohonleikkuu
+mgmt_operations_event_choice,mowing,mowing,niitto
 mgmt_operations_event_choice,observation,observation,havainto
 mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden valmistelu
 mgmt_operations_event_choice,inorg_mulch,placement of mulch,katteen levitys
@@ -143,7 +143,7 @@ variable_name,other_notes,Notes,Muistiinpanot
 #
 # labels for widgets, incl. help texts etc.
 #
-element_label,frontpage_title,Enter Management Events,Syötä tilanhoitotapahtumia
+element_label,frontpage_title,Enter Field Management Events,Syötä tilanhoitotapahtumia
 element_label,frontpage_text,"Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.","Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä."
 element_label,event_list_title,Events,Tapahtumat
 #   element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
@@ -182,8 +182,8 @@ element_label,planting_material_source_label,Source of seeds:,Siementen alkuper�
 element_label,planting_material_source_placeholder,"Commercial / own seeds, seed cultivar, etc.","Ostetut / omat siemenet, lajike, jne."
 element_label,planting_notes_label,Notes about the sowing:,Kylvömuistiinpanoja:
 element_label,planting_notes_placeholder,"Any notes or observations about the event, e.g. “soil was drier than usual at the time of sowing”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “maa oli tavallista kuivempi”"
-element_label,harvest_area_label,Harvest area (ha)*:,Pinta-ala (ha)*:
-element_label,harvest_yield_harvest_dw_total_label,"Yield, total dry weight (kg/ha)*:","Sato, kuivapaino yhteensä (kg/ha)*:" # not in ICASA
+element_label,harvest_area_label,Harvest area (ha):,Pinta-ala (ha):
+element_label,harvest_yield_harvest_dw_total_label,"Yield, total dry weight (kg/ha):","Sato, kuivapaino yhteensä (kg/ha):" # not in ICASA
 element_label,harv_yield_harv_f_wt_total_label,"Yield, total fresh weight (t/ha):","Sato, märkäpaino yhteensä (t/ha):" # not in ICASA
 element_label,yield_C_at_harvest_total_label,"Carbon (C) in yield, total (kg/ha):",Hiilen (C) määrä sadossa yhteensä (kg/ha): # not in ICASA
 element_label,harvest_crop_label,Harvested crop*:,Korjattu laji*:
