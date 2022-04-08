@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# R Shiny app for management data input
+# R Shiny app for field management data input
 
 <!-- badges: start -->
 
