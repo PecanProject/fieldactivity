@@ -9,6 +9,17 @@
       "required" : true
     },
     
+    "uservisible" : {
+      "code_name" : "uservisible",
+      "type" : "textInput",
+      "value": "temp"
+    },
+    
+    "uservisible_title" : {
+      "code_name" : "uservisible_title",
+      "type" : "textOutput"
+    },
+    
     "frontpage_title" : {
       "code_name" : "frontpage_title",
       "type" : "textOutput"

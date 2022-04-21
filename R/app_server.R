@@ -8,7 +8,7 @@
 app_server <- function(input, output, session) {
   # run interactive themer
   #bslib::bs_themer()
-
+  
   if (dp()) message("Initializing server function")
   
   # check_credentials returns a function to authenticate users
@@ -52,8 +52,14 @@ app_server <- function(input, output, session) {
     if (dp()) message("auth_result$user changed")
     
     if (auth_result$admin == "FALSE") {
+      
       updateSelectInput(session, "site", selected = auth_result$user)
       shinyjs::disable("site")
+      
+      updateTextInput(session, "uservisible", value = auth_result$user)
+      shinyjs::disable("uservisible")
+      
+      # shinyjs::show("usevisible")
     } else {
       shinyjs::enable("site")
       shinyjs::show("site")
