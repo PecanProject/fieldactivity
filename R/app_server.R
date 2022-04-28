@@ -63,6 +63,7 @@ app_server <- function(input, output, session) {
     } else {
       shinyjs::enable("site")
       shinyjs::show("site")
+      shinyjs::disable("uservisible")
     }
 
   })
