@@ -8,8 +8,17 @@ app_ui <- function(request) {
   
   # Define the UI of the application
   ui <- fluidPage(#theme = bslib::bs_theme(),
-
-    selectInput("language", choices = languages, width = "120px", label = ""),
+    
+    # adding the language to the left side and sitename to the right side on top of the application.
+    # Also added a few pixels on top, because otherwise sitename would be attached to the head of app.
+    fluidRow(
+      column(width = 1, offset = 10, div(style = "height:10px;background-color: white;", " "))),
+    fluidRow(
+      column(width = 2, selectInput("language", choices = languages, width = "120px", label = "")),
+      column(width = 2, offset = 8, textInput("uservisible", value = " ", width = "175px",
+                                              label = textOutput("uservisible_title")))
+      ),
+    
     
     # adding "" to the choices makes the default choice empty
     shinyjs::hidden(selectInput("site", 
@@ -19,6 +28,7 @@ app_ui <- function(request) {
     # set web page title
     titlePanel("", windowTitle = "Field Observatory"),
     
+
     # title to be displayed on the page
     h1(textOutput("frontpage_title")),
     
