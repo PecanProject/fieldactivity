@@ -12,7 +12,7 @@ app_ui <- function(request) {
     # adding the language to the left side and sitename to the right side on top of the application.
     # Also added a few pixels on top, because otherwise sitename would be attached to the head of app.
     fluidRow(
-      column(width = 2, offset = 8, div(style = "height:10px;background-color: green;", " "))),
+      column(width = 10, div(style = "height:10px;background-color: green;", " "))),
     fluidRow(
       column(width = 1, selectInput("language", choices = languages, width = "120px", label = ""),
              style = "margin-right: -1.4em;"),
