@@ -16,11 +16,11 @@ app_ui <- function(request) {
     fluidRow(
       column(width = 1, selectInput("language", choices = languages, width = "120px", label = ""),
              style = "margin-right: -1.4em;"),
-      column(width = 1, downloadButton("downloadInstructions", label = "Guide"),
-             style = "margin-top: 1.45em;"),
+      mod_download_ui("download_ui_1", label = textOutput("guide_text"), purp = "inst"),
       column(width = 2, offset = 8, textInput("uservisible", value = " ", width = "175px",
                                               label = textOutput("uservisible_title")))
       ),
+    
     
     
     # adding "" to the choices makes the default choice empty
