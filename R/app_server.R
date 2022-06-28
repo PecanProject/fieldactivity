@@ -74,6 +74,25 @@ app_server <- function(input, output, session) {
   
   ################
   
+  
+  callModule(mod_download_server_inst, "download_ui_1")
+  
+  
+  # observeEvent(input$downloadInstructions, {
+  #   output$downloadInstructions <- downloadHandler(
+  #     filename = function() {
+  #       paste("instructions_fieldactivity", ".csv", sep="")
+  #     },
+  #     content = function(file) {
+  #         write.csv(download_test, file)
+  #     }
+  #   )
+  # })
+  
+  
+  
+  ################
+  
   # lists of events by block on the currently viewed site
   # accessed like events$by_block[["0"]]
   # has to be done this way, because you can't remove values from reactiveValues
