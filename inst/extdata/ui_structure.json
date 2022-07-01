@@ -20,11 +20,6 @@
       "type" : "textOutput"
     },
     
-    "guide_text" : {
-      "code_name" : "guide_text",
-      "type" : "textOutput"
-    },
-    
     "frontpage_title" : {
       "code_name" : "frontpage_title",
       "type" : "textOutput"
