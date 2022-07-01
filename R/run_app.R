@@ -33,7 +33,7 @@ run_app <- function(
           selectInput("login_language",
                       label = "" ,
                       choices = languages),
-          readLines("./inst/user_doc/inst_frontpage.txt", warn = F)[1],
+          p(readLines("./inst/user_doc/inst_frontpage.txt", warn = F)[1], style="text-align: justify;"),
           br(), br(),
           readLines("./inst/user_doc/inst_frontpage.txt", warn = F)[3],
           br(),
