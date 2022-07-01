@@ -48,7 +48,7 @@ mod_download_server_inst <- function(input, output, session) {
       
       
       # Path to the instructions .md which will be rendered
-      rmarkdown::render("./inst/user_doc/user_instructions.md",
+      rmarkdown::render(system.file("user_doc", "user_instructions.md", package = "fieldactivity"),
                         output_file = file,
                         params = params,
                         envir = new.env(parent = globalenv())
