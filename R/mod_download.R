@@ -9,6 +9,8 @@
 #'
 #' @noRd 
 #'
+#' @import rmarkdown
+#' @import callr
 #' @importFrom shiny NS tagList 
 
 mod_download_ui <- function(id, label, purp) {
@@ -29,31 +31,43 @@ mod_download_ui <- function(id, label, purp) {
 #' Download Server Functions
 #'
 #' @noRd
+mod_download_server_inst <- function(id, report_path) {
+  
+  
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
 
-mod_download_server_inst <- function(input, output, session) {
-  ns <- session$ns
+    output$report <- downloadHandler(
+      # Name for the downloaded file
+      filename = "guideFieldactivity.html",
+      content = function(file) {
+        params <- list(n = input$n)
+  
+        # id <- showNotification(
+        #   "Rendering report...",
+        #   duration = 8,
+        #   closeButton = FALSE
+        # )
+        # on.exit(removeNotification(id), add = TRUE)
+        
+        if (dp()) message("Moving to rendering the .md file")
+        
+        # Path to the instructions .md which will be rendered
+        callr::r(
+          render_report,
+          list(input = report_path, output = file, params = params)
+        )
+      }
+    )
+  }) #Moduleserver close
+}
 
-  output$report <- downloadHandler(
-    # Name for the downloaded file
-    filename = "guideFieldactivity.html",
-    content = function(file) {
-      params <- list(n = input$n)
 
-      id <- showNotification(
-        "Rendering report...",
-        duration = NULL,
-        closeButton = FALSE
-      )
-      on.exit(removeNotification(id), add = TRUE)
-      
-      
-      # Path to the instructions .md which will be rendered
-      rmarkdown::render(system.file("user_doc", "user_instructions.md", package = "fieldactivity"),
-                        output_file = file,
-                        params = params,
-                        envir = new.env(parent = globalenv())
-      )
-    }
+render_report <- function(input, output, params) {
+  rmarkdown::render(input,
+                    output_file = output,
+                    params = params,
+                    envir = new.env(parent = globalenv())
   )
 }
 
