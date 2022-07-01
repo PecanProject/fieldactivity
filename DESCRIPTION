@@ -11,6 +11,7 @@ License: BSD_3_clause + file LICENSE
 Imports: 
     attempt,
     bslib,
+    callr,
     config (>= 0.3.1),
     DT,
     glue,
@@ -21,6 +22,7 @@ Imports:
     methods,
     pkgload,
     processx,
+    rmarkdown,
     shiny (>= 1.6.0),
     shinyjs,
     shinymanager (>= 1.0.400),
@@ -37,7 +39,6 @@ Suggests:
     testthat (>= 3.0.0),
     shinytest,
     knitr,
-    rmarkdown,
     markdown
 Config/testthat/edition: 3
 Language: en-US
