@@ -59,6 +59,7 @@ app_server <- function(input, output, session) {
       updateTextInput(session, "uservisible", value = auth_result$user)
       shinyjs::disable("uservisible")
       
+      
       # shinyjs::show("usevisible")
     } else {
       shinyjs::enable("site")
@@ -76,7 +77,10 @@ app_server <- function(input, output, session) {
   
   # Module for download server, need to decide if ui is separated to
   # different functions, if more download buttons in required
-  callModule(mod_download_server_inst, "download_ui_1")
+  report_path <- tempfile(fileext = ".md")
+  file.copy(system.file("user_doc", "user_instructions.md", package = "fieldactivity"), report_path, overwrite = TRUE)
+  
+  mod_download_server_inst("download_ui_1", report_path)
   
   
   # observeEvent(input$downloadInstructions, {
