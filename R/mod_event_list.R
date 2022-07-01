@@ -56,6 +56,7 @@ mod_event_list_ui <- function(id) {
 #' @param language A reactive expression holding the current UI language
 #' @param site A reactive expression holding the current site name
 #' @noRd
+
 mod_event_list_server <- function(id, events, language, site) {
   
   stopifnot(is.reactive(events))
