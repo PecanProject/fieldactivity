@@ -592,7 +592,7 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         
         # format Date value to character string and replace with "" if that
         # fails for some reason
-        if (class(value_to_save) == "Date") {
+        if (inherits(value_to_save, "Date")) {
           value_to_save <- tryCatch(
             expr = format(value_to_save, date_format_json),
             error = function(cnd) {
