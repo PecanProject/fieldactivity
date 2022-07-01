@@ -10,7 +10,7 @@ pagetitle: fieldactivity
 ### Login
 In order to use the application, you should have a site account registered. If you don’t have an account yet, see the contact section for requesting one, otherwise you should be able to fill in the provided sitename and password to login.
 
-![Login page view](./images_user_instructions/loginpage.png)
+<!---![Login page view](./images_user_instructions/loginpage.png)-->
 
 ### Layout
 The UI of the application is simple, but we will provide an overview of what functionalities and views the user can utilise.
@@ -18,21 +18,21 @@ The UI of the application is simple, but we will provide an overview of what fun
 1. Change the language between English and Finnish.
 2. Check the sitename you have logged in with. Next to this field, by pressing plus sign (+), it gives an option to logout.
 
-![Overview of layout of the application](./images_user_instructions/Layout.png)
+<!---![Overview of layout of the application](./images_user_instructions/Layout.png)-->
 
 
 3. Change the shown subset of the events based on the type of events, block and year.
 
 As a default, all of the events from all of the (available) blocks and years are visible for the user. With the first option menu, the user is able to select which type of events she wants to keep visible on the summary table. With the second and third option menus, the user can pick the block and the year respectively to be displayed. If there are multiple events displayed, on the bottom of the table there is a navigation tool to switch the shown page.
 
-![Summary table of the events](./images_user_instructions/Eventtable.png)
+<!---![Summary table of the events](./images_user_instructions/Eventtable.png)-->
 
 
 ### Filling in events
 Options for filling in the event will open, when pressing the *Add event* button. Start filling in the management event information by first choosing the block wherein the event has occurred, the name of this activity/event and a date for when it was conducted. One may also provide a short description that will be visible in the event table and later on give a quick reminder to which occurrence the event was related.
 
 
-![Adding a new event](./images_user_instructions/Addevent.png)
+<!---![Adding a new event](./images_user_instructions/Addevent.png)-->
 
 After choosing the type of activity, one should fill in the data about this activity. Different types of activities have different fields to be filled in, for example, after choosing tillage one should fill in the type of tillage, how the tillage was implemented and what the depth of the tillage was. Required option fields are marked with a star sign (*).
 
@@ -47,7 +47,7 @@ Here are some notes that generally apply to all of the activities and that are g
 - **Events can be modified after saving them**, so there is no need to stress about doing something irreversible.
 
 
-![Example of the view for filling in the (tilling) event](./images_user_instructions/eventexample_1.png)
+<!---![Example of the view for filling in the (tilling) event](./images_user_instructions/eventexample_1.png)-->
 
 
 ### Clone event
