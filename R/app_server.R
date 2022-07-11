@@ -59,6 +59,7 @@ app_server <- function(input, output, session) {
       updateTextInput(session, "uservisible", value = auth_result$user)
       shinyjs::disable("uservisible")
       
+      
       # shinyjs::show("usevisible")
     } else {
       shinyjs::enable("site")
@@ -71,6 +72,16 @@ app_server <- function(input, output, session) {
   if (golem::app_dev()) {
     shinyjs::show("site")
   }
+  
+  ################
+  
+  # Module for download server, need to decide if ui is separated to
+  # different functions, if more download buttons in required
+  
+  mod_download_server_inst("download_ui_1", report_path)
+  
+  
+  
   
   ################
   
