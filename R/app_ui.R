@@ -17,8 +17,8 @@ app_ui <- function(request) {
       column(width = 1, selectInput("language", choices = languages, width = "120px", label = ""),
              style = "margin-right: -1.4em;"),
       mod_download_ui("download_ui_1", label = textOutput("guide_text"), purp = "inst"),
-      column(width = 2, offset = 8, textInput("uservisible", value = " ", width = "175px",
-                                              label = textOutput("uservisible_title")))
+      column(width = 2, offset = 9, textInput("uservisible", value = " ", width = "175px",
+                                              label = textOutput("uservisible_title")), style = "margin-top: -2em;")
       ),
     
     
