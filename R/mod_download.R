@@ -18,10 +18,9 @@ mod_download_ui <- function(id, label, purp) {
   
   if(purp == "inst"){
     tagList(
-      column(width = 1,
       downloadButton(ns("report"), label, class = "butt", icon = icon("download"),
       tags$head(tags$style(".butt{width:85px;} .butt{display: flex;}
-                          .butt{margin-top: 1.45em;}")))))
+                          .butt{margin-top: 1.45em;}"))))
   } else {
     # Not decided
   }
@@ -42,7 +41,25 @@ mod_download_server_inst <- function(id, report_path) {
       filename = "guideFieldactivity.html",
       content = function(file) {
         params <- list(n = input$n)
-  
+        
+        if(dp()) message("Copying instructions to temp file")
+        
+        # Paths to the rendered document + used images
+        report_path <- file.path(tempdir(), "user_instructions.md")
+        report_img_1 <- file.path(tempdir(), "loginpage.png")
+        report_img_2 <- file.path(tempdir(), "Layout.png")
+        report_img_3 <- file.path(tempdir(), "Eventtable.png")
+        report_img_4 <- file.path(tempdir(), "Addevent.png")
+        report_img_5 <- file.path(tempdir(), "eventexample_1.png")
+        
+        # Copu the actual files to tmp folder. Images need to be on the same folder as instructions .md
+        file.copy(system.file("user_doc", "user_instructions.md", package = "fieldactivity"), report_path, overwrite = TRUE)
+        file.copy(system.file("user_doc/images_user_instructions", "loginpage.png", package = "fieldactivity"), report_img_1, overwrite = TRUE)
+        file.copy(system.file("user_doc/images_user_instructions", "Layout.png", package = "fieldactivity"), report_img_2, overwrite = TRUE)
+        file.copy(system.file("user_doc/images_user_instructions", "Eventtable.png", package = "fieldactivity"), report_img_3, overwrite = TRUE)
+        file.copy(system.file("user_doc/images_user_instructions", "Addevent.png", package = "fieldactivity"), report_img_4, overwrite = TRUE)
+        file.copy(system.file("user_doc/images_user_instructions", "eventexample_1.png", package = "fieldactivity"), report_img_5, overwrite = TRUE)
+        
         # id <- showNotification(
         #   "Rendering report...",
         #   duration = 8,
