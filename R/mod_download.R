@@ -54,7 +54,7 @@ mod_download_server_inst <- function(id) {
         report_img_4 <- file.path(tempdir(), "Addevent.png")
         report_img_5 <- file.path(tempdir(), "eventexample_1.png")
         
-        # Copu the actual files to tmp folder. Images need to be on the same folder as instructions .md
+        # Copy the actual files to tmp folder. Images need to be on the same folder as instructions .md
         file.copy(system.file("user_doc", "user_instructions.md", package = "fieldactivity"), report_path, overwrite = TRUE)
         file.copy(system.file("user_doc/images_user_instructions", "loginpage.png", package = "fieldactivity"), report_img_1, overwrite = TRUE)
         file.copy(system.file("user_doc/images_user_instructions", "Layout.png", package = "fieldactivity"), report_img_2, overwrite = TRUE)
@@ -119,7 +119,7 @@ mod_download_table <- function(id, label) {
 #'
 #' @importFrom utils write.csv
 #'
-mod_download_server_table <- function(id, user_auth) {
+mod_download_server_table <- function(id, user_auth, base_folder = json_file_base_folder()) {
   
   
   moduleServer(id, function(input, output, session){
@@ -133,17 +133,18 @@ mod_download_server_table <- function(id, user_auth) {
         
         if(dp()) message("Fetching the event table observations")
         user <- NULL
-        if (golem::app_dev()) {
-          file_path <- "dev/dev_events"
-          #user <- "qvidja"
-        } else {
-          if(dp()) message("Data path changed to production")
-          file_path <-"/data/fo-event-files"
-          
-          if(dp()) message("Checking current user")
-            user <- user_auth
-            #print(user)
-        }
+        # if (golem::app_dev()) {
+        #   file_path <- "dev/dev_events"
+        #   #user <- "qvidja"
+        # } else {
+        if(dp()) message("Data path changed to production")
+        file_path <- base_folder
+        #print(file_path)
+        
+        if(dp()) message("Checking current user")
+          user <- user_auth
+          #print(user)
+        # }
         # Create the file path based on the production status and the user
         file_path <- file.path(file_path, user)
         events_file <- NULL
