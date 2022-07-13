@@ -1,7 +1,8 @@
 Package: fieldactivity
 Title: An app for keeping track of field activity
 Version: 0.2.1
-Authors@R: person('Otto', 'Kuusela', email = 'otto.kuusela@helsinki.fi', role = c('cre', 'aut'))
+Authors@R: c(person('Otto', 'Kuusela', email = 'otto.kuusela@helsinki.fi', role = 'cre'),
+             person('Henri', 'Kajasilta', email = 'henri.kajasilta@fmi.fi', role = 'aut'))
 Description: An app for keeping track of field activity in the Field
   Observatory project. Built using Shiny, the application allows farmers to 
   enter information about common farming events like tillage, sowing and 
