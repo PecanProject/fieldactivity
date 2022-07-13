@@ -44,6 +44,9 @@ mod_event_list_ui <- function(id) {
                     width = "100px")),
     div(style="display: inline-block;vertical-align:middle;", "."),
     
+    div(style="display: inline-block;vertical-align:0.2em;position:absolute;right:5em;",
+        mod_download_table("event_table", label = "Event table (csv)")),
+    
     # front page data table
     DT::dataTableOutput(ns("table"))
   )
