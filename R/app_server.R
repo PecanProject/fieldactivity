@@ -78,8 +78,9 @@ app_server <- function(input, output, session) {
   # Module for download server, need to decide if ui is separated to
   # different functions, if more download buttons in required
   
-  mod_download_server_inst("download_ui_1", report_path)
+  mod_download_server_inst("download_ui_1")
   
+  mod_download_server_table("event_table", auth_result$user)
   
   
   

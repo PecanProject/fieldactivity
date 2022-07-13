@@ -10,7 +10,6 @@
 #' @noRd 
 #'
 #' @import rmarkdown
-#' @import callr
 #' @importFrom shiny NS tagList 
 
 mod_download_ui <- function(id, label, purp) {
@@ -27,10 +26,12 @@ mod_download_ui <- function(id, label, purp) {
 }
 
 
+
+
 #' Download Server Functions
 #'
 #' @noRd
-mod_download_server_inst <- function(id, report_path) {
+mod_download_server_inst <- function(id) {
   
   
   moduleServer(id, function(input, output, session){
@@ -89,6 +90,83 @@ render_report <- function(input, output, params) {
 
   )
 }
+
+
+
+#' UI for exporting the eventtable as csv
+#'
+#' @param id Internal parameters for {shiny}
+#' @param label Label for download button
+#'
+#' @noRd
+#' 
+
+mod_download_table <- function(id, label) {
+  ns <- NS(id)
+  
+  tagList(
+    downloadButton(ns("eventtable"), label, class = "butt", icon = icon("download")))
+                   #tags$head(tags$style(".butt{width:85px;} .butt{display: flex;}")))))
+}
+
+
+
+
+#' Server side for downloading the csv export
+#'
+#' @noRd
+#'
+#' @importFrom utils write.csv
+#'
+mod_download_server_table <- function(id, user_auth) {
+  
+  
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+    
+    output$eventtable <- downloadHandler(
+      # Name for the downloaded file
+      filename = "event_table_fa.csv",
+      
+      content = function(file) {
+        
+        if(dp()) message("Fetching the event table observations")
+        user <- NULL
+        if (golem::app_dev()) {
+          file_path <- "dev/dev_events"
+          #user <- "qvidja"
+        } else {
+          if(dp()) message("Data path changed to production")
+          file_path <-"/data/fo-event-files"
+          
+          if(dp()) message("Checking current user")
+            user <- user_auth
+            #print(user)
+        }
+        # Create the file path based on the production status and the user
+        file_path <- file.path(file_path, user)
+        events_file <- NULL
+        if(length(list.files(file_path)) != 0){
+          for(i in list.files(file_path)){
+            if(is.null(events_file)){
+              events_file <- cbind(block = i, jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events)
+            } else {
+              events_file <- merge(events_file, cbind(block = i, jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events), all = T)
+            }
+          }
+          
+          
+          if (dp()) message("Creating an export of the events")
+          write.csv(events_file, file, row.names = FALSE, quote=FALSE)
+        } else {
+          write.csv("Error with a file path. Under maintenance", file, row.names = FALSE, quote = FALSE)
+        }
+        
+      }
+    )
+  }) #Moduleserver close
+}
+
 
 
 
