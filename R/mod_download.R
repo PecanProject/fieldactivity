@@ -105,8 +105,8 @@ mod_download_table <- function(id, label) {
   ns <- NS(id)
   
   tagList(
-    downloadButton(ns("eventtable"), label, class = "butt", icon = icon("download")))
-                   #tags$head(tags$style(".butt{width:85px;} .butt{display: flex;}")))))
+    downloadButton(ns("eventtable"), label, class = "butt", icon = icon("download")),
+                   tags$head(tags$style(".butt{width:150px;} .butt{display: flex;}")))
 }
 
 
