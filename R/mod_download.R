@@ -11,6 +11,7 @@
 #'
 #' @import rmarkdown
 #' @importFrom shiny NS tagList 
+#' @importFrom callr r
 
 mod_download_ui <- function(id, label, purp) {
   ns <- NS(id)
