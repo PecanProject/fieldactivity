@@ -82,6 +82,8 @@ app_server <- function(input, output, session) {
   
   mod_download_server_table("event_table", auth_result$user)
   
+  mod_download_server_json("json_zip", auth_result$user)
+  
   
   
   ################
