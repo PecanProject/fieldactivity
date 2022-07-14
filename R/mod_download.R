@@ -157,7 +157,9 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
             }
           }
           
+          # Flattening the lists and removing extra "," that can cause parsing issues
           events_file <- apply(events_file, 2, as.character)
+          events_file <- apply(events_file, 2, function(x) gsub(",", " ", x))
           
           if (dp()) message("Creating an export of the events")
           write.csv(events_file, file, row.names = FALSE, quote=FALSE)
