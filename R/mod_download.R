@@ -157,6 +157,7 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
             }
           }
           
+          events_file <- apply(events_file, 2, as.character)
           
           if (dp()) message("Creating an export of the events")
           write.csv(events_file, file, row.names = FALSE, quote=FALSE)
