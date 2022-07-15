@@ -39,6 +39,16 @@
       "code_name" : "event_list_title",
       "type" : "textOutput"
     },
+    
+    "json_dl_label" : {
+      "code_name" : "json_dl_label",
+      "type" : "textOutput"
+    },
+    
+    "csv_dl_label" : {
+      "code_name" : "csv_dl_label",
+      "type" : "textOutput"
+    },
 
     "table_filter_text_1" : {
       "code_name" : "table_filter_text_1",
