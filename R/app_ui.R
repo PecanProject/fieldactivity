@@ -10,16 +10,18 @@ app_ui <- function(request) {
   ui <- fluidPage(#theme = bslib::bs_theme(),
     
     # adding the language to the left side and sitename to the right side on top of the application.
-    # Also added a few pixels on top, because otherwise sitename would be attached to the head of app.
-    fluidRow(
-      column(width = 10, div(style = "height:10px;background-color: white;", " "))),
-    fluidRow(
-      column(width = 1, selectInput("language", choices = languages, width = "120px", label = ""),
-             style = "margin-right: -1.4em;"),
-      mod_download_ui("download_ui_1", label = textOutput("guide_text"), purp = "inst"),
-      column(width = 2, offset = 9, textInput("uservisible", value = " ", width = "175px",
-                                              label = textOutput("uservisible_title")), style = "margin-top: -2em;")
-      ),
+    tagList(
+      # Top of the page elements
+      div(style="display: inline-block;vertical-align:middle;",
+          selectInput("language", choices = languages, width = "120px", label = ""), inline = TRUE),
+      
+      div(style="display: inline-block;vertical-align:0.15em;",
+          mod_download_ui("download_ui_1", label = textOutput("guide_text"), purp = "inst")),
+          
+      div(style="display: inline-block;position:absolute;right:10em;margin-top:.5em;",
+          textInput("uservisible", value = " ", width = "175px",
+                    label = textOutput("uservisible_title")))
+    ),
     
     
     
