@@ -29,7 +29,8 @@ Imports:
     shinymanager (>= 1.0.400),
     shinyvalidate (>= 0.1.1),
     stringr,
-    tools
+    tools,
+    zip
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.0

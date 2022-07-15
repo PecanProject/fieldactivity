@@ -12,6 +12,7 @@
 #' @import rmarkdown
 #' @importFrom shiny NS tagList 
 #' @importFrom callr r
+#' @importFrom zip zip
 
 mod_download_ui <- function(id, label, purp) {
   ns <- NS(id)
@@ -94,7 +95,7 @@ render_report <- function(input, output, params) {
 
 
 
-#' UI for exporting the eventtable as csv
+#' UI for exporting the eventtable as csv // json zip file
 #'
 #' @param id Internal parameters for {shiny}
 #' @param label Label for download button
@@ -108,6 +109,14 @@ mod_download_table <- function(id, label) {
   tagList(
     downloadButton(ns("eventtable"), label, class = "butt", icon = icon("download")),
                    tags$head(tags$style(".butt{width:150px;} .butt{display: flex;}")))
+}
+
+mod_download_json <- function(id, label) {
+  ns <- NS(id)
+  
+  tagList(
+    downloadButton(ns("eventjson"), label, class = "butt", icon = icon("download")),
+    tags$head(tags$style(".butt{width:150px;} .butt{display: flex;}")))
 }
 
 
@@ -133,18 +142,16 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
         
         if(dp()) message("Fetching the event table observations")
         user <- NULL
-        # if (golem::app_dev()) {
-        #   file_path <- "dev/dev_events"
-        #   #user <- "qvidja"
-        # } else {
-        if(dp()) message("Data path changed to production")
-        file_path <- base_folder
-        #print(file_path)
-        
-        if(dp()) message("Checking current user")
-          user <- user_auth
-          #print(user)
-        # }
+        if (golem::app_dev()) {
+          file_path <- "dev/dev_events"
+          #user <- "qvidja"
+        } else {
+          if(dp()) message("Data path on production")
+          file_path <- base_folder
+          
+          if(dp()) message("Checking current user")
+            user <- user_auth
+        }
         # Create the file path based on the production status and the user
         file_path <- file.path(file_path, user)
         events_file <- NULL
@@ -164,7 +171,7 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
           if (dp()) message("Creating an export of the events")
           write.csv(events_file, file, row.names = FALSE, quote=FALSE)
         } else {
-          write.csv("Error with a file path. Under maintenance", file, row.names = FALSE, quote = FALSE)
+          write.csv("Error with a file path. Under maintenance or right directories not found.", file, row.names = FALSE, quote = FALSE)
         }
         
       }
@@ -173,7 +180,71 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
 }
 
 
+#' Server side for download button for json-files
+#'
+#' @param id Internal parameters for {shiny}
+#' @param user_auth Site name in order to download correct site files
+#' @param base_folder Location of directories in server
+#'
+#' @noRd
+#'
 
+mod_download_server_json <- function(id, user_auth, base_folder = json_file_base_folder()) {
+  
+  
+  moduleServer(id, function(input, output, session){
+    ns <- session$ns
+    
+    output$eventjson <- downloadHandler(
+      # Name for the downloaded file
+      # With zip-files it has to be this way, otherwise it won't work
+      filename = function() {
+        paste("events_json", "zip", sep=".")
+      },
+      
+      content = function(file) {
+        
+        if(dp()) message("Fetching the event table observations (for json export)")
+        user <- NULL
+        if (golem::app_dev()) {
+          file_path <- "dev/dev_events"
+          #user <- "qvidja"
+        } else {
+          if(dp()) message("Data path on production")
+          file_path <- base_folder
+          
+          if(dp()) message("Checking current user")
+          user <- user_auth
+        }
+        # Create the file path based on the production status and the user
+        file_path <- file.path(file_path, user)
+        # tmp directory with sub directory for json files
+        tmpdr <- tempdir()
+        if(!file.exists(file.path(tmpdr, "json"))){
+          dir.create(paste0(tmpdr, "/json"))
+        } 
+        
+        # Path to subdirectory
+        tmpdrjson <- file.path(tmpdr, "json")
+        
+        if(length(list.files(file_path)) != 0){
+          for(block_name in list.files(file_path)){
+            block_json <- file.path(tmpdrjson, paste0("events_", block_name, ".json"))
+            file.copy(file.path(file_path, block_name, "events.json"), block_json)
+          }
+          
+          if (dp()) message("Creating a zip file of the json files")
+          zip::zip(zipfile=file, files="json", root = tmpdr)
+        } else {
+          emptydir <- file.path(tmpdr, "Invalid_path.csv")
+          file.copy(write.csv("Invalid file path"), emptydir)
+          zip::zip(zipfile=file, files="json", root = tmpdr)
+        }
+      },
+      contentType = "application/zip"
+    )
+  }) #Moduleserver close
+}
 
 
 
