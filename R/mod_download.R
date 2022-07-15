@@ -18,10 +18,10 @@ mod_download_ui <- function(id, label, purp) {
   ns <- NS(id)
   
   if(purp == "inst"){
-    tagList(
-      downloadButton(ns("report"), label, class = "butt", icon = icon("download"),
-      tags$head(tags$style(".butt{width:85px;} .butt{display: flex;}
-                          .butt{margin-top: 1.45em;}"))))
+    #tagList(
+      downloadButton(ns("report"), label, class = "butt", icon = icon("download"), style = "width:85px;")
+      # #tags$head(tags$style(".butt{width:85px;} .butt{display: flex;}
+      #                     .butt{margin-top: 1.45em;}"))))
   } else {
     # Not decided
   }
