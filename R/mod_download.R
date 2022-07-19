@@ -141,10 +141,12 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
       content = function(file) {
         
         if(dp()) message("Fetching the event table observations")
-        user <- NULL
+        #user <- NULL
         if (golem::app_dev()) {
+          if(dp()) message("Development state")
           file_path <- "dev/dev_events"
-          #user <- "qvidja"
+          user <- "qvidja"
+          
         } else {
           if(dp()) message("Data path on production")
           file_path <- base_folder
@@ -205,10 +207,12 @@ mod_download_server_json <- function(id, user_auth, base_folder = json_file_base
       content = function(file) {
         
         if(dp()) message("Fetching the event table observations (for json export)")
-        user <- NULL
+        
         if (golem::app_dev()) {
+          if(dp()) message("Development state")
           file_path <- "dev/dev_events"
-          #user <- "qvidja"
+          user <- "qvidja"
+          
         } else {
           if(dp()) message("Data path on production")
           file_path <- base_folder
@@ -236,8 +240,9 @@ mod_download_server_json <- function(id, user_auth, base_folder = json_file_base
           if (dp()) message("Creating a zip file of the json files")
           zip::zip(zipfile=file, files="json", root = tmpdr)
         } else {
-          emptydir <- file.path(tmpdr, "Invalid_path.csv")
-          file.copy(write.csv("Invalid file path"), emptydir)
+          #emptydir <- file.path(tmpdr, "Invalid_path.csv")
+          if(dp()) message("Return a csv with an error")
+          write.csv("Invalid file path", file.path(tmpdrjson, "Error.csv"), row.names = FALSE)
           zip::zip(zipfile=file, files="json", root = tmpdr)
         }
       },
