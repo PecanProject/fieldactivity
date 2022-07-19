@@ -13,7 +13,17 @@ mod_event_list_server(id, events, language, site)
 
 \item{language}{A reactive expression holding the current UI language}
 
-\item{site}{A reactive expression holding the current site name}
+\item{site}{A reactive expression holding the current site name
+
+Update year choices in event list filter
+
+Adds as choices all the years for which events have been recorded
+Update block choices in event list filter
+
+Add all blocks of the current site as choices
+Update activity choices in event list filter
+
+Only used when the language is changed.}
 }
 \description{
 event_list Server Functions
