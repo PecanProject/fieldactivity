@@ -44,6 +44,10 @@ app_server <- function(input, output, session) {
     # this seems to refresh the authentication UI
     auth_result <- shinymanager::secure_server(check_credentials = 
                                                  credential_checker)
+    
+    
+    # Update the authentication page language
+    mod_auth_page_server("auth_text", input$login_language)
   })
   
   # runs when logged in
