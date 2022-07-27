@@ -44,6 +44,12 @@ mod_event_list_ui <- function(id) {
                     width = "100px")),
     div(style="display: inline-block;vertical-align:middle;", "."),
     
+    div(style="display: inline-block;vertical-align:0.2em;position:absolute;right:15em;",
+        mod_download_json("json_zip", label = textOutput("json_dl_label"))),
+    
+    div(style="display: inline-block;vertical-align:0.2em;position:absolute;right:5em;",
+        mod_download_table("event_table", label = textOutput("csv_dl_label"))),
+    
     # front page data table
     DT::dataTableOutput(ns("table"))
   )
@@ -55,7 +61,8 @@ mod_event_list_ui <- function(id) {
 #' @param events A reactive expression holding a list of events to display in the event list
 #' @param language A reactive expression holding the current UI language
 #' @param site A reactive expression holding the current site name
-#' @noRd
+#'
+
 mod_event_list_server <- function(id, events, language, site) {
   
   stopifnot(is.reactive(events))

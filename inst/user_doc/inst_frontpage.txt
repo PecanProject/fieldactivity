@@ -1,0 +1,6 @@
+In order to use the application, you should have a site account registered. If you don’t have an account yet, see the contact persons below for requesting one, otherwise you should be able to fill in the provided sitename and password to login. Instructions in detail are available when logged in to the application.
+Käyttääksesi sovellusta sinulla täytyy olla sovellukseen rekisteröity tila. Jos tämä on tehty, voit kirjautua sovellukseen saamiesi käyttäjätietojen avulla (sijainti ja salasana), muussa tapauksessa ota yhteyttä alla oleviin henkilöihin tilasi rekisteröimistä varten. Oppaan sovelluksen käyttämiseksi voit ladata sovellukseen kirjautumisen jälkeen (toistaiseksi vain englanniksi).
+Henri Kajasilta        henri.kajasilta@fmi.fi        [Eng / Fin]
+Istem Fer                istem.fer@fmi.fi                [Eng]
+Fill in feature/bug issues directly 
+Ilmianna kehityskohteita ja ongelmia suoraan 

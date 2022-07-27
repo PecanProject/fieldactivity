@@ -181,3 +181,55 @@ set_login_language <- function(language) {
     )
   }
 }
+
+
+#' UI side of the displayed texts in login page
+#'
+#' @param id 
+#'
+#' @noRd
+mod_select_lan <- function(id) {
+  ns <- NS(id)
+  
+  tagList(
+    p(textOutput(ns("frontpage1")),style="text-align: justify;"),
+    br(),
+    readLines(system.file("user_doc", "inst_frontpage.txt", package = "fieldactivity"), warn = F)[3],
+    br(),
+    readLines(system.file("user_doc", "inst_frontpage.txt", package = "fieldactivity"), warn = F)[4],
+    br(),
+    tags$hr(style="border-color: steelblue;"),
+    div(style="display: inline-block;vertical-align:middle;", textOutput(ns("frontpage2"))),
+    div(style="display: inline-block;vertical-align:middle;", tags$a(href="https://github.com/Ottis1/fieldactivity/issues", target="_blank", textOutput(ns("frontpage3")))))
+    #style="display: inline-block;"))
+}
+
+
+
+
+#' Server side of the language selected in login page
+#'
+#' @param id 
+#' @param language This comes from the selected login language
+#'
+#' @noRd
+mod_auth_page_server <- function(id, language) {
+  
+  # Create a reactive value, language is not one in this case
+  i <- reactiveVal()
+  #stopifnot(is.reactive(language))
+  
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
+
+    # Give i a value based on the login input language that has been chosen.
+    i(ifelse(identical(language, "disp_name_eng"), 0, 1))
+
+    # Outputs for login page, change the short introduction and path to github page
+    output$frontpage1 <- renderText(readLines(system.file("user_doc", "inst_frontpage.txt", package = "fieldactivity"), warn = F)[1+i()])
+    output$frontpage2 <- renderText(readLines(system.file("user_doc", "inst_frontpage.txt", package = "fieldactivity"), warn = F)[5+i()])
+    output$frontpage3 <- renderText(ifelse(i() == 0, "here", "täällä"))
+    
+  })
+}

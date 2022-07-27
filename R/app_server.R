@@ -8,7 +8,7 @@
 app_server <- function(input, output, session) {
   # run interactive themer
   #bslib::bs_themer()
-
+  
   if (dp()) message("Initializing server function")
   
   # check_credentials returns a function to authenticate users
@@ -44,6 +44,10 @@ app_server <- function(input, output, session) {
     # this seems to refresh the authentication UI
     auth_result <- shinymanager::secure_server(check_credentials = 
                                                  credential_checker)
+    
+    
+    # Update the authentication page language
+    mod_auth_page_server("auth_text", input$login_language)
   })
   
   # runs when logged in
@@ -52,11 +56,19 @@ app_server <- function(input, output, session) {
     if (dp()) message("auth_result$user changed")
     
     if (auth_result$admin == "FALSE") {
+      
       updateSelectInput(session, "site", selected = auth_result$user)
       shinyjs::disable("site")
+      
+      updateTextInput(session, "uservisible", value = auth_result$user)
+      shinyjs::disable("uservisible")
+      
+      
+      # shinyjs::show("usevisible")
     } else {
       shinyjs::enable("site")
       shinyjs::show("site")
+      shinyjs::disable("uservisible")
     }
 
   })
@@ -64,6 +76,19 @@ app_server <- function(input, output, session) {
   if (golem::app_dev()) {
     shinyjs::show("site")
   }
+  
+  ################
+  
+  # Module for download server, need to decide if ui is separated to
+  # different functions, if more download buttons in required
+  
+  mod_download_server_inst("download_ui_1")
+  
+  mod_download_server_table("event_table", auth_result$user)
+  
+  mod_download_server_json("json_zip", auth_result$user)
+  
+  
   
   ################
   

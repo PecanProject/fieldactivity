@@ -57,6 +57,8 @@ variable_name,tillage_operations_depth,Tillage depth (cm),Muokkaussyvyys (cm)
 variable_name,tillage_treatment_notes,Tillage notes,Muistiinpanot muokkauksesta
 variable_name,fertilizer_type,Fertilizer type,Lannoitteen tyyppi
 variable_name,organic_material,Organic material,Eloperäinen aine
+#  variable_name,fert_animal,Fertilizer animal,Lannoite eläin
+variable_name,animal_fert_usage,Fert animal,Lannoite e
 variable_name,org_matter_moisture_conc,Moisture concentration (%),Aineen kosteus (%)
 variable_name,org_matter_carbon_conc,Carbon (C) concentration (%),Hiilen (C) määrä aineessa (%)
 variable_name,fertilizer_product_name,Name of fertilizer,Lannoitteen nimi
@@ -65,7 +67,8 @@ variable_name,fertilizer_material_source,Fertilizer material source,Lannoitteen 
 variable_name,fertilizer_applic_method,Application method,Levitystapa
 variable_name,application_depth_fert,Application depth (cm),Levityssyvyys (cm)
 variable_name,fertilizer_total_amount,Total amount of fertilizer (kg/ha),Lannoitteen kokonaismäärä (kg/ha)
-variable_name,N_in_applied_fertilizer,Amount of nitrogen (N) in fertilizer (kg/ha),Typen (N) määrä lannoitteessa (kg/ha)
+variable_name,N_in_applied_fertilizer,Amount of total nitrogen (N) in fertilizer (kg/ha),Typen (N) määrä lannoitteessa (kg/ha)
+variable_name,N_in_soluble_fertilizer,Amount of soluble nitrogen (N) in fertilizer (kg/ha), Liukenevan typen (N) määrä lannoitteessa (kg/ha)
 variable_name,phosphorus_applied_fert,Amount of phosphorus (P) in fertilizer (kg/ha),Fosforin (P) määrä lannoitteessa (kg/ha)
 variable_name,fertilizer_K_applied,Amount of potassium (K) in fertilizer (kg/ha),Kaliumin (K) määrä lannoitteessa (kg/ha)
 variable_name,S_in_applied_fertilizer,Amount of sulphur (S) in fertilizer (kg/ha),Rikin (S) määrä lannoitteessa (kg/ha)
@@ -104,6 +107,8 @@ variable_name,chemical_applic_target,Chemical application target,Kemikaalinlevit
 variable_name,chemical_applic_method,Chemical application method,Kemikaalinlevitystapa
 variable_name,chemical_applic_amount,Chemical amount (kg/ha),Kemikaalin määrä (kg/ha)
 variable_name,application_depth_chem,Chemical application depth (cm),Kemikaalinlevityssyvyys (cm)
+variable_name,application_ph_start,pH before the application,pH ennen toimenpidettä
+variable_name,application_ph_end,pH after the application,pH jälkeen toimenpiteen
 variable_name,chemical_applic_notes,Chemical application notes,Kemikaalinlevitysmuistiinpanot
 variable_name,observation_type,Observation type,Havainnon tyyppi
 variable_name,soil_layer_count,Number of layers in soil sample,Maanäytteen kerrosten lukumäärä
@@ -145,6 +150,10 @@ variable_name,other_notes,Notes,Muistiinpanot
 #
 element_label,frontpage_title,Enter Field Management Events,Syötä tilanhoitotapahtumia
 element_label,frontpage_text,"Welcome! Here you can add new events and files and modify previously entered entries. Click on an event in the list to view details or to edit it.","Tervetuloa! Täällä voit lisätä uusia tapahtumia ja muokata aiemmin syöttämiäsi tapahtumia. Klikkaa tapahtumaa nähdäksesi lisätietoja tai muokataksesi sitä."
+element_label,uservisible_title,Site,Sijainti
+element_label,guide_text,Guide,Ohje
+element_label,json_dl_label,Events json (zip),Tapah. json (zip)
+element_label,csv_dl_label,Events table (csv),Tapah. kaikki (csv)
 element_label,event_list_title,Events,Tapahtumat
 #   element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
 element_label,table_filter_text_1,"Showing ","Näytetään "
@@ -207,6 +216,8 @@ element_label,tillage_treatment_notes_label,Tillage notes:,Muistiinpanot muokkau
 element_label,tillage_treatment_notes_placeholder,"Any notes or observations about the event, e.g. “had to stop tillage and continue the next day”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. “jatkoin muokkausta seuraavana päivänä”"
 element_label,fertilizer_type_label,Fertilizer type*:,Lannoitteen tyyppi*:
 element_label,organic_material_label,Organic material:,Eloperäinen aine:
+element_label,animal_fert_usage_label,Animal fertilizer:,Eläimen lannoite:
+element_label,animal_fert_usage_placeholder,"Which animal fertilizer, e.g. pig, horse, cow","Minkä eläimen lannoitetta, esim. sika, hevonen, lehmä"
 element_label,org_matter_moisture_conc_label,Moisture concentration (%):,Aineen kosteus (%):
 element_label,org_matter_carbon_conc_label,Carbon (C) concentration (%):,Hiilen (C) määrä aineessa (%):
 element_label,fertilizer_product_name_label,Name of fertilizer:,Lannoitteen nimi:
@@ -217,6 +228,7 @@ element_label,fertilizer_applic_method_label,Application method:,Levitystapa:
 element_label,application_depth_fert_label,Application depth (cm):,Levityssyvyys (cm):
 element_label,fertilizer_total_amount_label,Total amount of fertilizer (kg/ha)*:,Lannoitteen kokonaismäärä (kg/ha)*:
 element_label,N_in_applied_fertilizer_label,nitrogen (N),typpi (N)
+element_label,N_in_soluble_fertilizer_label,soluble nitrogen (N),liukeneva typpi (N)
 element_label,phosphorus_applied_fert_label,phosphorus (P),fosfori (P)
 element_label,fertilizer_K_applied_label,potassium (K),kalium (K)
 element_label,S_in_applied_fertilizer_label,sulphur (S),rikki (S)
@@ -275,6 +287,8 @@ element_label,chemical_applic_target_label,Chemical application target*:,Kemikaa
 element_label,chemical_applic_method_label,Chemical application method:,Kemikaalinlevitystapa:
 element_label,chemical_applic_amount_label,Chemical amount (kg/ha):,Kemikaalin määrä (kg/ha):
 element_label,application_depth_chem_label,Chemical application depth (cm):,Kemikaalinlevityssyvyys (cm):
+element_label,application_ph_start_label,pH before the application:,pH toimenpidettä ennen:
+element_label,application_ph_end_label,pH after the application:,pH toimenpiteen jälkeen:
 element_label,chemical_applic_notes_label,Chemical application notes:,Kemikaalinlevitysmuistiinpanot:
 element_label,chemical_applic_notes_placeholder,"Any notes or observations about the event, e.g. “rot affecting X % of plants”","Mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. “mätää X % kasveista”"
 element_label,observation_type_label,Observation type*:,Havainnon tyyppi*:
@@ -434,6 +448,11 @@ FEACD,AP009,Injected,Ruiskutettu pinnan alle
 #   FEACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil","Deeply placed urea super granules/pellets, 95% in soil -käännös"
 #   FEACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil","Deeply placed urea super granules/pellets, 100% in soil -käännös"
 FEACD,AP999,Method unknown/not given,Tapa ei tiedossa
+#   Related to soil amendment substance, not found from ICASA table!
+FECD,FE996,Bio char,Biohiili
+FECD,FE997,Peat,Turve
+FECD,FE998,Sawdust,Sahanpuru
+FECD,FE999,Wood chip,Puulastu
 #   the following tillage_practice choices are not from ICASA
 tillage_practice_choice,tillage_practice_primary,Primary (residue incorporation),Perusmuokkaus
 tillage_practice_choice,tillage_practice_secondary,Secondary (seedbed),Kylvömuokkaus
@@ -500,6 +519,7 @@ chemical_type_choice,chemical_type_insecticide,Insecticide,Hyönteistorjunta-ain
 chemical_type_choice,chemical_type_herbicide,Herbicide,Rikkakasvien torjunta-aine
 chemical_type_choice,chemical_type_fungicide,Fungicide,Sienitautien torjunta-aine
 chemical_type_choice,chemical_type_growth_regulator,Growth regulator,Kasvunsääde
+chemical_type_choice,chemical_type_lime_application,Lime application, Kalkin levitys
 # source for active substances (in Finnish): 
 # https://www.kemidigi.fi/kasvinsuojeluainerekisteri/haku
 active_substance,AS001,(E,E)-8,10-dodekadien-1-oli,(E,E)-8,10-dodekadien-1-oli
@@ -708,6 +728,7 @@ CH_TARGETS,DROUGHT,Drought,Kuivuus
 CH_TARGETS,WEATHER,Weather damage (generic),Yleiset säävahingot
 CH_TARGETS,BRLFWD,Broad-leafed weeds,Leveälehtiset rikkakasvit
 CH_TARGETS,WEED,Weeds (generic),Yleiset rikkakasvit
+CH_TARGETS,ACIDITY,Acidity (pH),Happamuus (pH)
 observation_type_choice,observation_type_soil,Soil,Maaperä
 observation_type_choice,observation_type_vegetation,Vegetation,Kasvillisuus
 observation_type_choice,observation_type_water,Water,Vesi

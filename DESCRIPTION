@@ -1,7 +1,8 @@
 Package: fieldactivity
 Title: An app for keeping track of field activity
 Version: 0.2.1
-Authors@R: person('Otto', 'Kuusela', email = 'otto.kuusela@helsinki.fi', role = c('cre', 'aut'))
+Authors@R: c(person('Otto', 'Kuusela', email = 'otto.kuusela@helsinki.fi', role = 'cre'),
+             person('Henri', 'Kajasilta', email = 'henri.kajasilta@fmi.fi', role = 'aut'))
 Description: An app for keeping track of field activity in the Field
   Observatory project. Built using Shiny, the application allows farmers to 
   enter information about common farming events like tillage, sowing and 
@@ -11,6 +12,7 @@ License: BSD_3_clause + file LICENSE
 Imports: 
     attempt,
     bslib,
+    callr,
     config (>= 0.3.1),
     DT,
     glue,
@@ -21,15 +23,17 @@ Imports:
     methods,
     pkgload,
     processx,
+    rmarkdown,
     shiny (>= 1.6.0),
     shinyjs,
     shinymanager (>= 1.0.400),
     shinyvalidate (>= 0.1.1),
     stringr,
-    tools
+    tools,
+    zip
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 URL: https://github.com/Ottis1/fieldactivity
 BugReports: https://github.com/Ottis1/fieldactivity/issues
 Suggests: 
@@ -37,7 +41,6 @@ Suggests:
     testthat (>= 3.0.0),
     shinytest,
     knitr,
-    rmarkdown,
     markdown
 Config/testthat/edition: 3
 Language: en-US

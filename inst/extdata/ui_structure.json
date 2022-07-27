@@ -9,6 +9,22 @@
       "required" : true
     },
     
+    "uservisible" : {
+      "code_name" : "uservisible",
+      "type" : "textInput",
+      "value": "temp"
+    },
+    
+    "uservisible_title" : {
+      "code_name" : "uservisible_title",
+      "type" : "textOutput"
+    },
+    
+    "guide_text" : {
+      "code_name" : "guide_text",
+      "type" : "textOutput"
+    },
+    
     "frontpage_title" : {
       "code_name" : "frontpage_title",
       "type" : "textOutput"
@@ -21,6 +37,16 @@
 
     "event_list_title" : {
       "code_name" : "event_list_title",
+      "type" : "textOutput"
+    },
+    
+    "json_dl_label" : {
+      "code_name" : "json_dl_label",
+      "type" : "textOutput"
+    },
+    
+    "csv_dl_label" : {
+      "code_name" : "csv_dl_label",
       "type" : "textOutput"
     },
 
@@ -400,6 +426,17 @@
                   "label" : "organic_material_label",
                   "choices" : "OMCD"
                 },
+                
+                "fert_animal" : {
+                  "condition" : "input.organic_material == 'RE003' | input.organic_material == 'RE004'",
+                  
+                  "animal_fert_usage" : {
+                    "code_name" : "animal_fert_usage",
+                    "type" : "textInput",
+                    "label" : "animal_fert_usage_label",
+                    "placeholder" : "animal_fert_usage_placeholder"
+                  }
+                },
 
                 "org_matter_moisture_conc" : {
                   "code_name" : "org_matter_moisture_conc",
@@ -487,7 +524,7 @@
             "rows" : {
                 
                 "row1" : {
-                  "variables" : ["N_in_applied_fertilizer", 
+                  "variables" : ["N_in_applied_fertilizer", "N_in_soluble_fertilizer", 
                   "phosphorus_applied_fert", "fertilizer_K_applied", 
                   "S_in_applied_fertilizer",  "Ca_in_applied_fertilizer", 
                   "Mg_in_applied_fertilizer", "Na_in_applied_fertilizer"],
@@ -514,6 +551,14 @@
               "code_name" : "N_in_applied_fertilizer",
               "type" : "numericInput",
               "label" : "N_in_applied_fertilizer_label",
+              "min" : 0,
+              "hide_in_event_list" : true
+            },
+            
+              "N_in_soluble_fertilizer" : {
+              "code_name" : "N_in_soluble_fertilizer",
+              "type" : "numericInput",
+              "label" : "N_in_soluble_fertilizer_label",
               "min" : 0,
               "hide_in_event_list" : true
             },
@@ -781,12 +826,16 @@
             "required" : true
           },
 
-          "chemical_applic_material" : {
-            "code_name" : "chemical_applic_material",
-            "type" : "selectInput",
-            "label" : "chemical_applic_material_label",
-            "choices" : "active_substance",
-            "multiple" : true
+          "chemical_type_substance" : {
+            "condition" : "input.chemical_type != 'chemical_type_lime_application'",
+          
+            "chemical_applic_material" : {
+              "code_name" : "chemical_applic_material",
+              "type" : "selectInput",
+              "label" : "chemical_applic_material_label",
+              "choices" : "active_substance",
+              "multiple" : true
+            }
           },
 
           "chemical_applic_target" : {
@@ -808,7 +857,7 @@
             "code_name" : "chemical_applic_amount",
             "type" : "numericInput",
             "label" : "chemical_applic_amount_label",
-            "min" : 1
+            "min" : 0
           },
 
           "application_depth_chem" : {
@@ -816,6 +865,26 @@
             "type" : "numericInput",
             "label" : "application_depth_chem_label",
             "min" : 0
+          },
+          
+          "pH_change_in_application" : {
+            "condition" : "input.chemical_type == 'chemical_type_lime_application'",
+            
+            "application_ph_start" : {
+              "code_name" : "application_ph_start",
+              "type" : "numericInput",
+              "label" : "application_ph_start_label",
+              "min" : 0,
+              "max" : 14
+            },
+            
+             "application_ph_end" : {
+              "code_name" : "application_ph_end",
+              "type" : "numericInput",
+              "label" : "application_ph_end_label",
+              "min" : 0,
+              "max" : 14
+            }
           },
 
           "chemical_applic_notes" : {

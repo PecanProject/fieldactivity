@@ -28,10 +28,14 @@ run_app <- function(
     # wrap the UI in shinymanager to display the login UI
     ui <- shinymanager::secure_app(
       ui,
-      # language selector for login page
-      tags_bottom = selectInput("login_language",
-                                label = "" ,
-                                choices = languages),
+      tags_bottom =
+        tags$div(
+          selectInput("login_language",
+                      label = "" ,
+                      choices = languages),
+          mod_select_lan("auth_text")),
+          
+
       theme = bslib::bs_theme(version = 4),
       enable_admin = TRUE,
       fab_position = "top-right")

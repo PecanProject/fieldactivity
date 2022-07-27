@@ -9,3 +9,4 @@ $run_dev.*
 ^rsconnect$
 ^README\.Rmd$
 ^\.github$
+^\./inst/user_doc$
