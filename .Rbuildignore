@@ -10,3 +10,6 @@ $run_dev.*
 ^README\.Rmd$
 ^\.github$
 ^\./inst/user_doc$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

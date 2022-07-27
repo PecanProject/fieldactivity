@@ -7,3 +7,4 @@ app.R
 inst/doc
 dev/database.sqlite
 inst/user_doc/user_instructions.html
+docs
