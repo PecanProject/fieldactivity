@@ -159,10 +159,13 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
         events_file <- NULL
         if(length(list.files(file_path)) != 0){
           for(i in list.files(file_path)){
+            jsontable <- jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events
             if(is.null(events_file)){
-              events_file <- cbind(block = i, jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events)
+              if(!identical(list(), jsontable)){
+                events_file <- as.data.frame(cbind(block = i, jsontable))
+              }
             } else {
-              events_file <- merge(events_file, cbind(block = i, jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events), all = T)
+              events_file <- merge(events_file,as.data.frame(cbind(block = i,jsontable)),all = T)
             }
           }
           
