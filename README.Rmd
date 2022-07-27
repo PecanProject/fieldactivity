@@ -55,3 +55,8 @@ To modify the code, clone the repository and set the working directory in R to t
 golem::run_dev()
 ```
 Modify `dev/run_dev.R` if necessary, this is the file which `golem::run_dev()` runs.
+
+
+## Meta
+
+Please, fill in issue form [here](https://github.com/Ottis1/fieldactivity/issues)
