@@ -183,6 +183,11 @@ set_login_language <- function(language) {
 }
 
 
+#' UI side of the displayed texts in login page
+#'
+#' @param id 
+#'
+#' @noRd
 mod_select_lan <- function(id) {
   ns <- NS(id)
   
@@ -200,6 +205,14 @@ mod_select_lan <- function(id) {
 }
 
 
+
+
+#' Server side of the language selected in login page
+#'
+#' @param id 
+#' @param language This comes from the selected login language
+#'
+#' @noRd
 mod_auth_page_server <- function(id, language) {
   
   # Create a reactive value, language is not one in this case
