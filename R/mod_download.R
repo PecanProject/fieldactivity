@@ -167,13 +167,15 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
           }
           
           # Flattening the lists and removing extra "," that can cause parsing issues
-          events_file <- apply(events_file, 2, as.character)
-          events_file <- apply(events_file, 2, function(x) gsub(",", " ", x))
+          events_file <- as.data.frame(lapply(events_file, as.character))
+          # Might not be suitable, if there are only simple event management stored,
+          # so only try this modification.
+          events_file <- try(as.data.frame(lapply(events_file, function(x) gsub(",", " ", x))))
           
           if (dp()) message("Creating an export of the events")
           write.csv(events_file, file, row.names = FALSE, quote=FALSE)
         } else {
-          write.csv("Error with a file path. Under maintenance or right directories not found.", file, row.names = FALSE, quote = FALSE)
+          write.csv("Error with a file path. Have you stored field management events? If yes, then this error should not occur.", file, row.names = FALSE, quote = FALSE)
         }
         
       }
