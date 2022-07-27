@@ -1,0 +1,17 @@
+url: https://github.com/Ottis1/fieldactivity
+template:
+  bootstrap: 5
+  bootswatch: minty
+  # includes:
+  #   before_title:  "App for field management events:"
+navbar:
+  structure:
+    left: [intro, tutorials]
+    right: [reference]
+  components:
+    tutorials:
+      text: Guide
+      menu:
+      - text: User guide
+        href: guide/guideFieldactivity.html
+        
