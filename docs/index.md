@@ -1,37 +1,65 @@
-## Welcome to GitHub Pages
+# R Shiny app for management data input
 
-You can use the [editor on GitHub](https://github.com/HenriKajasilta/fieldactivity/edit/docpage/docs/index.md) to maintain and preview the content for your website in Markdown files.
+<!-- badges: start -->
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+[![R-CMD-check](https://github.com/Ottis1/fieldactivity/workflows/R-CMD-check/badge.svg)](https://github.com/Ottis1/fieldactivity/actions)
+<!-- badges: end -->
 
-### Markdown
+An app for keeping track of field activity in the [Field
+Observatory](https://www.fieldobservatory.org) project. Built using
+[Shiny](http://shiny.rstudio.com/) and
+[Golem](https://thinkr-open.github.io/golem/), the application allows
+farmers to enter information about common farming events like tillage,
+sowing and harvest. These event data are stored in .json files, which
+mostly follow the ICASA standards for agricultural
+data.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Installation
 
-```markdown
-Syntax highlighted code block
+<!-- You can install the released version of fieldactivity from [CRAN](https://CRAN.R-project.org) with:
 
-# Header 1
-## Header 2
-### Header 3
+``` r
+install.packages("fieldactivity")
+``` 
+-->
 
-- Bulleted
-- List
+You can install the app from [GitHub](https://github.com/) with:
 
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+``` r
+# install.packages("devtools")
+devtools::install_github("Ottis1/fieldactivity")
 ```
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+## Running the app
 
-### Jekyll Themes
+To run the app, call `run_app` with the following arguments to define
+the json file directory, the user database and the passphrase to the
+user
+database:
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/HenriKajasilta/fieldactivity/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+``` r
+options(golem.app.prod = TRUE) # run in production mode to enable user authentication
 
-### Support or Contact
+fieldactivity::run_app(json_file_path = "~/my_json_file_folder", 
+                       user_db_path = "~/my_user_database.sqlite",
+                       user_db_passphrase = "password123")
+```
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+Check out the documentation of
+[Shinymanager](https://datastorm-open.github.io/shinymanager/) (the user
+authentication system used in the app) to find out how to create the
+user database. You can also use the supplied R script in
+`dev/create_user_db.R` for this purpose.
+
+## Modifying the code
+
+To modify the code, clone the repository and set the working directory
+in R to the package folder (or open the RStudio project file
+`fieldactivity.Rproj`). You should now be able to run the app by running
+
+``` r
+golem::run_dev()
+```
+
+Modify `dev/run_dev.R` if necessary, this is the file which
+`golem::run_dev()` runs.
