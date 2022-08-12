@@ -1,4 +1,5 @@
-url: https://github.com/HenriKajasilta/fieldactivity
+title: fieldactivity
+url: http://PecanProject.github.io/fieldactivity
 template:
   bootstrap: 5
   bootswatch: minty
@@ -14,4 +15,3 @@ navbar:
       menu:
       - text: User guide
         href: guide/guideFieldactivity.html
-        
