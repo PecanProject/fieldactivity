@@ -30,7 +30,7 @@ You can install the app from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Ottis1/fieldactivity")
+devtools::install_github("PecanProject/fieldactivity")
 ```
 
 ## Running the app
