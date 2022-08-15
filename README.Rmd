@@ -34,7 +34,7 @@ You can install the app from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Ottis1/fieldactivity")
+devtools::install_github("PecanProject/fieldactivity")
 ```
 ## Running the app
 
@@ -55,3 +55,11 @@ To modify the code, clone the repository and set the working directory in R to t
 golem::run_dev()
 ```
 Modify `dev/run_dev.R` if necessary, this is the file which `golem::run_dev()` runs.
+
+
+## Meta
+
+Links that might interest you:
+
+- [Webpage](https://pecanproject.github.io/fieldactivity/)
+- [Issues](https://github.com/PecanProject/fieldactivity/issues)

@@ -14,8 +14,7 @@ Observatory](https://www.fieldobservatory.org) project. Built using
 [Golem](https://thinkr-open.github.io/golem/), the application allows
 farmers to enter information about common farming events like tillage,
 sowing and harvest. These event data are stored in .json files, which
-mostly follow the ICASA standards for agricultural
-data.
+mostly follow the ICASA standards for agricultural data.
 
 ## Installation
 
@@ -30,15 +29,14 @@ You can install the app from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Ottis1/fieldactivity")
+devtools::install_github("PecanProject/fieldactivity")
 ```
 
 ## Running the app
 
 To run the app, call `run_app` with the following arguments to define
 the json file directory, the user database and the passphrase to the
-user
-database:
+user database:
 
 ``` r
 options(golem.app.prod = TRUE) # run in production mode to enable user authentication
@@ -66,3 +64,10 @@ golem::run_dev()
 
 Modify `dev/run_dev.R` if necessary, this is the file which
 `golem::run_dev()` runs.
+
+## Meta
+
+Links that might interest you:
+
+-   [Webpage](https://pecanproject.github.io/fieldactivity/)
+-   [Issues](https://github.com/PecanProject/fieldactivity/issues)
