@@ -247,7 +247,7 @@ mod_download_server_json <- function(id, user_auth, base_folder = json_file_base
         } else {
           #emptydir <- file.path(tmpdr, "Invalid_path.csv")
           if(dp()) message("Return a csv with an error")
-          write.csv("Invalid file path", file.path(tmpdrjson, "Error.csv"), row.names = FALSE)
+          write.csv("Seems that there isn't any data? Try to create a management event.", file.path(tmpdrjson, "Error.csv"), row.names = FALSE)
           zip::zip(zipfile=file, files="json", root = tmpdr)
         }
       },
