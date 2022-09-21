@@ -88,8 +88,8 @@ variable_name,grazing_species_age_group,Livestock age group (yr),Eläinten ikär
 variable_name,livestock_density,Livestock density (number/ha),Eläinten tiheys (eläintä/ha)
 variable_name,grazing_intensity,Grazing intensity (kg/ha),Laidunnusintensiteetti (kg/ha)
 variable_name,grazing_period,Grazing period,Laidunnusjakso
-variable_name,grazing_type,Grazing type,Laidunnuksen tyyppi,
-variable_name,grazing_area,Grazing area (ha),Laidunnettava ala (ha),
+variable_name,grazing_type,Grazing type,Laidunnuksen tyyppi
+variable_name,grazing_area,Grazing area (ha),Laidunnettava ala (ha)
 variable_name,grazing_material_removed_prop,Proportion of material removed (%),Syödyn aineksen määrä (%)
 variable_name,grazing_starting_height,Starting height (cm),Aloituspituus (cm)
 variable_name,grazing_end_height,End height (cm),Lopetuspituus (cm)
@@ -113,7 +113,7 @@ variable_name,chemical_applic_notes,Chemical application notes,Kemikaalinlevitys
 variable_name,observation_type,Observation type,Havainnon tyyppi
 variable_name,soil_layer_count,Number of layers in soil sample,Maanäytteen kerrosten lukumäärä
 variable_name,soil_layer_top_depth,"Soil layer depth, top (cm)","Kerroksen yläosan syvyys (cm)"
-variable_name,soil_layer_base_depth,"Soil layer depth, bottom (cm)","Kerroksen alaosan syvyys (cm)",
+variable_name,soil_layer_base_depth,"Soil layer depth, bottom (cm)","Kerroksen alaosan syvyys (cm)"
 variable_name,soil_classification_by_layer,Soil structure (MARA card),Maan rakenne (MARA-kortti)
 variable_name,root_depth,Root depth (m),Juurten syvyys (m)
 variable_name,soil_compactification_depth,Soil compactification depth (cm),Tiivistymän syvyys (cm)
@@ -294,7 +294,7 @@ element_label,chemical_applic_notes_placeholder,"Any notes or observations about
 element_label,observation_type_label,Observation type*:,Havainnon tyyppi*:
 element_label,soil_layer_count_label,Number of layers in soil sample:,Maanäytteen kerrosten lukumäärä:
 element_label,soil_layer_top_depth_label,"Soil layer depth, top (cm):","Kerroksen yläosan syvyys (cm):"
-element_label,soil_layer_base_depth_label,"Soil layer depth, bottom (cm):","Kerroksen alaosan syvyys (cm):",
+element_label,soil_layer_base_depth_label,"Soil layer depth, bottom (cm):","Kerroksen alaosan syvyys (cm):"
 element_label,soil_classification_by_layer_label,Soil structure (MARA card):,Maan rakenne (MARA-kortti):
 element_label,root_depth_label,Root depth (m):,Juurten syvyys (m):
 element_label,soil_compactification_depth_label,Soil compactification depth (cm):,Tiivistymän syvyys (cm):
