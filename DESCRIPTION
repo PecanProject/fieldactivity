@@ -14,7 +14,7 @@ Imports:
     bslib,
     callr,
     config (>= 0.3.1),
-    DT,
+    DT (>= 0.25),
     glue,
     golem (>= 0.3.1),
     htmlwidgets,
