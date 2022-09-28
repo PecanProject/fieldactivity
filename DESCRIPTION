@@ -12,7 +12,7 @@ Imports:
     attempt,
     bslib,
     config (>= 0.3.1),
-    DT,
+    DT (>= 0.25),
     glue,
     golem (>= 0.3.1),
     htmltools,
@@ -29,7 +29,7 @@ Imports:
     tools
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 URL: https://github.com/Ottis1/fieldactivity
 BugReports: https://github.com/Ottis1/fieldactivity/issues
 Suggests: 
