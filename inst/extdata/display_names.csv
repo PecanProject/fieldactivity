@@ -448,6 +448,11 @@ FEACD,AP009,Injected,Ruiskutettu pinnan alle
 #   FEACD,AP019,"Deeply placed urea super granules/pellets, 95% in soil","Deeply placed urea super granules/pellets, 95% in soil -käännös"
 #   FEACD,AP020,"Deeply placed urea super granules/pellets, 100% in soil","Deeply placed urea super granules/pellets, 100% in soil -käännös"
 FEACD,AP999,Method unknown/not given,Tapa ei tiedossa
+#   Related to soil amendment substance, not found from ICASA table!
+FECD,FE996,Bio char,Biohiili
+FECD,FE997,Peat,Turve
+FECD,FE998,Sawdust,Sahanpuru
+FECD,FE999,Wood chip,Puulastu
 #   the following tillage_practice choices are not from ICASA
 tillage_practice_choice,tillage_practice_primary,Primary (residue incorporation),Perusmuokkaus
 tillage_practice_choice,tillage_practice_secondary,Secondary (seedbed),Kylvömuokkaus

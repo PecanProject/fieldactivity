@@ -159,21 +159,26 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
         events_file <- NULL
         if(length(list.files(file_path)) != 0){
           for(i in list.files(file_path)){
+            jsontable <- jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events
             if(is.null(events_file)){
-              events_file <- cbind(block = i, jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events)
+              if(!identical(list(), jsontable)){
+                events_file <- as.data.frame(cbind(block = i, jsontable))
+              }
             } else {
-              events_file <- merge(events_file, cbind(block = i, jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events), all = T)
+              events_file <- merge(events_file,as.data.frame(cbind(block = i,jsontable)),all = T)
             }
           }
           
           # Flattening the lists and removing extra "," that can cause parsing issues
-          events_file <- apply(events_file, 2, as.character)
-          try(events_file <- apply(events_file, 2, function(x) gsub(",", " ", x)))
+          events_file <- as.data.frame(lapply(events_file, as.character))
+          # Might not be suitable, if there are only simple event management stored,
+          # so only try this modification.
+          events_file <- try(as.data.frame(lapply(events_file, function(x) gsub(",", " ", x))))
           
           if (dp()) message("Creating an export of the events")
           write.csv(events_file, file, row.names = FALSE, quote=FALSE)
         } else {
-          write.csv("Error with a file path. Under maintenance or right directories not found.", file, row.names = FALSE, quote = FALSE)
+          write.csv("Error with a file path. Have you stored field management events? If yes, then this error should not occur.", file, row.names = FALSE, quote = FALSE)
         }
         
       }
@@ -242,7 +247,7 @@ mod_download_server_json <- function(id, user_auth, base_folder = json_file_base
         } else {
           #emptydir <- file.path(tmpdr, "Invalid_path.csv")
           if(dp()) message("Return a csv with an error")
-          write.csv("Invalid file path", file.path(tmpdrjson, "Error.csv"), row.names = FALSE)
+          write.csv("Seems that there isn't any data? Try to create a management event.", file.path(tmpdrjson, "Error.csv"), row.names = FALSE)
           zip::zip(zipfile=file, files="json", root = tmpdr)
         }
       },
