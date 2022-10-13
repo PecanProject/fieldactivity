@@ -61,7 +61,7 @@ mod_event_list_ui <- function(id) {
 #' @param events A reactive expression holding a list of events to display in the event list
 #' @param language A reactive expression holding the current UI language
 #' @param site A reactive expression holding the current site name
-#'
+#' @noRd
 
 mod_event_list_server <- function(id, events, language, site) {
   
