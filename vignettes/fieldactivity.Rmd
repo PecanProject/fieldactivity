@@ -35,6 +35,7 @@ run_dev.R is the script that `golem::run_dev()` runs (note, you should always us
 
 - `golem-config.yml` is a configuration file related to Golem. Note, don't change the version number by hand here; see `dev/02_dev.R` instead.
 - `inst/app/www/script.js` is a javascript file the app uses. It is added as a head tag to the app html. It is mostly related to the table and fileInput modules.
+- `inst/user_doc/inst_frontpage` is a file that the login page will use to generate the text paragraphs.
 
 #### `inst/extdata`
 
@@ -95,7 +96,7 @@ A csv file which contains the sites and their blocks. Note, the user names in th
 
 ### `tests`
 
-All tests should be placed under `tests/testthat`. The testthat package is used.
+All tests should be placed under `tests/testthat`. The testthat package is used. Currently automated test are made to check that changing language works as expected, and that downloading buttons return a valid file.
 
 ### `R`
 
@@ -107,9 +108,11 @@ The structure of the app can be summarised as follows:
 
 - the main app consists of `app_server.R` and `app_ui.R`. The UI includes (in order)
   - the language and site selectors
+  - button to download the user instructions for the app
   - the title and introduction text
   - **the event list module** (`mod_event_list.R`)
     - the event list includes a table showing a list of events and selectors to filter which events are displayed
+    - buttons to download the events as a zipped json files or as a flat csv
   - buttons to create a new event and to clone an event
   - **the form module** (`mod_form.R`)
     - this contains all the widgets for entering information about an event and the save, cancel and delete event buttons
