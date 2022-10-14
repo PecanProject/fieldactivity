@@ -5,7 +5,7 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/Ottis1/fieldactivity/workflows/R-CMD-check/badge.svg)](https://github.com/Ottis1/fieldactivity/actions)
+[![R-CMD-check](https://github.com/Ottis1/fieldactivity/workflows/R-CMD-check/badge.svg)](https://github.com/PecanProject/fieldactivity/actions)
 <!-- badges: end -->
 
 An app for keeping track of field activity in the [Field
@@ -65,9 +65,25 @@ golem::run_dev()
 Modify `dev/run_dev.R` if necessary, this is the file which
 `golem::run_dev()` runs.
 
-## Meta
+## Additional resources
 
-Links that might interest you:
+Github pages offer material for the developers, but also for the regular
+application users. For the developers, there is the `Get started` tab on
+the top of the page, this leads to the vignette of the files that the
+package have. By reading this, the developer should have a preliminary
+idea/conception of the package logic and which parts of the
+functionality the different code sections are responsible for. However,
+to get a better picture of the application, we are encouraging to
+test/run the package as well while getting familiar to the code base.
 
--   [Webpage](https://pecanproject.github.io/fieldactivity/)
--   [Issues](https://github.com/PecanProject/fieldactivity/issues)
+For the application users, the instructions can be found via the `Guide`
+tab (which is located next to the `Get started`). Here we have
+introduced the most meaningful features and functionalities, which the
+user should be aware while using the application. The instructions has
+been written for someone using the application in product mode,
+i.e. signing in to application with a registered site and using those
+features that are available for non-developers.
+
+We also encourage users and developers to fill in possible issues or
+feature request here:
+[Issues](https://github.com/PecanProject/fieldactivity/issues)

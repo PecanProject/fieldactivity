@@ -68,7 +68,7 @@
       <img src="" class="logo" alt=""><h1>fieldactivity package for developers</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/Ottis1/fieldactivity/blob/HEAD/vignettes/fieldactivity.Rmd" class="external-link"><code>vignettes/fieldactivity.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/PecanProject/fieldactivity/blob/HEAD/vignettes/fieldactivity.Rmd" class="external-link"><code>vignettes/fieldactivity.Rmd</code></a></small>
       <div class="d-none name"><code>fieldactivity.Rmd</code></div>
     </div>
 
@@ -125,6 +125,9 @@ Golem. Note, don’t change the version number by hand here; see
 <code>inst/app/www/script.js</code> is a javascript file the app
 uses. It is added as a head tag to the app html. It is mostly related to
 the table and fileInput modules.</li>
+<li>
+<code>inst/user_doc/inst_frontpage</code> is a file that the login
+page will use to generate the text paragraphs.</li>
 </ul>
 <div class="section level4">
 <h4 id="instextdata">
@@ -288,7 +291,9 @@ Roxygen2, <code>vignettes</code> contains this vignette.</p>
 <code>tests</code><a class="anchor" aria-label="anchor" href="#tests"></a>
 </h3>
 <p>All tests should be placed under <code>tests/testthat</code>. The
-testthat package is used.</p>
+testthat package is used. Currently automated test are made to check
+that changing language works as expected, and that downloading buttons
+return a valid file.</p>
 </div>
 <div class="section level3">
 <h3 id="r">
@@ -312,6 +317,7 @@ modules.</p>
 <code>app_ui.R</code>. The UI includes (in order)
 <ul>
 <li>the language and site selectors</li>
+<li>button to download the user instructions for the app</li>
 <li>the title and introduction text</li>
 <li>
 <strong>the event list module</strong>
@@ -319,6 +325,8 @@ modules.</p>
 <ul>
 <li>the event list includes a table showing a list of events and
 selectors to filter which events are displayed</li>
+<li>buttons to download the events as a zipped json files or as a flat
+csv</li>
 </ul>
 </li>
 <li>buttons to create a new event and to clone an event</li>
