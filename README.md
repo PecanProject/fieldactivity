@@ -5,7 +5,7 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/Ottis1/fieldactivity/workflows/R-CMD-check/badge.svg)](https://github.com/Ottis1/fieldactivity/actions)
+[![R-CMD-check](https://github.com/PecanProject/fieldactivity/workflows/R-CMD-check/badge.svg)](https://github.com/PecanProject/fieldactivity/actions)
 <!-- badges: end -->
 
 An app for keeping track of field activity in the [Field
