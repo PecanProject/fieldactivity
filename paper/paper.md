@@ -45,6 +45,9 @@ bibliography: paper.bib
 output: rticles::joss_article
 csl: apa.csl
 journal: JOSS
+
+nocite: |
+  @hoglind2020basgran
 ---
 
 \setlength{\headheight}{63.55022pt}
@@ -85,16 +88,17 @@ Monitored data from carbon farming fields within the Field Observatory Network (
 
 
 
-![](./images/Org_dat_FA.png){width=42%} ![](./images/Org_app_FA.png){width=58%}
+![](./images/Org_Dat_FA.png){width=42%} ![](./images/Org_App_FA.png){width=58%}
 \begin{figure}[!h]
-\caption{(left) How it is stored: Example of a harvest event in a field management event file adopting the ICASA standards, collected and processed by the fieldactivity app, and shared online https://data.lit.fmi.fi/field-observatory/qvidja/ec/events.json. (right) How it is used: The event information is then marked with specific icons (e.g. scythe icon for harvest) on respective graphs with enabled pop-up windows, and informed modeling workflows for the field (the green continuous polygon representing the predictions for Leaf Area Index variable from a grassland model, BASGRAN [@hoglind2020basgran].\label{fig:management}}
+\caption{(left) How it is stored: Example of a harvest event in a field management event file adopting the ICASA standards, collected and processed by the fieldactivity app, and shared online https://data.lit.fmi.fi/field-observatory/qvidja/ec/events.json. (right) How it is used: The event information is then marked with specific icons (e.g. scythe icon for harvest) on respective graphs with enabled pop-up windows, and informed modeling workflows for the field (the green continuous polygon representing the predictions for Leaf Area Index variable from a grassland model, BASGRA\_N (Höglind et al., 2020).\label{fig:management}}
 \end{figure}
 
 
 
 # Acknowledgements
 
-We thank the people who tested the app and gave valuable feedback on how to develop the application further; Annalea Lohila, Juuso Joona, Liisa Kulmala, Åsa Stam, especially to those who participated in the hackathon for entering historical field management events through the fieldactivity app, Tuuli Hakala and Olli Nevalainen, and to the Carbon Action farmers who reported their field activity data.
+We thank the people who tested the app and gave valuable feedback on how to develop the application further; Annalea Lohila, Juuso Joona, Liisa Kulmala, Åsa Stam, especially to those who participated in the hackathon for entering historical field management events through the fieldactivity app, Tuuli Hakala and Olli Nevalainen, and to the Carbon Action farmers who reported their field activity data. We acknowledge support from The Strategic Research Council (SRC) at the Academy of Finland grant no. 352431, The Ministry of Agriculture and Forestry of Finland grant no. VN/27979/2021 and Business Finland: Project 8391/31/2021 - From Footprints to Digital Handprints - Carbon and greenhouse gas budget of agriculture.
+
 
 
 # References
