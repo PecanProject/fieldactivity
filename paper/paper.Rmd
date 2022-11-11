@@ -28,15 +28,15 @@ authors:
     orcid: 0000-0001-8236-303X
     affiliation: 1
 affiliations:
- - name: Finnish Meteorological Institute
+ - name: Finnish Meteorological Institute (FMI), Helsinki, Finland
    index: 1
- - name: University of Amsterdam
+ - name: University of Amsterdam, Graduate School of Informatics, Amsterdam, Netherlands
    index: 2
- - name: SYKE
+ - name: Finnish Environmental Institute (SYKE), Centre for Sustainable Production and Consumption, Helsinki, Finland
    index: 3
- - name: HAMK
+ - name: Häme University of Applied Sciences (HAMK), HAMK Smart Research Unit, Hämeenlinna, Finland
    index: 4
- - name: BSAG
+ - name: Baltic Sea Action Group (BSAG), Espoo, Finland
    index: 5
 citation_author: Kajasilta and Kuusela  et. al.
 date: 10 Nov 2022
