@@ -12,7 +12,7 @@ authors:
     orcid: 0000-0002-8001-2161
     affiliation: 1 # (Multiple affiliations must be quoted) "1,2"
   - name: Otto Kuusela^[Co-first author]
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-9946-0597
     affiliation: 2
   - name: Tuomas Mattila
     affiliation: 3
