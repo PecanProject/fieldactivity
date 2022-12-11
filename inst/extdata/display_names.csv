@@ -520,6 +520,7 @@ chemical_type_choice,chemical_type_herbicide,Herbicide,Rikkakasvien torjunta-ain
 chemical_type_choice,chemical_type_fungicide,Fungicide,Sienitautien torjunta-aine
 chemical_type_choice,chemical_type_growth_regulator,Growth regulator,Kasvunsääde
 chemical_type_choice,chemical_type_lime_application,Lime application, Kalkin levitys
+chemical_type_choice,chemical_type_gypsum_application,Gypsum application,Kipsin levitys
 # source for active substances (in Finnish): 
 # https://www.kemidigi.fi/kasvinsuojeluainerekisteri/haku
 active_substance,AS001,(E,E)-8,10-dodekadien-1-oli,(E,E)-8,10-dodekadien-1-oli
