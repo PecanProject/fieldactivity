@@ -56,15 +56,26 @@ app_server <- function(input, output, session) {
     if (dp()) message("auth_result$user changed")
     
     if (auth_result$admin == "FALSE") {
-      
-      updateSelectInput(session, "site", selected = auth_result$user)
-      shinyjs::disable("site")
+      # Create a new user that has access to the Carbon action sites.
+      if (auth_result$user == "ca_user") {
+        
+        shinyjs::enable("site")
+        shinyjs::show("site")
+        # Subset of site choices for the third user
+        site_choices <- sites[sites$site_type %in% c('Advanced CarbonAction Site','CarbonAction Site'),]$site
+        
+        updateSelectInput(session, "site", choices = site_choices, selected = auth_result$user)
+      } else {
+        
+        updateSelectInput(session, "site", selected = auth_result$user)
+        shinyjs::disable("site")
+      }
       
       updateTextInput(session, "uservisible", value = auth_result$user)
       shinyjs::disable("uservisible")
       
       
-      # shinyjs::show("usevisible")
+      # shinyjs::show("uservisible")
     } else {
       shinyjs::enable("site")
       shinyjs::show("site")
