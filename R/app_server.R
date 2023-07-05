@@ -65,6 +65,15 @@ app_server <- function(input, output, session) {
         site_choices <- sites[sites$site_type %in% c('Advanced CarbonAction Site','CarbonAction Site'),]$site
         
         updateSelectInput(session, "site", choices = site_choices, selected = auth_result$user)
+      } else if (auth_result$user == "valio_user") {
+        
+        shinyjs::enable("site")
+        shinyjs::show("site")
+        # Subset of site choices for the third user
+        site_choices <- sites[grepl("Valio Carbo", sites$site_type),]$site
+        
+        updateSelectInput(session, "site", choices = site_choices, selected = auth_result$user)
+        
       } else {
         
         updateSelectInput(session, "site", selected = auth_result$user)
@@ -91,13 +100,13 @@ app_server <- function(input, output, session) {
   ################
   
   # Module for download server, need to decide if ui is separated to
-  # different functions, if more download buttons in required
+  # different functions, if more download buttons is required
   
   mod_download_server_inst("download_ui_1")
   
-  mod_download_server_table("event_table", auth_result$user)
+  mod_download_server_table("event_table", user_auth = reactive(input$site))
   
-  mod_download_server_json("json_zip", auth_result$user)
+  mod_download_server_json("json_zip", user_auth = reactive(input$site))
   
   
   
