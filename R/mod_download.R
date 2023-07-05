@@ -130,6 +130,7 @@ mod_download_json <- function(id, label) {
 #'
 mod_download_server_table <- function(id, user_auth, base_folder = json_file_base_folder()) {
   
+  stopifnot(is.reactive(user_auth))
   
   moduleServer(id, function(input, output, session){
     ns <- session$ns
@@ -152,7 +153,7 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
           file_path <- base_folder
           
           if(dp()) message("Checking current user")
-            user <- user_auth
+            user <- user_auth()
         }
         # Create the file path based on the production status and the user
         file_path <- file.path(file_path, user)
@@ -198,6 +199,7 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
 
 mod_download_server_json <- function(id, user_auth, base_folder = json_file_base_folder()) {
   
+  stopifnot(is.reactive(user_auth))
   
   moduleServer(id, function(input, output, session){
     ns <- session$ns
@@ -223,7 +225,7 @@ mod_download_server_json <- function(id, user_auth, base_folder = json_file_base
           file_path <- base_folder
           
           if(dp()) message("Checking current user")
-          user <- user_auth
+          user <- user_auth()
         }
         # Create the file path based on the production status and the user
         file_path <- file.path(file_path, user)
