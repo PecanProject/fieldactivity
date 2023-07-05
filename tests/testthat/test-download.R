@@ -7,15 +7,17 @@ test_that("is download functional", {
     expect_true(file.info(output$report)$size > 10000)
   })
   
+  site <- reactive("qvidja")
+  
   # Check that file exist when downloading csv
-  testServer(mod_download_server_table, args = list(user_auth = "qvidja"), {
+  testServer(mod_download_server_table, args = list(user_auth = site), {
     expect_true(file.exists(output$eventtable))
     expect_true(file.size(output$eventtable) > 70)
   })
   
   
   # Check that file exist when downloading zip
-  testServer(mod_download_server_json, args = list(user_auth = "qvidja"), {
+  testServer(mod_download_server_json, args = list(user_auth = site), {
     expect_true(file.exists(output$eventjson))
     expect_true(grepl(".zip", output$eventjson))
     
