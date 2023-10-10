@@ -4,7 +4,13 @@
 \alias{write_json_file}
 \title{Write a given event list to a json file}
 \usage{
-write_json_file(site, block, event_list, base_folder = json_file_base_folder())
+write_json_file(
+  site,
+  block,
+  event_list,
+  rotation_list,
+  base_folder = json_file_base_folder()
+)
 }
 \arguments{
 \item{site}{The site of the events}
