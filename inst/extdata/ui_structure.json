@@ -40,6 +40,11 @@
       "type" : "textOutput"
     },
     
+    "rotation_cycle_title" : {
+      "code_name" : "rotation_cycle_title",
+      "type" : "textOutput"
+    },
+    
     "json_dl_label" : {
       "code_name" : "json_dl_label",
       "type" : "textOutput"
