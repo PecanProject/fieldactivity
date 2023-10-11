@@ -132,10 +132,10 @@ read_json_file <- function(site, block,
     return(list())
   }
   
-  # if there are no rotation, return an empty list
-  if (length(rotation) == 0) {
-    return(list())
-  }
+  # # if there are no rotation, return an empty list
+  # if (length(rotation) == 0) {
+  #   return(list())
+  # }
   
   # add block information and apply exceptions to each event
   for (i in 1:length(events)) {
@@ -152,8 +152,10 @@ read_json_file <- function(site, block,
   }
   
   # add block info for rotations
-  for (j in 1:length(rotation)) {
-    rotation[[j]]$block <- block
+  if (length(rotation) != 0){
+    for (j in 1:length(rotation)) {
+      rotation[[j]]$block <- block
+    }
   }
   
   # Add events and rotation as a list objects which both will be returned
