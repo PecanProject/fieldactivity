@@ -926,7 +926,12 @@
                     "code_name" : "soil_layer_count_table",
                     "type" : "dataTable",
                     "columns" : ["soil_layer_top_depth", 
-                    "soil_layer_base_depth", "soil_classification_by_layer"],
+                    "soil_layer_base_depth", "soil_classification_by_layer",
+                    "soil_bulk_density_moist", "soil_water_wilting_pt",
+                    "soil_water_field_cap_1", "soil_water_saturated",
+                    "soil_silt_fraction", "soil_sand_fraction",
+                    "soil_clay_fraction", "soil_organic_matter_layer",
+                    "soil_organic_C_perc_layer"],
                     "rows" : {
                       "soil_layers" : {
                         "row_variable" : "soil_layer_count",
@@ -960,6 +965,78 @@
                     "type" : "selectInput",
                     "label" : "soil_classification_by_layer_label",
                     "choices" : "soil_classification_by_layer_choice",
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_bulk_density_moist" : {
+                    "code_name" : "soil_bulk_density_moist",
+                    "type" : "numericInput",
+                    "label" : "soil_bulk_density_moist_label",
+                    "min" : 0,
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_water_wilting_pt" : {
+                    "code_name" : "soil_water_wilting_pt",
+                    "type" : "numericInput",
+                    "label" : "soil_water_wilting_pt_label",
+                    "min" : 0,
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_water_field_cap_1" : {
+                    "code_name" : "soil_water_field_cap_1",
+                    "type" : "numericInput",
+                    "label" : "soil_water_field_cap_1_label",
+                    "min" : 0,
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_water_saturated" : {
+                    "code_name" : "soil_water_saturated",
+                    "type" : "numericInput",
+                    "label" : "soil_water_saturated_label",
+                    "min" : 0,
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_silt_fraction" : {
+                    "code_name" : "soil_silt_fraction",
+                    "type" : "numericInput",
+                    "label" : "soil_silt_fraction_label",
+                    "min" : 0,
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_sand_fraction" : {
+                    "code_name" : "soil_sand_fraction",
+                    "type" : "numericInput",
+                    "label" : "soil_sand_fraction_label",
+                    "min" : 0,
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_clay_fraction" : {
+                    "code_name" : "soil_clay_fraction",
+                    "type" : "numericInput",
+                    "label" : "soil_clay_fraction_label",
+                    "min" : 0,
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_organic_matter_layer" : {
+                    "code_name" : "soil_organic_matter_layer",
+                    "type" : "numericInput",
+                    "label" : "soil_organic_matter_layer_label",
+                    "min" : 0,
+                    "hide_in_event_list" : true
+                  },
+                  
+                  "soil_organic_C_perc_layer" : {
+                    "code_name" : "soil_organic_C_perc_layer",
+                    "type" : "numericInput",
+                    "label" : "soil_organic_C_perc_layer_label",
+                    "min" : 0,
                     "hide_in_event_list" : true
                   }
 
@@ -1030,6 +1107,20 @@
               "code_name" : "leaf_area_index",
               "type" : "numericInput",
               "label" : "leaf_area_index_label",
+              "min" : 0
+            },
+            
+            "total_biomass_dw" : {
+              "code_name" : "total_biomass_dw",
+              "type" : "numericInput",
+              "label" : "total_biomass_dw_label",
+              "min" : 0
+            },
+            
+            "tops_C" : {
+              "code_name" : "tops_C",
+              "type" : "numericInput",
+              "label" : "tops_C_label",
               "min" : 0
             },
 
