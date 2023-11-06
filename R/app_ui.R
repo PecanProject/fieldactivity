@@ -62,8 +62,10 @@ app_ui <- function(request) {
     
     br(),
     
-    h4(textOutput("rotation_cycle_title")),
+    # Header for rotation cycle
+    h5(textOutput("rotation_cycle_title")),
     
+    # Rotation cycle will show here
     mod_rotation_cycle_ui("rotation_cycle")
     
   )
