@@ -88,9 +88,6 @@ app_server <- function(input, output, session) {
   
   mod_download_server_json("json_zip", auth_result$user)
   
-  mod_rotation_cycle_server("rotation_cycle")
-  
-  
   
   ################
   
@@ -98,7 +95,14 @@ app_server <- function(input, output, session) {
   # accessed like events$by_block[["0"]]
   # has to be done this way, because you can't remove values from reactiveValues
   events <- reactiveValues(by_block = list())
+  rotation <- reactiveValues(by_block = list())
 
+  # 
+  rotation_cycle <- mod_rotation_cycle_server("rotation_cycle",
+                                              rotation = reactive(rotation$by_block),
+                                              site = reactive(input$site),
+                                              block = reactive(block))
+  
   # start server for the event list
   event_list <- mod_event_list_server("event_list",
                                       events = reactive(events$by_block),
