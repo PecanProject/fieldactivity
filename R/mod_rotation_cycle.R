@@ -20,10 +20,17 @@ mod_rotation_cycle_ui <- function(id){
 #' @noRd 
 #' 
 #' @import ggplot2
-mod_rotation_cycle_server <- function(id){ # site needs to be added at some point
+mod_rotation_cycle_server <- function(id, rotation, site, block){ # site needs to be added at some point
+  
+  stopifnot(is.reactive(rotation))
+  stopifnot(is.reactive(site))
+  stopifnot(is.reactive(block))
+  
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
+
+    
     # observeEvent(site, {
     #
     #
@@ -33,8 +40,29 @@ mod_rotation_cycle_server <- function(id){ # site needs to be added at some poin
     #   ggplot(data = data.frame(a=1:10, b=seq(2,20, 2)), aes(x=a, y=b)) + geom_point()
     # })
 
-    output$rotation_cycle <- renderText({
-      result <- paste("Placeholder")
+    observeEvent( block(), {
+      if (!isTruthy(site())) { return() }
+      
+      browser()
+      if ( is.null(block()) ){
+        site_block <- subset(sites, sites$site == site())$blocks[[1]][1]
+      } else {
+        site_block <- block()
+      }
+      print(block)
+      
+      rotation <- read_json_file(site(), site_block)$rotation
+      
+      
+      if( length(rotation) != 0 ){
+        output$rotation_cycle <- renderText({
+          result <- paste("Rotation info")
+        })
+      } else {
+        output$rotation_cycle <- renderText({
+          result <- paste("Rotation information not added")
+        })
+      }
     })
 
   })
