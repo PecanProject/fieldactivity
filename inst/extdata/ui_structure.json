@@ -1123,6 +1123,27 @@
               "label" : "tops_C_label",
               "min" : 0
             },
+            
+            "tops_C_std" : {
+              "code_name" : "tops_C_std",
+              "type" : "numericInput",
+              "label" : "tops_C_std_label",
+              "min" : 0
+            },
+            
+            "roots_C" : {
+              "code_name" : "roots_C",
+              "type" : "numericInput",
+              "label" : "roots_C_label",
+              "min" : 0
+            },
+            
+            "roots_C_std" : {
+              "code_name" : "roots_C_std",
+              "type" : "numericInput",
+              "label" : "roots_C_std_label",
+              "min" : 0
+            },
 
             "canopy_height" : {
               "code_name" : "canopy_height",
