@@ -96,11 +96,6 @@ app_server <- function(input, output, session) {
   # has to be done this way, because you can't remove values from reactiveValues
   events <- reactiveValues(by_block = list())
   
-  # observeEvent(event_list$filters(), {
-  #   browser()
-  # })
-  
-
   
   # start server for the event list
   event_list <- mod_event_list_server("event_list",
@@ -109,14 +104,16 @@ app_server <- function(input, output, session) {
                                       site = reactive(input$site))
   
   
-  # 
+  # Observe the changes in block filter
   observeEvent(event_list$filters()$block, {
+    # TRUE or FALSE value returned
     rotation_cycle <- mod_rotation_cycle_server("rotation_cycle",
                                                 rotation = reactive(rotation$by_block),
                                                 site = reactive(input$site),
                                                 block = reactive(event_list$filters()$block))
     
     
+    # Determine if the rotation information is shown on the application or not
     if( isTRUE(rotation_cycle) ){
       shinyjs::show("crop_rotation")
     } else {
