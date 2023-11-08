@@ -27,53 +27,32 @@ mod_rotation_cycle_server <- function(id, rotation, site, block){ # site needs t
   stopifnot(is.reactive(rotation))
   stopifnot(is.reactive(site))
   stopifnot(is.reactive(block))
-  #stopifnot(is.reactive(rotation_status))
   
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    
+    if (dp()) message("Check the crop rotation options")
     rotation_status <- reactiveVal(FALSE)
-    
-    # observeEvent(site, {
-    #
-    #
-    # })
 
-    # output$rotation_cycle <- renderPlot({
-    #   ggplot(data = data.frame(a=1:10, b=seq(2,20, 2)), aes(x=a, y=b)) + geom_point()
-    # })
-
-    #observeEvent( block(), {
       if (!isTruthy(site())) { return() }
       rotation <- read_json_file(site(), block())$rotation
-      rotation_status <- ifelse(!is.null(rotation), TRUE, FALSE)
-      print(rotation_status)
-      print(block())
+      # Rotation status based on if there is rotation information on json -file
+      rotation_status <- ifelse(length(rotation) != 0, TRUE, FALSE)
 
       if( length(rotation) != 0 ){
         output$rotation_cycle <- renderText({
           result <- paste("Rotation info")
         })
-        # output$rotation_status <- renderPrint({
-        #   rotation_in_place()
-        # })
         
       } else {
         output$rotation_cycle <- renderText({
           result <- paste("Rotation information not added for this block")
         })
+        if (dp()) message("Crop rotation information not found from this site and block")
       }
     
-    #})
-
+    # Return true/false value
     return(rotation_status)
     
   })
 }
-    
-## To be copied in the UI
-# mod_rotation_cycle_ui("rotation_cycle_1")
-    
-## To be copied in the server
-# mod_rotation_cycle_server("rotation_cycle_1")
