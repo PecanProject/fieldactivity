@@ -62,7 +62,7 @@ app_ui <- function(request) {
     
     br(),
     
-    # Rotation cycle will show here
+    # Rotation cycle will be shown here
     shinyjs::hidden(div(id = "crop_rotation", mod_rotation_cycle_ui("rotation_cycle")))
     
   )
