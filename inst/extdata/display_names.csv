@@ -115,6 +115,15 @@ variable_name,soil_layer_count,Number of layers in soil sample,Maanäytteen kerr
 variable_name,soil_layer_top_depth,"Soil layer depth, top (cm)","Kerroksen yläosan syvyys (cm)"
 variable_name,soil_layer_base_depth,"Soil layer depth, bottom (cm)","Kerroksen alaosan syvyys (cm)"
 variable_name,soil_classification_by_layer,Soil structure (MARA card),Maan rakenne (MARA-kortti)
+variable_name,soil_bulk_density_moist,Bulk density (g/cm3),Irtotiheys (g/cm3)
+variable_name,soil_water_wilting_pt,Soil water content at wilting point (cm3/cm3),Nuutumispiste (cm3/cm3)
+variable_name,soil_water_field_cap_1,"Soil water content at field capacity, 30 kPA (cm3/cm3)", "Kenttäkapasiteetti, 30 kPA (cm3/cm3)"
+variable_name,soil_water_saturated,Soil water content at saturation (cm3/cm3),Kylläisyyspiste (cm3/cm3)
+variable_name,soil_silt_fraction,Soil silt fraction (%),Maaperän lietteen osuus (%)
+variable_name,soil_sand_fraction,Soil sand fraction (%),Maaperän hiekan osuus (%)
+variable_name,soil_clay_fraction,Soil clay fraction (%),Maaperän saven osuus (%)
+variable_name,soil_organic_matter_layer,Total soil organic matter (kg[OM]/ha),Maaperän orgaaninen aines (kg[OA]/ha)
+variable_name,soil_organic_C_perc_layer,Total soil organic carbon content (%),Orgaanisen hiilen osuus (%)
 variable_name,root_depth,Root depth (m),Juurten syvyys (m)
 variable_name,soil_compactification_depth,Soil compactification depth (cm),Tiivistymän syvyys (cm)
 variable_name,earthworm_count,Number of earthworms,Lierojen lukumäärä
@@ -123,6 +132,11 @@ variable_name,growth_stage,Plant growth stage,Kasvuaste
 variable_name,plant_density,Plant density (plants/m2),Kasvitiheys (kasveja/m2)
 variable_name,specific_leaf_area,Specific leaf area (cm2/g),Ominaislehtiala (cm2/g)
 variable_name,leaf_area_index,Leaf area index (m2/m2),Lehtialaindeksi (m2/m2)
+variable_name,total_biomass_dw,"Total biomass, dry weight (kg/ha)","Kokonaisbiomassa, kuivapaino (kg/ha)"
+variable_name,tops_C,Carbon in aboveground biomass (kg[C]/ha),Biomassa maanpinnalla (kg[C]/ha)
+variable_name,tops_C_std,Standard deviation of aboveground biomass C (meas.),Maanpäällisen biomassan (mittausten) keskihajonta
+variable_name,roots_C,Carbon in belowground biomass (kg[C]/ha),Biomassa maanpinnan alapuolella (kg[C]/ha)
+variable_name,roots_C_std,Standard deviation of belowground biomass C (meas.),Maanalaisen biomassan (mittausten) keskihajonta
 variable_name,canopy_height,Canopy height (m),Latvuston korkeus (m)
 variable_name,canopeo_reading,Canopeo reading,Canopeo-lukema
 variable_name,canopeo_image,Canopeo image,Canopeo-kuva
@@ -297,6 +311,15 @@ element_label,soil_layer_count_label,Number of layers in soil sample:,Maanäytte
 element_label,soil_layer_top_depth_label,"Soil layer depth, top (cm):","Kerroksen yläosan syvyys (cm):"
 element_label,soil_layer_base_depth_label,"Soil layer depth, bottom (cm):","Kerroksen alaosan syvyys (cm):"
 element_label,soil_classification_by_layer_label,Soil structure (MARA card):,Maan rakenne (MARA-kortti):
+element_label,soil_bulk_density_moist_label,Bulk density (g/cm3):,Irtotiheys (g/cm3):
+element_label,soil_water_wilting_pt_label,Soil water content at wilting point (cm3/cm3):,Nuutumispiste (cm3/cm3):
+element_label,soil_water_field_cap_1_label,"Soil water content at field capacity, 30 kPA (cm3/cm3):", "Kenttäkapasiteetti, 30 kPA (cm3/cm3):"
+element_label,soil_water_saturated_label,Soil water content at saturation (cm3/cm3):,Kylläisyyspiste (cm3/cm3):
+element_label,soil_silt_fraction_label,Soil silt fraction (%):,Maaperän lietteen osuus (%):
+element_label,soil_sand_fraction_label,Soil sand fraction (%):,Maaperän hiekan osuus (%):
+element_label,soil_clay_fraction_label,Soil clay fraction (%):,Maaperän saven osuus (%):
+element_label,soil_organic_matter_layer_label,Total soil organic matter (kg[OM]/ha):,Maaperän orgaaninen aines (kg[OA]/ha):
+element_label,soil_organic_C_perc_layer_label,Total soil organic carbon content (%):,Orgaanisen hiilen osuus (%):
 element_label,root_depth_label,Root depth (m):,Juurten syvyys (m):
 element_label,soil_compactification_depth_label,Soil compactification depth (cm):,Tiivistymän syvyys (cm):
 element_label,earthworm_count_label,Number of earthworms:,Lierojen lukumäärä:
@@ -305,6 +328,11 @@ element_label,growth_stage_label,Plant growth stage:,Kasvuaste:
 element_label,plant_density_label,Plant density (plants/m2):,Kasvitiheys (plants/m2):
 element_label,specific_leaf_area_label,Specific leaf area (cm2/g):,Ominaislehtiala (cm2/g):
 element_label,leaf_area_index_label,Leaf area index (m2/m2):,Lehtialaindeksi (m2/m2):
+element_label,total_biomass_dw_label,"Total biomass, dry weight (kg/ha):","Kokonaisbiomassa, kuivapaino (kg/ha):"
+element_label,tops_C_label,Carbon in aboveground biomass (kg[C]/ha):,Hiiltä biomassassa maanpinnalla (kg[C]/ha):
+element_label,tops_C_std_label,Standard deviation of aboveground biomass C (meas.):,Maanpäällisen hiilibiomassan (mittausten) keskihajonta:
+element_label,roots_C_label,Carbon in belowground biomass (kg[C]/ha):,Hiiltä biomassassa maanpinnan alapuolella (kg[C]/ha):
+element_label,roots_C_std_label,Standard deviation of belowground biomass C (meas.):,Maanalaisen hiilibiomassan (mittausten) keskihajonta:
 element_label,canopy_height_label,Canopy height (m):,Latvuston korkeus (m):
 element_label,canopeo_reading_label,Canopeo reading:,Canopeo-lukema:
 element_label,canopeo_image_label,Canopeo image:,Canopeo-kuva:
@@ -341,6 +369,7 @@ CRID,OAT,Oats (Avena sativa),Kaura (Avena sativa)
 CRID,RYE,Rye (Secale cereale),Ruis (Secale cereale)
 CRID,BAR,Barley (Hordeum vulgare),Ohra (Hordeum vulgare)
 CRID,ZZ1,Mixed grain,Seosvilja
+CRID,ZZ3,Mixed grass,Seosruoho
 CRID,BWH,Buckwheat (Fagopyrum esculentum),Tattari (Fagopyrum esculentum)
 CRID,POT,Potato (Solanum tuberosum),Peruna (Solanum tuberosum)
 CRID,SBT,Sugar beet (Beta vulgaris var. altissima),Sokerijuurikas (Beta vulgaris var. altissima)
