@@ -10,6 +10,8 @@
 mod_rotation_cycle_ui <- function(id){
   ns <- NS(id)
   tagList(
+    # Header for rotation cycle
+    h5(textOutput("rotation_cycle_title")),
     #plotOutput(ns("rotation_cycle"))
     verbatimTextOutput(ns("rotation_cycle"))
   )
@@ -25,11 +27,13 @@ mod_rotation_cycle_server <- function(id, rotation, site, block){ # site needs t
   stopifnot(is.reactive(rotation))
   stopifnot(is.reactive(site))
   stopifnot(is.reactive(block))
+  #stopifnot(is.reactive(rotation_status))
   
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-
+    
+    rotation_status <- reactiveVal(FALSE)
     
     # observeEvent(site, {
     #
@@ -40,31 +44,31 @@ mod_rotation_cycle_server <- function(id, rotation, site, block){ # site needs t
     #   ggplot(data = data.frame(a=1:10, b=seq(2,20, 2)), aes(x=a, y=b)) + geom_point()
     # })
 
-    observeEvent( block(), {
+    #observeEvent( block(), {
       if (!isTruthy(site())) { return() }
-      
-      browser()
-      if ( is.null(block()) ){
-        site_block <- subset(sites, sites$site == site())$blocks[[1]][1]
-      } else {
-        site_block <- block()
-      }
-      print(block)
-      
-      rotation <- read_json_file(site(), site_block)$rotation
-      
-      
+      rotation <- read_json_file(site(), block())$rotation
+      rotation_status <- ifelse(!is.null(rotation), TRUE, FALSE)
+      print(rotation_status)
+      print(block())
+
       if( length(rotation) != 0 ){
         output$rotation_cycle <- renderText({
           result <- paste("Rotation info")
         })
+        # output$rotation_status <- renderPrint({
+        #   rotation_in_place()
+        # })
+        
       } else {
         output$rotation_cycle <- renderText({
-          result <- paste("Rotation information not added")
+          result <- paste("Rotation information not added for this block")
         })
       }
-    })
+    
+    #})
 
+    return(rotation_status)
+    
   })
 }
     
