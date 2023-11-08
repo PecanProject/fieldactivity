@@ -95,19 +95,38 @@ app_server <- function(input, output, session) {
   # accessed like events$by_block[["0"]]
   # has to be done this way, because you can't remove values from reactiveValues
   events <- reactiveValues(by_block = list())
-  rotation <- reactiveValues(by_block = list())
+  
+  # observeEvent(event_list$filters(), {
+  #   browser()
+  # })
+  
 
-  # 
-  rotation_cycle <- mod_rotation_cycle_server("rotation_cycle",
-                                              rotation = reactive(rotation$by_block),
-                                              site = reactive(input$site),
-                                              block = reactive(block))
   
   # start server for the event list
   event_list <- mod_event_list_server("event_list",
                                       events = reactive(events$by_block),
                                       language = reactive(input$language),
                                       site = reactive(input$site))
+  
+  
+  # 
+  observeEvent(event_list$filters()$block, {
+    rotation_cycle <- mod_rotation_cycle_server("rotation_cycle",
+                                                rotation = reactive(rotation$by_block),
+                                                site = reactive(input$site),
+                                                block = reactive(event_list$filters()$block))
+    
+    
+    if( isTRUE(rotation_cycle) ){
+      shinyjs::show("crop_rotation")
+    } else {
+      shinyjs::hide("crop_rotation")
+    }
+  })
+  
+  
+
+  
   # a reactiveVal which holds the currently edited event
   event_to_edit <- event_list$current
   
