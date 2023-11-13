@@ -58,7 +58,13 @@ app_ui <- function(request) {
     # add form for entering and viewing information
     shinyjs::hidden(div(id = "form_panel", wellPanel(
       mod_form_ui("form")
-    )))
+    ))),
+    
+    br(),
+    
+    # Rotation cycle will be shown here
+    shinyjs::hidden(div(id = "crop_rotation", mod_rotation_cycle_ui("rotation_cycle")))
+    
   )
   
   tagList(
