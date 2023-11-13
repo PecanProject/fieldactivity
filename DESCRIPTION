@@ -15,6 +15,7 @@ Imports:
     callr,
     config (>= 0.3.1),
     DT (>= 0.25),
+    ggplot2,
     glue,
     golem (>= 0.3.1),
     htmlwidgets,
