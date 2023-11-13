@@ -43,7 +43,7 @@ create_file_folder <- function(site, block,
 #' @param event_list The list of events to write to the events.json file
 #' @param base_folder Included for testing reasons, the default value should
 #'   otherwise be used
-write_json_file <- function(site, block, event_list, 
+write_json_file <- function(site, block, event_list, rotation_list, 
                             base_folder = json_file_base_folder()) {
   
   # this ensures that the folder to store this file exists
@@ -73,11 +73,25 @@ write_json_file <- function(site, block, event_list,
     }
   }
   
+  # If rotations on the list --> erase the block information like with events
+  if (length(rotation_list) > 0) {
+    for (j in 1:length(rotation_list)) {
+      rotation_list[[j]]$block <- NULL
+      
+      rotation <- rotation_list[[j]]
+    }
+  }
+  
   # create appropriate structure
   experiment <- list()
   experiment$management <- list()
+  
+  # rotation will be part of the management
+  experiment$management$rotation <- rotation_list
+  
   experiment$management$events <- event_list
   
+
   # create file
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
                        null = "list", auto_unbox = TRUE)
@@ -105,13 +119,23 @@ read_json_file <- function(site, block,
     return(list())
   }
   
+  management <- NULL
+  
   events <- jsonlite::fromJSON(file_path, 
                                simplifyDataFrame = FALSE)$management$events
+  
+  rotation <- jsonlite::fromJSON(file_path, 
+                                  simplifyDataFrame = FALSE)$management$rotation
   
   # if there are no events, return an empty list
   if (length(events) == 0) {
     return(list())
   }
+  
+  # # if there are no rotation, return an empty list
+  # if (length(rotation) == 0) {
+  #   return(list())
+  # }
   
   # add block information and apply exceptions to each event
   for (i in 1:length(events)) {
@@ -127,7 +151,19 @@ read_json_file <- function(site, block,
     #####
   }
   
-  return(events)
+  # add block info for rotations
+  if (length(rotation) != 0){
+    for (j in 1:length(rotation)) {
+      rotation[[j]]$block <- block
+    }
+  }
+  
+  # Add events and rotation as a list objects which both will be returned
+  # when function is called
+  management$events <- events
+  management$rotation <- rotation
+  
+  return(management)
 }
 
 #' Copy a file related to an event and name it appropriately

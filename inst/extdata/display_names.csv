@@ -169,6 +169,7 @@ element_label,guide_text,Guide,Ohje
 element_label,json_dl_label,Events json (zip),Tapah. json (zip)
 element_label,csv_dl_label,Events table (csv),Tapah. kaikki (csv)
 element_label,event_list_title,Events,Tapahtumat
+element_label,rotation_cycle_title,Crop rotation,Vuoroviljely
 #   element_label,editing_table_title,"All %mgmt_operations_event% events in block '%block%'","Kaikki %mgmt_operations_event%-tapahtumat lohkossa '%block%'"
 element_label,table_filter_text_1,"Showing ","Näytetään "
 element_label,table_filter_text_2," events from block "," tapahtumat lohkosta "

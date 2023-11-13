@@ -109,19 +109,41 @@ app_server <- function(input, output, session) {
   mod_download_server_json("json_zip", user_auth = reactive(input$site))
   
   
-  
   ################
   
   # lists of events by block on the currently viewed site
   # accessed like events$by_block[["0"]]
   # has to be done this way, because you can't remove values from reactiveValues
   events <- reactiveValues(by_block = list())
-
+  
+  
   # start server for the event list
   event_list <- mod_event_list_server("event_list",
                                       events = reactive(events$by_block),
                                       language = reactive(input$language),
                                       site = reactive(input$site))
+  
+  
+  # Observe the changes in block filter
+  observeEvent(event_list$filters()$block, {
+    # TRUE or FALSE value returned
+    rotation_cycle <- mod_rotation_cycle_server("rotation_cycle",
+                                                rotation = reactive(rotation$by_block),
+                                                site = reactive(input$site),
+                                                block = reactive(event_list$filters()$block))
+    
+    
+    # Determine if the rotation information is shown on the application or not
+    if( isTRUE(rotation_cycle) ){
+      shinyjs::show("crop_rotation")
+    } else {
+      shinyjs::hide("crop_rotation")
+    }
+  })
+  
+  
+
+  
   # a reactiveVal which holds the currently edited event
   event_to_edit <- event_list$current
   
@@ -218,7 +240,7 @@ app_server <- function(input, output, session) {
     # go through the blocks and save events from the corresponding json file
     # to events$by_block
     for (block in site_blocks) {
-      events$by_block[[block]] <- read_json_file(site1, block)
+      events$by_block[[block]] <- read_json_file(site1, block)$events
     }
   }
   
@@ -269,7 +291,7 @@ app_server <- function(input, output, session) {
       # replacing the old event with the updated one.
       if (editing) {
         
-        orig_block_data <- read_json_file(input$site, orig_event$block)
+        orig_block_data <- read_json_file(input$site, orig_event$block)$events
         event_index <- find_event_index(orig_event, orig_block_data)
         
         if (is.null(event_index)) {
@@ -278,13 +300,20 @@ app_server <- function(input, output, session) {
           return()
         }
         
+        # if rotation information is not null, the fetch it as well. Here it stays
+        # unchanged
+        orig_block_data_rotation <- read_json_file(input$site, orig_event$block)$rotation
+        if ( is.null(orig_block_data_rotation) ) {
+          orig_block_data_rotation <- list()
+        }
+        
         # if the block of the event has been changed, delete it from the 
         # original block file.
         # If the event has files associated with it (like images), those will be
         # handled later.
         if (event$block != orig_event$block) {
           orig_block_data[event_index] <- NULL
-          write_json_file(input$site, orig_event$block, orig_block_data)
+          write_json_file(input$site, orig_event$block, orig_block_data, orig_block_data_rotation)
           events$by_block[[orig_event$block]] <- orig_block_data
         }
         
@@ -447,7 +476,7 @@ app_server <- function(input, output, session) {
       # load the json file corresponding to the new block selection (new as in
       # the current event$block value). We load from the file because it might
       # have changed and events$by_block might be out of date
-      new_block_data <- read_json_file(input$site, event$block)
+      new_block_data <- read_json_file(input$site, event$block)$events
       
       # if editing and block didn't change, replace event. 
       # Otherwise append event to the list
@@ -457,8 +486,15 @@ app_server <- function(input, output, session) {
         new_block_data[[length(new_block_data) + 1]] <- event
       }
       
+      # if rotation information is not null, the fetch it as well. Here it stays
+      # unchanged
+      new_block_data_rotation <- read_json_file(input$site, event$block)$rotation
+      if ( is.null(new_block_data_rotation) ) {
+        new_block_data_rotation <- list()
+      }
+      
       # save changes
-      write_json_file(input$site, event$block, new_block_data)
+      write_json_file(input$site, event$block, new_block_data, new_block_data_rotation)
       showNotification("Saved successfully.", type = "message")
       
       # update events$by_block
@@ -478,7 +514,7 @@ app_server <- function(input, output, session) {
       event <- event_to_edit()
       
       # retrieve up to date information from the json file
-      block_data <- read_json_file(input$site, event$block)
+      block_data <- read_json_file(input$site, event$block)$events
       
       # find the index of the event to be deleted from the event list
       event_index <- find_event_index(event, block_data)
@@ -511,8 +547,16 @@ app_server <- function(input, output, session) {
       # delete
       block_data[event_index] <- NULL
       
+      
+      # if rotation information is not null, the fetch it as well. Here it stays
+      # unchanged
+      block_data_rotation <- read_json_file(input$site, event$block)$rotation
+      if ( is.null(block_data_rotation) ) {
+        block_data_rotation <- list()
+      }
+      
       # write changes to json
-      write_json_file(input$site, event$block, block_data)
+      write_json_file(input$site, event$block, block_data, block_data_rotation)
       showNotification("Entry deleted.", type = "message")
       
       # update events list
@@ -575,12 +619,20 @@ app_server <- function(input, output, session) {
       
     }
     
-    block_data <- read_json_file(input$site, event$block)
+    block_data <- read_json_file(input$site, event$block)$events
     
     block_data[[length(block_data) + 1]] <- event
     
+    
+    # if rotation information is not null, the fetch it as well. Here it stays
+    # unchanged
+    block_data_rotation <- read_json_file(input$site, event$block)$rotation
+    if ( is.null(block_data_rotation) ) {
+      block_data_rotation <- list()
+    }
+    
     # save changes
-    write_json_file(input$site, event$block, block_data)
+    write_json_file(input$site, event$block, block_data, block_data_rotation)
     showNotification("Cloned successfully.", type = "message")
     
     # update events data
