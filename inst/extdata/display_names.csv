@@ -368,6 +368,8 @@ CRID,WHT,Wheat (Triticum spp.),Vehnä (Triticum spp.)
 CRID,OAT,Oats (Avena sativa),Kaura (Avena sativa)
 CRID,RYE,Rye (Secale cereale),Ruis (Secale cereale)
 CRID,BAR,Barley (Hordeum vulgare),Ohra (Hordeum vulgare)
+CRID,TRT,Triticale (x Triticosecale),Ruisvehnä (x Triticosecale)
+CRID,EMW,Emmer wheat (Triticum dicoccon), Emmervehnä (Triticum dicoccon) #not ICASA
 CRID,ZZ1,Mixed grain,Seosvilja
 CRID,ZZ3,Mixed grass,Seosruoho
 CRID,BWH,Buckwheat (Fagopyrum esculentum),Tattari (Fagopyrum esculentum)
@@ -375,6 +377,7 @@ CRID,POT,Potato (Solanum tuberosum),Peruna (Solanum tuberosum)
 CRID,SBT,Sugar beet (Beta vulgaris var. altissima),Sokerijuurikas (Beta vulgaris var. altissima)
 CRID,PEA,Pea (Pisum sativum),Herne (Pisum sativum)
 CRID,FBN,Faba bean (Vicia faba),Härkäpapu (Vicia faba)
+CRID,FHSO,Hemp seed oil (Finola),Öljyhamppu (Finola) # not ICASA, but Hemp would be
 CRID,RYP,Turnip rape (Brassica rapa subsp. oleifera),Rypsi (Brassica rapa subsp. oleifera) # not ICASA
 CRID,RAP,Rapeseed (Brassica napus subsp. napus),Rapsi (Brassica napus subsp. napus)
 CRID,FLX,Flax (Linum usitatissimum),Pellava (Linum usitatissimum)
@@ -382,15 +385,22 @@ CRID,CCA,Caraway (Carum carvi),Kumina (Carum carvi) # not ICASA
 CRID,PHA,Reed canary grass (Phalaris arundinacea),Ruokohelpi (Phalaris arundinacea) #not ICASA
 CRID,RCL,Red clover (Trifolium pratense),Puna-apila (Trifolium pratense)
 CRID,WCL,White clover (Trifolium repens),Valkoapila (Trifolium repens) # not ICASA
+CRID,WSC,White sweetclover (Melilotus albus),Valkomesikkä (Melilotus albus) # not ICASA
+CRID,BFT,Bird's-foot trefoil (Lotus corniculatus),Keltamaite(Lotus corniculatus) #not ICASA
+CRID,CRC,Crimson glover (Trifolium incarnatum),Veriapila (Trifolium incarnatum) #not ICASA
 CRID,ACL,Alsike clover (Trifolium hybridum),Alsikeapila (Trifolium hybridum) # not ICASA
+CRID,ALC,Aleksandria clover (Trifolium Alexandrinum L), Aleksandrian apila (Trifolium Alexandrinum L) #not ICASA
 CRID,ALF,Alfalfa (Medicago sativa),Sinimailanen (Medicago sativa)
 CRID,RSO,Oilseed radish (Raphanus sativus var. oleiformis),Öljyretikka (Raphanus sativus var. oleiformis) # not ICASA
 CRID,VSA,Common vetch (Vicia sativa),Rehuvirna (Vicia sativa) # not ICASA
 CRID,BRI,Smooth brome (Bromus inermis),Rehukattara (Bromus inermis) # not ICASA
 CRID,FEP,Meadow fescue (Festuca pratensis),Nurminata (Festuca pratensis) # not ICASA
+CRID,CAG,Cat grass (Dactylis glomerata),Koiranheinä (Dactylis glomerata) # not ICASA
+CRID,SIM,Sickle medic (Medicago falcata),Rehumailanen (Medicago falcata) #not ICASA
 CRID,RGP,Perennial ryegrass (Lolium perenne),Englanninraiheinä (Lolium perenne)
 CRID,POA,Kentucky bluegrass (Poa pratensis),Niittynurmikka (Poa pratensis) # not ICASA
 CRID,SDR,Sudan grass (Sorghum × drummondii),Sudaninruoho (Sorghum × drummondii) # not ICASA
+CRID,SUN,Sunflower (Helianthus annuus),Auringonkukka (Helianthus annuus)
 CRID,RGA,Annual ryegrass (Festuca perennis / Lolium multiflorum),Italianraiheinä (Festuca perennis / Lolium multiflorum) # Latin name different in ICASA
 CRID,TFS,Tall fescue (Festuca arundinacea / Schedonorus arundinaceus),Ruokonata (Festuca arundinacea / Schedonorus arundinaceus) # Latin name different in ICASA
 CRID,HVT,Hairy vetch (Vicia villosa),Ruisvirna (Vicia villosa)
@@ -525,6 +535,7 @@ TIIMP,TI038,Rotary hoe,Maanjyrsin (rotary hoe?)
 #   TIIMP,TI042,Moldboard plow 30 cm,TI042-käännös
 #   TIIMP,TI043,Strip tillage,TI043-käännös
 TIIMP,TI044,Tine weeder,Rikkaäes #not on ICASA
+TIIMP,TI045,Tume harrow,Lapiorullaäes #not on ICASA
 TIIMP,TI999,Other,Muu #not on ICASA
 # the following fertilizer_type_choice tags are not in ICASA
 fertilizer_type_choice,fertilizer_type_organic,Organic,Eloperäinen lannoite
