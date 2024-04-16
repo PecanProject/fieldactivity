@@ -392,6 +392,7 @@ CRID,ACL,Alsike clover (Trifolium hybridum),Alsikeapila (Trifolium hybridum) # n
 CRID,ALC,Aleksandria clover (Trifolium Alexandrinum L), Aleksandrian apila (Trifolium Alexandrinum L) #not ICASA
 CRID,ALF,Alfalfa (Medicago sativa),Sinimailanen (Medicago sativa)
 CRID,RSO,Oilseed radish (Raphanus sativus var. oleiformis),Öljyretikka (Raphanus sativus var. oleiformis) # not ICASA
+CRID,RAD,(Tillage) radish (Raphanus sativus), Muokkausretikka (Raphanus sativus)
 CRID,VSA,Common vetch (Vicia sativa),Rehuvirna (Vicia sativa) # not ICASA
 CRID,BRI,Smooth brome (Bromus inermis),Rehukattara (Bromus inermis) # not ICASA
 CRID,FEP,Meadow fescue (Festuca pratensis),Nurminata (Festuca pratensis) # not ICASA
@@ -535,7 +536,7 @@ TIIMP,TI038,Rotary hoe,Maanjyrsin (rotary hoe?)
 #   TIIMP,TI042,Moldboard plow 30 cm,TI042-käännös
 #   TIIMP,TI043,Strip tillage,TI043-käännös
 TIIMP,TI044,Tine weeder,Rikkaäes #not on ICASA
-TIIMP,TI045,Tume harrow,Lapiorullaäes #not on ICASA
+TIIMP,TI045,Spade disk harrow,Lapiorullaäes #not on ICASA
 TIIMP,TI999,Other,Muu #not on ICASA
 # the following fertilizer_type_choice tags are not in ICASA
 fertilizer_type_choice,fertilizer_type_organic,Organic,Eloperäinen lannoite
