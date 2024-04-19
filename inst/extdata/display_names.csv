@@ -396,11 +396,13 @@ CRID,RAD,(Tillage) radish (Raphanus sativus), Muokkausretikka (Raphanus sativus)
 CRID,VSA,Common vetch (Vicia sativa),Rehuvirna (Vicia sativa) # not ICASA
 CRID,BRI,Smooth brome (Bromus inermis),Rehukattara (Bromus inermis) # not ICASA
 CRID,FEP,Meadow fescue (Festuca pratensis),Nurminata (Festuca pratensis) # not ICASA
+CRID,CAM,Camelina (Camelina sativa),Ruistankio (Camelina sativa)
 CRID,CAG,Cat grass (Dactylis glomerata),Koiranheinä (Dactylis glomerata) # not ICASA
 CRID,SIM,Sickle medic (Medicago falcata),Rehumailanen (Medicago falcata) #not ICASA
 CRID,RGP,Perennial ryegrass (Lolium perenne),Englanninraiheinä (Lolium perenne)
 CRID,POA,Kentucky bluegrass (Poa pratensis),Niittynurmikka (Poa pratensis) # not ICASA
 CRID,SDR,Sudan grass (Sorghum × drummondii),Sudaninruoho (Sorghum × drummondii) # not ICASA
+CRID,SPE,Spelt (Triticum spelta),Speltti (Triticum spelta) # not ICASA
 CRID,SUN,Sunflower (Helianthus annuus),Auringonkukka (Helianthus annuus)
 CRID,RGA,Annual ryegrass (Festuca perennis / Lolium multiflorum),Italianraiheinä (Festuca perennis / Lolium multiflorum) # Latin name different in ICASA
 CRID,TFS,Tall fescue (Festuca arundinacea / Schedonorus arundinaceus),Ruokonata (Festuca arundinacea / Schedonorus arundinaceus) # Latin name different in ICASA
