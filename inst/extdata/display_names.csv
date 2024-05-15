@@ -377,7 +377,7 @@ CRID,POT,Potato (Solanum tuberosum),Peruna (Solanum tuberosum)
 CRID,SBT,Sugar beet (Beta vulgaris var. altissima),Sokerijuurikas (Beta vulgaris var. altissima)
 CRID,PEA,Pea (Pisum sativum),Herne (Pisum sativum)
 CRID,FBN,Faba bean (Vicia faba),Härkäpapu (Vicia faba)
-CRID,FHSO,Hemp seed oil (Finola),Öljyhamppu (Finola) # not ICASA, but Hemp would be
+CRID,FHSO,Hemp seed oil (Finola),Öljyhamppu (Finola) # not ICASA but Hemp would be
 CRID,RYP,Turnip rape (Brassica rapa subsp. oleifera),Rypsi (Brassica rapa subsp. oleifera) # not ICASA
 CRID,RAP,Rapeseed (Brassica napus subsp. napus),Rapsi (Brassica napus subsp. napus)
 CRID,FLX,Flax (Linum usitatissimum),Pellava (Linum usitatissimum)
@@ -408,7 +408,7 @@ CRID,RGA,Annual ryegrass (Festuca perennis / Lolium multiflorum),Italianraihein�
 CRID,TFS,Tall fescue (Festuca arundinacea / Schedonorus arundinaceus),Ruokonata (Festuca arundinacea / Schedonorus arundinaceus) # Latin name different in ICASA
 CRID,HVT,Hairy vetch (Vicia villosa),Ruisvirna (Vicia villosa)
 CRID,TRM,Persian clover (Trifolium resupinatum var. majus),Persianapila (Trifolium resupinatum var. majus) # not ICASA
-CRID,XFL,Hybrid fescue (x Festulolium loliaceum),Rainata (x Festulolium loliaceum) # not ICASA, not sure about the names
+CRID,XFL,Hybrid fescue (x Festulolium loliaceum),Rainata (x Festulolium loliaceum) # not ICASA not sure about the names
 CRID,CII,Common chicory (Cichorium intybus),Sikuri (Cichorium intybus) # not ICASA
 CRID,PHT,Lacy phacelia (Phacelia tanacetifolia),Aitohunajakukka (Phacelia tanacetifolia)
 HACOM,canopy,Canopy,Latvusto
@@ -502,7 +502,7 @@ tillage_practice_choice,tillage_practice_secondary,Secondary (seedbed),Kylvömuo
 tillage_practice_choice,tillage_practice_tertiary,Tertiary (weed control),Rikkakasvien torjunta
 #   TIIMP,TI001,V-Ripper,TI001-käännös
 TIIMP,TI002,Subsoiler,Jankkuri
-TIIMP,TI003,Mould-board plough,Kyntöaura # in ICASA this is Moldboard plow 20cm depth, here we use it for all depths
+TIIMP,TI003,Mould-board plough,Kyntöaura # in ICASA this is Moldboard plow 20cm depth here we use it for all depths
 #   TIIMP,TI004,"Chisel plow, sweeps",TI004-käännös
 #   TIIMP,TI005,"Chisel plow, straight point",TI005-käännös
 #   TIIMP,TI006,"Chisel plow, twisted shovels",TI006-käännös
@@ -567,7 +567,7 @@ chemical_type_choice,chemical_type_lime_application,Lime application, Kalkin lev
 chemical_type_choice,chemical_type_gypsum_application,Gypsum application,Kipsin levitys
 # source for active substances (in Finnish): 
 # https://www.kemidigi.fi/kasvinsuojeluainerekisteri/haku
-active_substance,AS001,(E,E)-8,10-dodekadien-1-oli,(E,E)-8,10-dodekadien-1-oli
+active_substance,AS001,"(E,E)-8,10-dodekadien-1-oli","(E,E)-8,10-dodekadien-1-oli"
 active_substance,AS002,(Z)-11-tetradeken-1-yyliasetaatti,(Z)-11-tetradeken-1-yyliasetaatti
 active_substance,AS003,"1,4-dimetyylinaftaleeni","1,4-dimetyylinaftaleeni"
 active_substance,AS004,"2,4-D","2,4-D"
