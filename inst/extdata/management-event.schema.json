@@ -1,0 +1,3815 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "management-event.schema.json",
+    "@context": {
+        "@language": "en",
+        "title": {
+            "@id": "dc:title",
+            "@language": "en"
+        },
+        "title_fi": {
+            "@id": "dc:title",
+            "@language": "fi"
+        },
+        "title_sv": {
+            "@id": "dc:title",
+            "@language": "sv"
+        },
+        "unitless_title": {
+            "@id": "fo:unitless_title",
+            "@language": "en"
+        },
+        "unitless_title_fi": {
+            "@id": "fo:unitless_title",
+            "@language": "fi"
+        },
+        "unitless_title_sv": {
+            "@id": "fo:unitless_title",
+            "@language": "sv"
+        },
+        "description": {
+            "@id": "dc:description",
+            "@language": "en"
+        },
+        "description_fi": {
+            "@id": "dc:description",
+            "@language": "fi"
+        },
+        "description_sv": {
+            "@id": "dc:description",
+            "@language": "sv"
+        },
+        "form-placeholder": {
+            "@id": "fo:form-placeholder",
+            "@language": "en"
+        },
+        "form-placeholder_fi": {
+            "@id": "fo:form-placeholder",
+            "@language": "fi"
+        },
+        "form-placeholder_sv": {
+            "@id": "fo:form-placeholder",
+            "@language": "sv"
+        }
+    },
+    "title": "management event",
+    "title_fi": "tilanhoitotapahtuma",
+    "title_sv": "inträffande av metoden",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string",
+            "format": "url",
+            "const": "https://raw.githubusercontent.com/hamk-uas/fieldobservatory-data-schemas/main/management-event.schema.json"
+        },
+        "mgmt_operations_event": {
+            "title": "event",
+            "title_en": "event",
+            "title_fi": "tapahtuma",
+            "type": "string",
+            "x-ui": {
+                "discriminator": true
+            }
+        },
+        "date": {
+            "title": "date",
+            "title_en": "the date when the activity was performed",            
+            "title_fi": "päivä jolloin tapahtuma tapahtui",
+            "type": "string",
+            "format": "date"
+        },
+        "mgmt_event_short_notes": {
+            "title": "description",
+            "title_en": "description",
+            "title_fi": "kuvaus",
+            "type": "string",
+            "x-ui": {
+                "placeholder": "A high level description of the event, e.g. \"first harvest of the year\" or \"spring fertilization\". This will appear on the event list.",
+                "placeholder_fi": "Yleinen kuvaus tapahtumasta, esim. \"vuoden ensimmäinen sadonkorjuu\" tai \"kevätlannoitus\". Tämä tulee näkyviin tapahtumalistaan."
+            }
+        }        
+    },
+    "oneOf": [
+        {
+            "$id": "#planting",
+            "title": "sowing",
+            "title2": "planting",
+            "title_fi": "kylvö",
+            "title_sv": "sådd",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "sowing",
+                    "title2": "planting",
+                    "title_fi": "kylvö",
+                    "title_sv": "sådd",
+                    "const": "planting"
+                },
+                "planting_list": {
+                    "type": "array",
+                    "title": "planting list",
+                    "title_fi": "kylvölista",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "planted_crop": {
+                                "allOf": [
+                                    {
+                                        "title": "planted crop",
+                                        "title_fi": "kylvetty laji",
+                                        "title_sv": "sådd gröda"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/crop_ident_ICASA"
+                                    }
+                                ]
+                            },
+                            "planting_material_weight": {
+                                "title": "weight of seeds (kg/ha)",
+                                "title2": "planting material weight (kg/ha)",
+                                "title_fi": "siementen määrä (kg/ha)",
+                                "title2_fi": "kylvetyn materiaalin paino (kg/ha)",
+                                "title_sv": "vikt av sådd material (kg/ha)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "kg/ha",
+                                    "unitless_title": "weight of seeds",
+                                    "unitless_title2": "planting material weight",
+                                    "unitless_title_fi": "siementen määrä",
+                                    "unitless_title2_fi": "kylvetyn materiaalin paino",
+                                    "unitless_title_sv": "vikt av sådd material"
+                                }
+                            },
+                            "planting_depth": {
+                                "title": "sowing depth (mm)",
+                                "title2": "planting depth (mm)",
+                                "title_fi": "kylvösyvyys (mm)",
+                                "title2_fi": "sådjup (mm)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "mm",
+                                    "unitless_title": "sowing depth",
+                                    "unitless_title2": "planting depth",
+                                    "unitless_title_fi": "kylvösyvyys",
+                                    "unitless_title2_fi": "sådjup"
+                                }
+                            },
+                            "planting_material_source": {
+                                "title": "source of seeds",
+                                "title2": "planting material source",
+                                "title_fi": "siementen alkuperä",
+                                "title2_fi": "kylvetyn materiaalin alkuperä",
+                                "title_sv": "ursprung på sådda materialet",
+                                "type": "string",
+                                "x-ui": {
+                                    "form-type": "textInput",
+                                    "form-placeholder": "commercial / own seeds, seed cultivar, etc.",
+                                    "form-placeholder_fi": "ostetut / omat siemenet, lajike, jne."
+                                }
+                            }
+                        },
+                        "required": [
+                            "planted_crop"
+                        ]
+                    },
+                    "minItems": 1
+                },
+                "mgmt_event_long_notes": {
+                    "title": "sowing notes",
+                    "title2": "planting notes",
+                    "title_fi": "kylvömuistiinpanoja",
+                    "title2_fi": "kylvömuistiinpanot",
+                    "title_sv": "såddanteckningar",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"soil was drier than usual at the time of sowing\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. \"maa oli tavallista kuivempi\""
+                    }
+                }
+            },
+            "required": [
+                "date",
+                "planting_list"
+            ]
+        },
+        {
+            "$id": "#fertilizer",
+            "title": "fertilizer application",
+            "title_fi": "lannoitteen levitys",
+            "title_sv": "spridning av gödslingsmedel",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "fertilizer application",
+                    "title_fi": "lannoitteen levitys",
+                    "title_sv": "spridning av gödslingsmedel",
+                    "const": "fertilizer"
+                },
+                "N_in_applied_fertilizer": {
+                    "title": "amount of total nitrogen (N) in fertilizer (kg/ha)",
+                    "title2": "amount of nitrogen (N) in fertilizer (kg/ha)",
+                    "title_fi": "typen (N) määrä lannoitteessa (kg/ha)",
+                    "title_sv": "mängden lväve (N) i gödseln (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of total nitrogen (N) in fertilizer",
+                        "unitless_title2": "amount of nitrogen (N) in fertilizer",
+                        "unitless_title_fi": "typen (N) määrä lannoitteessa",
+                        "unitless_title_sv": "mängden lväve (N) i gödseln"
+                    }
+                },
+                "N_in_soluble_fertilizer": {
+                    "title": "amount of soluble nitrogen (N) in fertilizer (kg/ha)",
+                    "title_fi": "liukenevan typen (N) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of soluble nitrogen (N) in fertilizer",
+                        "unitless_title_fi": "liukenevan typen (N) määrä lannoitteessa"
+                    }
+                },
+                "phosphorus_applied_fert": {
+                    "title": "amount of phosphorus (P) in fertilizer (kg/ha)",
+                    "title_fi": "fosforin (P) määrä lannoitteessa (kg/ha)",
+                    "title_sv": "mängden fosfor (P) i gödseln (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of phosphorus (P) in fertilizer",
+                        "unitless_title_fi": "fosforin (P) määrä lannoitteessa",
+                        "unitless_title_sv": "mängden fosfor (P) i gödseln"
+                    }
+                },
+                "fertilizer_K_applied": {
+                    "title": "amount of potassium (K) in fertilizer (kg/ha)",
+                    "title_fi": "kaliumin (K) määrä lannoitteessa (kg/ha)",
+                    "title_sv": "mängden kalium (K) i gödseln (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of potassium (K) in fertilizer",
+                        "unitless_title_fi": "kaliumin (K) määrä lannoitteessa",
+                        "unitless_title_sv": "mängden kalium (K) i gödseln"
+                    }
+                },
+                "S_in_applied_fertilizer": {
+                    "title": "amount of sulphur (S) in fertilizer (kg/ha)",
+                    "title_fi": "rikin (S) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of sulphur (S) in fertilizer",
+                        "unitless_title_fi": "rikin (S) määrä lannoitteessa"
+                    }
+                },
+                "Ca_in_applied_fertilizer": {
+                    "title": "amount of calcium (Ca) in fertilizer (kg/ha)",
+                    "title_fi": "kalsiumin (Ca) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of calcium (Ca) in fertilizer",
+                        "unitless_title_fi": "kalsiumin (Ca) määrä lannoitteessa"
+                    }
+                },
+                "Mg_in_applied_fertilizer": {
+                    "title": "amount of magnesium (Mg) in fertilizer (kg/ha)",
+                    "title_fi": "magnesiumin (Mg) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of magnesium (Mg) in fertilizer",
+                        "unitless_title_fi": "magnesiumin (Mg) määrä lannoitteessa"
+                    }
+                },
+                "Na_in_applied_fertilizer": {
+                    "title": "amount of sodium (Na) in fertilizer (kg/ha)",
+                    "title_fi": "natriumin (Na) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of sodium (Na) in fertilizer",
+                        "unitless_title_fi": "natriumin (Na) määrä lannoitteessa"
+                    }
+                },
+                "Cu_in_applied_fertilizer": {
+                    "title": "amount of copper (Cu) in fertilizer (kg/ha)",
+                    "title_fi": "kuparin (Cu) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of copper (Cu) in fertilizer",
+                        "unitless_title_fi": "kuparin (Cu) määrä lannoitteessa"
+                    }
+                },
+                "Zn_in_applied_fertilizer": {
+                    "title": "amount of zinc (Zn) in fertilizer (kg/ha)",
+                    "title_fi": "sinkin (Zn) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of zinc (Zn) in fertilizer",
+                        "unitless_title_fi": "sinkin (Zn) määrä lannoitteessa"
+                    }
+                },
+                "B_in_applied_fertilizer": {
+                    "title": "amount of boron (B) in fertilizer (kg/ha)",
+                    "title_fi": "boorin (B) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of boron (B) in fertilizer",
+                        "unitless_title_fi": "boorin (B) määrä lannoitteessa"
+                    }
+                },
+                "Mn_in_applied_fertilizer": {
+                    "title": "amount of manganese (Mn) in fertilizer (kg/ha)",
+                    "title_fi": "mangaanin (Mn) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of manganese (Mn) in fertilizer",
+                        "unitless_title_fi": "mangaanin (Mn) määrä lannoitteessa"
+                    }
+                },
+                "Se_in_applied_fertilizer": {
+                    "title": "amount of selenium (Se) in fertilizer (kg/ha)",
+                    "title_fi": "seleenin (Se) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of selenium (Se) in fertilizer",
+                        "unitless_title_fi": "seleenin (Se) määrä lannoitteessa"
+                    }
+                },
+                "Fe_in_applied_fertilizer": {
+                    "title": "amount of iron (Fe) in fertilizer (kg/ha)",
+                    "title_fi": "raudan (Fe) määrä lannoitteessa (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "amount of iron (Fe) in fertilizer",
+                        "unitless_title_fi": "raudan (Fe) määrä lannoitteessa"
+                    }
+                },
+                "other_element_in_applied_fertilizer": {
+                    "title": "other elements in fertilizer (kg/ha)",
+                    "title_fi": "muut ravinteet lannoitteessa (kg/ha)",
+                    "type": "string"
+                },
+                "fertilizer_type": {
+                    "title": "fertilizer type",
+                    "title_fi": "lannoitteen tyyppi",
+                    "type": "string",
+                    "x-ui": {
+                        "discriminator": true
+                    }
+                },                
+                "fertilizer_applic_method": {
+                    "allOf": [
+                        {
+                            "title": "application method",
+                            "title_fi": "levitystapa"
+                        },
+                        {
+                            "$ref": "#/$defs/fertilizer_applic_method"
+                        }
+                    ]
+                },
+                "application_depth_fert": {
+                    "title": "application depth (cm)",
+                    "title_fi": "levityssyvyys (cm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "cm",
+                        "unitless_title": "application depth",
+                        "unitless_title_fi": "levityssyvyys"
+                    }
+                },
+                "fertilizer_total_amount": {
+                    "title": "total amount of fertilizer (kg/ha)",
+                    "title_fi": "lannoitteen kokonaismäärä (kg/ha)",
+                    "title_sv": "totala mändgen gödsel (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "total amount of fertilizer",
+                        "unitless_title_fi": "lannoitteen kokonaismäärä",
+                        "unitless_title_sv": "totala mändgen gödsel"
+                    }
+                },
+                "mgmt_event_long_notes": {
+                    "title": "notes on fertilizer application",
+                    "title_fi": "muistiinpanoja lannoitteen levityksestä",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"biostimulant was added because the field suffered from drought\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. \"lisäsin biostimulanttia pellon kuivuuden vuoksi\""
+                    }
+                }
+            },
+            "oneOf": [
+                {
+                    "title": "mineral",
+                    "title_fi": "väkilannoite",
+                    "properties": {
+                        "fertilizer_type": {
+                            "title": "mineral",
+                            "title_fi": "väkilannoite",
+                            "const": "fertilizer_type_mineral"
+                        },
+                        "fertilizer_product_name" : {
+                            "title": "name of fertilizer",
+                            "title_fi": "lannoitteen nimi",
+                            "type" : "string"               
+                        }
+                    }
+                },
+                {
+                    "title": "soil amendment",
+                    "title_fi": "maanparannusaine",
+                    "properties": {
+                        "fertilizer_type": {
+                            "title": "soil amendment",
+                            "title_fi": "maanparannusaine",
+                            "const": "fertilizer_type_soil_amendment"
+                        },
+                        "fertilizer_material": {
+                            "title": "soil amendment substance",
+                            "title_fi": "maanparannusaine",
+                            "type": "string",
+                            "oneOf": [
+                                {
+                                    "title": "Bio char",
+                                    "title_fi": "Biohiili",
+                                    "const": "FE996"
+                                },
+                                {
+                                    "title": "Peat",
+                                    "title_fi": "Turve",
+                                    "const": "FE997"
+                                },
+                                {
+                                    "title": "Sawdust",
+                                    "title_fi": "Sahanpuru",
+                                    "const": "FE998"
+                                },
+                                {
+                                    "title": "Wood chip",
+                                    "title_fi": "Puulastu",
+                                    "const": "FE999"
+                                }
+                            ]
+                        },
+                        "fertilizer_material_source": {
+                            "title": "fertilizer material source",
+                            "title_fi": "Lannoitteen alkuperä",
+                            "type" : "string",
+                            "x-ui": {
+                                "placeholder" : "e.g. local stables or own farm or Commercial (brand)",
+                                "placeholder_fi" : "esim. paikallinen talli, oma tila tai kaupallinen (tuotteen nimi)"
+                            }
+                        }
+                    }
+                },
+                {
+                    "title": "organic material application",
+                    "title_fi": "eloperäisen lannoitteen levitys",
+                    "title_sv": "applicering av organiskt material",
+                    "properties": {
+                        "fertilizer_type": {
+                            "title": "organic material",
+                            "title_fi": "eloperäinen aine",
+                            "title_sv": "organisk material",
+                            "const": "fertilizer_type_organic"
+                        },
+                        "organic_material": {
+                            "title": "organic material",
+                            "title_fi": "eloperäinen aine",
+                            "title_sv": "organisk material",
+                            "type": "string",
+                            "oneOf": [
+                                {
+                                    "title": "generic crop residue",
+                                    "title_fi": "yleinen kasvijäte",
+                                    "title_sv": "allmänna växtrester",
+                                    "const": "RE001"
+                                },
+                                {
+                                    "title": "green manure",
+                                    "title_fi": "viherlannoitus",
+                                    "title_sv": "gröngödsel",
+                                    "const": "RE002"
+                                },
+                                {
+                                    "title": "barnyard manure",
+                                    "title_fi": "kuivalanta",
+                                    "title_sv": "gårdsgödsel",
+                                    "const": "RE003"
+                                },
+                                {
+                                    "title": "liquid manure",
+                                    "title_fi": "lietelanta",
+                                    "title_sv": "slamgödsel",
+                                    "const": "RE004"
+                                },
+                                {
+                                    "title": "compost",
+                                    "title_fi": "komposti",
+                                    "title_sv": "kompost",
+                                    "const": "RE005"
+                                },
+                                {
+                                    "title": "bark",
+                                    "title_fi": "puun kuori",
+                                    "title_sv": "bark",
+                                    "const": "RE006"
+                                },
+                                {
+                                    "title": "generic legume residue",
+                                    "title_fi": "palkokasvijäte",
+                                    "title_sv": "baljväxtrester",
+                                    "const": "RE101"
+                                },
+                                {
+                                    "title": "faba bean",
+                                    "title_fi": "härkäpapu",
+                                    "title_sv": "bondböna",
+                                    "const": "RE109"
+                                },
+                                {
+                                    "title": "pea residue",
+                                    "title_fi": "hernejäte",
+                                    "title_sv": "ärtavfall",
+                                    "const": "RE110"
+                                },
+                                {
+                                    "title": "hairy vetch",
+                                    "title_fi": "ruisvirna",
+                                    "title_sv": "luddvicker",
+                                    "const": "RE111"
+                                },
+                                {
+                                    "title": "generic cereal crop residue",
+                                    "title_fi": "viljakasvijäte",
+                                    "title_sv": "spannmålsavfall",
+                                    "const": "RE201"
+                                },
+                                {
+                                    "title": "wheat residue",
+                                    "title_fi": "vehnäjäte",
+                                    "title_sv": "veteavfall",
+                                    "const": "RE205"
+                                },
+                                {
+                                    "title": "barley",
+                                    "title_fi": "ohra",
+                                    "title_sv": "korn",
+                                    "const": "RE206"
+                                },
+                                {
+                                    "title": "rye",
+                                    "title_fi": "ruis",
+                                    "title_sv": "råg",
+                                    "const": "RE208"
+                                },
+                                {
+                                    "title": "generic grass",
+                                    "title_fi": "ruohokasvi",
+                                    "title_sv": "gräsväxti",
+                                    "const": "RE301"
+                                },
+                                {
+                                    "title": "bermudagrass",
+                                    "title_fi": "varvasheinä",
+                                    "title_sv": "hundtandsgräs",
+                                    "const": "RE303"
+                                },
+                                {
+                                    "title": "switchgrass",
+                                    "title_fi": "lännenhirssi",
+                                    "title_sv": "jungfruhirs",
+                                    "const": "RE304"
+                                },
+                                {
+                                    "title": "brachiaria",
+                                    "title_fi": "viittaheinät",
+                                    "title_sv": "brachiaria",
+                                    "const": "RE305"
+                                },
+                                {
+                                    "title": "forage grasses",
+                                    "title_fi": "nurmikasvit",
+                                    "title_sv": "vallväxter",
+                                    "const": "RE306"
+                                },
+                                {
+                                    "title": "decomposed crop residue",
+                                    "title_fi": "maatunut kasvijäte",
+                                    "title_sv": "nedbrutet växtavfall",
+                                    "const": "RE999"
+                                },
+                                {
+                                    "title": "other",
+                                    "title_fi": "muu",
+                                    "const": "REOTHER"
+                                }
+                            ]
+                        },
+                        "org_matter_moisture_conc" : {
+                            "title": "moisture concentration (%)",
+                            "title_fi": "aineen kosteus (%)",
+                            "x-ui": {
+                                "unitless_title": "moisture concentration",
+                                "unitless_title_fi": "aineen kosteus",
+                                "unit": "%"
+                            },                        
+                            "type" : "number",
+                            "minimum" : 0,
+                            "maximum" : 100
+                        },          
+                        "org_matter_carbon_conc" : {
+                            "title": "carbon (C) concentration in material (%)",
+                            "title_fi": "hiilen (C) määrä aineessa (%)",
+                            "x-ui": {
+                                "unitless_title": "carbon (C) concentration",
+                                "unitless_title_fi": "hiilen (C) määrä aineessa",
+                                "unit": "%"
+                            },
+                            "type": "number",
+                            "min" : 0,
+                            "max" : 100
+                        },
+                        "org_material_c_to_n": {
+                            "title": "C:N ratio in material",
+                            "title_fi": "C:N suhde aineessa",
+                            "type": "number",
+                            "min": 0
+                        },
+                        "fertilizer_material_source" : {
+                            "title": "fertilizer material source",
+                            "title_fi": "Lannoitteen alkuperä",
+                            "type" : "string",
+                            "x-ui": {
+                                "placeholder" : "e.g. local stables or own farm or Commercial (brand)",
+                                "placeholder_fi" : "esim. paikallinen talli, oma tila tai kaupallinen (tuotteen nimi)"
+                            }
+                        },
+                        "animal_fert_usage": {
+                            "title": "animal fertilizer",
+                            "title_fi": "eläimen lannoite",
+                            "type": "string",
+                            "x-ui": {
+                                "placeholder": "which animal fertilizer, e.g. pig, horse, cow",
+                                "placeholder_fi": "minkä eläimen lannoitetta, esim. sika, hevonen, lehmä"
+                            }
+                        }
+                    }
+                }
+            ],
+            "required": [
+                "date",
+                "fertilizer_type",
+                "fertilizer_total_amount"
+            ]
+        },
+        {
+            "$id": "#tillage",
+            "title": "tillage",
+            "title2": "tillage application",
+            "title_fi": "maanmuokkaus",
+            "title2_fi": "maan muokkaus",
+            "title_sv": "markens bearbetning",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "tillage",
+                    "title2": "tillage application",
+                    "title_fi": "maanmuokkaus",
+                    "title2_fi": "maan muokkaus",
+                    "title_sv": "markens bearbetning",
+                    "const": "tillage"
+                },
+                "tillage_practice": {
+                    "title": "tillage type",
+                    "title_fi": "muokkaustyyppi",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "primary (residue incorporation)",
+                            "title_fi": "perusmuokkaus",
+                            "const": "tillage_practice_primary"
+                        },
+                        {
+                            "title": "secondary (seedbed)",
+                            "title_fi": "kylvömuokkaus",
+                            "const": "tillage_practice_secondary"
+                        },
+                        {
+                            "title": "tertiary (weed control)",
+                            "title_fi": "rikkakasvien torjunta",
+                            "const": "tillage_practice_tertiary"
+                        }
+                    ]
+                },
+                "tillage_implement": {
+                    "title": "tillage implement",
+                    "title_fi": "muokkausväline",
+                    "title_sv": "bearbetningsredskap",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "subsoiler",
+                            "title_fi": "jankkuri",
+                            "const": "TI002"
+                        },
+                        {
+                            "title": "mould-board plough",
+                            "title_fi": "kyntöaura",
+                            "const": "TI003"
+                        },
+                        {
+                            "title": "disk, tandem",
+                            "title_fi": "lautasäes",
+                            "const": "TI009"
+                        },
+                        {
+                            "title": "cultivator, field",
+                            "title_fi": "kultivaattori",
+                            "const": "TI011"
+                        },
+                        {
+                            "title": "harrow, tine",
+                            "title_fi": "joustopiikkiäes",
+                            "const": "TI015"
+                        },
+                        {
+                            "title": "lister",
+                            "title_fi": "multain",
+                            "const": "TI016"
+                        },
+                        {
+                            "title": "blade cultivator",
+                            "title_fi": "hara",
+                            "const": "TI018"
+                        },
+                        {
+                            "title": "manure injector",
+                            "title_fi": "lannansijoituskone (Manure injector?)",
+                            "const": "TI020"
+                        },
+                        {
+                            "title": "roller packer",
+                            "title_fi": "jyrä (roller packer?)",
+                            "const": "TI024"
+                        },
+                        {
+                            "title": "drill, double-disk",
+                            "title_fi": "suorakylvökone, kaksoiskiekot (drill, double disk?)",
+                            "const": "TI025"
+                        },
+                        {
+                            "title": "drill, no-till",
+                            "title_fi": "suorakylvökone, ei muokkausta (drill, no-till?)",
+                            "const": "TI031"
+                        },
+                        {
+                            "title": "planter, row",
+                            "title_fi": "kylvökone (planter, row?)",
+                            "const": "TI033"
+                        },
+                        {
+                            "title": "rotary hoe",
+                            "title_fi": "maanjyrsin (rotary hoe?)",
+                            "const": "TI038"
+                        },
+                        {
+                            "title": "tine weeder",
+                            "title_fi": "rikkaäes",
+                            "const": "TI044"
+                        },
+                        {
+                            "title": "other",
+                            "title_fi": "muu",
+                            "const": "TI999"
+                        }
+                    ]
+                },
+                "tillage_operations_depth": {
+                    "title": "tillage depth (cm)",
+                    "title_fi": "muokkaussyvyys (cm)",
+                    "title_sv": "bearbetningsdjup (cm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "cm",
+                        "unitless_title": "tillage depth",
+                        "unitless_title_fi": "muokkaussyvyys",
+                        "unitless_title_sv": "bearbetningsdjup"
+                    }
+                },
+                "mgmt_event_long_notes": {
+                    "title": "tillage notes",
+                    "title_fi": "muistiinpanot muokkauksesta",
+                    "title_sv": "anteckningar på bearbetning",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"had to stop tillage and continue the next day\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. \"jatkoin muokkausta seuraavana päivänä\""
+                    }
+                }
+            },
+            "required": [
+                "date",
+                "tillage_practice"
+            ]
+        },
+        {
+            "$id": "#harvest",
+            "title": "harvest",
+            "title_fi": "sadonkorjuu",
+            "title_sv": "skörd",
+            "description": "If you left the harvest residue on the field, please add a new event (fertilizer application or tillage) accordingly.",
+            "description_en": "If you left the harvest residue on the field, please add a new event (fertilizer application or tillage) accordingly.",
+            "description_fi": "Jos jätit korjuutähteet pellolle, tee tästä uusi soveltuva tapahtuma (lannoitus- tai maanmuokkaus-).",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "harvest",
+                    "title_fi": "sadonkorjuu",
+                    "title_sv": "skörd",
+                    "const": "harvest"
+                },
+                "harvest_area": {
+                    "title": "harvest area (ha)",
+                    "title_fi": "pinta-ala (ha)",
+                    "title2_fi": "korjattu pinta-ala (ha)",
+                    "title_sv": "skördat område (ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "ha",
+                        "unitless_title": "harvest area",
+                        "unitless_title_fi": "pinta-ala",
+                        "unitless_title2_fi": "korjattu pinta-ala",
+                        "unitless_title_sv": "skördat område"
+                    }
+                },
+                "harvest_list": {
+                    "type": "array",
+                    "title": "harvested items",
+                    "title_fi": "sadonkorjuun kohteet",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "harvest_crop": {
+                                "allOf": [
+                                    {
+                                        "title": "harvest crop",
+                                        "title_fi": "korjattu laji",
+                                        "title_sv": "skördad gröda"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/crop_ident_ICASA"
+                                    }
+                                ]
+                            },
+                            "harvest_moisture": {
+                                "title": "yield moisture (%)",
+                                "title_fi": "sadon kosteus (%)",
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100,
+                                "x-ui": {
+                                    "unit": "%",
+                                    "unitless_title": "yield moisture",
+                                    "unitless_title_fi": "sadon kosteus"
+                                }
+                            },
+                            "harvest_method": {
+                                "title": "harvest method",
+                                "title_fi": "korjuutapa",
+                                "title_sv": "skördemetod",
+                                "type": "string",
+                                "oneOf": [
+                                    {
+                                        "title": "combined",
+                                        "title_fi": "leikkuupuimuri",
+                                        "title_sv": "skördetröska",
+                                        "const": "HM001"
+                                    },
+                                    {
+                                        "title": "hand picked, no further processing",
+                                        "title_fi": "poimittu käsin, ei muuta prosessointia",
+                                        "title_sv": "handplockat, ingen övrig bearbetning",
+                                        "const": "HM004"
+                                    },
+                                    {
+                                        "title": "hand picked, machine processing",
+                                        "title_fi": "poimittu käsin, prosessoitu koneella",
+                                        "title_sv": "handplockat, maskin bearbetat",
+                                        "const": "HM005"
+                                    },
+                                    {
+                                        "title": "hay",
+                                        "title_fi": "heinä",
+                                        "const": "HM007"
+                                    },
+                                    {
+                                        "title": "silage",
+                                        "title_fi": "säilörehu",
+                                        "const": "HM008"
+                                    },
+                                    {
+                                        "title": "potato harvester",
+                                        "title_fi": "perunannostokone",
+                                        "const": "HM009"
+                                    },
+                                    {
+                                        "title": "sugar beet harvester",
+                                        "title_fi": "juurikkaannostokone",
+                                        "const": "HM010"
+                                    }
+                                ]
+                            },
+                            "harvest_operat_component": {
+                                "title": "crop component harvested",
+                                "title_fi": "kerätty kasvinosa",
+                                "title2_fi": "korjattu kasvinosa",
+                                "title_sv": "skördad växtdel",
+                                "type": "string",
+                                "oneOf": [
+                                    {
+                                        "title": "canopy",
+                                        "title_fi": "latvusto",
+                                        "title_sv": "krontak",
+                                        "const": "canopy"
+                                    },
+                                    {
+                                        "title": "leaves",
+                                        "title_fi": "lehdet",
+                                        "title_sv": "blad",
+                                        "const": "leaf"
+                                    },
+                                    {
+                                        "title": "grain, legume seeds",
+                                        "title_fi": "jyvä, palkokasvin siemen",
+                                        "title_sv": "korn, baljväxtens frö",
+                                        "const": "grain"
+                                    },
+                                    {
+                                        "title": "silage",
+                                        "title_fi": "säilörehu",
+                                        "title_sv": "ensilage",
+                                        "const": "silage"
+                                    },
+                                    {
+                                        "title": "tuber, root, etc.",
+                                        "title_fi": "mukula, juuri, yms.",
+                                        "title_sv": "knöl, rot, etc.",
+                                        "const": "tuber"
+                                    },
+                                    {
+                                        "title": "fruit",
+                                        "title_fi": "hedelmä",
+                                        "title_sv": "frukt",
+                                        "const": "fruit"
+                                    },
+                                    {
+                                        "title": "stem",
+                                        "title_fi": "varsi",
+                                        "title_sv": "stjälk",
+                                        "const": "stem"
+                                    }
+                                ]
+                            },
+                            "canopy_height_harvest": {
+                                "title": "canopy height (m)",
+                                "title_fi": "kasvuston korkeus (m)",
+                                "title_sv": "växtlighetens höjd (m)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "m",
+                                    "unitless_title": "canopy height",
+                                    "unitless_title_fi": "kasvuston korkeus",
+                                    "unitless_title_sv": "växtlighetens höjd"
+                                }
+                            },
+                            "harvest_cut_height": {
+                                "title": "height of cut (cm)",
+                                "title_fi": "leikkuukorkeus (cm)",
+                                "title_sv": "klipphöjd (cm)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "cm",
+                                    "unitless_title": "height of cut",
+                                    "unitless_title_fi": "leikkuukorkeus",
+                                    "unitless_title_sv": "klipphöjd"
+                                }
+                            },
+                            "plant_density_harvest": {
+                                "title": "plant density at harvest (plants/m²)",
+                                "title_fi": "kasvitiheys korjuuhetkellä (kasveja/m²)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "m⁻²",
+                                    "unitless_title": "plant density at harvest",
+                                    "unitless_title_fi": "kasvitiheys korjuuhetkellä"
+                                }
+                            },
+                            "harvest_residue_placement": {
+                                "title": "harvest residue placement",
+                                "title_fi": "korjuutähteiden sijoituspaikka",
+                                "title2_fi": "korjatun kasvinosan sijoituspaikka",
+                                "type": "string",
+                                "oneOf": [
+                                    {
+                                        "title": "left in the field as green manure",
+                                        "title_fi": "jätetty pellolle viherlannoitukseksi",
+                                        "const": "harvest_residue_placement_green_manure"
+                                    },
+                                    {
+                                        "title": "left in the field for tillage incorporation",
+                                        "title_fi": "jätetty pellolle kyntämällä sekoittamista varten",
+                                        "const": "harvest_residue_placement_tillage"
+                                    },
+                                    {
+                                        "title": "burned",
+                                        "title_fi": "poltettu",
+                                        "const": "harvest_residue_placement_burned"
+                                    },
+                                    {
+                                        "title": "removed from the field",
+                                        "title_fi": "poistettu pellolta",
+                                        "const": "harvest_residue_placement_removed"
+                                    }
+                                ]
+                            },
+                            "harvest_yield_harvest_dw": {
+                                "title": "yield, dry weight (kg/ha)",
+                                "title_fi": "sato, kuivapaino (kg/ha)",
+                                "title_sv": "skörd, torrvikt (kg/ha)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "kg/ha",
+                                    "unitless_title": "yield, dry weight",
+                                    "unitless_title_fi": "sato, kuivapaino",
+                                    "unitless_title_sv": "skörd, torrvikt"
+                                }
+                            },
+                            "harv_yield_harv_f_wt": {
+                                "title": "yield, fresh weight (t/ha)",
+                                "title_fi": "sato, märkäpaino (t/ha)",
+                                "title2_fi": "sato, tuorepaino (t/ha)",
+                                "title_sv": "skörd, färskvikt (t/ha)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "t/ha",
+                                    "unitless_title": "yield, fresh weight",
+                                    "unitless_title_fi": "sato, märkäpaino",
+                                    "unitless_title2_fi": "sato, tuorepaino",
+                                    "unitless_title_sv": "skörd, färskvikt"
+                                }
+                            },
+                            "yield_C_at_harvest": {
+                                "title": "carbon (C) in yield (kg/ha)",
+                                "title_fi": "hiilen (C) määrä sadossa (kg/ha)",
+                                "title_sv": "mängden kol (C) i skörden (kg/ha)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "kg/ha",
+                                    "unitless_title": "carbon (C) in yield",
+                                    "unitless_title_fi": "hiilen (C) määrä sadossa",
+                                    "unitless_title_sv": "mängden kol (C) i skörden"
+                                }
+                            }
+                        },
+                        "required": [
+                            "harvest_crop"
+                        ]
+                    },
+                    "minItems": 1
+                },
+                "harvest_yield_harvest_dw_total": {
+                    "title": "yield, total dry weight (kg/ha)",
+                    "title2": "total yield, dry weight (kg/ha)",
+                    "title_fi": "sato, kuivapaino yhteensä (kg/ha)",
+                    "title2_fi": "kokonaissato, kuivapaino (kg/ha)",
+                    "title_sv": "totala skörden, torrvikt (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "yield, total dry weight",
+                        "unitless_title2": "total yield, dry weight",
+                        "unitless_title_fi": "sato, kuivapaino yhteensä",
+                        "unitless_title2_fi": "kokonaissato, kuivapaino",
+                        "unitless_title_sv": "totala skörden, torrvikt",
+                        "total_of_list": "harvest_list",
+                        "total_of_property": "harvest_yield_harvest_dw"
+                    }
+                },
+                "harv_yield_harv_f_wt_total": {
+                    "title": "yield, total fresh weight (t/ha)",
+                    "title_fi": "sato, märkäpaino yhteensä (t/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "t/ha",
+                        "unitless_title": "yield, total fresh weight",
+                        "unitless_title_fi": "sato, märkäpaino yhteensä",
+                        "total_of_list": "harvest_list",
+                        "total_of_property": "harv_yield_harv_f_wt"
+                    }
+                },
+                "yield_C_at_harvest_total": {
+                    "title": "carbon (C) in yield, total (kg/ha)",
+                    "title2": "total carbon (C) in yield (kg/ha)",
+                    "title_fi": "hiilen (C) määrä sadossa yhteensä (kg/ha)",
+                    "title2_fi": "hiilen (C) kokonaismäärä sadossa (kg/ha)",
+                    "title_sv": "totala mängden kol (C) i skörden (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "carbon (C) in yield, total",
+                        "unitless_title2": "total carbon (C) in yield",
+                        "unitless_title_fi": "hiilen (C) määrä sadossa yhteensä",
+                        "unitless_title2_fi": "hiilen (C) kokonaismäärä sadossa",
+                        "unitless_title_sv": "totala mängden kol (C) i skörden",
+                        "total_of_list": "harvest_list",
+                        "total_of_property": "yield_C_at_harvest"
+                    }
+                },
+                "mgmt_event_long_notes": {
+                    "title": "harvest comments",
+                    "title2": "comments",
+                    "title_fi": "sadonkorjuukommentit",
+                    "title_sv": "kommentarer",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"cutting height was not uniform\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. \"leikkuukorkeus ei ollut sama kaikkialla\""
+                    }
+                }
+            },
+            "required": [
+                "date",
+                "harvest_list"
+            ]
+        },
+        {
+            "$id": "#chemicals",
+            "title": "chemicals application",
+            "title_fi": "kemikaalin levitys",
+            "title_sv": "applicering av kemikalier",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "chemicals application",
+                    "title_fi": "kemikaalin levitys",
+                    "title_sv": "applicering av kemikalier",
+                    "const": "chemicals"
+                },
+                "chemical_type": {
+                    "title": "chemical type",
+                    "title_fi": "kemikaalin tyyppi",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "insecticide",
+                            "title_fi": "hyönteistorjunta-aine",
+                            "const": "chemical_type_insecticide"
+                        },
+                        {
+                            "title": "herbicide",
+                            "title_fi": "rikkakasvien torjunta-aine",
+                            "const": "chemical_type_herbicide"
+                        },
+                        {
+                            "title": "fungicide",
+                            "title_fi": "sienitautien torjunta-aine",
+                            "const": "chemical_type_fungicide"
+                        },
+                        {
+                            "title": "growth regulator",
+                            "title_fi": "kasvunsääde",
+                            "const": "chemical_type_growth_regulator"
+                        },
+                        {
+                            "title": "lime application",
+                            "title_fi": "kalkin levitys",
+                            "const": "chemical_type_lime_application"
+                        },
+                        {
+                            "title": "gypsum application",
+                            "title_fi": "kipsin levitys",
+                            "const": "chemical_type_gypsum_application"
+                        }
+                    ]
+                },
+                "chemical_product_name": {
+                    "title": "chemical product name",
+                    "title_fi": "kemikaalivalmisteen nimi",
+                    "type": "string"
+                },
+                "chemical_applic_material_list": {
+                    "title": "list of active substances in chemical",
+                    "title_fi": "lista kemikaalin tehoaineista",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "chemical_applic_material": {
+                                "title": "active substance in chemical",
+                                "title_fi": "kemikaalin tehoaine",
+                                "type": "string",
+                                "oneOf": [
+                                    {
+                                        "title": "(E,E)-8,10-dodekadien-1-oli",
+                                        "title_fi": "(E,E)-8,10-dodekadien-1-oli",
+                                        "const": "AS001"
+                                    },
+                                    {
+                                        "title": "(Z)-11-tetradeken-1-yyliasetaatti",
+                                        "title_fi": "(Z)-11-tetradeken-1-yyliasetaatti",
+                                        "const": "AS002"
+                                    },
+                                    {
+                                        "title": "1,4-dimetyylinaftaleeni",
+                                        "title_fi": "1,4-dimetyylinaftaleeni",
+                                        "const": "AS003"
+                                    },
+                                    {
+                                        "title": "2,4-D",
+                                        "title_fi": "2,4-D",
+                                        "const": "AS004"
+                                    },
+                                    {
+                                        "title": "6-bentsyyliadeniini",
+                                        "title_fi": "6-bentsyyliadeniini",
+                                        "const": "AS005"
+                                    },
+                                    {
+                                        "title": "Abamektiini",
+                                        "title_fi": "Abamektiini",
+                                        "const": "AS006"
+                                    },
+                                    {
+                                        "title": "aklonifeeni",
+                                        "title_fi": "aklonifeeni",
+                                        "const": "AS007"
+                                    },
+                                    {
+                                        "title": "Alfa-sypermetriini",
+                                        "title_fi": "Alfa-sypermetriini",
+                                        "const": "AS008"
+                                    },
+                                    {
+                                        "title": "Alumiinifosfidi",
+                                        "title_fi": "Alumiinifosfidi",
+                                        "const": "AS009"
+                                    },
+                                    {
+                                        "title": "Amidosulfuroni",
+                                        "title_fi": "Amidosulfuroni",
+                                        "const": "AS010"
+                                    },
+                                    {
+                                        "title": "Aminopyralidi",
+                                        "title_fi": "Aminopyralidi",
+                                        "const": "AS011"
+                                    },
+                                    {
+                                        "title": "Amisulbromi (ISO)",
+                                        "title_fi": "Amisulbromi (ISO)",
+                                        "const": "AS012"
+                                    },
+                                    {
+                                        "title": "Asetamipridi",
+                                        "title_fi": "Asetamipridi",
+                                        "const": "AS013"
+                                    },
+                                    {
+                                        "title": "Atsoksistrobiini (ISO)",
+                                        "title_fi": "Atsoksistrobiini (ISO)",
+                                        "const": "AS014"
+                                    },
+                                    {
+                                        "title": "Bacillus amyloliquefaciens (kanta MBI 600)",
+                                        "title_fi": "Bacillus amyloliquefaciens (kanta MBI 600)",
+                                        "const": "AS015"
+                                    },
+                                    {
+                                        "title": "Bacillus subtilis QST 713",
+                                        "title_fi": "Bacillus subtilis QST 713",
+                                        "const": "AS016"
+                                    },
+                                    {
+                                        "title": "Bacillus thuringiensis subsp. aizawai (kanta GC-91)",
+                                        "title_fi": "Bacillus thuringiensis subsp. aizawai (kanta GC-91)",
+                                        "const": "AS017"
+                                    },
+                                    {
+                                        "title": "Beauveria bassiana GHA",
+                                        "title_fi": "Beauveria bassiana GHA",
+                                        "const": "AS018"
+                                    },
+                                    {
+                                        "title": "Bentatsoni",
+                                        "title_fi": "Bentatsoni",
+                                        "const": "AS019"
+                                    },
+                                    {
+                                        "title": "Bentsoehappo",
+                                        "title_fi": "Bentsoehappo",
+                                        "const": "AS020"
+                                    },
+                                    {
+                                        "title": "Bentsovindiflupyyri (ISO)",
+                                        "title_fi": "Bentsovindiflupyyri (ISO)",
+                                        "const": "AS021"
+                                    },
+                                    {
+                                        "title": "Bifenatsaatti (ISO)",
+                                        "title_fi": "Bifenatsaatti (ISO)",
+                                        "const": "AS022"
+                                    },
+                                    {
+                                        "title": "Bifenoksi",
+                                        "title_fi": "Bifenoksi",
+                                        "const": "AS023"
+                                    },
+                                    {
+                                        "title": "Biksafeeni",
+                                        "title_fi": "Biksafeeni",
+                                        "const": "AS024"
+                                    },
+                                    {
+                                        "title": "Boskalidi",
+                                        "title_fi": "Boskalidi",
+                                        "const": "AS025"
+                                    },
+                                    {
+                                        "title": "Bromoksiniili",
+                                        "title_fi": "Bromoksiniili",
+                                        "const": "AS026"
+                                    },
+                                    {
+                                        "title": "Buprofetsiini",
+                                        "title_fi": "Buprofetsiini",
+                                        "const": "AS027"
+                                    },
+                                    {
+                                        "title": "Coniothyrium minitans, strain CON/M/91-08",
+                                        "title_fi": "Coniothyrium minitans, strain CON/M/91-08",
+                                        "const": "AS028"
+                                    },
+                                    {
+                                        "title": "Cydia pomonella granulovirus (CpGV)",
+                                        "title_fi": "Cydia pomonella granulovirus (CpGV)",
+                                        "const": "AS029"
+                                    },
+                                    {
+                                        "title": "Daminotsidi",
+                                        "title_fi": "Daminotsidi",
+                                        "const": "AS030"
+                                    },
+                                    {
+                                        "title": "Deltametriini",
+                                        "title_fi": "Deltametriini",
+                                        "const": "AS031"
+                                    },
+                                    {
+                                        "title": "Difenokonatsoli",
+                                        "title_fi": "Difenokonatsoli",
+                                        "const": "AS032"
+                                    },
+                                    {
+                                        "title": "Diflufenikaani",
+                                        "title_fi": "Diflufenikaani",
+                                        "const": "AS033"
+                                    },
+                                    {
+                                        "title": "Dikamba",
+                                        "title_fi": "Dikamba",
+                                        "const": "AS034"
+                                    },
+                                    {
+                                        "title": "Diklorproppi-P",
+                                        "title_fi": "Diklorproppi-P",
+                                        "const": "AS035"
+                                    },
+                                    {
+                                        "title": "Dikvatti",
+                                        "title_fi": "Dikvatti",
+                                        "const": "AS036"
+                                    },
+                                    {
+                                        "title": "Dimetenamidi-P (ISO)",
+                                        "title_fi": "Dimetenamidi-P (ISO)",
+                                        "const": "AS037"
+                                    },
+                                    {
+                                        "title": "Dimetomorfi",
+                                        "title_fi": "Dimetomorfi",
+                                        "const": "AS038"
+                                    },
+                                    {
+                                        "title": "Ditianoni",
+                                        "title_fi": "Ditianoni",
+                                        "const": "AS039"
+                                    },
+                                    {
+                                        "title": "dodiini",
+                                        "title_fi": "dodiini",
+                                        "const": "AS040"
+                                    },
+                                    {
+                                        "title": "Esfenvaleraatti",
+                                        "title_fi": "Esfenvaleraatti",
+                                        "const": "AS041"
+                                    },
+                                    {
+                                        "title": "etefoni",
+                                        "title_fi": "etefoni",
+                                        "const": "AS042"
+                                    },
+                                    {
+                                        "title": "Etikkahappo",
+                                        "title_fi": "Etikkahappo",
+                                        "const": "AS043"
+                                    },
+                                    {
+                                        "title": "Etofumesaatti (ISO)",
+                                        "title_fi": "Etofumesaatti (ISO)",
+                                        "const": "AS044"
+                                    },
+                                    {
+                                        "title": "Fenheksamidi",
+                                        "title_fi": "Fenheksamidi",
+                                        "const": "AS045"
+                                    },
+                                    {
+                                        "title": "Fenmedifaami",
+                                        "title_fi": "Fenmedifaami",
+                                        "const": "AS046"
+                                    },
+                                    {
+                                        "title": "Fenoksaproppi-P-etyyli (ISO)",
+                                        "title_fi": "Fenoksaproppi-P-etyyli (ISO)",
+                                        "const": "AS047"
+                                    },
+                                    {
+                                        "title": "Fenpyratsamiini",
+                                        "title_fi": "Fenpyratsamiini",
+                                        "const": "AS048"
+                                    },
+                                    {
+                                        "title": "fenpyroksimaatti (ISO)",
+                                        "title_fi": "fenpyroksimaatti (ISO)",
+                                        "const": "AS049"
+                                    },
+                                    {
+                                        "title": "Flonikamidi (ISO)",
+                                        "title_fi": "Flonikamidi (ISO)",
+                                        "const": "AS050"
+                                    },
+                                    {
+                                        "title": "Florasulaami",
+                                        "title_fi": "Florasulaami",
+                                        "const": "AS051"
+                                    },
+                                    {
+                                        "title": "Fluatsifoppi-P-butyyli",
+                                        "title_fi": "Fluatsifoppi-P-butyyli",
+                                        "const": "AS052"
+                                    },
+                                    {
+                                        "title": "Fluatsinami",
+                                        "title_fi": "Fluatsinami",
+                                        "const": "AS053"
+                                    },
+                                    {
+                                        "title": "Fludioksiniili (ISO)",
+                                        "title_fi": "Fludioksiniili (ISO)",
+                                        "const": "AS054"
+                                    },
+                                    {
+                                        "title": "Fludioksoniili",
+                                        "title_fi": "Fludioksoniili",
+                                        "const": "AS055"
+                                    },
+                                    {
+                                        "title": "fluksapyroksadi",
+                                        "title_fi": "fluksapyroksadi",
+                                        "const": "AS056"
+                                    },
+                                    {
+                                        "title": "Fluopikolidi",
+                                        "title_fi": "Fluopikolidi",
+                                        "const": "AS057"
+                                    },
+                                    {
+                                        "title": "Fluopyraami (ISO)",
+                                        "title_fi": "Fluopyraami (ISO)",
+                                        "const": "AS058"
+                                    },
+                                    {
+                                        "title": "Flupyradifuroni",
+                                        "title_fi": "Flupyradifuroni",
+                                        "const": "AS059"
+                                    },
+                                    {
+                                        "title": "fluroksipyyri",
+                                        "title_fi": "fluroksipyyri",
+                                        "const": "AS060"
+                                    },
+                                    {
+                                        "title": "fluroksipyyri-meptyyli (ISO)",
+                                        "title_fi": "fluroksipyyri-meptyyli (ISO)",
+                                        "const": "AS061"
+                                    },
+                                    {
+                                        "title": "Flutolaniili",
+                                        "title_fi": "Flutolaniili",
+                                        "const": "AS062"
+                                    },
+                                    {
+                                        "title": "Foramsulfuroni",
+                                        "title_fi": "Foramsulfuroni",
+                                        "const": "AS063"
+                                    },
+                                    {
+                                        "title": "Fosetyyli",
+                                        "title_fi": "Fosetyyli",
+                                        "const": "AS064"
+                                    },
+                                    {
+                                        "title": "Fosetyyli-alumiini",
+                                        "title_fi": "Fosetyyli-alumiini",
+                                        "const": "AS065"
+                                    },
+                                    {
+                                        "title": "Gamma-syhalotriini",
+                                        "title_fi": "Gamma-syhalotriini",
+                                        "const": "AS066"
+                                    },
+                                    {
+                                        "title": "Gibberelliini (GA4 ja GA7 seos)",
+                                        "title_fi": "Gibberelliini (GA4 ja GA7 seos)",
+                                        "const": "AS067"
+                                    },
+                                    {
+                                        "title": "Gliocladium catenulatum -sienen rihmastoa ja itiöitä",
+                                        "title_fi": "Gliocladium catenulatum -sienen rihmastoa ja itiöitä",
+                                        "const": "AS068"
+                                    },
+                                    {
+                                        "title": "Glyfosaatti (glyfosaatin ammoniumsuolana)",
+                                        "title_fi": "Glyfosaatti (glyfosaatin ammoniumsuolana)",
+                                        "const": "AS069"
+                                    },
+                                    {
+                                        "title": "Glyfosaatti (Glyfosaatin dimetyyliamiinisuolana)",
+                                        "title_fi": "Glyfosaatti (Glyfosaatin dimetyyliamiinisuolana)",
+                                        "const": "AS070"
+                                    },
+                                    {
+                                        "title": "Glyfosaatti (glyfosaatin isopropyyliamiinisuolana)",
+                                        "title_fi": "Glyfosaatti (glyfosaatin isopropyyliamiinisuolana)",
+                                        "const": "AS071"
+                                    },
+                                    {
+                                        "title": "Glyfosaatti (glyfosaatin kaliumsuolana)",
+                                        "title_fi": "Glyfosaatti (glyfosaatin kaliumsuolana)",
+                                        "const": "AS072"
+                                    },
+                                    {
+                                        "title": "Halauksifeeni-metyyli",
+                                        "title_fi": "Halauksifeeni-metyyli",
+                                        "const": "AS073"
+                                    },
+                                    {
+                                        "title": "Harmaaorvakka-sienen itiöitä",
+                                        "title_fi": "Harmaaorvakka-sienen itiöitä",
+                                        "const": "AS074"
+                                    },
+                                    {
+                                        "title": "heksytiatsoksi (ISO)",
+                                        "title_fi": "heksytiatsoksi (ISO)",
+                                        "const": "AS075"
+                                    },
+                                    {
+                                        "title": "hymeksatsoli (ISO)",
+                                        "title_fi": "hymeksatsoli (ISO)",
+                                        "const": "AS076"
+                                    },
+                                    {
+                                        "title": "Imatsaliili",
+                                        "title_fi": "Imatsaliili",
+                                        "const": "AS077"
+                                    },
+                                    {
+                                        "title": "Imatsamoksi",
+                                        "title_fi": "Imatsamoksi",
+                                        "const": "AS078"
+                                    },
+                                    {
+                                        "title": "Imidaklopridi",
+                                        "title_fi": "Imidaklopridi",
+                                        "const": "AS079"
+                                    },
+                                    {
+                                        "title": "Indoksakarbi",
+                                        "title_fi": "Indoksakarbi",
+                                        "const": "AS080"
+                                    },
+                                    {
+                                        "title": "Isaria fumosorosea, kanta Apopka 97",
+                                        "title_fi": "Isaria fumosorosea, kanta Apopka 97",
+                                        "const": "AS081"
+                                    },
+                                    {
+                                        "title": "Isoksabeeni",
+                                        "title_fi": "Isoksabeeni",
+                                        "const": "AS082"
+                                    },
+                                    {
+                                        "title": "Isopyratsaami",
+                                        "title_fi": "Isopyratsaami",
+                                        "const": "AS083"
+                                    },
+                                    {
+                                        "title": "Jodosulfuroni-metyyli-natrium",
+                                        "title_fi": "Jodosulfuroni-metyyli-natrium",
+                                        "const": "AS084"
+                                    },
+                                    {
+                                        "title": "Kaliumfosfonaatit (kaliumvetyfosfonaatti + dikaliumfosfonaatti)",
+                                        "title_fi": "Kaliumfosfonaatit (kaliumvetyfosfonaatti + dikaliumfosfonaatti)",
+                                        "const": "AS085"
+                                    },
+                                    {
+                                        "title": "Kapriinihappo",
+                                        "title_fi": "Kapriinihappo",
+                                        "const": "AS086"
+                                    },
+                                    {
+                                        "title": "Kapryylihappo",
+                                        "title_fi": "Kapryylihappo",
+                                        "const": "AS087"
+                                    },
+                                    {
+                                        "title": "Kaptaani",
+                                        "title_fi": "Kaptaani",
+                                        "const": "AS088"
+                                    },
+                                    {
+                                        "title": "Karfentratsoni-etyyli",
+                                        "title_fi": "Karfentratsoni-etyyli",
+                                        "const": "AS089"
+                                    },
+                                    {
+                                        "title": "Kletodiimi (ISO)",
+                                        "title_fi": "Kletodiimi (ISO)",
+                                        "const": "AS090"
+                                    },
+                                    {
+                                        "title": "Klomatsoni",
+                                        "title_fi": "Klomatsoni",
+                                        "const": "AS091"
+                                    },
+                                    {
+                                        "title": "Klopyralidi",
+                                        "title_fi": "Klopyralidi",
+                                        "const": "AS092"
+                                    },
+                                    {
+                                        "title": "Klorantraniliproli",
+                                        "title_fi": "Klorantraniliproli",
+                                        "const": "AS093"
+                                    },
+                                    {
+                                        "title": "Klormekvattikloridi",
+                                        "title_fi": "Klormekvattikloridi",
+                                        "const": "AS094"
+                                    },
+                                    {
+                                        "title": "Kresoksiimi-metyyli",
+                                        "title_fi": "Kresoksiimi-metyyli",
+                                        "const": "AS095"
+                                    },
+                                    {
+                                        "title": "Kvinmerakki",
+                                        "title_fi": "Kvinmerakki",
+                                        "const": "AS096"
+                                    },
+                                    {
+                                        "title": "Kvitsalofoppi-P-etyyli",
+                                        "title_fi": "Kvitsalofoppi-P-etyyli",
+                                        "const": "AS097"
+                                    },
+                                    {
+                                        "title": "Lambda-syhalotriini",
+                                        "title_fi": "Lambda-syhalotriini",
+                                        "const": "AS098"
+                                    },
+                                    {
+                                        "title": "Lampaanrasva",
+                                        "title_fi": "Lampaanrasva",
+                                        "const": "AS099"
+                                    },
+                                    {
+                                        "title": "Magnesiumfosfidi",
+                                        "title_fi": "Magnesiumfosfidi",
+                                        "const": "AS100"
+                                    },
+                                    {
+                                        "title": "Maleiinihydratsidi",
+                                        "title_fi": "Maleiinihydratsidi",
+                                        "const": "AS101"
+                                    },
+                                    {
+                                        "title": "Mandipropamidi (ISO)",
+                                        "title_fi": "Mandipropamidi (ISO)",
+                                        "const": "AS102"
+                                    },
+                                    {
+                                        "title": "Mankotsebi",
+                                        "title_fi": "Mankotsebi",
+                                        "const": "AS103"
+                                    },
+                                    {
+                                        "title": "MCPA",
+                                        "title_fi": "MCPA",
+                                        "const": "AS104"
+                                    },
+                                    {
+                                        "title": "mefentriflukonatsoli",
+                                        "title_fi": "mefentriflukonatsoli",
+                                        "const": "AS105"
+                                    },
+                                    {
+                                        "title": "Mekoproppi-P",
+                                        "title_fi": "Mekoproppi-P",
+                                        "const": "AS106"
+                                    },
+                                    {
+                                        "title": "Mepanipyriimi",
+                                        "title_fi": "Mepanipyriimi",
+                                        "const": "AS107"
+                                    },
+                                    {
+                                        "title": "mepikvattikloridi",
+                                        "title_fi": "mepikvattikloridi",
+                                        "const": "AS108"
+                                    },
+                                    {
+                                        "title": "Mesosulfuroni-metyyli (ISO)",
+                                        "title_fi": "Mesosulfuroni-metyyli (ISO)",
+                                        "const": "AS109"
+                                    },
+                                    {
+                                        "title": "Metalaksyyli-M",
+                                        "title_fi": "Metalaksyyli-M",
+                                        "const": "AS110"
+                                    },
+                                    {
+                                        "title": "metamitroni",
+                                        "title_fi": "metamitroni",
+                                        "const": "AS111"
+                                    },
+                                    {
+                                        "title": "Metatsakloori",
+                                        "title_fi": "Metatsakloori",
+                                        "const": "AS112"
+                                    },
+                                    {
+                                        "title": "Metkonatsoli",
+                                        "title_fi": "Metkonatsoli",
+                                        "const": "AS113"
+                                    },
+                                    {
+                                        "title": "Metobromuroni",
+                                        "title_fi": "Metobromuroni",
+                                        "const": "AS114"
+                                    },
+                                    {
+                                        "title": "Metributsiini",
+                                        "title_fi": "Metributsiini",
+                                        "const": "AS115"
+                                    },
+                                    {
+                                        "title": "Metsulfuroni-metyyli",
+                                        "title_fi": "Metsulfuroni-metyyli",
+                                        "const": "AS116"
+                                    },
+                                    {
+                                        "title": "Napropamidi",
+                                        "title_fi": "Napropamidi",
+                                        "const": "AS117"
+                                    },
+                                    {
+                                        "title": "Oksatiapiproliini",
+                                        "title_fi": "Oksatiapiproliini",
+                                        "const": "AS118"
+                                    },
+                                    {
+                                        "title": "Paklobutratsoli (ISO)",
+                                        "title_fi": "Paklobutratsoli (ISO)",
+                                        "const": "AS119"
+                                    },
+                                    {
+                                        "title": "Parafiiniöljy (CAS-nro 64742-46-7)",
+                                        "title_fi": "Parafiiniöljy (CAS-nro 64742-46-7)",
+                                        "const": "AS120"
+                                    },
+                                    {
+                                        "title": "Parafiiniöljy (CAS-nro 8042-47-5)",
+                                        "title_fi": "Parafiiniöljy (CAS-nro 8042-47-5)",
+                                        "const": "AS121"
+                                    },
+                                    {
+                                        "title": "Pelargonihappo",
+                                        "title_fi": "Pelargonihappo",
+                                        "const": "AS122"
+                                    },
+                                    {
+                                        "title": "Pendimetaliini",
+                                        "title_fi": "Pendimetaliini",
+                                        "const": "AS123"
+                                    },
+                                    {
+                                        "title": "penflufeeni",
+                                        "title_fi": "penflufeeni",
+                                        "const": "AS124"
+                                    },
+                                    {
+                                        "title": "Penkonatsoli",
+                                        "title_fi": "Penkonatsoli",
+                                        "const": "AS125"
+                                    },
+                                    {
+                                        "title": "Pepinon mosaiikkivirus (kannan CH2 isolaatti 1906)",
+                                        "title_fi": "Pepinon mosaiikkivirus (kannan CH2 isolaatti 1906)",
+                                        "const": "AS126"
+                                    },
+                                    {
+                                        "title": "Pikloraami",
+                                        "title_fi": "Pikloraami",
+                                        "const": "AS127"
+                                    },
+                                    {
+                                        "title": "Pinoksadeeni (ISO)",
+                                        "title_fi": "Pinoksadeeni (ISO)",
+                                        "const": "AS128"
+                                    },
+                                    {
+                                        "title": "Proheksadionikalsium",
+                                        "title_fi": "Proheksadionikalsium",
+                                        "const": "AS129"
+                                    },
+                                    {
+                                        "title": "Prokinatsidi",
+                                        "title_fi": "Prokinatsidi",
+                                        "const": "AS130"
+                                    },
+                                    {
+                                        "title": "Propakvitsafoppi",
+                                        "title_fi": "Propakvitsafoppi",
+                                        "const": "AS131"
+                                    },
+                                    {
+                                        "title": "Propamokarbi",
+                                        "title_fi": "Propamokarbi",
+                                        "const": "AS132"
+                                    },
+                                    {
+                                        "title": "Propamokarbi-hydrokloridi",
+                                        "title_fi": "Propamokarbi-hydrokloridi",
+                                        "const": "AS133"
+                                    },
+                                    {
+                                        "title": "Propoksikarbatsoni-natrium",
+                                        "title_fi": "Propoksikarbatsoni-natrium",
+                                        "const": "AS134"
+                                    },
+                                    {
+                                        "title": "Prosulfokarbi",
+                                        "title_fi": "Prosulfokarbi",
+                                        "const": "AS135"
+                                    },
+                                    {
+                                        "title": "Protiokonatsoli",
+                                        "title_fi": "Protiokonatsoli",
+                                        "const": "AS136"
+                                    },
+                                    {
+                                        "title": "Pseudomonas chlororaphis MA 342",
+                                        "title_fi": "Pseudomonas chlororaphis MA 342",
+                                        "const": "AS137"
+                                    },
+                                    {
+                                        "title": "Pyraflufeeni-etyyli (ISO)",
+                                        "title_fi": "Pyraflufeeni-etyyli (ISO)",
+                                        "const": "AS138"
+                                    },
+                                    {
+                                        "title": "Pyraklostrobiini",
+                                        "title_fi": "Pyraklostrobiini",
+                                        "const": "AS139"
+                                    },
+                                    {
+                                        "title": "Pyretriinit",
+                                        "title_fi": "Pyretriinit",
+                                        "const": "AS140"
+                                    },
+                                    {
+                                        "title": "Pyridaatti (ISO)",
+                                        "title_fi": "Pyridaatti (ISO)",
+                                        "const": "AS141"
+                                    },
+                                    {
+                                        "title": "Pyrimetaniili",
+                                        "title_fi": "Pyrimetaniili",
+                                        "const": "AS142"
+                                    },
+                                    {
+                                        "title": "Pyriofenoni",
+                                        "title_fi": "Pyriofenoni",
+                                        "const": "AS143"
+                                    },
+                                    {
+                                        "title": "Pyroksulaami",
+                                        "title_fi": "Pyroksulaami",
+                                        "const": "AS144"
+                                    },
+                                    {
+                                        "title": "Rapsiöljy",
+                                        "title_fi": "Rapsiöljy",
+                                        "const": "AS145"
+                                    },
+                                    {
+                                        "title": "Rasvahappojen kaliumsuoloja",
+                                        "title_fi": "Rasvahappojen kaliumsuoloja",
+                                        "const": "AS146"
+                                    },
+                                    {
+                                        "title": "Rautafosfaatti",
+                                        "title_fi": "Rautafosfaatti",
+                                        "const": "AS147"
+                                    },
+                                    {
+                                        "title": "Rautasulfaatti",
+                                        "title_fi": "Rautasulfaatti",
+                                        "const": "AS148"
+                                    },
+                                    {
+                                        "title": "Rimsulfuroni",
+                                        "title_fi": "Rimsulfuroni",
+                                        "const": "AS149"
+                                    },
+                                    {
+                                        "title": "Rypsiöljy",
+                                        "title_fi": "Rypsiöljy",
+                                        "const": "AS150"
+                                    },
+                                    {
+                                        "title": "Sedaksaani",
+                                        "title_fi": "Sedaksaani",
+                                        "const": "AS151"
+                                    },
+                                    {
+                                        "title": "Spirodiklofeeni (ISO)",
+                                        "title_fi": "Spirodiklofeeni (ISO)",
+                                        "const": "AS152"
+                                    },
+                                    {
+                                        "title": "spiroksamiini",
+                                        "title_fi": "spiroksamiini",
+                                        "const": "AS153"
+                                    },
+                                    {
+                                        "title": "Spirotetramaatti (ISO)",
+                                        "title_fi": "Spirotetramaatti (ISO)",
+                                        "const": "AS154"
+                                    },
+                                    {
+                                        "title": "Streptomyces K61 -sädebakteerin rihmastoa ja itiöitä",
+                                        "title_fi": "Streptomyces K61 -sädebakteerin rihmastoa ja itiöitä",
+                                        "const": "AS155"
+                                    },
+                                    {
+                                        "title": "Sulfosulfuroni",
+                                        "title_fi": "Sulfosulfuroni",
+                                        "const": "AS156"
+                                    },
+                                    {
+                                        "title": "Syantraniiliproli",
+                                        "title_fi": "Syantraniiliproli",
+                                        "const": "AS157"
+                                    },
+                                    {
+                                        "title": "Syatsofamidi",
+                                        "title_fi": "Syatsofamidi",
+                                        "const": "AS158"
+                                    },
+                                    {
+                                        "title": "Sykloksidiimi",
+                                        "title_fi": "Sykloksidiimi",
+                                        "const": "AS159"
+                                    },
+                                    {
+                                        "title": "symoksaniili",
+                                        "title_fi": "symoksaniili",
+                                        "const": "AS160"
+                                    },
+                                    {
+                                        "title": "Sypermetriini",
+                                        "title_fi": "Sypermetriini",
+                                        "const": "AS161"
+                                    },
+                                    {
+                                        "title": "Syprodiniili",
+                                        "title_fi": "Syprodiniili",
+                                        "const": "AS162"
+                                    },
+                                    {
+                                        "title": "Syprokonatsoli",
+                                        "title_fi": "Syprokonatsoli",
+                                        "const": "AS163"
+                                    },
+                                    {
+                                        "title": "tau-fluvalinaatti",
+                                        "title_fi": "tau-fluvalinaatti",
+                                        "const": "AS164"
+                                    },
+                                    {
+                                        "title": "Tebukonatsoli",
+                                        "title_fi": "Tebukonatsoli",
+                                        "const": "AS165"
+                                    },
+                                    {
+                                        "title": "Terpenoidien seos QRD 460",
+                                        "title_fi": "Terpenoidien seos QRD 460",
+                                        "const": "AS166"
+                                    },
+                                    {
+                                        "title": "Tiaklopridi",
+                                        "title_fi": "Tiaklopridi",
+                                        "const": "AS167"
+                                    },
+                                    {
+                                        "title": "Tieenikarbatsoni-metyyli",
+                                        "title_fi": "Tieenikarbatsoni-metyyli",
+                                        "const": "AS168"
+                                    },
+                                    {
+                                        "title": "Tifensulfuroni-metyyli",
+                                        "title_fi": "Tifensulfuroni-metyyli",
+                                        "const": "AS169"
+                                    },
+                                    {
+                                        "title": "Tiofanaatti-metyyli",
+                                        "title_fi": "Tiofanaatti-metyyli",
+                                        "const": "AS170"
+                                    },
+                                    {
+                                        "title": "Tolklofossi-metyyli",
+                                        "title_fi": "Tolklofossi-metyyli",
+                                        "const": "AS171"
+                                    },
+                                    {
+                                        "title": "Tribenuronimetyyli (ISO)",
+                                        "title_fi": "Tribenuronimetyyli (ISO)",
+                                        "const": "AS172"
+                                    },
+                                    {
+                                        "title": "Trichoderma harzianum (kanta T-22)",
+                                        "title_fi": "Trichoderma harzianum (kanta T-22)",
+                                        "const": "AS173"
+                                    },
+                                    {
+                                        "title": "Trifloksistrobiini",
+                                        "title_fi": "Trifloksistrobiini",
+                                        "const": "AS174"
+                                    },
+                                    {
+                                        "title": "Triflusulfuroni-metyyli",
+                                        "title_fi": "Triflusulfuroni-metyyli",
+                                        "const": "AS175"
+                                    },
+                                    {
+                                        "title": "Trineksapakki-etyyli",
+                                        "title_fi": "Trineksapakki-etyyli",
+                                        "const": "AS176"
+                                    },
+                                    {
+                                        "title": "Tritikonatsoli",
+                                        "title_fi": "Tritikonatsoli",
+                                        "const": "AS177"
+                                    },
+                                    {
+                                        "title": "Tritosulfuroni",
+                                        "title_fi": "Tritosulfuroni",
+                                        "const": "AS178"
+                                    },
+                                    {
+                                        "title": "Urea",
+                                        "title_fi": "Urea",
+                                        "const": "AS179"
+                                    },
+                                    {
+                                        "title": "viherminttuöljy",
+                                        "title_fi": "viherminttuöljy",
+                                        "const": "AS180"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "chemical_applic_target": {
+                    "title": "chemical application target",
+                    "title_fi": "kemikaalinlevityksen kohde",
+                    "description": "source (in Finnish): https://www.kemidigi.fi/kasvinsuojeluainerekisteri/haku",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "defoliation %",
+                            "title_fi": "lehtikato",
+                            "const": "PCLA"
+                        },
+                        {
+                            "title": "diseased leaf area %",
+                            "title_fi": "tautia lehdissä",
+                            "const": "PDLA"
+                        },
+                        {
+                            "title": "general pest and diseases losses (due to rot, tikka, leafminer, etc.)",
+                            "title_fi": "yleiset tuhoeläin- ja tautivahingot (mätä, miinaajat jne.)",
+                            "const": "PSTDS"
+                        },
+                        {
+                            "title": "reduction in photosynthetic rate %",
+                            "title_fi": "lasku yhteyttämisnopeudessa %",
+                            "const": "PRP"
+                        },
+                        {
+                            "title": "worm (generic)",
+                            "title_fi": "madot",
+                            "const": "WORM"
+                        },
+                        {
+                            "title": "leafminer",
+                            "title_fi": "miinaajat",
+                            "const": "LEAF_MIN"
+                        },
+                        {
+                            "title": "stink bug",
+                            "title_fi": "typpyluteet (Stink bug?)",
+                            "const": "STINKB"
+                        },
+                        {
+                            "title": "looper",
+                            "title_fi": "yökkösentoukat (Looper?)",
+                            "const": "LOOPER"
+                        },
+                        {
+                            "title": "caterpillar",
+                            "title_fi": "perhostoukat",
+                            "const": "CATERP"
+                        },
+                        {
+                            "title": "insect (generic)",
+                            "title_fi": "hyönteiset",
+                            "const": "INSECT"
+                        },
+                        {
+                            "title": "rabbit",
+                            "title_fi": "jänikset",
+                            "const": "RABBIT"
+                        },
+                        {
+                            "title": "deer",
+                            "title_fi": "hirvieläimet",
+                            "const": "DEER"
+                        },
+                        {
+                            "title": "mammal (generic)",
+                            "title_fi": "yleiset nisäkkäät",
+                            "const": "MAMMAL"
+                        },
+                        {
+                            "title": "root-knot nematode",
+                            "title_fi": "meloidogyne spp.",
+                            "const": "RKN"
+                        },
+                        {
+                            "title": "nematode (generic)",
+                            "title_fi": "sukkulamadot",
+                            "const": "NEMATODE"
+                        },
+                        {
+                            "title": "potato spindle tuber viroid",
+                            "title_fi": "perunan sukkulamukulaviroidi",
+                            "const": "PSTVd"
+                        },
+                        {
+                            "title": "viroid (generic)",
+                            "title_fi": "viroidit",
+                            "const": "VIROID"
+                        },
+                        {
+                            "title": "bean common mosaic virus",
+                            "title_fi": "bean common mosaic virus",
+                            "const": "BCMV"
+                        },
+                        {
+                            "title": "virus (generic)",
+                            "title_fi": "yleiset virukset",
+                            "const": "VIRUS"
+                        },
+                        {
+                            "title": "hail storm damage",
+                            "title_fi": "raekuurovahingot",
+                            "const": "HAIL"
+                        },
+                        {
+                            "title": "wind damage",
+                            "title_fi": "tuulivahingot",
+                            "const": "WIND"
+                        },
+                        {
+                            "title": "drought",
+                            "title_fi": "kuivuus",
+                            "const": "DROUGHT"
+                        },
+                        {
+                            "title": "weather damage (generic)",
+                            "title_fi": "yleiset säävahingot",
+                            "const": "WEATHER"
+                        },
+                        {
+                            "title": "broad-leafed weeds",
+                            "title_fi": "leveälehtiset rikkakasvit",
+                            "const": "BRLFWD"
+                        },
+                        {
+                            "title": "weeds (generic)",
+                            "title_fi": "yleiset rikkakasvit",
+                            "const": "WEED"
+                        },
+                        {
+                            "title": "acidity (pH)",
+                            "title_fi": "happamuus (pH)",
+                            "const": "ACIDITY"
+                        }
+                    ]
+                },
+                "chemical_applic_method": {
+                    "allOf": [
+                        {
+                            "title": "chemical application method",
+                            "title_fi": "kemikaalinlevitystapa"
+                        },
+                        {
+                            "$ref": "#/$defs/fertilizer_applic_method"
+                        }
+                    ]
+                },
+                "chemical_applic_amount": {
+                    "title": "chemical amount (kg/ha)",
+                    "title_fi": "kemikaalin määrä (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "chemical amount",
+                        "unitless_title_fi": "kemikaalin määrä"
+                    }
+                },
+                "application_depth_chem": {
+                    "title": "chemical application depth (cm)",
+                    "title_fi": "kemikaalinlevityssyvyys (cm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "cm",
+                        "unitless_title": "chemical application depth",
+                        "unitless_title_fi": "kemikaalinlevityssyvyys"
+                    }
+                },
+                "application_ph_start" : {
+                    "title" : "pH before the application",
+                    "title_fi" : "pH ennen toimenpidettä",
+                    "type": "number",
+                    "minimum" : 0,
+                    "maximum" : 14
+                },
+                "application_ph_end" : {
+                    "title": "pH after the application",
+                    "title_fi": "pH jälkeen toimenpiteen",
+                    "type": "number",
+                    "minimum" : 0,
+                    "maximum" : 14
+                },
+                "mgmt_event_long_notes": {
+                    "title": "chemical application notes",
+                    "title_fi": "kemikaalinlevitysmuistiinpanot",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"rot affecting X % of plants\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. \"mätää X % kasveista\""
+                    }
+                }
+            },
+            "required": [
+                "date",
+                "chemical_type",
+                "chemical_product_name",
+                "chemical_applic_target"
+            ]
+        },
+        {
+            "$id": "#grazing",
+            "title": "grazing",
+            "title_fi": "laidunnus",
+            "title_sv": "betning",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "grazing",
+                    "title_fi": "laidunnus",
+                    "title_sv": "betning",
+                    "const": "grazing"
+                },
+                "grazing_species": {
+                    "title": "grazing species",
+                    "title_fi": "laiduntava laji",
+                    "title_sv": "betande art",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "cattle",
+                            "title_fi": "nautakarja",
+                            "title_sv": "nötkreatur",
+                            "const": "grazing_species_cattle"
+                        },
+                        {
+                            "title": "sheep",
+                            "title_fi": "lampaat",
+                            "const": "grazing_species_sheep"
+                        },
+                        {
+                            "title": "goats",
+                            "title_fi": "vuohet",
+                            "const": "grazing_species_goat"
+                        },
+                        {
+                            "title": "mix",
+                            "title_fi": "useita",
+                            "const": "grazing_species_mix"
+                        },
+                        {
+                            "title": "other",
+                            "title_fi": "muu",
+                            "const": "grazing_species_other"
+                        }
+                    ]
+                },
+                "grazing_species_age_group": {
+                    "title": "livestock age group (yr)",
+                    "title_fi": "eläinten ikäryhmä (v)",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "0-1",
+                            "const": "0-1"
+                        },
+                        {
+                            "title": "1-2",
+                            "const": "1-2"
+                        },
+                        {
+                            "title": "2-3",
+                            "const": "2-3"
+                        },
+                        {
+                            "title": "3-5",
+                            "const": "3-5"
+                        },
+                        {
+                            "title": "5-10",
+                            "const": "5-10"
+                        },
+                        {
+                            "title": "10+",
+                            "const": "10+"
+                        },
+                        {
+                            "title": "mix",
+                            "title_fi": "useita",
+                            "const": "grazing_species_age_group_mix"
+                        }
+                    ]
+                },
+                "livestock_density": {
+                    "title": "livestock density (number/ha)",
+                    "title_fi": "eläinten tiheys (eläintä/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "ha⁻¹",
+                        "unitless_title": "livestock density",
+                        "unitless_title_fi": "eläinten tiheys"
+                    }
+                },
+                "grazing_intensity": {
+                    "title": "grazing intensity (kg/ha)",
+                    "title_fi": "laidunnusintensiteetti (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "grazing intensity",
+                        "unitless_title_fi": "laidunnusintensiteetti"
+                    }
+                },
+                "date": {
+                    "title": "start date",
+                    "title_fi": "alkamispäivä",
+                    "title_sv": "startdatum",
+                    "type": "string",
+                    "format": "date"
+                },
+                "end_date": {
+                    "title": "end date",
+                    "title_fi": "päättymispäivä",
+                    "title_sv": "slutdatum",
+                    "type": "string",
+                    "format": "date"
+                },
+                "grazing_type": {
+                    "title": "grazing type",
+                    "title_fi": "laidunnuksen tyyppi",
+                    "title_sv": "betstyp",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "continuous",
+                            "title_fi": "jatkuva",
+                            "const": "grazing_type_continuous"
+                        },
+                        {
+                            "title": "rotation",
+                            "title_fi": "lohkosyöttö",
+                            "title_sv": "rotationsbetning",
+                            "const": "grazing_type_rotation"
+                        },
+                        {
+                            "title": "mob grazing",
+                            "title_fi": "intensiivinen lohkosyöttö",
+                            "const": "grazing_type_mob_grazing"
+                        },
+                        {
+                            "title": "strip",
+                            "title_fi": "kaistasyöttö",
+                            "const": "grazing_type_strip"
+                        },
+                        {
+                            "title": "multi-species",
+                            "title_fi": "sekalaidunnus",
+                            "const": "grazing_type_multi_species"
+                        },
+                        {
+                            "title": "creep",
+                            "title_fi": "nuoret eläimet paremmalle lohkolle (Creep?)",
+                            "const": "grazing_type_creep"
+                        },
+                        {
+                            "title": "forward",
+                            "title_fi": "kaksoislaidunnus",
+                            "const": "grazing_type_forward"
+                        },
+                        {
+                            "title": "other",
+                            "title_fi": "muu",
+                            "const": "grazing_type_other"
+                        }
+                    ]
+                },
+                "grazing_area": {
+                    "title": "grazing area (ha)",
+                    "title_fi": "laidunnettava ala (ha)",
+                    "type": "number",
+                    "minimum": 1,
+                    "x-ui": {
+                        "unit": "ha",
+                        "unitless_title": "grazing area",
+                        "unitless_title_fi": "laidunnettava ala"
+                    }
+                },
+                "grazing_material_removed_prop": {
+                    "title": "proportion of material removed (%)",
+                    "title_fi": "syödyn aineksen määrä (%)",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "x-ui": {
+                        "unit": "%",
+                        "unitless_title": "proportion of material removed",
+                        "unitless_title_fi": "syödyn aineksen määrä"
+                    }
+                },
+                "grazing_starting_height": {
+                    "title": "starting height (cm)",
+                    "title_fi": "aloituspituus (cm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "cm",
+                        "unitless_title": "starting height",
+                        "unitless_title_fi": "aloituspituus"
+                    }
+                },
+                "grazing_end_height": {
+                    "title": "end height (cm)",
+                    "title_fi": "lopetuspituus (cm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "cm",
+                        "unitless_title": "end height",
+                        "unitless_title_fi": "lopetuspituus"
+                    }
+                },
+                "mgmt_event_long_notes": {
+                    "title": "grazing notes",
+                    "title_fi": "laidunnusmuistiinpanot",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"animals were too late to the field\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. \"eläimet vietiin pellolle liian myöhään\""
+                    }
+                }
+            },
+            "required": [
+                "grazing_species",
+                "date",
+                "end_date"
+            ]
+        },
+        {
+            "$id": "#weeding",
+            "title": "mechanical extraction of weeds",
+            "title_fi": "rikkaruohojen kitkeminen",
+            "title_sv": "rensning av ogräs",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "mechanical extraction of weeds",
+                    "title_fi": "rikkaruohojen kitkeminen",
+                    "title_sv": "rensning av ogräs",
+                    "const": "weeding"
+                },
+                "mgmt_event_long_notes": {
+                    "title": "notes on the extraction of weeds",
+                    "title_fi": "muistiinpanot rikkakasvien kitkemisestä",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"the weeds had very deep roots\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. \"rikkakasvien juuret olivat syvällä\""
+                    }
+                }
+            },
+            "required": [
+                "date"
+            ]
+        },
+        {
+            "$id": "#irrigation",
+            "title": "irrigation",
+            "title2": "irrigation application",
+            "title_fi": "kastelu",
+            "title_sv": "bevattning",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "irrigation",
+                    "title2": "irrigation application",
+                    "title_fi": "kastelu",
+                    "title_sv": "bevattning",
+                    "const": "irrigation"
+                },
+                "irrigation_operation": {
+                    "title": "irrigation method",
+                    "title_fi": "kastelujärjestelmä",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "furrow",
+                            "title_fi": "vakokastelu",
+                            "const": "IR001"
+                        },
+                        {
+                            "title": "alternating furrows",
+                            "title_fi": "vuorotteleva vakokastelu (alternating furrows?)",
+                            "const": "IR002"
+                        },
+                        {
+                            "title": "flood",
+                            "title_fi": "tulva",
+                            "const": "IR003"
+                        },
+                        {
+                            "title": "sprinkler",
+                            "title_fi": "sadetin",
+                            "const": "IR004"
+                        },
+                        {
+                            "title": "drip or trickle",
+                            "title_fi": "tihkukastelu",
+                            "const": "IR005"
+                        },
+                        {
+                            "title": "subsurface (buried) drip",
+                            "title_fi": "maanalainen tihkukastelu",
+                            "const": "IR012"
+                        }
+                    ]
+                },
+                "irrig_amount_depth": {
+                    "title": "irrigation amount (depth, mm)",
+                    "title_fi": "kastelun määrä (veden syvyys, mm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "mm",
+                        "unitless_title": "irrigation amount",
+                        "unitless_title_fi": "kastelun määrä"
+                    }
+                },
+                "irrigation_applic_depth": {
+                    "title": "irrigation depth (cm)",
+                    "title_fi": "kastelusyvyys (cm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "cm",
+                        "unitless_title": "irrigation depth",
+                        "unitless_title_fi": "kastelusyvyys"
+                    }
+                },
+                "mgmt_event_long_notes": {
+                    "title": "irrigation notes",
+                    "title_fi": "kastelumuistiinpanot",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"drip line flow rate seems a bit low\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. \"tippukasteluletkun virtausnopeus vaikuttaa melko hitaalta\""
+                    }
+                }
+            },
+            "required": [
+                "date",
+                "irrig_amount_depth"
+            ]
+        },
+        {
+            "$id": "#mowing",
+            "title": "mowing",
+            "title_fi": "niitto",
+            "title2_fi": "ruohonleikkuu",
+            "title_sv": "gräsklippning",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "mowing",
+                    "title_fi": "niitto",
+                    "title2_fi": "ruohonleikkuu",
+                    "title_sv": "gräsklippning",
+                    "const": "mowing"
+                },
+                "mowed_crop": {
+                    "allOf": [
+                        {
+                            "title": "mowed crop",
+                            "title_fi": "leikattu kasvi"
+                        },
+                        {
+                            "$ref": "#/$defs/crop_ident_ICASA"
+                        }
+                    ]
+                },
+                "mowed_area": {
+                    "title": "mowed area (ha)",
+                    "title_fi": "leikattu ala (ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "ha",
+                        "unitless_title": "mowed area",
+                        "unitless_title_fi": "leikattu ala"
+                    }
+                },
+                "mowing_canopy_height": {
+                    "title": "canopy height before mowing (m)",
+                    "title_fi": "kasvuston korkeus ennen leikkuuta (m)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "m",
+                        "unitless_title": "canopy height before mowing",
+                        "unitless_title_fi": "kasvuston korkeus ennen leikkuuta"
+                    }
+                },
+                "mowing_cut_height": {
+                    "title": "cut height (cm)",
+                    "title_fi": "leikkuukorkeus (cm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "cm",
+                        "unitless_title": "cut height",
+                        "unitless_title_fi": "leikkuukorkeus"
+                    }
+                },
+                "mgmt_event_long_notes": {
+                    "title": "mowing notes",
+                    "title_fi": "muistiinpanot leikkuusta",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"mowing height was not uniform\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havaintoja, esim. \"leikkuukorkeus ei ollut sama kaikkialla\""
+                    }
+                }
+            },
+            "required": [
+                "date",
+                "mowed_crop"
+            ]
+        },
+        {
+            "$id": "#observation",
+            "title": "observation",
+            "title_fi": "havainto",
+            "title_sv": "observation",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "observation",
+                    "title_fi": "havainto",
+                    "title_sv": "observation",
+                    "const": "observation"
+                },
+                "observation_type": {
+                    "title": "observation type",
+                    "title_fi": "havainnon tyyppi",
+                    "type": "string",
+                    "x-ui": {
+                        "discriminator": true
+                    }        
+                },
+                "mgmt_event_long_notes": {
+                    "title": "observations",
+                    "title_fi": "havainnot",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "date",
+                "observation_type"
+            ],
+            "oneOf": [
+                {
+                    "title": "soil observation",
+                    "title_fi": "maaperähavainto",
+                    "properties": {
+                        "observation_type": {
+                            "title": "soil",
+                            "title_fi": "maaperä",
+                            "const": "observation_type_soil"
+                        },
+                        "soil_layer_list": {
+                            "type": "array",
+                            "title": "soil layers",
+                            "title_fi": "maakerrokset",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "soil_layer_top_depth": {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "title": "soil layer depth, top (cm)",
+                                        "title_fi": "kerroksen yläosan syvyys (cm)",
+                                        "x-ui": {
+                                            "unit": "cm",
+                                            "unitless_title": "soil layer depth, top",
+                                            "unitless_title_fi": "kerroksen yläosan syvyys"
+                                        }
+                                    },
+                                    "soil_layer_base_depth": {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "title": "soil layer depth, bottom (cm)",
+                                        "title_fi": "kerroksen alaosan syvyys (cm)",
+                                        "x-ui": {
+                                            "unit": "cm",
+                                            "unitless_title": "soil layer depth, top",
+                                            "unitless_title_fi": "kerroksen yläosan syvyys"
+                                        }
+                                    },
+                                    "soil_classification_by_layer": {                                        
+                                        "type": "string",
+                                        "title": "soil structure (VESS or MARA score card)",                                    
+                                        "title_fi": "maan rakenne (MARA-kortti)",
+                                        "description": "visual evaluation of soil structure (Ball et al. 2007, Franco et al. 2019)",
+                                        "oneOf": [
+                                            {
+                                                "const": "soil_classification_1",
+                                                "title": "structure quality 1 friable",
+                                                "title_fi": "luokka 1 erittäin tiivis",
+                                                "title_sv": "klass 1 mycket kompakt"
+                                            },
+                                            {
+                                                "const": "soil_classification_2",
+                                                "title": "structure quality 2 intact",
+                                                "title_fi": "luokka 2 tiivis",
+                                                "title_sv": "klass 2 kompakt"
+                                            },
+                                            {
+                                                "const": "soil_classification_3",
+                                                "title": "structure quality 3 firm",
+                                                "title_fi": "luokka 3 kiinteä",
+                                                "title_sv": "klass 3 fast"
+                                            },
+                                            {
+                                                "const": "soil_classification_4",
+                                                "title": "structure quality 4 compact",
+                                                "title_fi": "luokka 4 tiivistymätön",
+                                                "title_sv": "klass 4 opackad"
+                                            },
+                                            {
+                                                "const": "soil_classification_5",
+                                                "title": "structure quality 5 very compact",
+                                                "title_fi": "luokka 5 mureneva",
+                                                "title_sv": "klass 5 lucker"
+                                            }
+                                        ]
+                                    },
+                                    "soil_bulk_density_moist": {
+                                        "title": "bulk density (g/cm³)",
+                                        "title_fi": "irtotiheys (g/cm³)",
+                                        "x-ui": {
+                                            "unitless_title": "bulk density",
+                                            "unitless_title_fi": "irtotiheys",
+                                            "unit": "g/cm³"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    },
+                                    "soil_water_wilting_pt": {
+                                        "title": "soil water content at wilting point (cm³/cm³)",
+                                        "title_fi": "nuutumispiste (cm³/cm³)",
+                                        "x-ui": {
+                                            "unitless_title": "soil water content at wilting point",
+                                            "unitless_title_fi": "nuutumispiste",
+                                            "unit": "cm³/cm³"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    },
+                                    "soil_water_field_cap_1": {
+                                        "title": "soil water content at field capacity, 30 kPA (cm³/cm³)",
+                                        "title_fi": "kenttäkapasiteetti, 30 kPA (cm³/cm³)",
+                                        "x-ui": {
+                                            "unitless_title": "soil water content at field capacity, 30 kPA",
+                                            "unitless_title_fi": "kenttäkapasiteetti, 30 kPA",
+                                            "unit": "cm³/cm³"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    },
+                                    "soil_water_saturated": {
+                                        "title": "soil water content at saturation (cm³/cm³)",
+                                        "title_fi": "kylläisyyspiste (cm³/cm³)",
+                                        "x-ui": {
+                                            "unitless_title": "soil water content at saturation",
+                                            "unitless_title_fi": "kylläisyyspiste",
+                                            "unit": "cm³/cm³"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    },
+                                    "soil_silt_fraction": {
+                                        "title": "soil silt fraction (%)",
+                                        "title_fi": "maaperän lietteen osuus (%)",
+                                        "x-ui": {
+                                            "unitless_title": "soil silt fraction",
+                                            "unitless_title_fi": "maaperän lietteen osuus",
+                                            "unit": "%"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    },
+                                    "soil_sand_fraction": {
+                                        "title": "soil sand fraction (%)",
+                                        "title_fi": "maaperän hiekan osuus (%)",
+                                        "x-ui": {
+                                            "unitless_title": "soil sand fraction",
+                                            "unitless_title_fi": "maaperän hiekan osuus",
+                                            "unit": "%"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    },
+                                    "soil_clay_fraction": {
+                                        "title": "soil clay fraction (%)",
+                                        "title_fi": "maaperän saven osuus (%)",
+                                        "x-ui": {
+                                            "unitless_title": "soil clay fraction",
+                                            "unitless_title_fi": "maaperän saven osuus",
+                                            "unit": "%"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    },
+                                    "soil_organic_matter_layer": {
+                                        "title": "total soil organic matter (kg/ha)",
+                                        "title_fi": "maaperän orgaaninen aines (kg/ha)",
+                                        "x-ui": {
+                                            "unitless_title": "total soil organic matter",
+                                            "unitless_title_fi": "maaperän orgaaninen aines",
+                                            "unit": "kg/ha"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    },
+                                    "soil_organic_C_perc_layer": {
+                                        "title": "total soil organic carbon content (%)",
+                                        "title_fi": "orgaanisen hiilen osuus (%)",
+                                        "x-ui": {
+                                            "unitless_title": "total soil organic carbon content",
+                                            "unitless_title_fi": "orgaanisen hiilen osuus",
+                                            "unit": "%"
+                                        },
+                                        "type": "number",
+                                        "minimum": 0
+                                    }
+                                }
+                            }
+                        },
+                        "root_depth": {
+                            "title": "root depth (m)",
+                            "title_fi": "juurten syvyys (m)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "m",
+                                "unitless_title": "root depth",
+                                "unitless_title_fi": "juurten syvyys"
+                            }
+                        },
+                        "soil_compactification_depth": {
+                            "title": "soil compactification depth (cm)",
+                            "title_fi": "tiivistymän syvyys (cm)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "cm",
+                                "unitless_title": "soil compactification depth",
+                                "unitless_title_fi": "tiivistymän syvyys"
+                            }
+                        },
+                        "earthworm_count": {
+                            "title": "number of earthworms",
+                            "title_fi": "lierojen lukumäärä",
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    }
+                },
+                {
+                    "title": "vegetation observation",
+                    "title_fi": "kasvillisuushavainto",
+                    "properties": {
+                        "observation_type": {
+                            "title": "vegetation",
+                            "title_fi": "kasvillisuus",
+                            "const": "observation_type_vegetation"
+                        },
+                        "growth_stage": {
+                            "title": "plant growth stage",
+                            "title_fi": "kasvuaste",
+                            "type": "string",
+                            "oneOf": [
+                                {
+                                    "title": "germination",
+                                    "title_fi": "itäminen",
+                                    "const": "growth_stage_germination"
+                                },
+                                {
+                                    "title": "first pod",
+                                    "title_fi": "first pod -käännös",
+                                    "const": "growth_stage_first_pod"
+                                },
+                                {
+                                    "title": "pegging",
+                                    "title_fi": "pegging-käännös",
+                                    "const": "growth_stage_pegging"
+                                },
+                                {
+                                    "title": "budding",
+                                    "title_fi": "budding-käännös",
+                                    "const": "growth_stage_budding"
+                                },
+                                {
+                                    "title": "blooming",
+                                    "title_fi": "blooming-käännös",
+                                    "const": "growth_stage_blooming"
+                                },
+                                {
+                                    "title": "seeding",
+                                    "title_fi": "seeding-käännös",
+                                    "const": "growth_stage_seeding"
+                                },
+                                {
+                                    "title": "maturity",
+                                    "title_fi": "maturity-käännös",
+                                    "const": "growth_stage_maturity"
+                                }
+                            ]
+                        },
+                        "plant_density": {
+                            "title": "plant density (plants/m²)",
+                            "title_fi": "kasvitiheys (kasveja/m²)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "m⁻²",
+                                "unitless_title": "plant density",
+                                "unitless_title_fi": "kasvitiheys"
+                            }
+                        },
+                        "specific_leaf_area": {
+                            "title": "specific leaf area (cm²/g)",
+                            "title_fi": "ominaislehtiala (cm²/g)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "cm²/g",
+                                "unitless_title": "specific leaf area",
+                                "unitless_title_fi": "ominaislehtiala"
+                            }
+                        },
+                        "leaf_area_index": {
+                            "title": "leaf area index (m²/m²)",
+                            "title_fi": "lehtialaindeksi (m²/m²)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "m²/m²",
+                                "unitless_title": "leaf area index",
+                                "unitless_title_fi": "lehtialaindeksi"
+                            }
+                        },
+                        "total_biomass_dw": {
+                            "title": "total biomass, dry weight (kg/ha)",
+                            "title_fi": "kokonaisbiomassa, kuivapaino (kg/ha)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "kg/ha",
+                                "unitless_title": "total biomass, dry weight",
+                                "unitless_title_fi": "kokonaisbiomassa, kuivapaino"
+                            }
+                        },
+                        "tops_C": {
+                            "title": "carbon (C) in aboveground biomass (kg/ha)",
+                            "title_fi": "hiilen määrä (C) biomassassa maanpinnalla (kg/ha)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "kg/ha",
+                                "unitless_title": "carbon (C) in aboveground biomass",
+                                "unitless_title_fi": "hiilen määrä (C) biomassa maanpinnalla"
+                            }
+                        },
+                        "tops_C_std": {
+                            "title": "standard deviation of carbon (C) in aboveground biomass (meas.) (kg/ha)",
+                            "title_fi": "maanpäällisen biomassan C (mittausten) keskihajonta (kg/ha)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "kg/ha",
+                                "unitless_title": "standard deviation of carbon (C) in aboveground biomass (meas.)",
+                                "unitless_title_fi": "maanpäällisen biomassan hiilen (C) mittausten keskihajonta"
+                            }
+                        },
+                        "roots_C": {
+                            "title": "carbon (C) in belowground biomass (kg/ha)",
+                            "title_fi": "hiilen määrä (C) biomassassa maanpinnan alapuolella (kg[C]/ha):",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "kg/ha",
+                                "unitless_title": "carbon (C) in belowground biomass",
+                                "unitless_title_fi": "hiilen määrä (C) biomassassa maanpinnan alapuolella"
+                            }
+                        },
+                        "roots_C_std": {
+                            "title": "standard deviation of carbon (C) in belowground biomass (kg/ha)",
+                            "title_fi": "maanalaisen hiilibiomassan hiilen (C) mittausten keskihajonta: (kg/ha)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "kg/ha",
+                                "unitless_title": "standard deviation of belowground biomass C (meas.)",
+                                "unitless_title_fi": "maanalaisen hiilibiomassan C (mittausten) keskihajonta"
+                            }
+                        },
+                        "canopy_height": {
+                            "title": "canopy height (m)",
+                            "title_fi": "latvuston korkeus (m)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "m",
+                                "unitless_title": "canopy height",
+                                "unitless_title_fi": "latvuston korkeus"
+                            }
+                        },
+                        "canopeo_reading": {
+                            "title": "canopeo reading",
+                            "title_fi": "canopeo-lukema",
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    }
+                },
+                {
+                    "title": "water observation",
+                    "title_fi": "vesihavainto",
+                    "properties": {
+                        "observation_type": {
+                            "title": "water observation",
+                            "title_fi": "vesihavainto",
+                            "const": "observation_type_water"
+                        },
+                        "floodwater_depth": {
+                            "title": "floodwater depth (mm)",
+                            "title_fi": "tulvaveden syvyys (mm)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "mm",
+                                "unitless_title": "floodwater depth",
+                                "unitless_title_fi": "tulvaveden syvyys"
+                            }
+                        },
+                        "water_table_depth": {
+                            "title": "water table level (cm)",
+                            "title_fi": "pohjaveden pinnan syvyys (cm)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "cm",
+                                "unitless_title": "water table level",
+                                "unitless_title_fi": "pohjaveden pinnan syvyys"
+                            }
+                        }
+                    }
+                },
+                {
+                    "title": "animals",
+                    "title_fi": "eläimet",
+                    "properties": {
+                        "observation_type": {
+                            "title": "animals",
+                            "title_fi": "eläimet",
+                            "const": "observation_type_animals"
+                        }
+                    }
+                },
+                {
+                    "title": "pests",
+                    "title_fi": "tuholaiset",
+                    "properties": {
+                        "observation_type": {
+                            "title": "pests",
+                            "title_fi": "tuholaiset",
+                            "const": "observation_type_pests"
+                        },
+                        "plant_pop_reduct_cum": {
+                            "title": "amount of plants eaten (%, cumulative)",
+                            "title_fi": "syötyjen kasvien määrä (%, kumulatiivinen)",
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 0,
+                            "x-ui": {
+                                "unit": "%",
+                                "unitless_title": "amount of plants eaten",
+                                "unitless_title_fi": "syötyjen kasvien määrä"
+                            }
+                        }
+                    }
+                },
+                {
+                    "title": "disturbance",
+                    "title_fi": "häiriö",
+                    "properties": {
+                        "observation_type": {
+                            "title": "disturbance",
+                            "title_fi": "häiriö",
+                            "const": "observation_type_disturbance"
+                        }
+                    }
+                },
+                {
+                    "title": "management",
+                    "title_fi": "tilanhoito",
+                    "properties": {
+                        "observation_type": {
+                            "title": "management",
+                            "title_fi": "tilanhoito",
+                            "const": "observation_type_management"
+                        },
+                        "fuel_amount": {
+                            "title": "fuel used (liters/ha)",
+                            "title_fi": "käytetty polttoaine (litraa/ha)",
+                            "type": "number",
+                            "minimum": 0,
+                            "x-ui": {
+                                "unit": "L/ha",
+                                "unitless_title": "fuel used",
+                                "unitless_title_fi": "käytetty polttoaine"
+                            }
+                        }
+                    }
+                },
+                {
+                    "title": "other",
+                    "title_fi": "muu",
+                    "properties": {
+                        "observation_type": {
+                            "title": "other",
+                            "title_fi": "muu",
+                            "const": "observation_type_other"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "$id": "#bed_prep",
+            "title": "raised bed preparation",
+            "title_fi": "kasvatuslaatikoiden valmistelu",
+            "title2_fi": "kohopenkki",
+            "title_sv": "upphöjd odlingsbädd",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "raised bed preparation",
+                    "title_fi": "kasvatuslaatikoiden valmistelu",
+                    "title2_fi": "kohopenkki",
+                    "title_sv": "upphöjd odlingsbädd",
+                    "const": "bed_prep"
+                },
+                "mgmt_event_long_notes": {
+                    "title": "notes on the preparation of raised beds",
+                    "title_fi": "muistiinpanot kasvatuslaatikoiden valmistelusta",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"used the beds from last year\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. \"käytettiin samoja kasvatuslaatikoita kuin edellisenä vuonna\""
+                    }
+                }
+            },
+            "required": [
+                "date"
+            ]
+        },
+        {
+            "$id": "#inorg_mulch",
+            "title": "placement of mulch",
+            "title2": "placement of inorganic mulch",
+            "title_fi": "katteen levitys",
+            "title_sv": "applicering av oorganisk kompost",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "placement of mulch",
+                    "title2": "placement of inorganic mulch",
+                    "title_fi": "katteen levitys",
+                    "title_sv": "applicering av oorganisk kompost",
+                    "const": "inorg_mulch"
+                },
+                "mulch_type": {
+                    "allOf": [
+                        {
+                            "title": "mulch type",
+                            "title_fi": "katteen tyyppi"
+                        },
+                        {
+                            "$ref": "#/$defs/mulch_type"
+                        }
+                    ]
+                },
+                "mulch_thickness": {
+                    "title": "mulch thickness (mm)",
+                    "title_fi": "katteen paksuus (mm)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "mm",
+                        "unitless_title": "mulch thickness",
+                        "unitless_title_fi": "katteen paksuus"
+                    }
+                },
+                "mulch_cover_fraction": {
+                    "title": "fraction of surface covered (%)",
+                    "title_fi": "peitto-osuus (%)",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "x-ui": {
+                        "unit": "%",
+                        "unitless_title": "fraction of surface covered",
+                        "unitless_title_fi": "peitto-osuus"
+                    }
+                },
+                "mulch_color": {
+                    "title": "mulch colour",
+                    "title_fi": "katteen väri",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "title": "transparent",
+                            "title_fi": "läpinäkyvä",
+                            "const": "MC001"
+                        },
+                        {
+                            "title": "white",
+                            "title_fi": "valkoinen",
+                            "const": "MC002"
+                        },
+                        {
+                            "title": "black",
+                            "title_fi": "musta",
+                            "const": "MC003"
+                        },
+                        {
+                            "title": "brown",
+                            "title_fi": "ruskea",
+                            "const": "MC004"
+                        },
+                        {
+                            "title": "grey",
+                            "title_fi": "harmaa",
+                            "const": "MC005"
+                        },
+                        {
+                            "title": "light straw color",
+                            "title_fi": "olki",
+                            "const": "MC006"
+                        }
+                    ]
+                },
+                "mgmt_event_long_notes": {
+                    "title": "mulch placement notes",
+                    "title_fi": "katteenlevitysmuistiinpanot",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"mulch was placed only on the northern half of the field\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. \"kate levitettiin ainoastaan pellon pohjoiselle puoliskolle\""
+                    }
+                }
+            },
+            "required": [
+                "date",
+                "mulch_type"
+            ]
+        },
+        {
+            "$id": "#Inorg_mul_rem",
+            "title": "removal of mulch",
+            "title2": "removal of inorganic mulch",
+            "title_fi": "katteen poisto",
+            "title_sv": "borttagning av oorganisk kompost",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "removal of mulch",
+                    "title2": "removal of inorganic mulch",
+                    "title_fi": "katteen poisto",
+                    "title_sv": "borttagning av oorganisk kompost",
+                    "const": "Inorg_mul_rem"
+                },
+                "mulch_type_remove": {
+                    "allOf": [
+                        {
+                            "title": "type of removed mulch",
+                            "title_fi": "poistetun katteen tyyppi"
+                        },
+                        {
+                            "$ref": "#/$defs/mulch_type"
+                        }
+                    ]
+                },
+                "mgmt_event_long_notes": {
+                    "title": "mulch removal notes",
+                    "title_fi": "katteenpoistomuistiinpanot",
+                    "type": "string",
+                    "x-ui": {
+                        "form-type": "textAreaInput",
+                        "form-placeholder": "any notes or observations about the event, e.g. \"the mulch was recycled\"",
+                        "form-placeholder_fi": "mitä tahansa tapahtumaan liittyviä muistiinpanoja tai havintoja, esim. \"kate kierrätettiin\""
+                    }
+                }
+            },
+            "required": [
+                "date",
+                "mulch_type_remove"
+            ]
+        },
+        {
+            "$id": "#measurement",
+            "title": "measurement",            
+            "title_fi": "mittaus",            
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "measurement",            
+                    "title_fi": "mittaus",            
+                    "const": "measurement"
+                },
+                "carbon_soil_tot": {
+                    "title": "average carbon in 1 m soil column (kg/m²)",
+                    "title_fi": "hiiltä keskimäärin 1 m maakolonnissa (kg/m²)",
+                    "title_sv": "kol i medeltal i 1 m markpelare (kg/m²)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/m²",
+                        "unitless_title": "average carbon in 1 m soil column",
+                        "unitless_title_fi": "hiiltä keskimäärin 1 m maakolonnissa",
+                        "unitless_title_sv": "kol i medeltal i 1 m markpelare"
+                    }
+                },
+                "carbon_soil_tot_sd": {
+                    "title": "standard deviation",
+                    "title_fi": "keskihajonta",
+                    "title_sv": "standardavvikelse",
+                    "type": "number",
+                    "minimum": 0
+                }
+            }
+        },
+        {
+            "$id": "#other",
+            "title": "other",
+            "title2": "other management event",
+            "title_fi": "muu",
+            "title2_fi": "muu toimenpide",
+            "title_sv": "annan åtgärd",
+            "properties": {
+                "mgmt_operations_event": {
+                    "title": "other",
+                    "title2": "other management event",
+                    "title_fi": "muu",
+                    "title2_fi": "muu toimenpide",
+                    "title_sv": "annan åtgärd",
+                    "const": "other"
+                },
+                "mgmt_event_long_notes": {
+                    "title": "notes",
+                    "title_fi": "muistiinpanot",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "date",
+                "mgmt_event_long_notes"
+            ]
+        }
+    ],
+    "$defs": {
+        "crop_ident_ICASA": {
+            "type": "string",
+            "oneOf": [
+                {
+                    "title": "timothy (Phleum pratense)",
+                    "title_fi": "timotei (Phleum pratense)",
+                    "title_sv": "timotej (Phleum pratense)",
+                    "const": "FRG"
+                },
+                {
+                    "title": "wheat (Triticum spp.)",
+                    "title_fi": "vehnä (Triticum spp.)",
+                    "title_sv": "vete (Triticum spp.)",
+                    "const": "WHT"
+                },
+                {
+                    "title": "oats (Avena sativa)",
+                    "title_fi": "kaura (Avena sativa)",
+                    "title_sv": "havre (Avena sativa)",
+                    "const": "OAT"
+                },
+                {
+                    "title": "rye (Secale cereale)",
+                    "title_fi": "ruis (Secale cereale)",
+                    "const": "RYE"
+                },
+                {
+                    "title": "barley (Hordeum vulgare)",
+                    "title_fi": "ohra (Hordeum vulgare)",
+                    "title_sv": "korn (Hordeum vulgare)",
+                    "const": "BAR"
+                },
+                {
+                    "title": "mixed grain",
+                    "title_fi": "seosvilja",
+                    "const": "ZZ1"
+                },
+                {
+                    "title": "Mixed grass",
+                    "title_fi": "Seosruoho",
+                    "const": "ZZ3"
+                },
+                {
+                    "title": "buckwheat (Fagopyrum esculentum)",
+                    "title_fi": "tattari (Fagopyrum esculentum)",
+                    "const": "BWH"
+                },
+                {
+                    "title": "potato (Solanum tuberosum)",
+                    "title_fi": "peruna (Solanum tuberosum)",
+                    "const": "POT"
+                },
+                {
+                    "title": "sugar beet (Beta vulgaris var. altissima)",
+                    "title_fi": "sokerijuurikas (Beta vulgaris var. altissima)",
+                    "const": "SBT"
+                },
+                {
+                    "title": "pea (Pisum sativum)",
+                    "title_fi": "herne (Pisum sativum)",
+                    "const": "PEA"
+                },
+                {
+                    "title": "faba bean (Vicia faba)",
+                    "title_fi": "härkäpapu (Vicia faba)",
+                    "const": "FBN"
+                },
+                {
+                    "title": "turnip rape (Brassica rapa subsp. oleifera)",
+                    "title_fi": "rypsi (Brassica rapa subsp. oleifera)",
+                    "const": "RYP"
+                },
+                {
+                    "title": "rapeseed (Brassica napus subsp. napus)",
+                    "title_fi": "rapsi (Brassica napus subsp. napus)",
+                    "const": "RAP"
+                },
+                {
+                    "title": "flax (Linum usitatissimum)",
+                    "title_fi": "pellava (Linum usitatissimum)",
+                    "const": "FLX"
+                },
+                {
+                    "title": "caraway (Carum carvi)",
+                    "title_fi": "kumina (Carum carvi)",
+                    "const": "CCA"
+                },
+                {
+                    "title": "reed canary grass (Phalaris arundinacea)",
+                    "title_fi": "ruokohelpi (Phalaris arundinacea)",
+                    "const": "PHA"
+                },
+                {
+                    "title": "red clover (Trifolium pratense)",
+                    "title_fi": "puna-apila (Trifolium pratense)",
+                    "const": "RCL"
+                },
+                {
+                    "title": "white clover (Trifolium repens)",
+                    "title_fi": "valkoapila (Trifolium repens)",
+                    "const": "WCL"
+                },
+                {
+                    "title": "alsike clover (Trifolium hybridum)",
+                    "title_fi": "alsikeapila (Trifolium hybridum)",
+                    "const": "ACL"
+                },
+                {
+                    "title": "alfalfa (Medicago sativa)",
+                    "title_fi": "sinimailanen (Medicago sativa)",
+                    "const": "ALF"
+                },
+                {
+                    "title": "oilseed radish (Raphanus sativus var. oleiformis)",
+                    "title_fi": "öljyretikka (Raphanus sativus var. oleiformis)",
+                    "const": "RSO"
+                },
+                {
+                    "title": "common vetch (Vicia sativa)",
+                    "title_fi": "rehuvirna (Vicia sativa)",
+                    "const": "VSA"
+                },
+                {
+                    "title": "smooth brome (Bromus inermis)",
+                    "title_fi": "rehukattara (Bromus inermis)",
+                    "const": "BRI"
+                },
+                {
+                    "title": "meadow fescue (Festuca pratensis)",
+                    "title_fi": "nurminata (Festuca pratensis)",
+                    "title_sv": "ängssvingel (Festuca pratensis)",
+                    "const": "FEP"
+                },
+                {
+                    "title": "perennial ryegrass (Lolium perenne)",
+                    "title_fi": "englanninraiheinä (Lolium perenne)",
+                    "const": "RGP"
+                },
+                {
+                    "title": "kentucky bluegrass (Poa pratensis)",
+                    "title_fi": "niittynurmikka (Poa pratensis)",
+                    "const": "POA"
+                },
+                {
+                    "title": "sudan grass (Sorghum × drummondii)",
+                    "title_fi": "sudaninruoho (Sorghum × drummondii)",
+                    "const": "SDR"
+                },
+                {
+                    "title": "annual ryegrass (Festuca perennis / Lolium multiflorum)",
+                    "title_fi": "italianraiheinä (Festuca perennis / Lolium multiflorum)",
+                    "const": "RGA"
+                },
+                {
+                    "title": "tall fescue (Festuca arundinacea / Schedonorus arundinaceus)",
+                    "title_fi": "ruokonata (Festuca arundinacea / Schedonorus arundinaceus)",
+                    "const": "TFS"
+                },
+                {
+                    "title": "hairy vetch (Vicia villosa)",
+                    "title_fi": "ruisvirna (Vicia villosa)",
+                    "const": "HVT"
+                },
+                {
+                    "title": "persian clover (Trifolium resupinatum var. majus)",
+                    "title_fi": "persianapila (Trifolium resupinatum var. majus)",
+                    "const": "TRM"
+                },
+                {
+                    "title": "hybrid fescue (x Festulolium loliaceum)",
+                    "title_fi": "rainata (x Festulolium loliaceum)",
+                    "const": "XFL"
+                },
+                {
+                    "title": "common chicory (Cichorium intybus)",
+                    "title_fi": "sikuri (Cichorium intybus)",
+                    "const": "CII"
+                },
+                {
+                    "title": "lacy phacelia (Phacelia tanacetifolia)",
+                    "title_fi": "aitohunajakukka (Phacelia tanacetifolia)",
+                    "const": "PHT"
+                }
+            ]
+        },
+        "fertilizer_applic_method": {
+            "type": "string",
+            "oneOf": [
+                {
+                    "title": "broadcast, not incorporated",
+                    "title_fi": "levitetty pinnalle, ei sekoitettu",
+                    "const": "AP001"
+                },
+                {
+                    "title": "broadcast, incorporated",
+                    "title_fi": "levitetty ja sekoitettu",
+                    "const": "AP002"
+                },
+                {
+                    "title": "banded on surface",
+                    "title_fi": "nauhoina pinnalla",
+                    "const": "AP003"
+                },
+                {
+                    "title": "banded beneath surface",
+                    "title_fi": "sijoituslannoitus",
+                    "const": "AP004"
+                },
+                {
+                    "title": "applied in irrigation water",
+                    "title_fi": "kasteluveden mukana",
+                    "const": "AP005"
+                },
+                {
+                    "title": "foliar spray",
+                    "title_fi": "suihkutettu lehdelle",
+                    "const": "AP006"
+                },
+                {
+                    "title": "bottom of hole",
+                    "title_fi": "bottom of hole -käännös",
+                    "const": "AP007"
+                },
+                {
+                    "title": "on the seed",
+                    "title_fi": "siemenen pinnassa",
+                    "const": "AP008"
+                },
+                {
+                    "title": "injected",
+                    "title_fi": "ruiskutettu pinnan alle",
+                    "const": "AP009"
+                }
+            ]
+        },
+        "mulch_type": {
+            "type": "string",
+            "oneOf": [
+                {
+                    "title": "polyethylene sheet - solid",
+                    "title_fi": "katemuovi (PE)",
+                    "const": "MT001"
+                },
+                {
+                    "title": "polyethylene sheet - perforated",
+                    "title_fi": "rei'itetty katemuovi (PE)",
+                    "const": "MT002"
+                },
+                {
+                    "title": "landscape fabric",
+                    "title_fi": "maisemointikangas",
+                    "const": "MT003"
+                },
+                {
+                    "title": "paper",
+                    "title_fi": "paperi",
+                    "const": "MT004"
+                },
+                {
+                    "title": "grass clippings",
+                    "title_fi": "leikattu ruoho",
+                    "const": "MT005"
+                },
+                {
+                    "title": "pine needles",
+                    "title_fi": "männynneulaset",
+                    "const": "MT006"
+                },
+                {
+                    "title": "straw",
+                    "title_fi": "olki",
+                    "const": "MT007"
+                },
+                {
+                    "title": "foil",
+                    "title_fi": "folio (foil?)",
+                    "const": "MT008"
+                },
+                {
+                    "title": "foil coated plastic",
+                    "title_fi": "muovipäällysteinen folio (foil coated with plastic?)",
+                    "const": "MT009"
+                },
+                {
+                    "title": "photodegradable plastic",
+                    "title_fi": "valohajoava muovi",
+                    "const": "MT010"
+                }
+            ]
+        }
+    },
+    "required": [
+        "mgmt_operations_event"
+    ]
+}
