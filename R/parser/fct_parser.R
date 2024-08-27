@@ -205,10 +205,30 @@ parse_property <- function(prop, schema) {
 #'   title_sv = "Exempel"
 #' )
 get_multilingual_field <- function(obj, field) {
-  # Extract and return multilingual values for the given field
-  list(
-    en = obj[[field]],
-    fi = obj[[paste0(field, "_fi")]],
-    sv = obj[[paste0(field, "_sv")]]
-  )
+  languages <- c("en", "fi", "sv")
+  result <- list()
+
+  for (lang in languages) {
+    field_name <- if (lang == "en") field else paste0(field, "_", lang)
+    value <- obj[[field_name]]
+
+    if (!is.null(value)) {
+      result[[lang]] <- value
+    } else if (lang != "en") {
+      # Fallback to English if the language-specific field is not found
+      result[[lang]] <- obj[[field]]
+    }
+  }
+
+  # If English is not available, use the first non-null value
+  if (is.null(result[["en"]])) {
+    first_non_null <- Find(function(x) !is.null(x), result)
+    for (lang in languages) {
+      if (is.null(result[[lang]])) {
+        result[[lang]] <- first_non_null
+      }
+    }
+  }
+
+  return(result)
 }
