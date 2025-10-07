@@ -10,7 +10,7 @@ date_format_display <- "%d/%m/%Y"
 # see: “Paths hard-coded in R code”
 sites_file_path <- function() system.file("extdata", "FOsites.csv", 
                                package = "fieldactivity")
-sites <- read.csv(sites_file_path())
+sites <- read.csv(sites_file_path(), na.strings = c("", "NaN", "NULL"))
 # converts block info from csv (e.g. "[0;1]") to vectors of strings ("0" "1")
 blocks_to_vector <- function(x) strsplit(substr(x, start = 2, stop = nchar(x)-1), ";")
 sites$blocks <- sapply(sites$blocks, blocks_to_vector)
