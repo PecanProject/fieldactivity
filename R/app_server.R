@@ -74,6 +74,15 @@ app_server <- function(input, output, session) {
         
         updateSelectInput(session, "site", choices = site_choices, selected = auth_result$user)
         
+      } else if (auth_result$user == "icos_agri_user") {
+        
+        shinyjs::enable("site")
+        shinyjs::show("site")
+        # Subset of site choices for the third user
+        site_choices <- sites[grepl("icos-agri", sites$site_type),]$site
+        
+        updateSelectInput(session, "site", choices = site_choices, selected = auth_result$user)
+        
       } else {
         
         updateSelectInput(session, "site", selected = auth_result$user)
