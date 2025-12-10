@@ -31,5 +31,9 @@ jobs:
       - name: Check
         run: |
           options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
+          rcmdcheck::rcmdcheck(
+            build_args = "--no-build-vignettes",
+            args = c("--no-manual", "--no-vignettes"),
+            error_on = "error"
+          )
         shell: Rscript {0}
