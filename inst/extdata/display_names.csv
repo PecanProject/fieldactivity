@@ -377,6 +377,7 @@ CRID,POT,Potato (Solanum tuberosum),Peruna (Solanum tuberosum)
 CRID,SBT,Sugar beet (Beta vulgaris var. altissima),Sokerijuurikas (Beta vulgaris var. altissima)
 CRID,PEA,Pea (Pisum sativum),Herne (Pisum sativum)
 CRID,FBN,Faba bean (Vicia faba),Härkäpapu (Vicia faba)
+CRID,BNG,Green bean (Phaseolus vulgaris),Vihreä papu (Phaseolus vulgaris)
 CRID,FHSO,Hemp seed oil (Finola),Öljyhamppu (Finola) # not ICASA but Hemp would be
 CRID,RYP,Turnip rape (Brassica rapa subsp. oleifera),Rypsi (Brassica rapa subsp. oleifera) # not ICASA
 CRID,RAP,Rapeseed (Brassica napus subsp. napus),Rapsi (Brassica napus subsp. napus)
@@ -410,6 +411,9 @@ CRID,HVT,Hairy vetch (Vicia villosa),Ruisvirna (Vicia villosa)
 CRID,TRM,Persian clover (Trifolium resupinatum var. majus),Persianapila (Trifolium resupinatum var. majus) # not ICASA
 CRID,XFL,Hybrid fescue (x Festulolium loliaceum),Rainata (x Festulolium loliaceum) # not ICASA not sure about the names
 CRID,CII,Common chicory (Cichorium intybus),Sikuri (Cichorium intybus) # not ICASA
+CRID,SWC,Corn (Zea Mays),Maissi (Zea Mays)
+CRID,MUS,Mustard,Sinappikasvi # not ICASA
+CRID,SPN,Spinach (Spinacia oleracea),Pinaatti (Spinacia oleracea)
 CRID,PHT,Lacy phacelia (Phacelia tanacetifolia),Aitohunajakukka (Phacelia tanacetifolia)
 HACOM,canopy,Canopy,Latvusto
 HACOM,leaf,Leaves,Lehdet
