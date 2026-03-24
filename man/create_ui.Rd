@@ -18,5 +18,6 @@ A list of Shiny widgets
 }
 \description{
 For a given list of widget structures as read from ui_structure.json, 
-create_ui applies create_widget to each widget in the list
+create_ui applies create_widget to each widget in the list.
+Still used for app chrome rendering and by mod_table.R for legacy tables.
 }

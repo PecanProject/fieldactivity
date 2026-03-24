@@ -11,14 +11,11 @@ update_ui_element(session, code_name, value = NULL, clear_value = FALSE, ...)
 
 \item{code_name}{The code name of the UI element to update}
 
-\item{value}{An atomic vector holding the desired value of the UI element. If
-NULL, the value of the element is not altered.}
+\item{value}{An atomic vector holding the desired value of the UI element.}
 
-\item{clear_value}{If set to TRUE, the value of the element is cleared (and
-any value supplied to value is ignored)}
+\item{clear_value}{If set to TRUE, the value of the element is cleared.}
 
-\item{...}{Additional arguments (such as label) to pass to Shiny's update-
-functions.}
+\item{...}{Additional arguments to pass to Shiny's update functions.}
 }
 \description{
 Determines the type of the element and updates its value using shiny's update

@@ -744,24 +744,38 @@ mod_table_server_schema <- function(id, array_prop_name, desc, schema,
 
         if (widget_name %in% rules_added) return()
 
+        # Extract the row number from the widget name (e.g. "crop_name_2" -> 2)
+        row_num <- as.integer(sub(paste0("^", variables[i], "_"), "", widget_name))
+
+        child_iv <- InputValidator$new()
+
         if (isTRUE(col_desc$required)) {
-          iv$add_rule(widget_name, sv_required(message = ""))
+          child_iv$add_rule(widget_name, sv_required(message = "Required"))
         }
         if (!is.null(col_desc$minimum)) {
-          iv$add_rule(widget_name, sv_gte(col_desc$minimum, allow_na = TRUE,
-                                           message_fmt = ""))
+          child_iv$add_rule(widget_name, sv_gte(col_desc$minimum, allow_na = TRUE,
+                                           message_fmt = "Must be >= {rhs}"))
         }
         if (!is.null(col_desc$maximum)) {
-          iv$add_rule(widget_name, sv_lte(col_desc$maximum, allow_na = TRUE,
-                                           message_fmt = ""))
+          child_iv$add_rule(widget_name, sv_lte(col_desc$maximum, allow_na = TRUE,
+                                           message_fmt = "Must be <= {rhs}"))
         }
         if (isTRUE(col_desc$is_integer)) {
-          iv$add_rule(widget_name, function(value) {
+          child_iv$add_rule(widget_name, function(value) {
             if (is.null(value) || is.na(value)) return(NULL)
-            if (value != floor(value)) return("")
+            if (value != floor(value)) return("Must be a whole number")
             NULL
           })
         }
+
+        # Only validate when this row still exists
+        local({
+          local_row <- row_num
+          child_iv$condition(reactive({
+            local_row %in% dynamic_rows()
+          }))
+        })
+        iv$add_validator(child_iv)
       })
       rules_added <<- c(rules_added, widgets)
     }

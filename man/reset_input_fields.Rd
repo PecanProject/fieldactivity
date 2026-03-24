@@ -13,17 +13,11 @@ reset_input_fields(session, fields_to_clear, exceptions = c(""))
 should be cleared}
 
 \item{exceptions}{Optional vector of variable names which should not be
-cleared. This is useful if fields_to_clear is supplied with all variable
-names but there are a few that should not be cleared.}
+cleared.}
 }
 \value{
 None, used for side effects.
 }
 \description{
-Set the specified input fields to their default empty values.
-}
-\note{
-This doesn't reset the tables (e.g. harvest_crop_table) -- they reset 
-  themselves every time they become hidden. Also doesn't reset fileInputs,
-  they have their own way of clearing their value.
+Reset the value of input fields
 }

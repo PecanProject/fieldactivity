@@ -135,19 +135,19 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       added_rules <- FALSE
       
       if (isTRUE(desc$required)) {
-        iv$add_rule(prop_name, sv_required(message = ""))
+        iv$add_rule(prop_name, sv_required(message = "Required"))
         added_rules <- TRUE
       }
-      
+
       if (!is.null(desc$minimum)) {
-        iv$add_rule(prop_name, sv_gte(desc$minimum, allow_na = TRUE, 
-                                       message_fmt = ""))
+        iv$add_rule(prop_name, sv_gte(desc$minimum, allow_na = TRUE,
+                                       message_fmt = "Must be >= {rhs}"))
         added_rules <- TRUE
       }
-      
+
       if (!is.null(desc$maximum)) {
         iv$add_rule(prop_name, sv_lte(desc$maximum, allow_na = TRUE,
-                                       message_fmt = ""))
+                                       message_fmt = "Must be <= {rhs}"))
         added_rules <- TRUE
       }
 
