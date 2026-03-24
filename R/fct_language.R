@@ -155,6 +155,8 @@ replace_with_display_names <- function(events_with_code_names, language) {
     }
 
     if (element$type == "selectInput") {
+      # the pasting is done to ensure we get a nicely formatted name
+      # when x is a character vector
       events_with_display_names[[variable_name]] <-
         sapply(events_with_code_names[[variable_name]],
                FUN = function(x) {
@@ -208,6 +210,7 @@ set_login_language <- function(language) {
   if (identical(language, "disp_name_fin")) {
     shinymanager::set_labels(
       language = "en",
+      # the \U codes are UTF-8 codes for Finnish letters a and o with dots
       "Please authenticate" = "Kirjaudu sy\U00f6tt\U00e4\U00e4ksesi tapahtumia",
       "Username:" = "Sijainti",
       "Password:" = "Salasana",

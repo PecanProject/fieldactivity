@@ -36,8 +36,10 @@ legacy_name_map <- c(
 #'
 #' @return TRUE if the directory was created successfully or already exists,
 #'   FALSE otherwise.
-create_file_folder <- function(site, block, 
+create_file_folder <- function(site, block,
                                base_folder = json_file_base_folder()) {
+  # if the events directory (stored in json_file_base_folder) doesn't exist,
+  # stop
   if (!dir.exists(base_folder)) {
     stop(glue("Could not find folder {json_file_base_folder}"))
   }
@@ -60,11 +62,15 @@ create_file_folder <- function(site, block,
 #'   otherwise be used
 write_json_file <- function(site, block, event_list, rotation_list, 
                             base_folder = json_file_base_folder()) {
-  
+
+  # this ensures that the folder to store this file exists
   create_file_folder(site, block)
-  
+
   file_path <- file.path(base_folder, site, block, "events.json")
-  
+
+  # if there are events in the list, do the following:
+  # - erase block information in each event
+  # - apply other exceptions
   if (length(event_list) > 0) {
     for (i in 1:length(event_list)) {
       event_list[[i]]$block <- NULL
@@ -86,18 +92,23 @@ write_json_file <- function(site, block, event_list, rotation_list,
       #####
     }
   }
-  
+
+  # If rotations on the list --> erase the block information like with events
   if (length(rotation_list) > 0) {
     for (j in 1:length(rotation_list)) {
       rotation_list[[j]]$block <- NULL
     }
   }
-  
+
+  # create appropriate structure
   experiment <- list()
   experiment$management <- list()
+
+  # rotation will be part of the management
   experiment$management$rotation <- rotation_list
   experiment$management$events <- event_list
 
+  # create file
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
                        null = "list", auto_unbox = TRUE)
 }
@@ -118,7 +129,8 @@ read_json_file <- function(site, block,
                            base_folder = json_file_base_folder()) {
   
   file_path <- file.path(base_folder, site, block, "events.json")
-  
+
+  # if file doesn't exist or given names are empty, can't read it
   if (!file.exists(file_path)) {
     return(list())
   }
@@ -130,11 +142,13 @@ read_json_file <- function(site, block,
   
   rotation <- jsonlite::fromJSON(file_path, 
                                   simplifyDataFrame = FALSE)$management$rotation
-  
+
+  # if there are no events, return an empty list
   if (length(events) == 0) {
     return(list())
   }
-  
+
+  # add block information and apply exceptions to each event
   for (i in 1:length(events)) {
     events[[i]]$block <- block
     
@@ -150,13 +164,16 @@ read_json_file <- function(site, block,
     
     #####
   }
-  
+
+  # add block info for rotations
   if (length(rotation) != 0){
     for (j in 1:length(rotation)) {
       rotation[[j]]$block <- block
     }
   }
-  
+
+  # Add events and rotation as a list objects which both will be returned
+  # when function is called
   management$events <- events
   management$rotation <- rotation
   
@@ -204,33 +221,44 @@ normalize_legacy_event <- function(event) {
 copy_file <- function(orig_filepath, variable_name, site, block, date,
                       filepath_is_relative = FALSE, delete_original = FALSE,
                       base_folder = json_file_base_folder()) {
+  # ensures the folder for this site-block combo is there
   create_file_folder(site, block)
-  
+
+  # add json_file_base_folder to filepath if requested
   if (filepath_is_relative) {
     orig_filepath <- file.path(base_folder, orig_filepath)
   }
-  
+
+  # check that the temporary file actually exists
   if (!file.exists(orig_filepath)) {
     stop(glue("The file {orig_filepath} to copy does not exist"))
   }
   
   file_extension <- tolower(tools::file_ext(orig_filepath))
   allowed_extensions <- c("jpg", "jpeg", "tif", "tiff", "png")
+  # if the image format is not supported, stop
   if (!(file_extension %in% allowed_extensions)) {
     stop("This file extension is not supported")
   }
-  
+
+  # base of the new file name
   file_base <- paste(date, site, block, variable_name, sep = "_")
+
+  # path to the final file folder
   filepath <- file.path(base_folder, site, block, variable_name)
   if (!dir.exists(filepath)) {
     dir.create(filepath)
   }
-  
+
+  # determine the number to add to the end of the file name to keep file names
+  # in the folder unique
   number <- 0
   while (TRUE) {
     file_name <- paste(file_base, number, sep = "_")
     file_name <- paste(file_name, file_extension, sep = ".")
     if (!file.exists(file.path(filepath, file_name))) {
+      # we found a unique name. It will be available in file_name after
+      # the loop
       break
     }
     number <- number + 1
@@ -247,6 +275,7 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
                       warning = function(cnd) {message(cnd); FALSE},
                       error = function(cnd) {message(cnd); FALSE})
 
+  # if we succeeded in renaming, delete the original file if requested
   if (success & delete_original) {
     deleted_original <- tryCatch(expr = file.remove(orig_filepath),
                                  warning = function(cnd) {message(cnd)},
@@ -263,6 +292,9 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
 }
 
 #' Delete a file
+#'
+#' Delete the file with the path filepath. Used to delete files (images)
+#' associated with events, e.g. canopeo_image
 #'
 #' @param filepath The path to the file which should be deleted.
 #' @param filepath_relative Set to TRUE and supply site and block if filepath is

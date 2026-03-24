@@ -1,4 +1,5 @@
 # Builds the ui based on a json file
+# e.g. builds additional options for the different activity types
 # Otto Kuusela 2021
 
 structure_file_path <- function() system.file("extdata", "ui_structure.json",
@@ -24,10 +25,13 @@ rlapply <- function(x, fun, name_fun = NULL, ...) {
     if (!is.list(element)) {
       next
     }
-    
+
+    # x is a list, so let's test it
     result <- fun(element, ...)
-    
+
     if (!is.null(result)) {
+      # if we have a naming function defined, use that
+      # index is either an actual index or name of the element
       if (is.null(name_fun)) {
         index <- length(results) + 1
       } else {
@@ -36,7 +40,9 @@ rlapply <- function(x, fun, name_fun = NULL, ...) {
       
       results[[index]] <- result
     }
-    
+
+    # more results might lurk on lower levels of the list.
+    # So let's investigate those
     more_results <- rlapply(element, fun, name_fun, ...)
     
     if (length(more_results) > 0) {
@@ -62,6 +68,7 @@ rlapply <- function(x, fun, name_fun = NULL, ...) {
 build_structure_lookup_list <- function() {
   element_fetcher <- function(x) {
     if (!is.null(x$code_name)) {
+      # we don't need the sub_elements listed, those will come separately
       x$sub_elements <- NULL
       return(x)
     } else {
@@ -78,7 +85,12 @@ build_structure_lookup_list <- function() {
 
 structure_lookup_list <- build_structure_lookup_list()
 
-# Categorize code names by type for text outputs, tables, and fileInputs
+# help texts (technically textOutputs) have a different method of updating
+# when the language is changed because they are outputs rather than inputs,
+# and for that we need a list of the code names of these objects.
+# The same goes for data tables (excluding event table).
+# We also need the code names of fileInput delete buttons to set up observers
+# for them
 text_output_code_names <- NULL
 data_table_code_names <- NULL
 fileInput_code_names <- NULL
@@ -117,6 +129,10 @@ create_ui <- function(widget_structure_list, ns) {
   return(new_elements)
 }
 
+# creates the individual elements
+# the override_label and ... functionalities are used for creating elements
+# in dynamic (e.g. multi-crop) data tables. Do NOT supply the label argument in
+# the unnamed arguments (...)!
 create_widget <- function(element, ns = NS(NULL),
                            override_label = NULL, 
                            override_code_name = NULL, 
@@ -125,14 +141,22 @@ create_widget <- function(element, ns = NS(NULL),
                            override_selected = NULL,
                            override_placeholder = NULL, ...) {
   
+  # element is a string, i.e. a visibility condition for a element set
+  # it has already been handled in create_ui
   if (!is.list(element)) {
     return()
   }
-  
+
+  # element is a list of elements, because it doesn't have the type
+  # attribute. In that case we want to create all of the elements in that list
   if (is.null(element$type)) {
     return(create_ui(element, ns))
   }
-  
+
+  # the labels will be set to element$label which is a code_name, not a
+  # display_name, but this is okay as the server will update this as the
+  # language changes (which also happens when the program starts)
+  # the following allows overwriting the label through ...
   element_label <- get_disp_name(element$label, init_lang)
   if (!is.null(override_label)) {
     element_label <- override_label
@@ -161,14 +185,17 @@ create_widget <- function(element, ns = NS(NULL),
   new_element <- if (element$type == "checkboxInput") {
     checkboxInput(element_code_name, label = element_label, ...)
   } else if (element$type == "selectInput") {
+    # if multiple is defined (=TRUE) then pass that to selectInput
     multiple <- identical(element$multiple, TRUE)
-    selectInput(element_code_name, label = element_label, 
+    # we don't enter choices yet, that will be handled by the server
+    selectInput(element_code_name, label = element_label,
                 choices = element_choices, multiple = multiple,
                 selected = override_selected, ...)
   } else if (element$type == "textOutput") {
     if (!is.null(element$style) && element$style == "label") {
       strong(textOutput(element_code_name, ...))
     } else {
+      # these are inteded to look like helpTexts so make text gray
       tagList(
         span(textOutput(element_code_name, ...), style = "color:gray"),
         br()
@@ -204,7 +231,8 @@ create_widget <- function(element, ns = NS(NULL),
   } else if (element$type == "actionButton") {
     # 
   }
-  
+
+  # if there are sub-elements to create, do that
   if (!is.null(element$sub_elements)) {
     return(list(new_element, 
                 create_ui(element$sub_elements, ns)))
@@ -221,6 +249,15 @@ create_widget <- function(element, ns = NS(NULL),
 #' @return A vector of choices (code names). If language was supplied, the names
 #'   will be the names of the vector.
 get_selectInput_choices <- function(selectInput_code_name, language) {
+  # the choices for a selectInput element can be stored in
+  # three ways:
+  # 1) the code names of the choices are given as a vector
+  # 2) for site and block selectors, there is IGNORE:
+  # this means that the choices should not be updated here (return NULL)
+  # 3) the category name for the choices is given.
+  # in the following if-statement, these are handled
+  # in this same order
+
   element_structure <- structure_lookup_list[[selectInput_code_name]]
 
   if (!identical(element_structure$type, "selectInput") || 

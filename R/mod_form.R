@@ -23,17 +23,25 @@ mod_form_ui <- function(id){
   iso <- lang_to_iso(init_lang)
   
   tagList(
+
+    # the form contains the widgets for entering information
+    # about the event
     fluidRow(
       column(width = 3,
              h3(textOutput(ns("form_title")), 
                 style = "margin-bottom = 0px; margin-top = 0px; 
                    margin-block-start = 0px"),
              
-             span(textOutput(ns("required_variables_helptext")), 
+             # in general the choices and labels don't have to be
+             # defined for  selectInputs, as they will be
+             # populated when the language is changed
+             # (which also happens when the app starts)
+
+             span(textOutput(ns("required_variables_helptext")),
                   style = "color:gray"),
              br(),
-             
-             selectInput(ns("block"), label = get_disp_name("block_label", 
+
+             selectInput(ns("block"), label = get_disp_name("block_label",
                                                             init_lang),
                          choices = ""),
              
@@ -44,7 +52,8 @@ mod_form_ui <- function(id){
                            iso, "event"),
                          choices = build_event_type_choices(mgmt_schema, iso)
              ),
-             
+
+             # setting max disallows inputting future events
              dateInput(
                ns("date"),
                format = "dd/mm/yyyy",
@@ -122,8 +131,12 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     er <- schema$event_registry
     pr <- schema$property_registry
     
+    # add input validators
+    # the idea is that each widget has its own validator. This validator is
+    # active whenever that widget is in relevant variables. These individual
+    # validators are then added as subvalidators to main_iv
     main_iv <- InputValidator$new()
-    
+
     all_props <- get_all_schema_properties(schema)
     for (prop_name in all_props) {
       # Try to find descriptor from any event/subtype context
@@ -133,24 +146,28 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
 
       iv <- InputValidator$new()
       added_rules <- FALSE
-      
+
+      # add required rule
       if (isTRUE(desc$required)) {
         iv$add_rule(prop_name, sv_required(message = "Required"))
         added_rules <- TRUE
       }
 
+      # add minimum rule
       if (!is.null(desc$minimum)) {
         iv$add_rule(prop_name, sv_gte(desc$minimum, allow_na = TRUE,
                                        message_fmt = "Must be >= {rhs}"))
         added_rules <- TRUE
       }
 
+      # add maximum rule
       if (!is.null(desc$maximum)) {
         iv$add_rule(prop_name, sv_lte(desc$maximum, allow_na = TRUE,
                                        message_fmt = "Must be <= {rhs}"))
         added_rules <- TRUE
       }
 
+      # add integer rule
       if (isTRUE(desc$is_integer)) {
         iv$add_rule(prop_name, function(value) {
           if (is.null(value) || is.na(value)) return(NULL)
@@ -161,15 +178,19 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       }
       
       if (added_rules) {
+        # the validator is only active when it is in the current list of
+        # relevant, regular widgets
         local({
           local_prop <- prop_name
-          iv$condition(reactive({ 
-            local_prop %in% relevant_variables()$regular 
+          iv$condition(reactive({
+            local_prop %in% relevant_variables()$regular
           }))
         })
+        # add widget validator to main validator
         main_iv$add_validator(iv)
       }
     }
+    # start showing validation messages
     main_iv$enable()
     
     # when site setting is changed, update the block choices on the form
@@ -182,7 +203,8 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
       shinyjs::enable("block")
       shinyjs::enable("save")
-      
+
+      # update block choices
       block_choices <- subset(sites, sites$site == site())$blocks[[1]]
       updateSelectInput(session, "block", choices = block_choices)
     })
@@ -193,7 +215,9 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       
       values <- set_values()
       iso <- lang_to_iso(language())
-      
+
+      # populate the input widgets with the values corresponding to the
+      # event, and clear others
       relevant <- get_relevant_properties(
         schema, 
         values$mgmt_operations_event %||% "",
@@ -259,9 +283,12 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                             value = values$mgmt_event_notes)
       }
       
+      # change set_values back to NULL so that we can catch the next time its
+      # value is changed. This doesn't re-trigger this observeEvent as
+      # observeEvent ignores NULL values by default
       set_values(NULL)
     })
-    
+
     # when reset_values is signaled, reset the values of all widgets
     observeEvent(reset_values(), {
       if (identical(reset_values(), FALSE)) return()
@@ -295,14 +322,18 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       shinyjs::toggle("delete", condition = edit_mode())
     })
     
-    # text outputs (form_title, required_variables_helptext)
+    # update each of the text outputs automatically, including language changes
+    # and the dynamic updating in editing table title etc.
     lapply(text_output_code_names, FUN = function(text_output_code_name) {
+      # render text
       output[[text_output_code_name]] <- renderText({
         if (dp()) message(glue("Rendering text for {text_output_code_name}"))
         
         text_to_show <- get_disp_name(text_output_code_name, language())
         
+        #get element from the UI structure lookup list
         element <- structure_lookup_list[[text_output_code_name]]
+        #if the text should be updated dynamically, do that
         if (!is.null(element$dynamic)) {
           if (element$dynamic$mode == "edit_mode") {
             text_to_show <- if (edit_mode()) {
@@ -510,23 +541,25 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       }
     })
 
+    # when requested, prepare the entered data
     form_data <- reactive({
       if (dp()) message("Calculating form data")
-      
+
       relevant <- relevant_variables()
-      
+
       relevant_table <- NULL
       if (length(relevant$table_name) > 0 && !is.null(tables[[relevant$table_name]])) {
         relevant_table <- tables[[relevant$table_name]]$result
       }
-      
-      if (!main_iv$is_valid() || 
+
+      # check that the form and table validation rules have been met
+      if (!main_iv$is_valid() ||
           (!is.null(relevant_table) && !relevant_table$valid())) {
         return(NULL)
       }
       
       event <- list()
-      
+      # fill information
       event$mgmt_operations_event <- input[["mgmt_operations_event"]]
       event$date <- tryCatch(
         format(input[["date"]], date_format_json),
@@ -555,13 +588,17 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
           input[[prop_name]]
         }
         
+        # if value is character, trim any whitespace around it
         if (is.character(value)) value <- trimws(value)
-        
+
+        # format Date value to character string and replace with "" if that
+        # fails for some reason
         if (inherits(value, "Date")) {
           value <- tryCatch(format(value, date_format_json),
                             error = function(cnd) "")
         }
-        
+
+        # if the value is not defined or empty, replace with missingval
         if (length(value) == 0) {
           value <- missingval
         } else {
@@ -595,9 +632,17 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         }
       }
       
+      # return event data
       event
     })
-    
+
+    # When requested, calculate a vector with the names of relevant variables. A
+    # variable is relevant when it is visible in some form, either as a regular
+    # widget or in a table module. Relevant variables are ones which we want to
+    # save to a json file given the current choices of the user. For example,
+    # when the user is making a soil observation event, the variables related
+    # to that are relevant while other observation variables are not.
+    # This only works when the form is already open.
     relevant_variables <- reactive({
       if (dp()) message("Calculating relevant variables")
       

@@ -667,17 +667,28 @@ app_server <- function(input, output, session) {
   observeEvent(input$language, ignoreInit = TRUE, {
     
     if (dp()) message("input$language changed")
-    
+
+    # get a list of all input elements which we have to relabel
     input_element_names <- names(reactiveValuesToList(input))
-    
+
     for (code_name in input_element_names) {
-      element <- structure_lookup_list[[code_name]]  
+
+      # find element in the UI structure lookup list
+      element <- structure_lookup_list[[code_name]]
+
+      # didn't find the element corresponding to code_name
+      # this should not happen if the element is in
+      # sidebar_ui_structure.json
       if (is.null(element$type)) next
       
       label <- get_disp_name(element$label, input$language)
       
       if (element$type == "selectInput") {
+
+        # fetch choices for the selectInput
         choices <- get_selectInput_choices(code_name, input$language)
+
+        # make sure we don't change the selected value
         current_value <- input[[code_name]]
         
         if (is.null(choices)) {
