@@ -2,7 +2,9 @@
 // your browser cache! It might be using an older version of this file.
 
 function do_selectize(table_id) {
-    return $('#'+table_id).find('select').selectize();
+    return $('#'+table_id).find('select').selectize({
+        dropdownParent: 'body'
+    });
 }
 
 var renderCounter = 0;

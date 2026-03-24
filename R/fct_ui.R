@@ -1,11 +1,9 @@
 # Builds the ui based on a json file
-# e.g. builds additional options for the different activity types
 # Otto Kuusela 2021
 
-structure_file_path <- function() system.file("extdata", "ui_structure.json", 
+structure_file_path <- function() system.file("extdata", "ui_structure.json",
                                    package = "fieldactivity")
 structure <- jsonlite::fromJSON(structure_file_path(), simplifyMatrix = FALSE)
-activity_options <- structure$form$mgmt_operations_event$sub_elements
 
 
 #' Recursively apply function to lists in a list
@@ -27,13 +25,9 @@ rlapply <- function(x, fun, name_fun = NULL, ...) {
       next
     }
     
-    # x is a list, so let's test it
     result <- fun(element, ...)
     
     if (!is.null(result)) {
-      
-      # if we have a naming function defined, use that
-      # index is either an actual index or name of the element
       if (is.null(name_fun)) {
         index <- length(results) + 1
       } else {
@@ -43,8 +37,6 @@ rlapply <- function(x, fun, name_fun = NULL, ...) {
       results[[index]] <- result
     }
     
-    # more results might lurk on lower levels of the list. 
-    # So let's investigate those
     more_results <- rlapply(element, fun, name_fun, ...)
     
     if (length(more_results) > 0) {
@@ -56,7 +48,6 @@ rlapply <- function(x, fun, name_fun = NULL, ...) {
     return(results)
   } else if (length(results) == 1) {
     return(results)
-    #return(results[[1]])
   } else {
     return(NULL)
   }
@@ -66,12 +57,11 @@ rlapply <- function(x, fun, name_fun = NULL, ...) {
 #' Build lookup list for UI elements
 #' @description Build a list where the names are the code names of UI elements
 #' and the values are the corresponding element structures (lists) found in 
-#' ui_structure.json
+#' ui_structure.json. Now only contains app chrome elements.
 #' @return The lookup list.
 build_structure_lookup_list <- function() {
   element_fetcher <- function(x) {
     if (!is.null(x$code_name)) {
-      # we don't need the sub_elements listed, those will come separately
       x$sub_elements <- NULL
       return(x)
     } else {
@@ -88,12 +78,7 @@ build_structure_lookup_list <- function() {
 
 structure_lookup_list <- build_structure_lookup_list()
 
-# help texts (technically textOutputs) have a different method of updating
-# when the language is changed because they are outputs rather than inputs,
-# and for that we need a list of the code names of these objects.
-# The same goes for data tables (excluding event table).
-# We also need the code names of fileInput delete buttons to set up observers
-# for them
+# Categorize code names by type for text outputs, tables, and fileInputs
 text_output_code_names <- NULL
 data_table_code_names <- NULL
 fileInput_code_names <- NULL
@@ -110,7 +95,8 @@ for (element in structure_lookup_list) {
 #' Generate the UI for a list of elements in the structure file.
 #' 
 #' For a given list of widget structures as read from ui_structure.json, 
-#' create_ui applies create_widget to each widget in the list
+#' create_ui applies create_widget to each widget in the list.
+#' Still used for app chrome rendering and by mod_table.R for legacy tables.
 #' 
 #' @param widget_structure_list The list of widget structures (from
 #'   ui_structure.json) to generate as UI
@@ -121,7 +107,6 @@ for (element in structure_lookup_list) {
 create_ui <- function(widget_structure_list, ns) {
   new_elements <- lapply(widget_structure_list, create_widget, ns = ns)
   
-  # if there is a visibility condition, apply it
   if (!is.null(widget_structure_list$condition)) {
     new_elements <- conditionalPanel(
       condition = widget_structure_list$condition, 
@@ -132,11 +117,6 @@ create_ui <- function(widget_structure_list, ns) {
   return(new_elements)
 }
 
-# creates the individual elements
-# the override_label and ... functionalities are used for creating elements
-# in dynamic (e.g. multi-crop) data tables. Do NOT supply the label argument in
-# the unnamed arguments (...)!
-# TODO: refactor. Get rid of those ugly override arguments
 create_widget <- function(element, ns = NS(NULL),
                            override_label = NULL, 
                            override_code_name = NULL, 
@@ -145,22 +125,14 @@ create_widget <- function(element, ns = NS(NULL),
                            override_selected = NULL,
                            override_placeholder = NULL, ...) {
   
-  # element is a string, i.e. a visibility condition for a element set
-  # it has already been handled in create_ui
   if (!is.list(element)) {
     return()
   }
   
-  # element is a list of elements, because it doesn't have the type
-  # attribute. In that case we want to create all of the elements in that list
   if (is.null(element$type)) {
     return(create_ui(element, ns))
   }
   
-  # the labels will be set to element$label which is a code_name, not a 
-  # display_name, but this is okay as the server will update this as the
-  # language changes (which also happens when the program starts)
-  # the following allows overwriting the label through ...
   element_label <- get_disp_name(element$label, init_lang)
   if (!is.null(override_label)) {
     element_label <- override_label
@@ -189,9 +161,7 @@ create_widget <- function(element, ns = NS(NULL),
   new_element <- if (element$type == "checkboxInput") {
     checkboxInput(element_code_name, label = element_label, ...)
   } else if (element$type == "selectInput") {
-    # if multiple is defined (=TRUE) then pass that to selectInput
     multiple <- identical(element$multiple, TRUE)
-    # we don't enter choices yet, that will be handled by the server
     selectInput(element_code_name, label = element_label, 
                 choices = element_choices, multiple = multiple,
                 selected = override_selected, ...)
@@ -199,7 +169,6 @@ create_widget <- function(element, ns = NS(NULL),
     if (!is.null(element$style) && element$style == "label") {
       strong(textOutput(element_code_name, ...))
     } else {
-      # these are inteded to look like helpTexts so make text gray
       tagList(
         span(textOutput(element_code_name, ...), style = "color:gray"),
         br()
@@ -236,11 +205,6 @@ create_widget <- function(element, ns = NS(NULL),
     # 
   }
   
-  # put the new element in a conditionalPanel. If no condition is specified,
-  # the element will be visible by default
-  #new_element <- conditionalPanel(condition = element$condition, new_element)
-  
-  # if there are sub-elements to create, do that
   if (!is.null(element$sub_elements)) {
     return(list(new_element, 
                 create_ui(element$sub_elements, ns)))
@@ -252,21 +216,11 @@ create_widget <- function(element, ns = NS(NULL),
 #' Find the choices for a selectInput given its code name
 #'
 #' @param selectInput_code_name The code name of the selectInput
-#' @param language The language to show the options in. This will be passed to
-#'   get_disp_name
+#' @param language The language to show the options in.
 #'
 #' @return A vector of choices (code names). If language was supplied, the names
 #'   will be the names of the vector.
 get_selectInput_choices <- function(selectInput_code_name, language) {
-  # the choices for a selectInput element can be stored in
-  # three ways: 
-  # 1) the code names of the choices are given as a vector
-  # 2) for site and block selectors, there is IGNORE:
-  # this means that the choices should not be updated here (return NULL)
-  # 3) the category name for the choices is given.
-  # in the following if-statement, these are handled
-  # in this same order
-  
   element_structure <- structure_lookup_list[[selectInput_code_name]]
 
   if (!identical(element_structure$type, "selectInput") || 
@@ -281,8 +235,6 @@ get_selectInput_choices <- function(selectInput_code_name, language) {
   } else if (element_structure$choices == "IGNORE") {
     choices <- NULL
   } else {
-    # get_category_names returns both display names and 
-    # code names
     choices <- c(
       "",
       get_category_names(element_structure$choices,
@@ -299,22 +251,14 @@ get_selectInput_choices <- function(selectInput_code_name, language) {
 #'   functions.
 #' @param session Current shiny session
 #' @param code_name The code name of the UI element to update
-#' @param value An atomic vector holding the desired value of the UI element. If
-#'   NULL, the value of the element is not altered.
-#' @param clear_value If set to TRUE, the value of the element is cleared (and
-#'   any value supplied to value is ignored)
-#' @param ... Additional arguments (such as label) to pass to Shiny's update-
-#'   functions.
+#' @param value An atomic vector holding the desired value of the UI element.
+#' @param clear_value If set to TRUE, the value of the element is cleared.
+#' @param ... Additional arguments to pass to Shiny's update functions.
 #' @importFrom glue glue
 update_ui_element <- function(session, code_name, value = NULL, 
                               clear_value = FALSE, ...) {
-  # find the element from the UI structure lookup list, which has been
-  # generated in ui_builder.R 
   element <- structure_lookup_list[[code_name]]
   
-  # didn't find the element corresponding to code_name
-  # this should not happen if the element is in 
-  # sidebar_ui_structure.json
   if (is.null(element$type)) {
     stop("UI element type not found, could not update")
   }
@@ -322,23 +266,17 @@ update_ui_element <- function(session, code_name, value = NULL,
     stop("The value given to update_ui_element should be an atomic vector")
   }
   
-  # if value is NULL, we need to determine on a widget type basis how to 
-  # clear the value. If it isn't, replace missingvals with ""
   if (!is.null(value)) {
-    # replace missingvals with empty strings
     missing_indexes <- identical(value, missingval)
     if (any(missing_indexes)) {
       value[missing_indexes] <- ""
     }
   } 
   
-  
   if (element$type == "selectInput") {
     if (clear_value) value <- ""
-    # setting the selected value to NULL doesn't change the widget's value
     updateSelectInput(session, code_name, selected = value,  ...)
   } else if (element$type == "dateInput") {
-    # setting value to NULL will reset the date to the current date
     value <- if (clear_value) {
       NULL
     } else {
@@ -349,21 +287,15 @@ update_ui_element <- function(session, code_name, value = NULL,
   } else if (element$type == "textAreaInput") {
     if (clear_value) value <- ""
     updateTextAreaInput(session, code_name, value = value, ...)
-    #} else if (element$type == "checkboxInput") {
-    #    updateCheckboxInput(session, code_name, value = value, ...)
   } else if (element$type == "actionButton") {
     updateActionButton(session, code_name, ...)
   } else if (element$type == "textInput") {
     if (clear_value) value <- ""
     updateTextInput(session, code_name, value = value, ...)
   } else if (element$type == "numericInput") {
-    # if we are given a non-numeric value, we don't want to start converting
-    # it. Let's replace it with an empty string (the default value)
-    # if (!is.numeric(value)) {value <- ""}
     if (clear_value) { value <- "" }
     updateNumericInput(session, code_name, value = value, ...)
   } else if (element$type == "dateRangeInput") {
-    
     if (!is.null(value) & length(value) != 2) {
       value <- NULL
       warning(glue("Value supplied to the dateRangeInput was not of ", 
@@ -378,33 +310,22 @@ update_ui_element <- function(session, code_name, value = NULL,
                                   start = start, end = end))
   } else if (element$type == "fileInput") {
     
-    
   }
 }
 
 #' Reset the value of input fields
 #' 
-#' Set the specified input fields to their default empty values.
-#' 
 #' @param session The current Shiny session
 #' @param fields_to_clear The names of the variables whose corresponding fields
 #'   should be cleared
 #' @param exceptions Optional vector of variable names which should not be
-#'   cleared. This is useful if fields_to_clear is supplied with all variable
-#'   names but there are a few that should not be cleared.
+#'   cleared.
 #' @return None, used for side effects.
-#' @note This doesn't reset the tables (e.g. harvest_crop_table) -- they reset 
-#'   themselves every time they become hidden. Also doesn't reset fileInputs,
-#'   they have their own way of clearing their value.
-# TODO: is exceptions necessary?
 reset_input_fields <- function(session, fields_to_clear, exceptions = c("")) {
-  
-  # we never want to clear the site or block
   exceptions <- c(exceptions, "site", "block")
   
   for (code_name in fields_to_clear) {
     if (code_name %in% exceptions) next
     update_ui_element(session, code_name, clear_value = TRUE)
   }
-  
 }

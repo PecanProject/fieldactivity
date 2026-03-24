@@ -74,15 +74,6 @@ app_server <- function(input, output, session) {
         
         updateSelectInput(session, "site", choices = site_choices, selected = auth_result$user)
         
-      } else if (auth_result$user == "icos_agri_user") {
-        
-        shinyjs::enable("site")
-        shinyjs::show("site")
-        # Subset of site choices for the third user
-        site_choices <- sites[grepl("icos-agri", sites$site_type),]$site
-        
-        updateSelectInput(session, "site", choices = site_choices, selected = auth_result$user)
-        
       } else {
         
         updateSelectInput(session, "site", selected = auth_result$user)
@@ -671,55 +662,37 @@ app_server <- function(input, output, session) {
     
   })
   
-  # change language when user requests it
+  # change language when user requests it — only app chrome elements
+  # (form module handles its own schema-driven language switching)
   observeEvent(input$language, ignoreInit = TRUE, {
     
     if (dp()) message("input$language changed")
     
-    # get a list of all input elements which we have to relabel
     input_element_names <- names(reactiveValuesToList(input))
     
     for (code_name in input_element_names) {
-      
-      # TODO: update to use the update_ui_element function
-      
-      # find element in the UI structure lookup list
       element <- structure_lookup_list[[code_name]]  
-      
-      # didn't find the element corresponding to code_name
-      # this should not happen if the element is in 
-      # sidebar_ui_structure.json
       if (is.null(element$type)) next
       
       label <- get_disp_name(element$label, input$language)
       
       if (element$type == "selectInput") {
-        
-        # fetch choices for the selectInput
         choices <- get_selectInput_choices(code_name, input$language)
-        
-        # make sure we don't change the selected value
         current_value <- input[[code_name]]
         
         if (is.null(choices)) {
-          updateSelectInput(session, 
-                            code_name,
-                            label = ifelse(is.null(label),"",label),
+          updateSelectInput(session, code_name,
+                            label = ifelse(is.null(label), "", label),
                             selected = current_value) 
         } else {
-          updateSelectInput(session, 
-                            code_name,
-                            label = ifelse(is.null(label),"",label),
+          updateSelectInput(session, code_name,
+                            label = ifelse(is.null(label), "", label),
                             choices = choices,
                             selected = current_value)
         }
-        
       } else if (element$type == "actionButton") {
-        updateActionButton(session,
-                           code_name,
-                           label = label)
+        updateActionButton(session, code_name, label = label)
       }
-      
     }
 
   })
