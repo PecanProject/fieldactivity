@@ -94,9 +94,10 @@ golem_add_external_resources <- function(){
       path = app_sys('app/www'),
       app_title = 'fieldactivity'
     ),
+    tags$link(rel = "stylesheet", type = "text/css",
+              href = "www/schema.css"),
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert() 
     shinyjs::useShinyjs(),  # enable shinyjs
   )
 }
-

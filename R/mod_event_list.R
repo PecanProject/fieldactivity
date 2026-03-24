@@ -236,14 +236,14 @@ mod_event_list_server <- function(id, events, language, site) {
             isTruthy(input$event_list_block_filter) &
             isTruthy(input$event_list_year_filter))) {
         default_variables <- c("block", "mgmt_operations_event",
-                               "date", "mgmt_event_notes")
+                               "date", "mgmt_event_short_notes")
         return(get_data_table(list(), default_variables))
       }
       
       if (dp()) message("event list table_data reactive running")
       
       # determine the columns displayed in the table
-      table_variables <- c("date", "mgmt_event_notes")
+      table_variables <- c("date", "mgmt_event_short_notes")
       if (input$event_list_activity_filter == "activity_choice_all") {
         table_variables <- c("mgmt_operations_event", table_variables)
       }
@@ -256,16 +256,21 @@ mod_event_list_server <- function(id, events, language, site) {
       if (input$event_list_activity_filter != "activity_choice_all") {
         hidden_widget_types <- c("textOutput", "dataTable", "fileInput", 
                                  "actionButton")
-        activity_variables <- unlist(rlapply(
-          activity_options[[input$event_list_activity_filter]],
-          fun = function(x) {
-            if (is.null(x$type) || x$type %in% hidden_widget_types ||
-                identical(x$hide_in_event_list, TRUE)) {
-              NULL
-            } else {
-              x$code_name
-            }
-          }))
+        # Use schema registry to get event-specific property names
+        event_type <- input$event_list_activity_filter
+        event_entry <- mgmt_schema$event_registry[[event_type]]
+        if (!is.null(event_entry)) {
+          activity_variables <- character(0)
+          for (pn in event_entry$property_names) {
+            desc <- lookup_property(mgmt_schema$property_registry, pn, 
+                                    event_type)
+            if (is.null(desc)) next
+            if (desc$type %in% c("const", "dataTable")) next
+            activity_variables <- c(activity_variables, pn)
+          }
+        } else {
+          activity_variables <- character(0)
+        }
         table_variables <- c(table_variables, activity_variables)
       }
       
@@ -283,12 +288,13 @@ mod_event_list_server <- function(id, events, language, site) {
       # filter by activity type
       if (input$event_list_activity_filter != "activity_choice_all") {
         event_list <- rlapply(event_list, fun = function(x)
-          if (x$mgmt_operations_event == input$event_list_activity_filter) {x})
+          if (!is.null(x$mgmt_operations_event) && x$mgmt_operations_event == input$event_list_activity_filter) {x})
       }
-      
+
       # filter by year
       if (input$event_list_year_filter != "year_choice_all") {
         event_list <- rlapply(event_list, fun = function(x) {
+          if (is.null(x$date)) return(NULL)
           event_year <- format(as.Date(x$date, date_format_json), "%Y")
           if (event_year == input$event_list_year_filter) {x}
         })
@@ -355,9 +361,9 @@ mod_event_list_server <- function(id, events, language, site) {
                     rownames = FALSE, # hide row numbers
                     class = "table table-hover",
                     #autoHideNavigation = TRUE, doesn't work properly with dom
-                    colnames = get_disp_name(names(new_data_to_display),
-                                             language = language(),
-                                             is_variable_name = TRUE),
+                    colnames = unname(get_event_list_colnames(
+                                             names(new_data_to_display),
+                                             language())),
                     options = list(dom = 'tp', # hide unnecessary controls
                                    # order chronologically by hidden column
                                    order = list(n_cols - 1, 'desc'), 

@@ -24,31 +24,26 @@ copy_file(
 
 \item{block}{The block where the event took place}
 
-\item{date}{The day of the event as a character string, the format must be
-yyyy-mm-dd}
+\item{date}{The day of the event as a character string, format yyyy-mm-dd}
 
-\item{filepath_is_relative}{If TRUE, json_file_base_folder will be added to
-the beginning of filepath}
+\item{filepath_is_relative}{If TRUE, json_file_base_folder will be added}
 
 \item{delete_original}{Should the original file be deleted after copying?}
 
-\item{base_folder}{Included for testing reasons, the default value should
-otherwise be used}
+\item{base_folder}{Included for testing reasons}
 }
 \value{
-A path to the new location of the file relative to the events.json
-  file.
+A path to the new location of the file relative to events.json.
 }
 \description{
 When a file (image) is uploaded through a fileInput widget, it is saved to a
 temporary folder. This function copies that file to an appropriate directory
-and name. The file does not have to be originally in a temporary
-folder, any file path is ok. Therefore this function can also be used e.g.
-when cloning and event and the images associated with it need to be
-duplicated.
+and name. The file does not have to be originally in a temporary folder —
+any file path is valid. This allows the function to also be used when cloning
+an event and its associated images need to be duplicated.
 }
 \details{
-The name will be of the format 
-yyyy-mm-dd_site_block_variable_name_# where # is a number (0, 1, 2, ...) to
-ensure that files have unique names.
+The new file name has the format
+  `yyyy-mm-dd_site_block_variable_name_#.ext` where `#` is an incrementing
+  number (0, 1, 2, ...) to ensure uniqueness within the target folder.
 }

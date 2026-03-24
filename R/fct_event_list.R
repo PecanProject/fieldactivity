@@ -85,3 +85,28 @@ find_event_index <- function(event, event_list) {
   # We didn't find a match, so return NULL
   return(NULL)
 }
+
+#' Get display names for event list table column headers
+#' Tries display_names.csv first, then schema titles as fallback
+#' @param col_names Vector of column names
+#' @param language Language code or column name
+#' @return Vector of display names
+get_event_list_colnames <- function(col_names, language) {
+  iso <- lang_to_iso(language)
+  
+  vapply(col_names, function(cn) {
+    # Try display_names.csv first
+    dn <- get_disp_name(cn, language = language, is_variable_name = TRUE)
+    if (!identical(dn, cn)) return(dn)
+    
+    # Try schema property titles
+    desc <- find_any_property_desc(mgmt_schema$property_registry, cn,
+                                    mgmt_schema$property_reverse_index)
+    if (!is.null(desc) && !is.null(desc$titles)) {
+      title <- schema_get_title(desc$titles, iso, "")
+      if (nchar(title) > 0) return(title)
+    }
+    
+    cn
+  }, character(1))
+}

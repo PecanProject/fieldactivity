@@ -20,11 +20,9 @@ delete_file(
 \item{block}{The block where the event took place}
 
 \item{filepath_relative}{Set to TRUE and supply site and block if filepath is
-relative to the events.json file. This allows the function to figure out
-the correct path to the file.}
+relative to the events.json file.}
 
-\item{base_folder}{Included for testing reasons, the default value should
-otherwise be used}
+\item{base_folder}{Included for testing reasons}
 }
 \description{
 Delete the file with the path filepath. Used to delete files (images)
