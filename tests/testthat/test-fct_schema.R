@@ -122,11 +122,8 @@ test_that("lang_to_iso converts column names and passes through ISO codes", {
   expect_equal(lang_to_iso("disp_name_swe"), "sv")
   expect_equal(lang_to_iso("en"), "en")
   expect_equal(lang_to_iso("fi"), "fi")
-  # NOTE: unknown language codes cause subscript out of bounds error because
-  # mapping is a named character vector, not a list. The NULL fallback on
-  # line 427 of fct_schema.R is unreachable. Consider using match() or
-  # switching to a list. For now, test the actual behavior:
-  expect_error(lang_to_iso("unknown"), "subscript out of bounds")
+  # Unknown language codes fall back to "en"
+  expect_equal(lang_to_iso("unknown"), "en")
 })
 
 # --- schema_get_choices -------------------------------------------------------

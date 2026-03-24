@@ -423,8 +423,8 @@ lang_to_iso <- function(language) {
     "fi" = "fi",
     "sv" = "sv"
   )
-  result <- mapping[[language]]
-  if (is.null(result)) "en" else result
+  result <- mapping[language]
+  if (is.na(result) || is.null(result)) "en" else unname(result)
 }
 
 #' Build a named choice vector for selectInput from schema choices

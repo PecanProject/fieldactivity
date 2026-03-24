@@ -25,5 +25,6 @@ relative to the events.json file.}
 \item{base_folder}{Included for testing reasons}
 }
 \description{
-Delete a file
+Delete the file with the path filepath. Used to delete files (images)
+associated with events, e.g. canopeo_image
 }

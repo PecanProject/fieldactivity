@@ -43,8 +43,6 @@ mod_download_server_inst <- function(id) {
       # Name for the downloaded file
       filename = "guideFieldactivity.html",
       content = function(file) {
-        params <- list(n = input$n)
-        
         if(dp()) message("Copying instructions to temp file")
         
         # Paths to the rendered document + used images
@@ -63,19 +61,12 @@ mod_download_server_inst <- function(id) {
         file.copy(system.file("user_doc/images_user_instructions", "Addevent.png", package = "fieldactivity"), report_img_4, overwrite = TRUE)
         file.copy(system.file("user_doc/images_user_instructions", "eventexample_1.png", package = "fieldactivity"), report_img_5, overwrite = TRUE)
         
-        # id <- showNotification(
-        #   "Rendering report...",
-        #   duration = 8,
-        #   closeButton = FALSE
-        # )
-        # on.exit(removeNotification(id), add = TRUE)
-        
         if (dp()) message("Moving to rendering the .md file")
         
         # Path to the instructions .md which will be rendered
         callr::r(
           render_report,
-          list(input = report_path, output = file, params = params)
+          list(input = report_path, output = file, params = list())
         )
       }
     )
@@ -262,21 +253,3 @@ mod_download_server_json <- function(id, user_auth, base_folder = json_file_base
 
 
 
-#' download Server Function
-#'
-#' @noRd
-# mod_download_serverxx <- function(input, output, session){
-#   ns <- session$ns
-#   data_xi <- "string"
-#   
-#   output$report <- downloadHandler(
-#     
-#     filename = function(){
-#       paste("sitemxt", "csv", sep = ".")
-#     },
-#     
-#     content = function(file){
-#       write.csv(data_xi, file)
-#     }
-#   )
-# }
