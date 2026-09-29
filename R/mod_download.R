@@ -146,13 +146,13 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
         events <- unlist(lapply(blocks, function(block) {
           read_json_file(site, block, base_folder = base_folder)$events
         }), recursive = FALSE)
-        
+          
         if (length(events) == 0) {
           write.csv("Seems that there isn't any data? Try to create a management event.",
                     file, row.names = FALSE)
           return()
-        }
-        
+          }
+          
         events_table <- events_to_table(events)
         # block first, as in the event list
         events_table <- events_table[c("block", setdiff(names(events_table), "block"))]
@@ -203,13 +203,13 @@ mod_download_server_json <- function(id, user_auth, base_folder = json_file_base
         for (block_name in blocks) {
           file.copy(file.path(base_folder, site, block_name, "events.json"),
                     file.path(tmpdrjson, paste0("events_", block_name, ".json")))
-        }
+        } 
         
         if (length(list.files(tmpdrjson)) == 0) {
           if(dp()) message("Return a csv with an error")
           write.csv("Seems that there isn't any data? Try to create a management event.",
                     file.path(tmpdrjson, "Error.csv"), row.names = FALSE)
-        }
+          }
         zip::zip(zipfile = file, files = "json", root = zip_root)
       },
       contentType = "application/zip"

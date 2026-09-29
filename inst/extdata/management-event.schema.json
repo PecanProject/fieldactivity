@@ -3067,6 +3067,15 @@
                             "title_fi": "lierojen lukumäärä",
                             "type": "integer",
                             "minimum": 0
+                        },
+                        "soil_image": {
+                            "title": "photo of soil",
+                            "title_fi": "kuva maaperästä",
+                            "type": "string",
+                            "x-ui": {
+                                "form-type": "fileInput",
+                                "accept": "image/*"
+                            }
                         }
                     }
                 },
@@ -3225,6 +3234,15 @@
                             "title_fi": "canopeo-lukema",
                             "type": "number",
                             "minimum": 0
+                        },
+                        "canopeo_image": {
+                            "title": "canopeo image",
+                            "title_fi": "canopeo-kuva",
+                            "type": "string",
+                            "x-ui": {
+                                "form-type": "fileInput",
+                                "accept": "image/*"
+                            }
                         }
                     }
                 },

@@ -4,7 +4,7 @@
 \alias{update_schema_widget}
 \title{Update a single schema widget's label and choices}
 \usage{
-update_schema_widget(session, desc, iso, input, override_choices = NULL)
+update_schema_widget(session, desc, iso, input, choices = NULL)
 }
 \arguments{
 \item{session}{Shiny session}
@@ -15,7 +15,7 @@ update_schema_widget(session, desc, iso, input, override_choices = NULL)
 
 \item{input}{The input of the session, to keep the current selection}
 
-\item{override_choices}{Optional choices (e.g. for a subtype discriminator)}
+\item{choices}{Optional choices (e.g. for a subtype discriminator)}
 }
 \description{
 Update a single schema widget's label and choices

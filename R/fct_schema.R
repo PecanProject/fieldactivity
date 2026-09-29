@@ -26,7 +26,7 @@ load_schema <- function() {
   defs <- raw[["$defs"]]
   common_props <- raw$properties
   one_of <- raw$oneOf
-  top_required <- if (!is.null(raw$required)) raw$required else character(0)
+  top_required <- raw$required %||% character(0)
   
   event_registry <- list()
   property_registry <- list()
@@ -38,8 +38,7 @@ load_schema <- function() {
     prop_resolved <- resolve_property(prop, defs)
     desc <- build_property_descriptor(prop_name, prop_resolved, 
                                        required = prop_name %in% top_required,
-                                       event_type = "__common__",
-                                       is_array_item = FALSE)
+                                       event_type = "__common__")
     property_registry[[prop_name]] <- desc
   }
   
@@ -56,11 +55,7 @@ load_schema <- function() {
     if (is.null(event_const)) next
     
     event_titles <- extract_titles(event_def)
-    event_required <- if (!is.null(event_def$required)) {
-      event_def$required
-    } else {
-      character(0)
-    }
+    event_required <- event_def$required %||% character(0)
     
     event_type_choices[[event_const]] <- event_titles
     
@@ -77,8 +72,7 @@ load_schema <- function() {
       for (pn in names(event_props)) {
         if (pn == "mgmt_operations_event") next
         p <- event_props[[pn]]
-        xui <- p[["x-ui"]]
-        if (!is.null(xui) && identical(xui$discriminator, TRUE)) {
+        if (isTRUE(p[["x-ui"]]$discriminator)) {
           subtype_discriminator <- pn
           break
         }
@@ -95,11 +89,7 @@ load_schema <- function() {
         if (is.null(sub_const)) next
         
         sub_titles <- extract_titles(subtype_def)
-        sub_required <- if (!is.null(subtype_def$required)) {
-          subtype_def$required
-        } else {
-          character(0)
-        }
+        sub_required <- subtype_def$required %||% character(0)
         
         # Register subtype-specific properties
         sub_prop_names <- character(0)
@@ -107,12 +97,12 @@ load_schema <- function() {
           if (spn == subtype_discriminator) next
           if (spn == "mgmt_operations_event") next
           sp <- sub_props[[spn]]
+          if (!is.null(sp[["const"]]) && is.null(sp$type)) next
           sp_resolved <- resolve_property(sp, defs)
           is_req <- spn %in% sub_required || spn %in% event_required
           desc <- build_property_descriptor(spn, sp_resolved, 
                                              required = is_req,
-                                             event_type = event_const,
-                                             is_array_item = FALSE)
+                                             event_type = event_const)
           desc$subtype <- sub_const
           property_registry[[paste0(spn, REGISTRY_KEY_SEP, event_const, REGISTRY_KEY_SEP, sub_const)]] <- desc
           sub_prop_names <- c(sub_prop_names, spn)
@@ -144,8 +134,7 @@ load_schema <- function() {
       is_req <- pn %in% event_required
       desc <- build_property_descriptor(pn, p_resolved, 
                                          required = is_req,
-                                         event_type = event_const,
-                                         is_array_item = FALSE)
+                                         event_type = event_const)
       if (pn %in% common_prop_names) {
         common_overrides[[pn]] <- desc
         next
@@ -222,7 +211,7 @@ resolve_property <- function(prop, defs) {
     merged <- list()
     for (part in prop$allOf) {
       resolved <- resolve_ref(part, defs)
-      merged <- merge_lists(merged, resolved)
+      merged[names(resolved)] <- resolved
     }
     # Carry over any top-level keys not in allOf
     for (k in names(prop)) {
@@ -264,15 +253,7 @@ resolve_ref <- function(obj, defs) {
   for (p in parts[-1]) {
     target <- target[[p]]
   }
-  if (is.null(target)) return(obj)
-  target
-}
-
-merge_lists <- function(a, b) {
-  for (k in names(b)) {
-    a[[k]] <- b[[k]]
-  }
-  a
+  target %||% obj
 }
 
 # Titles are only used as UI labels, so they are shown in sentence case here
@@ -320,8 +301,8 @@ determine_widget_type <- function(prop) {
   }
   
   if (identical(prop_type, "string")) {
-    if (!is.null(prop$oneOf) && length(prop$oneOf) > 0) return("selectInput")
-    if (!is.null(xui) && identical(xui$discriminator, TRUE)) return("selectInput")
+    if (length(prop$oneOf) > 0) return("selectInput")
+    if (isTRUE(xui$discriminator)) return("selectInput")
     if (identical(prop$format, "date")) return("dateInput")
     return("textInput")
   }
@@ -338,10 +319,8 @@ determine_widget_type <- function(prop) {
 #' @param prop Resolved property definition
 #' @param required Whether this property is required
 #' @param event_type The event type this property belongs to
-#' @param is_array_item Whether this property is inside an array items
 #' @return A named list describing the property
-build_property_descriptor <- function(name, prop, required, event_type, 
-                                       is_array_item) {
+build_property_descriptor <- function(name, prop, required, event_type) {
   xui <- prop[["x-ui"]]
   widget_type <- determine_widget_type(prop)
   
@@ -354,18 +333,13 @@ build_property_descriptor <- function(name, prop, required, event_type,
   array_items_required <- NULL
   if (widget_type == "dataTable" && !is.null(prop$items$properties)) {
     array_columns <- list()
-    array_items_required <- if (!is.null(prop$items$required)) {
-      prop$items$required
-    } else {
-      character(0)
-    }
+    array_items_required <- prop$items$required %||% character(0)
     for (col_name in names(prop$items$properties)) {
       col_prop <- prop$items$properties[[col_name]]
       array_columns[[col_name]] <- build_property_descriptor(
         col_name, col_prop, 
         required = col_name %in% array_items_required,
-        event_type = event_type,
-        is_array_item = TRUE)
+        event_type = event_type)
     }
   }
   
@@ -403,9 +377,8 @@ build_property_descriptor <- function(name, prop, required, event_type,
     placeholders = placeholders,
     total_of = total_of,
     event_type = event_type,
-    is_array_item = is_array_item,
     is_integer = identical(prop$type, "integer"),
-    is_discriminator = !is.null(xui) && identical(xui$discriminator, TRUE),
+    is_discriminator = isTRUE(xui$discriminator),
     array_columns = array_columns,
     array_items_required = array_items_required,
     xui = xui
@@ -435,8 +408,7 @@ extract_oneof_choices <- function(one_of_array) {
 #' @return The title string
 schema_get_title <- function(titles, language = "en", fallback = "") {
   if (is.null(titles)) return(fallback)
-  lang_key <- language
-  result <- titles[[lang_key]]
+  result <- titles[[language]]
   if (!is.null(result) && nchar(result) > 0) return(result)
   # fallback to English
   result <- titles[["en"]]
@@ -457,7 +429,7 @@ lang_to_iso <- function(language) {
     "sv" = "sv"
   )
   result <- mapping[language]
-  if (is.na(result) || is.null(result)) "en" else unname(result)
+  if (is.na(result)) "en" else unname(result)
 }
 
 #' Build a named choice vector for selectInput from schema choices
@@ -471,9 +443,7 @@ schema_get_choices <- function(choices, language) {
   labels <- vapply(choices, function(ch) {
     schema_get_title(ch$titles, iso, ch$value)
   }, character(1))
-  result <- c("", values)
-  names(result) <- c("", labels)
-  result
+  stats::setNames(c("", values), c("", labels))
 }
 
 #' Look up a property descriptor from the registry

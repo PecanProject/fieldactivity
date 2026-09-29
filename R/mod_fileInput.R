@@ -24,19 +24,21 @@
 #' @description A shiny Module.
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
+#' @param desc Property descriptor of the file field
+#' @param iso ISO language code
 #'
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
-mod_fileInput_ui <- function(id, widget_structure) {
+mod_fileInput_ui <- function(id, desc, iso) {
   ns <- NS(id)
   tagList(
     div(style = "display: flex;",
         
         div(style = "flex-grow: 1;", 
             fileInput(ns("file"), 
-                      label = get_disp_name(widget_structure$label, init_lang),
-                      accept = widget_structure$filetype)),
+                      label = schema_get_title(desc$titles, iso, desc$name),
+                      accept = desc$xui$accept)),
         
         div(style = "margin-left: 5px; padding-top: 26px",
             shinyjs::hidden(
@@ -51,7 +53,7 @@ mod_fileInput_ui <- function(id, widget_structure) {
 #' fileInput Server Functions
 #'
 #' @noRd 
-mod_fileInput_server <- function(id, language, set_path, reset_path) {
+mod_fileInput_server <- function(id, desc, language, set_path, reset_path) {
   
   stopifnot(is.reactive(language))
   stopifnot(is.reactive(set_path))
@@ -137,8 +139,8 @@ mod_fileInput_server <- function(id, language, set_path, reset_path) {
     # when language changes, update labels
     observeEvent(language(), {
       # update label of widget
-      label <- structure_lookup_list[[id]]$label
-      update_label(get_disp_name(label, language()))
+      update_label(schema_get_title(desc$titles, lang_to_iso(language()),
+                                    desc$name))
       # update label on the browse button
       update_button_label(get_disp_name("file_input_button_label", language()))
       # update delete button label

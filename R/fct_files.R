@@ -5,11 +5,8 @@
 # path to json file folder
 json_file_base_folder <- function() golem::get_golem_options("json_file_path")
 
-# LIFECYCLE: This URL is embedded in every persisted event JSON file as "$schema".
-# When bumping the schema version or moving the schema repository, update this
-# value AND consider backward-compatibility for files already written with the
-# old URL.  Coordinate changes with write_json_file() below and any external
-# consumers that validate events against this schema.
+# the schema the saved events follow, written as "$schema" in every event.
+# Update it together with the bundled management-event.schema.json
 schema_url <- "https://raw.githubusercontent.com/hamk-uas/fieldobservatory-data-schemas/main/management-event.schema.json"
 
 #' Create a folder for a site-block combination
@@ -26,7 +23,7 @@ schema_url <- "https://raw.githubusercontent.com/hamk-uas/fieldobservatory-data-
 #'
 #' @return TRUE if the directory was created successfully or already exists,
 #'   FALSE otherwise.
-create_file_folder <- function(site, block,
+create_file_folder <- function(site, block, 
                                base_folder = json_file_base_folder()) {
   # if the events directory (stored in json_file_base_folder) doesn't exist,
   # stop
@@ -52,33 +49,35 @@ create_file_folder <- function(site, block,
 #'   otherwise be used
 write_json_file <- function(site, block, event_list, rotation_list, 
                             base_folder = json_file_base_folder()) {
-
+  
   # this ensures that the folder to store this file exists
   create_file_folder(site, block, base_folder)
-
+  
   file_path <- file.path(base_folder, site, block, "events.json")
-
+  
   # the block is implied by the file location
   event_list <- lapply(event_list, function(event) {
     event$block <- NULL
     event[["$schema"]] <- schema_url
     drop_empty_values(event)
   })
-
+  
   # If rotations on the list --> erase the block information like with events
   if (length(rotation_list) > 0) {
     for (j in 1:length(rotation_list)) {
       rotation_list[[j]]$block <- NULL
     }
   }
-
+  
   # create appropriate structure
   experiment <- list()
   experiment$management <- list()
-
+  
   # rotation will be part of the management
   experiment$management$rotation <- rotation_list
+  
   experiment$management$events <- event_list
+  
 
   # create file
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
@@ -101,7 +100,7 @@ read_json_file <- function(site, block,
                            base_folder = json_file_base_folder()) {
   
   file_path <- file.path(base_folder, site, block, "events.json")
-
+  
   # if file doesn't exist or given names are empty, can't read it
   if (!file.exists(file_path)) {
     return(list())
@@ -114,25 +113,25 @@ read_json_file <- function(site, block,
   
   rotation <- jsonlite::fromJSON(file_path, 
                                   simplifyDataFrame = FALSE)$management$rotation
-
+  
   # if there are no events, return an empty list
   if (length(events) == 0) {
     return(list())
   }
-
+  
   # add block information and upgrade legacy events to the canonical format
   for (i in 1:length(events)) {
     events[[i]]$block <- block
     events[[i]] <- normalize_legacy_event(events[[i]])
   }
-
+  
   # add block info for rotations
   if (length(rotation) != 0){
     for (j in 1:length(rotation)) {
       rotation[[j]]$block <- block
     }
   }
-
+  
   # Add events and rotation as a list objects which both will be returned
   # when function is called
   management$events <- events
@@ -142,27 +141,31 @@ read_json_file <- function(site, block,
 }
 
 #' Copy a file related to an event and name it appropriately
-#'
+#' 
 #' When a file (image) is uploaded through a fileInput widget, it is saved to a
 #' temporary folder. This function copies that file to an appropriate directory
-#' and name. The file does not have to be originally in a temporary folder —
-#' any file path is valid. This allows the function to also be used when cloning
-#' an event and its associated images need to be duplicated.
-#'
-#' @details The new file name has the format
-#'   `yyyy-mm-dd_site_block_variable_name_#.ext` where `#` is an incrementing
-#'   number (0, 1, 2, ...) to ensure uniqueness within the target folder.
-#'
+#' and name. The file does not have to be originally in a temporary
+#' folder, any file path is ok. Therefore this function can also be used e.g.
+#' when cloning and event and the images associated with it need to be
+#' duplicated.
 #' @param orig_filepath The path of the file to copy
 #' @param variable_name Which variable is this file for? E.g. canopeo_image
 #' @param site The site where the event took place
 #' @param block The block where the event took place
-#' @param date The day of the event as a character string, format yyyy-mm-dd
-#' @param filepath_is_relative If TRUE, json_file_base_folder will be added
+#' @param date The day of the event as a character string, the format must be
+#'   yyyy-mm-dd
+#' @param filepath_is_relative If TRUE, json_file_base_folder will be added to
+#'   the beginning of filepath
 #' @param delete_original Should the original file be deleted after copying?
-#' @param base_folder Included for testing reasons
+#' @param base_folder Included for testing reasons, the default value should
+#'   otherwise be used
 #' 
-#' @return A path to the new location of the file relative to events.json.
+#' @details The name will be of the format 
+#' yyyy-mm-dd_site_block_variable_name_# where # is a number (0, 1, 2, ...) to
+#' ensure that files have unique names. 
+#' 
+#' @return A path to the new location of the file relative to the events.json
+#'   file.
 #' 
 #' @importFrom glue glue
 copy_file <- function(orig_filepath, variable_name, site, block, date,
@@ -170,12 +173,12 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
                       base_folder = json_file_base_folder()) {
   # ensures the folder for this site-block combo is there
   create_file_folder(site, block, base_folder)
-
+  
   # add json_file_base_folder to filepath if requested
   if (filepath_is_relative) {
     orig_filepath <- file.path(base_folder, orig_filepath)
   }
-
+  
   # check that the temporary file actually exists
   if (!file.exists(orig_filepath)) {
     stop(glue("The file {orig_filepath} to copy does not exist"))
@@ -187,7 +190,7 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
   if (!(file_extension %in% allowed_extensions)) {
     stop("This file extension is not supported")
   }
-
+  
   # base of the new file name
   file_base <- paste(date, site, block, variable_name, sep = "_")
 
@@ -196,7 +199,7 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
   if (!dir.exists(filepath)) {
     dir.create(filepath)
   }
-
+  
   # determine the number to add to the end of the file name to keep file names
   # in the folder unique
   number <- 0
@@ -209,6 +212,7 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
       break
     }
     number <- number + 1
+    
     # don't loop forever
     if (number >= 1000) {
       stop("Could not find a unique name for the file")
@@ -222,7 +226,7 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
                       warning = function(cnd) {message(cnd); FALSE},
                       error = function(cnd) {message(cnd); FALSE})
 
-  # if we succeeded in renaming, delete the original file if requested
+  # if we succeeded in renaming, delete the original file if requested 
   if (success & delete_original) {
     deleted_original <- tryCatch(expr = file.remove(orig_filepath),
                                  warning = function(cnd) {message(cnd)},
@@ -242,13 +246,15 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
 #'
 #' Delete the file with the path filepath. Used to delete files (images)
 #' associated with events, e.g. canopeo_image
-#'
+#' 
 #' @param filepath The path to the file which should be deleted.
 #' @param filepath_relative Set to TRUE and supply site and block if filepath is
-#'   relative to the events.json file.
+#'   relative to the events.json file. This allows the function to figure out
+#'   the correct path to the file.
 #' @param site The site where the event took place
 #' @param block The block where the event took place
-#' @param base_folder Included for testing reasons
+#' @param base_folder Included for testing reasons, the default value should
+#'   otherwise be used
 #' 
 #' @importFrom glue glue
 delete_file <- function(filepath, site = NULL, block = NULL, 

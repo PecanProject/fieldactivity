@@ -84,31 +84,33 @@ render_schema_form <- function(schema, ns, language) {
 #' @param event_const The event type const value
 #' @return A tagList
 render_event_panel <- function(event_entry, pr, ns, iso, event_const) {
-  widgets <- list()
-  
-  # Render event-level properties (excluding discriminator and const-only)
-  for (pn in event_entry$property_names) {
+  widgets <- lapply(event_entry$property_names, function(pn) {
     desc <- lookup_property(pr, pn, event_const)
-    if (is.null(desc)) next
-    if (desc$type == "const") next
-    
-    if (desc$type == "dataTable") {
-      w <- render_array_table(desc, ns, iso)
-    } else if (desc$is_discriminator && event_entry$has_subtypes) {
-      w <- render_subtype_section(desc, event_entry, pr, ns, iso,
-                                   event_const)
+    if (desc$is_discriminator && event_entry$has_subtypes) {
+      render_subtype_section(desc, event_entry, pr, ns, iso, event_const)
     } else {
-      w <- render_property_widget(desc$id, desc, ns, iso)
+      render_field(desc, ns, iso)
     }
-    # Wrap in conditionalPanel if x-ui condition is defined
-    if (!is.null(desc$condition)) {
-      w <- conditionalPanel(
-        condition = convert_condition_to_js(desc$condition, ns), w)
-    }
-    widgets[[length(widgets) + 1]] <- w
-  }
-
+  })
   tagList(widgets)
+}
+
+#' Render the widget or table of a field, shown only when its x-ui condition
+#' (if any) is met
+#' @param desc Property descriptor
+#' @param ns Namespace function
+#' @param iso ISO language code
+#' @return A Shiny tag
+render_field <- function(desc, ns, iso) {
+  w <- if (desc$type == "dataTable") {
+    render_array_table(desc, ns, iso)
+  } else if (desc$type == "fileInput") {
+    mod_fileInput_ui(ns(desc$id), desc, iso)
+  } else {
+    render_property_widget(desc$id, desc, ns, iso)
+  }
+  if (is.null(desc$condition)) return(w)
+  conditionalPanel(condition = convert_condition_to_js(desc$condition, ns), w)
 }
 
 #' Render a subtype discriminator and its conditional panels
@@ -117,30 +119,14 @@ render_subtype_section <- function(desc, event_entry, pr, ns, iso,
   # Render the discriminator selectInput with subtype choices
   subtype_choices <- build_subtype_choices(event_entry, iso)
   discriminator_widget <- render_property_widget(desc$id, desc, ns, iso,
-                                                  override_choices = subtype_choices)
+                                                  choices = subtype_choices)
   
   # Build subtype conditional panels
   subtype_panels <- lapply(names(event_entry$subtypes), function(sub_const) {
-    sub <- event_entry$subtypes[[sub_const]]
-    
-    sub_widgets <- list()
-    for (spn in sub$property_names) {
-      sdesc <- lookup_property(pr, spn, event_const, sub_const)
-      if (is.null(sdesc)) next
-      if (sdesc$type == "const") next
-      
-      if (sdesc$type == "dataTable") {
-        sw <- render_array_table(sdesc, ns, iso)
-      } else {
-        sw <- render_property_widget(sdesc$id, sdesc, ns, iso)
-      }
-      if (!is.null(sdesc$condition)) {
-        sw <- conditionalPanel(
-          condition = convert_condition_to_js(sdesc$condition, ns), sw)
-      }
-      sub_widgets[[length(sub_widgets) + 1]] <- sw
-    }
-    
+    sub_widgets <- lapply(event_entry$subtypes[[sub_const]]$property_names,
+                          function(spn) {
+      render_field(lookup_property(pr, spn, event_const, sub_const), ns, iso)
+    })
     condition <- paste0("input['", ns(desc$id), "'] == '", sub_const, "'")
     conditionalPanel(condition = condition, tagList(sub_widgets))
   })
@@ -149,121 +135,51 @@ render_subtype_section <- function(desc, event_entry, pr, ns, iso,
 }
 
 #' Render a single Shiny input widget from a property descriptor
-#' @param prop_name Input ID of the widget (desc$id for form fields)
+#' @param id Input ID of the widget (desc$id for form fields)
 #' @param desc Property descriptor from the registry
 #' @param ns Namespace function
 #' @param iso ISO language code
-#' @param override_code_name Optional code name override (for table cells)
-#' @param override_label Optional label override
-#' @param override_value Optional value override
-#' @param override_choices Optional choices override
-#' @param override_selected Optional selected value override
-#' @param override_placeholder Optional placeholder override
+#' @param label Optional label, the property title by default
+#' @param value Optional initial value (the selected value of a selectInput)
+#' @param choices Optional choices, the property's choices by default
 #' @param width Optional width
 #' @return A Shiny widget tag
-render_property_widget <- function(prop_name, desc, ns, iso,
-                                    override_code_name = NULL,
-                                    override_label = NULL,
-                                    override_value = NULL,
-                                    override_choices = NULL,
-                                    override_selected = NULL,
-                                    override_placeholder = NULL,
-                                    width = NULL) {
-  input_id <- ns(if (!is.null(override_code_name)) {
-    override_code_name
-  } else {
-    prop_name
-  })
-  
-  label <- if (!is.null(override_label)) {
-    override_label
-  } else {
-    make_required_label(
-      schema_get_title(desc$titles, iso, desc$name),
-      desc$required
-    )
+render_property_widget <- function(id, desc, ns, iso, label = NULL,
+                                   value = NULL, choices = NULL,
+                                   width = NULL) {
+  input_id <- ns(id)
+  label <- label %||% make_required_label(
+    schema_get_title(desc$titles, iso, desc$name), desc$required)
+  placeholder <- if (!is.null(desc$placeholders)) {
+    schema_get_title(desc$placeholders, iso, "")
   }
 
-  value <- if (!is.null(override_value)) override_value else ""
-  
-  placeholder <- if (!is.null(override_placeholder)) {
-    override_placeholder
-  } else if (!is.null(desc$placeholders)) {
-    schema_get_title(desc$placeholders, iso, "")
-  } else {
-    NULL
-  }
-  
-  wtype <- desc$type
-  extra_args <- list()
-  if (!is.null(width)) extra_args$width <- width
-  
-  if (wtype == "selectInput") {
-    choices <- if (!is.null(override_choices)) {
-      override_choices
-    } else {
-      schema_get_choices(desc$choices, iso)
-    }
-    if (is.null(choices)) choices <- stats::setNames("", "")
-    selected <- override_selected
-    
-    do.call(selectInput, c(list(
-      inputId = input_id,
-      label = label,
-      choices = choices,
-      selected = selected
-    ), extra_args))
-    
-  } else if (wtype == "numericInput") {
-    num_val <- if (is.numeric(override_value)) override_value else NA
-    num_min <- if (!is.null(desc$minimum)) desc$minimum else NA
-    num_max <- if (!is.null(desc$maximum)) desc$maximum else NA
-    
-    do.call(numericInput, c(list(
-      inputId = input_id,
-      label = label,
-      value = num_val,
-      min = num_min,
-      max = num_max,
-      step = if (isTRUE(desc$is_integer)) 1 else "any"
-    ), extra_args))
-    
-  } else if (wtype == "dateInput") {
-    date_val <- if (!is.null(override_value) && nchar(override_value) > 0) {
-      tryCatch(as.Date(override_value), error = function(e) Sys.Date())
+  if (desc$type == "selectInput") {
+    choices <- choices %||% schema_get_choices(desc$choices, iso) %||%
+      stats::setNames("", "")
+    selectInput(input_id, label = label, choices = choices, selected = value,
+                width = width)
+  } else if (desc$type == "numericInput") {
+    numericInput(input_id, label = label,
+                 value = if (is.numeric(value)) value else NA,
+                 min = desc$minimum %||% NA, max = desc$maximum %||% NA,
+                 step = if (isTRUE(desc$is_integer)) 1 else "any",
+                 width = width)
+  } else if (desc$type == "dateInput") {
+    date_val <- if (isTruthy(value)) {
+      tryCatch(as.Date(value), error = function(e) Sys.Date())
     } else {
       Sys.Date()
     }
-    
-    do.call(dateInput, c(list(
-      inputId = input_id,
-      label = label,
-      value = date_val,
-      format = "dd/mm/yyyy",
-      max = Sys.Date(),
-      weekstart = 1
-    ), extra_args))
-    
-  } else if (wtype == "textAreaInput") {
-    do.call(textAreaInput, c(list(
-      inputId = input_id,
-      label = label,
-      value = value,
-      resize = "vertical",
-      placeholder = placeholder
-    ), extra_args))
-    
-  } else if (wtype == "textInput") {
-    do.call(textInput, c(list(
-      inputId = input_id,
-      label = label,
-      value = value,
-      placeholder = placeholder
-    ), extra_args))
-    
+    dateInput(input_id, label = label, value = date_val, format = "dd/mm/yyyy",
+              max = Sys.Date(), weekstart = 1, width = width)
+  } else if (desc$type == "textAreaInput") {
+    textAreaInput(input_id, label = label, value = value %||% "",
+                  resize = "vertical", placeholder = placeholder,
+                  width = width)
   } else {
-    # Fallback
-    textInput(inputId = input_id, label = label, value = value)
+    textInput(input_id, label = label, value = value %||% "",
+              placeholder = placeholder, width = width)
   }
 }
 
@@ -300,9 +216,8 @@ schema_table_id <- function(desc) {
 #' @param desc Property descriptor
 #' @param iso ISO language code
 #' @param input The input of the session, to keep the current selection
-#' @param override_choices Optional choices (e.g. for a subtype discriminator)
-update_schema_widget <- function(session, desc, iso, input,
-                                 override_choices = NULL) {
+#' @param choices Optional choices (e.g. for a subtype discriminator)
+update_schema_widget <- function(session, desc, iso, input, choices = NULL) {
   id <- desc$id
   label <- make_required_label(
     schema_get_title(desc$titles, iso, desc$name),
@@ -313,7 +228,7 @@ update_schema_widget <- function(session, desc, iso, input,
   }
   
   if (desc$type == "selectInput") {
-    choices <- override_choices %||% schema_get_choices(desc$choices, iso)
+    choices <- choices %||% schema_get_choices(desc$choices, iso)
     updateSelectInput(session, id, label = label, choices = choices,
                       selected = input[[id]])
   } else if (desc$type == "numericInput") {
@@ -336,9 +251,7 @@ build_event_type_choices <- function(schema, iso) {
   labels <- vapply(schema$event_type_choices, function(titles) {
     schema_get_title(titles, iso, "")
   }, character(1))
-  result <- c("", values)
-  names(result) <- c("", labels)
-  result
+  stats::setNames(c("", values), c("", labels))
 }
 
 #' Build subtype selectInput choices
@@ -352,9 +265,7 @@ build_subtype_choices <- function(event_entry, iso) {
   labels <- vapply(subtypes, function(s) {
     schema_get_title(s$titles, iso, s$const)
   }, character(1))
-  result <- c("", values)
-  names(result) <- c("", labels)
-  result
+  stats::setNames(c("", values), c("", labels))
 }
 
 #' Update a schema-driven widget value (for populating forms)
@@ -362,7 +273,6 @@ build_subtype_choices <- function(event_entry, iso) {
 #' @param desc Property descriptor
 #' @param value The value to set. NULL clears the widget
 update_schema_value <- function(session, desc, value) {
-  if (is.null(desc)) return()
   id <- desc$id
   if (is.atomic(value) && all(is_missing_value(value))) value <- NULL
   

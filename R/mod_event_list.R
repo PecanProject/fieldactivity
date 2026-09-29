@@ -254,23 +254,12 @@ mod_event_list_server <- function(id, events, language, site) {
       # if we are only looking at a specific event type, show columns
       # appropriate to it
       if (input$event_list_activity_filter != "activity_choice_all") {
-        hidden_widget_types <- c("textOutput", "dataTable", "fileInput", 
-                                 "actionButton")
-        # Use schema registry to get event-specific property names
-        event_type <- input$event_list_activity_filter
-        event_entry <- mgmt_schema$event_registry[[event_type]]
-        if (!is.null(event_entry)) {
-          activity_variables <- character(0)
-          for (pn in event_entry$property_names) {
-            desc <- lookup_property(mgmt_schema$property_registry, pn, 
-                                    event_type)
-            if (is.null(desc)) next
-            if (desc$type %in% c("const", "dataTable")) next
-            activity_variables <- c(activity_variables, pn)
-          }
-        } else {
-          activity_variables <- character(0)
-        }
+        # tables and files are not shown in the event list
+        activity_fields <- Filter(
+          function(desc) !desc$type %in% c("dataTable", "fileInput"),
+          get_relevant_fields(mgmt_schema, input$event_list_activity_filter))
+        activity_variables <- vapply(activity_fields, function(desc) desc$name,
+                                     character(1))
         table_variables <- c(table_variables, activity_variables)
       }
       
@@ -288,9 +277,10 @@ mod_event_list_server <- function(id, events, language, site) {
       # filter by activity type
       if (input$event_list_activity_filter != "activity_choice_all") {
         event_list <- rlapply(event_list, fun = function(x)
-          if (!is.null(x$mgmt_operations_event) && x$mgmt_operations_event == input$event_list_activity_filter) {x})
+          if (identical(x$mgmt_operations_event,
+                        input$event_list_activity_filter)) {x})
       }
-
+      
       # filter by year
       if (input$event_list_year_filter != "year_choice_all") {
         event_list <- rlapply(event_list, fun = function(x) {

@@ -5,21 +5,18 @@
 \title{Render a single Shiny input widget from a property descriptor}
 \usage{
 render_property_widget(
-  prop_name,
+  id,
   desc,
   ns,
   iso,
-  override_code_name = NULL,
-  override_label = NULL,
-  override_value = NULL,
-  override_choices = NULL,
-  override_selected = NULL,
-  override_placeholder = NULL,
+  label = NULL,
+  value = NULL,
+  choices = NULL,
   width = NULL
 )
 }
 \arguments{
-\item{prop_name}{Input ID of the widget (desc$id for form fields)}
+\item{id}{Input ID of the widget (desc$id for form fields)}
 
 \item{desc}{Property descriptor from the registry}
 
@@ -27,17 +24,11 @@ render_property_widget(
 
 \item{iso}{ISO language code}
 
-\item{override_code_name}{Optional code name override (for table cells)}
+\item{label}{Optional label, the property title by default}
 
-\item{override_label}{Optional label override}
+\item{value}{Optional initial value (the selected value of a selectInput)}
 
-\item{override_value}{Optional value override}
-
-\item{override_choices}{Optional choices override}
-
-\item{override_selected}{Optional selected value override}
-
-\item{override_placeholder}{Optional placeholder override}
+\item{choices}{Optional choices, the property's choices by default}
 
 \item{width}{Optional width}
 }

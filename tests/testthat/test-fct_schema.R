@@ -117,8 +117,7 @@ test_that("build_property_descriptor builds array_columns for dataTable", {
   )
   desc <- build_property_descriptor("my_table", prop,
                                      required = FALSE,
-                                     event_type = "planting",
-                                     is_array_item = FALSE)
+                                     event_type = "planting")
   expect_equal(desc$type, "dataTable")
   expect_length(desc$array_columns, 2)
   expect_equal(desc$array_columns$col_a$type, "textInput")

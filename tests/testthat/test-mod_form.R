@@ -65,17 +65,17 @@ test_that("the date is required only when the event type requires it", {
 test_that("keys the form doesn't know about are kept when saving", {
   testServer(mod_form_server, args = form_module_args(), {
     set_values(list(mgmt_operations_event = "weeding", date = "2022-06-01",
-                    canopeo_image = "canopeo_image/image.jpg"))
+                    weeding_tool = "hoe"))
     session$flushReact()
     session$setInputs(mgmt_operations_event = "weeding", block = "0",
                       date = as.Date("2022-06-01"))
 
-    expect_equal(form_data()$canopeo_image, "canopeo_image/image.jpg")
+    expect_equal(form_data()$weeding_tool, "hoe")
 
     # a new event doesn't inherit them
     reset_values(TRUE)
     session$flushReact()
-    expect_null(form_data()$canopeo_image)
+    expect_null(form_data()$weeding_tool)
   })
 })
 
@@ -113,5 +113,29 @@ test_that("table rows are saved nested under the array property", {
     expect_equal(event$harvest_list,
                  list(list(harvest_crop = "ZZ1", harvest_method = "HM008")))
     expect_null(event$harvest_crop)
+  })
+})
+
+test_that("the image of the edited event is passed on for saving", {
+  testServer(mod_form_server, args = form_module_args(), {
+    init_signal(TRUE)
+    set_values(list(mgmt_operations_event = "observation",
+                    observation_type = "observation_type_vegetation",
+                    date = "2022-06-01",
+                    canopeo_image = "canopeo_image/image.jpg"))
+    session$flushReact()
+    session$setInputs(mgmt_operations_event = "observation", block = "0",
+                      date = as.Date("2022-06-01"))
+    set_field(session, field_id("observation_type", "observation"),
+              "observation_type_vegetation")
+
+    # the main app moves the file if needed and saves its path
+    expect_equal(form_data()$canopeo_image,
+                 list(filepath = "canopeo_image/image.jpg", new_file = FALSE))
+
+    # a new event has no image
+    reset_values(TRUE)
+    session$flushReact()
+    expect_null(form_data()$canopeo_image$filepath)
   })
 })

@@ -11,7 +11,7 @@ table_module_args <- function(override_values) {
 
 test_that("table is prefilled with one row per item", {
   override_values <- reactiveVal()
-  testServer(mod_table_server_schema, args = table_module_args(override_values), {
+  testServer(mod_table_server, args = table_module_args(override_values), {
     override_values(list(list(harvest_crop = "ZZ1", harvest_method = "HM008"),
                          list(harvest_crop = "BAR")))
     session$flushReact()
@@ -26,7 +26,7 @@ test_that("table is prefilled with one row per item", {
 
 test_that("removing a row keeps the other rows and validates them by position", {
   override_values <- reactiveVal()
-  testServer(mod_table_server_schema, args = table_module_args(override_values), {
+  testServer(mod_table_server, args = table_module_args(override_values), {
     override_values(list(list(), list()))
     session$flushReact()
     session$setInputs(rendered = TRUE, harvest_crop_1 = "ZZ1",

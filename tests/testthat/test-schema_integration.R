@@ -51,6 +51,21 @@ test_that("a table inside a subtype is registered under the subtype", {
   expect_equal(schema_table_id(desc), paste0(key, "_table"))
 })
 
+test_that("image fields are file uploads of their observation subtype", {
+  pr <- mgmt_schema$property_registry
+  soil <- lookup_property(pr, "soil_image", "observation",
+                          "observation_type_soil")
+  canopeo <- lookup_property(pr, "canopeo_image", "observation",
+                             "observation_type_vegetation")
+  expect_equal(soil$type, "fileInput")
+  expect_equal(canopeo$type, "fileInput")
+  expect_setequal(fileInput_code_names, c("soil_image", "canopeo_image"))
+
+  html <- as.character(render_field(canopeo, NS("form"), "fi"))
+  expect_match(html, "Canopeo-kuva", fixed = TRUE)
+  expect_match(html, 'accept="image/*"', fixed = TRUE)
+})
+
 test_that("a date field without a value is cleared", {
   # updateDateInput ignores a NULL value, so the widget must be sent null
   sent <- list()

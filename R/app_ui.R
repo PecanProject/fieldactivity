@@ -101,3 +101,4 @@ golem_add_external_resources <- function(){
     shinyjs::useShinyjs(),  # enable shinyjs
   )
 }
+

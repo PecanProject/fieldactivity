@@ -12,5 +12,5 @@ The lookup list.
 \description{
 Build a list where the names are the code names of UI elements
 and the values are the corresponding element structures (lists) found in 
-ui_structure.json. Now only contains app chrome elements.
+ui_structure.json (the app chrome, the event form is built from the schema).
 }

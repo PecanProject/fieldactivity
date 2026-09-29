@@ -4,7 +4,7 @@
 \alias{build_property_descriptor}
 \title{Build a property descriptor for the property registry}
 \usage{
-build_property_descriptor(name, prop, required, event_type, is_array_item)
+build_property_descriptor(name, prop, required, event_type)
 }
 \arguments{
 \item{name}{Property name (used as input ID)}
@@ -14,8 +14,6 @@ build_property_descriptor(name, prop, required, event_type, is_array_item)
 \item{required}{Whether this property is required}
 
 \item{event_type}{The event type this property belongs to}
-
-\item{is_array_item}{Whether this property is inside an array items}
 }
 \value{
 A named list describing the property

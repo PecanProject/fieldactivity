@@ -54,40 +54,15 @@ mod_table_ui <- function(id) {
     br()
   )
 }
-
-# -- Helpers for mod_table_server_schema ------------------------------------
-
+    
 #' Build a single table cell widget as an HTML string
 #' @noRd
-build_schema_cell_widget <- function(variable, col_desc, ns, iso,
-                                      current_row, value) {
-  code_name <- paste(variable, current_row, sep = "_")
-
-  if (!isTruthy(value) || identical(value, missingval)) value <- ""
-
-  choices <- NULL
-  if (identical(col_desc$type, "selectInput")) {
-    choices <- schema_get_choices(col_desc$choices, iso)
-  }
-
-  placeholder <- NULL
-  if (!is.null(col_desc$placeholders)) {
-    placeholder <- schema_get_title(col_desc$placeholders, iso, "")
-  }
-
+build_cell_widget <- function(code_name, col_desc, ns, iso, value) {
+  if (!isTruthy(value)) value <- ""
   width <- if (col_desc$type == "numericInput") 100 else NULL
-
-  widget_html <- as.character(
-    render_property_widget(variable, col_desc, ns, iso,
-                            override_code_name = code_name,
-                            override_label = "",
-                            override_value = value,
-                            override_choices = choices,
-                            override_selected = value,
-                            override_placeholder = placeholder,
-                            width = width))
-
-  list(html = widget_html, code_name = code_name)
+  as.character(render_property_widget(code_name, col_desc, ns, iso,
+                                      label = "", value = value,
+                                      width = width))
 }
 
 #' Build a remove-row button as an HTML string
@@ -110,7 +85,7 @@ build_remove_row_button <- function(ns, iso, row_idx, can_remove) {
   )
 }
 
-#' Schema-driven table server module
+#' Table server module
 #'
 #' @param id Module ID (must match the table_id used in render_array_table)
 #' @param desc The property descriptor for the array
@@ -122,52 +97,40 @@ build_remove_row_button <- function(ns, iso, row_idx, can_remove) {
 #'   table contents as a list of rows (named lists keyed by column name)
 #' @import shinyvalidate
 #' @noRd
-mod_table_server_schema <- function(id, desc, language, override_values) {
-
+mod_table_server <- function(id, desc, language, override_values) {
+  
   stopifnot(is.reactive(language))
   stopifnot(is.reactive(override_values))
-
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
     columns <- desc$array_columns
     if (is.null(columns)) return(list(values = reactiveVal(list()),
                                        valid = reactive(TRUE)))
 
     column_names <- names(columns)
     action_column_name <- "..remove_row.."
-
+    
     iv <- InputValidator$new()
     iv$enable()
     rules_added <- NULL
-
-    add_schema_validation_rules <- function(widgets, variables) {
-      lapply(seq_along(widgets), FUN = function(i) {
-        widget_name <- widgets[i]
-        col_desc <- columns[[variables[i]]]
-
-        if (widget_name %in% rules_added) return()
-
-        # Extract the row number from the widget name (e.g. "crop_name_2" -> 2)
-        row_num <- as.integer(sub(paste0("^", variables[i], "_"), "", widget_name))
-
-        child_iv <- field_validator(col_desc, widget_name)
-        if (is.null(child_iv)) return()
-
-        # Only validate when this row is displayed. Widgets are numbered by
-        # display position, so compare with the number of rows rather than
-        # with the (stable) row ids
-        local({
-          local_row <- row_num
-          child_iv$condition(reactive({
-            local_row <= length(dynamic_rows())
-          }))
-        })
-        iv$add_validator(child_iv)
-      })
-      rules_added <<- c(rules_added, widgets)
-    }
-
+        
+    add_validation_rule <- function(widget_name, col_desc, row_number) {
+      force(row_number)
+      if (widget_name %in% rules_added) return()
+      rules_added <<- c(rules_added, widget_name)
+        
+      child_iv <- field_validator(col_desc, widget_name)
+      if (is.null(child_iv)) return()
+        
+      # Only validate when this row is displayed. Widgets are numbered by
+      # display position, so compare with the number of rows rather than
+      # with the (stable) row ids
+      child_iv$condition(reactive(row_number <= length(dynamic_rows())))
+      iv$add_validator(child_iv)
+        }
+        
     n_cols <- length(column_names)
     # the latest entered rows and their dynamic row ids, used to keep the
     # entered values when the table is re-rendered
@@ -175,14 +138,11 @@ mod_table_server_schema <- function(id, desc, language, override_values) {
     table_values <- reactiveVal()
     rendered <- reactiveVal(FALSE)
     dynamic_rows <- reactiveVal()
-
+        
     observeEvent(input$rendered, { rendered(TRUE) })
 
-    visible <- reactive({
-      rows <- dynamic_rows()
-      !is.null(rows) && length(rows) > 0
-    })
-
+    visible <- reactive(length(dynamic_rows()) > 0)
+    
     observeEvent(visible(), ignoreNULL = FALSE, ignoreInit = TRUE,
                  priority = 1, {
       if (!visible()) {
@@ -190,10 +150,10 @@ mod_table_server_schema <- function(id, desc, language, override_values) {
         old_values(list())
       }
     })
-
+    
     override_trigger <- reactiveVal(0)
     row_trigger <- reactiveVal(0)
-
+    
     observeEvent(override_values(), {
       values <- override_values()
       if (is.null(values)) return()
@@ -201,7 +161,7 @@ mod_table_server_schema <- function(id, desc, language, override_values) {
       dynamic_rows(if (length(values) > 0) seq_along(values) else 1L)
       override_trigger(override_trigger() + 1)
     })
-
+    
     # Initialize with one row when first accessed (no override data)
     observe({
       if (is.null(dynamic_rows())) {
@@ -212,24 +172,23 @@ mod_table_server_schema <- function(id, desc, language, override_values) {
     # Add row handler
     observeEvent(input$add_row, {
       current <- dynamic_rows()
-      if (is.null(current) || length(current) == 0) {
+      if (length(current) == 0) {
         dynamic_rows(1L)
       } else {
         dynamic_rows(c(current, max(current) + 1L))
       }
-      row_trigger(row_trigger() + 1)
+        row_trigger(row_trigger() + 1)
     })
-
+    
     # Remove a specific row while keeping stable row ids.
     observeEvent(input$remove_row_index, {
       current <- dynamic_rows()
       row_id <- input$remove_row_index
-      if (is.null(current) || length(current) <= 1) return()
-      if (is.null(row_id) || !(row_id %in% current)) return()
+      if (length(current) <= 1 || !(row_id %in% current)) return()
       dynamic_rows(current[current != row_id])
       row_trigger(row_trigger() + 1)
     })
-
+    
     # Update button labels on language change
     observeEvent(language(), {
       iso <- lang_to_iso(language())
@@ -246,32 +205,28 @@ mod_table_server_schema <- function(id, desc, language, override_values) {
       req(isolate(rendered()))
       session$sendCustomMessage("unbind-table", ns("table"))
     })
-
-    # Sum calculation for schema tables is handled by the parent form module's
-    # auto-sum observer, not inside the table module itself.
-
+    
     table_data <- reactive({
       override_trigger()
       row_trigger()
-
+      
       iso <- lang_to_iso(language())
       override_vals <- isolate(override_values())
       do_override <- !is.null(override_vals)
-
+      
       table_to_display <- data.frame(
         matrix("", nrow = 0, ncol = n_cols + 1L),
         stringsAsFactors = FALSE
       )
       names(table_to_display) <- c(column_names, action_column_name)
-
+      
       if (do_override && identical(override_vals, list())) {
-        override_values(NULL)
-        do_override <- FALSE
-        old_values(list())
-      }
+          override_values(NULL)
+          do_override <- FALSE
+          old_values(list())
+        }
 
       rows <- isolate(dynamic_rows())
-      if (is.null(rows) || length(rows) == 0) rows <- integer(0)
       can_remove_rows <- length(rows) > 1L
 
       current_row <- 1
@@ -285,52 +240,52 @@ mod_table_server_schema <- function(id, desc, language, override_values) {
             old <- isolate(old_values())
             old_row_number <- match(row_idx, old$row_ids)
             if (!is.na(old_row_number)) old$rows[[old_row_number]][[variable]]
-          }
-
-          cell <- build_schema_cell_widget(variable, col_desc, ns, iso,
-                                            current_row, value)
-          add_schema_validation_rules(cell$code_name, variable)
-          table_to_display[current_row, variable] <- cell$html
-        }
-
+      }
+      
+          code_name <- paste(variable, current_row, sep = "_")
+          add_validation_rule(code_name, col_desc, current_row)
+          table_to_display[current_row, variable] <-
+            build_cell_widget(code_name, col_desc, ns, iso, value)
+            }
+            
         table_to_display[current_row, action_column_name] <-
           build_remove_row_button(ns, iso, row_idx, can_remove_rows)
-
+            
         rownames(table_to_display)[current_row] <- as.character(row_idx)
-        current_row <- current_row + 1
-      }
-
+            current_row <- current_row + 1
+          }
+          
       override_values(NULL)
       table_to_display
     })
-
+    
     output$table <- DT::renderDataTable({
       req(visible())
       rendered(FALSE)
       table_to_display <- table_data()
-
+      
       if (nrow(table_to_display) == 0) return()
-
+      
       iso <- lang_to_iso(language())
       # full titles, as they include the unit
       col_labels <- vapply(column_names, function(cn) {
         schema_get_title(columns[[cn]]$titles, iso, cn)
       }, character(1))
       names(table_to_display) <- c(col_labels, "")
-
-      table_to_display <-
+      
+      table_to_display <- 
         DT::datatable(
-          table_to_display,
+          table_to_display, 
           escape = FALSE,
           selection = "none",
           class = "table table-hover",
           rownames = FALSE,
-          options =
+          options = 
             list(dom = "t",
                  ordering = FALSE,
                  autoWidth = FALSE,
                  drawCallback = htmlwidgets::JS(js_bind_script),
-                 initComplete =
+                 initComplete = 
                    htmlwidgets::JS(paste0(
                      "function(settings, json) {",
                      "do_selectize('", ns("table"), "'); ",
@@ -345,23 +300,23 @@ mod_table_server_schema <- function(id, desc, language, override_values) {
                    )
                  )
             ))
-      table_to_display
+        table_to_display
     }, server = FALSE)
-
+    
     observe({
       if (!rendered()) {
         table_values(list())
         return()
       }
-
+      
       table_data()
-
+      
       rows <- dynamic_rows()
-      if (is.null(rows) || length(rows) == 0) {
+      if (length(rows) == 0) {
         table_values(list())
         return()
       }
-
+      
       # widgets are numbered by display position, not by dynamic row id
       row_values <- lapply(seq_along(rows), function(row_number) {
         row <- lapply(column_names, function(variable) {
@@ -369,15 +324,18 @@ mod_table_server_schema <- function(id, desc, language, override_values) {
         })
         names(row) <- column_names
         row
-      })
-
+    })
+    
       table_values(row_values)
       old_values(list(rows = row_values, row_ids = rows))
     })
-
+    
     list(
       values = table_values,
       valid = reactive(iv$is_valid())
     )
+    
   })
+    
 }
+

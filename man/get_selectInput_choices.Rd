@@ -9,7 +9,8 @@ get_selectInput_choices(selectInput_code_name, language)
 \arguments{
 \item{selectInput_code_name}{The code name of the selectInput}
 
-\item{language}{The language to show the options in.}
+\item{language}{The language to show the options in. This will be passed to
+get_disp_name}
 }
 \value{
 A vector of choices (code names). If language was supplied, the names

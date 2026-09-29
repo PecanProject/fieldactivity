@@ -100,65 +100,30 @@ replace_with_display_names <- function(events_with_code_names, language) {
   iso <- lang_to_iso(language)
   
   for (variable_name in names(events_with_code_names)) {
-    # First check structure_lookup_list (app chrome elements)
+    # determine the type of element the variable corresponds to: an app
+    # chrome element or a schema property
     element <- structure_lookup_list[[variable_name]]
+    desc <- if (is.null(element$type)) {
+      find_property_by_name(mgmt_schema, variable_name)
+    }
+    type <- element$type %||% desc$type
     
-    # If not in structure_lookup_list, try schema property registry
-    if (is.null(element$type)) {
-      desc <- find_property_by_name(mgmt_schema, variable_name)
-      if (!is.null(desc)) {
-        wtype <- desc$type
-        if (wtype == "selectInput") {
-          events_with_display_names[[variable_name]] <-
-            sapply(events_with_code_names[[variable_name]],
-                   FUN = function(x) {
-                     if (is.null(x) || identical(x, missingval)) return("")
-                     # Try schema choices first
-                     if (!is.null(desc$choices)) {
-                       for (ch in desc$choices) {
-                         if (identical(ch$value, x)) {
-                           return(schema_get_title(ch$titles, iso, x))
-                         }
-                       }
-                     }
-                     # Try display_names.csv
-                     name <- get_disp_name(x, language = language)
-                     if (length(name) > 1) {
-                       name <- paste(ifelse(name == "", "-", name), 
-                                     collapse = ", ")
-                     }
-                     name
-                   })
-        } else if (wtype %in% c("textAreaInput", "textInput", "numericInput")) {
-          events_with_display_names[[variable_name]] <-
-            sapply(events_with_code_names[[variable_name]],
-                   FUN = function(x) {
-                     if (length(x) > 1) {
-                       paste(ifelse(x == missingval, "-", x), collapse = ", ")
-                     } else {
-                       ifelse(x == missingval, "", x)
-                     }
-                   })
-        } else if (wtype == "dateInput") {
-          events_with_display_names[[variable_name]] <-
-            sapply(events_with_code_names[[variable_name]], 
-                   FUN = function(x) { 
-                     paste(format(as.Date(x, format = date_format_json), 
-                                  date_format_display),
-                           collapse = " - ")
-                   })
-        }
-        next
-      }
+    if (is.null(type)) {
+      # this could be e.g. the date_ordering or event column
       next
     }
-
-    if (element$type == "selectInput") {
+    
+    if (type == "selectInput") {
       # the pasting is done to ensure we get a nicely formatted name
       # when x is a character vector
       events_with_display_names[[variable_name]] <-
         sapply(events_with_code_names[[variable_name]],
                FUN = function(x) {
+                 choice <- Find(function(ch) identical(ch$value, x),
+                                desc$choices)
+                 if (!is.null(choice)) {
+                   return(schema_get_title(choice$titles, iso, x))
+                 }
                  name <- get_disp_name(x, language = language)
                  if (length(name) > 1) {
                    name <- paste(ifelse(name=="", "-", name), 
@@ -166,7 +131,7 @@ replace_with_display_names <- function(events_with_code_names, language) {
                  }
                  name
                })
-    } else if (element$type %in% 
+    } else if (type %in% 
                c("textAreaInput", "textInput", "numericInput")) {
       events_with_display_names[[variable_name]] <-
         sapply(events_with_code_names[[variable_name]],
@@ -178,7 +143,7 @@ replace_with_display_names <- function(events_with_code_names, language) {
                    ifelse(x==missingval,"",x)
                  }
                })
-    } else if (element$type %in% c("dateInput", "dateRangeInput")) {
+    } else if (type %in% c("dateInput", "dateRangeInput")) {
       events_with_display_names[[variable_name]] <-
         sapply(events_with_code_names[[variable_name]], 
                FUN = function(x) { 
