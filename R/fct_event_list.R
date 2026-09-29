@@ -100,8 +100,7 @@ get_event_list_colnames <- function(col_names, language) {
     if (!identical(dn, cn)) return(dn)
     
     # Try schema property titles
-    desc <- find_any_property_desc(mgmt_schema$property_registry, cn,
-                                    mgmt_schema$property_reverse_index)
+    desc <- find_property_by_name(mgmt_schema, cn)
     if (!is.null(desc) && !is.null(desc$titles)) {
       title <- schema_get_title(desc$titles, iso, "")
       if (nchar(title) > 0) return(title)

@@ -4,12 +4,10 @@
 \alias{render_array_table}
 \title{Render a schema array property as a table module placeholder}
 \usage{
-render_array_table(prop_name, desc, ns, iso)
+render_array_table(desc, ns, iso)
 }
 \arguments{
-\item{prop_name}{The array property name (e.g. "planting_list")}
-
-\item{desc}{The property descriptor}
+\item{desc}{The property descriptor of the array (e.g. planting_list)}
 
 \item{ns}{Namespace function}
 

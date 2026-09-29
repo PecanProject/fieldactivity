@@ -4,7 +4,7 @@
 \alias{render_subtype_section}
 \title{Render a subtype discriminator and its conditional panels}
 \usage{
-render_subtype_section(pn, desc, event_entry, pr, ns, iso, event_const)
+render_subtype_section(desc, event_entry, pr, ns, iso, event_const)
 }
 \description{
 Render a subtype discriminator and its conditional panels

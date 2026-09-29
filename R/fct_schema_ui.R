@@ -20,6 +20,39 @@ convert_condition_to_js <- function(condition, ns) {
        perl = TRUE)
 }
 
+#' Build the validator for a schema-driven widget
+#'
+#' Rules come from the property descriptor: required, minimum, maximum and
+#' whole numbers. An empty optional widget skips the other rules.
+#' @param desc Property descriptor
+#' @param id Input ID of the widget
+#' @return An InputValidator, or NULL if the property has no rules
+#' @import shinyvalidate
+field_validator <- function(desc, id = desc$id) {
+  rules <- list()
+  if (!is.null(desc$minimum)) {
+    rules <- c(rules, sv_gte(desc$minimum, message_fmt = "Must be >= {rhs}"))
+  }
+  if (!is.null(desc$maximum)) {
+    rules <- c(rules, sv_lte(desc$maximum, message_fmt = "Must be <= {rhs}"))
+  }
+  if (isTRUE(desc$is_integer)) {
+    rules <- c(rules, function(value) {
+      if (value != floor(value)) "Must be a whole number"
+    })
+  }
+  if (!isTRUE(desc$required) && length(rules) == 0) return(NULL)
+  
+  iv <- InputValidator$new()
+  if (isTRUE(desc$required)) {
+    iv$add_rule(id, sv_required(message = "Required"))
+  } else {
+    iv$add_rule(id, sv_optional())
+  }
+  for (rule in rules) iv$add_rule(id, rule)
+  iv
+}
+
 #' Render the full schema-driven form
 #' @param schema The loaded schema (from load_schema)
 #' @param ns Shiny namespace function
@@ -60,17 +93,17 @@ render_event_panel <- function(event_entry, pr, ns, iso, event_const) {
     if (desc$type == "const") next
     
     if (desc$type == "dataTable") {
-      w <- render_array_table(pn, desc, ns, iso)
+      w <- render_array_table(desc, ns, iso)
     } else if (desc$is_discriminator && event_entry$has_subtypes) {
-      w <- render_subtype_section(pn, desc, event_entry, pr, ns, iso,
+      w <- render_subtype_section(desc, event_entry, pr, ns, iso,
                                    event_const)
     } else {
-      w <- render_property_widget(pn, desc, ns, iso)
+      w <- render_property_widget(desc$id, desc, ns, iso)
     }
     # Wrap in conditionalPanel if x-ui condition is defined
-    if (!is.null(desc$xui$condition)) {
+    if (!is.null(desc$condition)) {
       w <- conditionalPanel(
-        condition = convert_condition_to_js(desc$xui$condition, ns), w)
+        condition = convert_condition_to_js(desc$condition, ns), w)
     }
     widgets[[length(widgets) + 1]] <- w
   }
@@ -79,11 +112,11 @@ render_event_panel <- function(event_entry, pr, ns, iso, event_const) {
 }
 
 #' Render a subtype discriminator and its conditional panels
-render_subtype_section <- function(pn, desc, event_entry, pr, ns, iso, 
+render_subtype_section <- function(desc, event_entry, pr, ns, iso, 
                                     event_const) {
   # Render the discriminator selectInput with subtype choices
   subtype_choices <- build_subtype_choices(event_entry, iso)
-  discriminator_widget <- render_property_widget(pn, desc, ns, iso,
+  discriminator_widget <- render_property_widget(desc$id, desc, ns, iso,
                                                   override_choices = subtype_choices)
   
   # Build subtype conditional panels
@@ -97,18 +130,18 @@ render_subtype_section <- function(pn, desc, event_entry, pr, ns, iso,
       if (sdesc$type == "const") next
       
       if (sdesc$type == "dataTable") {
-        sw <- render_array_table(spn, sdesc, ns, iso)
+        sw <- render_array_table(sdesc, ns, iso)
       } else {
-        sw <- render_property_widget(spn, sdesc, ns, iso)
+        sw <- render_property_widget(sdesc$id, sdesc, ns, iso)
       }
-      if (!is.null(sdesc$xui$condition)) {
+      if (!is.null(sdesc$condition)) {
         sw <- conditionalPanel(
-          condition = convert_condition_to_js(sdesc$xui$condition, ns), sw)
+          condition = convert_condition_to_js(sdesc$condition, ns), sw)
       }
       sub_widgets[[length(sub_widgets) + 1]] <- sw
     }
     
-    condition <- paste0("input['", ns(pn), "'] == '", sub_const, "'")
+    condition <- paste0("input['", ns(desc$id), "'] == '", sub_const, "'")
     conditionalPanel(condition = condition, tagList(sub_widgets))
   })
   
@@ -116,7 +149,7 @@ render_subtype_section <- function(pn, desc, event_entry, pr, ns, iso,
 }
 
 #' Render a single Shiny input widget from a property descriptor
-#' @param prop_name Property name (used as input ID)
+#' @param prop_name Input ID of the widget (desc$id for form fields)
 #' @param desc Property descriptor from the registry
 #' @param ns Namespace function
 #' @param iso ISO language code
@@ -146,7 +179,7 @@ render_property_widget <- function(prop_name, desc, ns, iso,
     override_label
   } else {
     make_required_label(
-      schema_get_title(desc$titles, iso, prop_name),
+      schema_get_title(desc$titles, iso, desc$name),
       desc$required
     )
   }
@@ -235,15 +268,14 @@ render_property_widget <- function(prop_name, desc, ns, iso,
 }
 
 #' Render a schema array property as a table module placeholder
-#' @param prop_name The array property name (e.g. "planting_list")
-#' @param desc The property descriptor
+#' @param desc The property descriptor of the array (e.g. planting_list)
 #' @param ns Namespace function
 #' @param iso ISO language code
 #' @return A tagList with the table module UI
-render_array_table <- function(prop_name, desc, ns, iso) {
-  table_id <- paste0(prop_name, "_table")
+render_array_table <- function(desc, ns, iso) {
+  table_id <- schema_table_id(desc)
   table_ns <- NS(ns(table_id))
-  w <- div(
+  div(
     class = "schema-array-table",
     mod_table_ui(ns(table_id)),
     div(
@@ -254,45 +286,44 @@ render_array_table <- function(prop_name, desc, ns, iso) {
                    class = "btn-sm btn-default")
     )
   )
-  if (!is.null(desc$xui$condition)) {
-    w <- conditionalPanel(
-      condition = convert_condition_to_js(desc$xui$condition, ns), w)
-  }
-  w
+}
+
+#' Module ID of the table for an array property
+#' @param desc The property descriptor of the array
+#' @return The table module ID
+schema_table_id <- function(desc) {
+  paste0(desc$id, "_table")
 }
 
 #' Update a single schema widget's label and choices
-update_schema_widget <- function(session, prop_name, desc, iso, input) {
+#' @param session Shiny session
+#' @param desc Property descriptor
+#' @param iso ISO language code
+#' @param input The input of the session, to keep the current selection
+#' @param override_choices Optional choices (e.g. for a subtype discriminator)
+update_schema_widget <- function(session, desc, iso, input,
+                                 override_choices = NULL) {
+  id <- desc$id
   label <- make_required_label(
-    schema_get_title(desc$titles, iso, prop_name),
+    schema_get_title(desc$titles, iso, desc$name),
     desc$required
   )
+  placeholder <- if (!is.null(desc$placeholders)) {
+    schema_get_title(desc$placeholders, iso, "")
+  }
   
   if (desc$type == "selectInput") {
-    choices <- schema_get_choices(desc$choices, iso)
-    current <- input[[prop_name]]
-    if (is.null(choices)) {
-      updateSelectInput(session, prop_name, label = label, selected = current)
-    } else {
-      updateSelectInput(session, prop_name, label = label, choices = choices,
-                        selected = current)
-    }
+    choices <- override_choices %||% schema_get_choices(desc$choices, iso)
+    updateSelectInput(session, id, label = label, choices = choices,
+                      selected = input[[id]])
   } else if (desc$type == "numericInput") {
-    updateNumericInput(session, prop_name, label = label)
+    updateNumericInput(session, id, label = label)
   } else if (desc$type == "dateInput") {
-    updateDateInput(session, prop_name, label = label)
+    updateDateInput(session, id, label = label)
   } else if (desc$type == "textAreaInput") {
-    placeholder <- if (!is.null(desc$placeholders)) {
-      schema_get_title(desc$placeholders, iso, "")
-    } else { NULL }
-    updateTextAreaInput(session, prop_name, label = label, 
-                        placeholder = placeholder)
+    updateTextAreaInput(session, id, label = label, placeholder = placeholder)
   } else if (desc$type == "textInput") {
-    placeholder <- if (!is.null(desc$placeholders)) {
-      schema_get_title(desc$placeholders, iso, "")
-    } else { NULL }
-    updateTextInput(session, prop_name, label = label, 
-                    placeholder = placeholder)
+    updateTextInput(session, id, label = label, placeholder = placeholder)
   }
 }
 
@@ -328,78 +359,33 @@ build_subtype_choices <- function(event_entry, iso) {
 
 #' Update a schema-driven widget value (for populating forms)
 #' @param session Shiny session
-#' @param prop_name Property name
 #' @param desc Property descriptor
-#' @param value The value to set
-update_schema_value <- function(session, prop_name, desc, value) {
+#' @param value The value to set. NULL clears the widget
+update_schema_value <- function(session, desc, value) {
   if (is.null(desc)) return()
-  
-  # Replace missingval with empty
-  if (!is.null(value) && is.atomic(value)) {
-    value[value == missingval] <- ""
-  }
+  id <- desc$id
+  if (is.atomic(value) && all(is_missing_value(value))) value <- NULL
   
   wtype <- desc$type
   
   if (wtype == "selectInput") {
-    if (is.null(value) || identical(value, "")) {
-      updateSelectInput(session, prop_name, selected = "")
-    } else {
-      updateSelectInput(session, prop_name, selected = value)
-    }
+    updateSelectInput(session, id, selected = value %||% "")
   } else if (wtype == "numericInput") {
-    if (is.null(value) || identical(value, "") || identical(value, missingval)) {
-      updateNumericInput(session, prop_name, value = NA)
-    } else {
-      updateNumericInput(session, prop_name, value = as.numeric(value))
-    }
+    updateNumericInput(session, id,
+                       value = if (is.null(value)) NA else as.numeric(value))
   } else if (wtype == "dateInput") {
     date_val <- tryCatch(as.Date(value, format = date_format_json),
                          warning = function(cnd) NULL,
                          error = function(cnd) NULL)
-    updateDateInput(session, prop_name, value = date_val)
-  } else if (wtype == "textAreaInput") {
-    updateTextAreaInput(session, prop_name, 
-                        value = if (is.null(value)) "" else value)
-  } else if (wtype == "textInput") {
-    updateTextInput(session, prop_name, 
-                    value = if (is.null(value)) "" else value)
-  }
-}
-
-#' Clear a schema-driven widget
-clear_schema_value <- function(session, prop_name, desc) {
-  if (is.null(desc)) return()
-  wtype <- desc$type
-  
-  if (wtype == "selectInput") {
-    updateSelectInput(session, prop_name, selected = "")
-  } else if (wtype == "numericInput") {
-    updateNumericInput(session, prop_name, value = NA)
-  } else if (wtype == "dateInput") {
-    updateDateInput(session, prop_name, value = NULL)
-  } else if (wtype == "textAreaInput") {
-    updateTextAreaInput(session, prop_name, value = "")
-  } else if (wtype == "textInput") {
-    updateTextInput(session, prop_name, value = "")
-  }
-}
-
-#' Get all schema property names as a flat vector (for registry iteration)
-#' Used to find all properties that need validation, value collection, etc.
-get_all_schema_properties <- function(schema) {
-  er <- schema$event_registry
-  all_props <- schema$common_properties
-  
-  for (ec in names(er)) {
-    event_entry <- er[[ec]]
-    all_props <- c(all_props, event_entry$property_names)
-    if (event_entry$has_subtypes) {
-      for (sc in names(event_entry$subtypes)) {
-        all_props <- c(all_props, event_entry$subtypes[[sc]]$property_names)
-      }
+    if (length(date_val) != 1 || is.na(date_val)) {
+      # updateDateInput ignores NULL, a null value clears the input
+      session$sendInputMessage(id, list(value = NA))
+    } else {
+      updateDateInput(session, id, value = date_val)
     }
+  } else if (wtype == "textAreaInput") {
+    updateTextAreaInput(session, id, value = value %||% "")
+  } else if (wtype == "textInput") {
+    updateTextInput(session, id, value = value %||% "")
   }
-  
-  unique(all_props)
 }

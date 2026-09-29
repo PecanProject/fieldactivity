@@ -4,16 +4,14 @@
 \alias{update_schema_value}
 \title{Update a schema-driven widget value (for populating forms)}
 \usage{
-update_schema_value(session, prop_name, desc, value)
+update_schema_value(session, desc, value)
 }
 \arguments{
 \item{session}{Shiny session}
 
-\item{prop_name}{Property name}
-
 \item{desc}{Property descriptor}
 
-\item{value}{The value to set}
+\item{value}{The value to set. NULL clears the widget}
 }
 \description{
 Update a schema-driven widget value (for populating forms)

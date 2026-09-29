@@ -11,5 +11,8 @@ A list with components: raw (the full parsed schema), event_registry,
   property_registry, common_properties, event_type_choices
 }
 \description{
-Load and parse the management-event schema
+Every property is registered once per event type (and subtype) it appears
+in. Its registry key is also its unique input ID in the form, so a property
+shared by several event types (e.g. mgmt_event_long_notes) gets a separate
+widget per event type.
 }

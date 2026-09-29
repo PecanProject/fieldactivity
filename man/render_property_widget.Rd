@@ -19,7 +19,7 @@ render_property_widget(
 )
 }
 \arguments{
-\item{prop_name}{Property name (used as input ID)}
+\item{prop_name}{Input ID of the widget (desc$id for form fields)}
 
 \item{desc}{Property descriptor from the registry}
 

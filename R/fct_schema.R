@@ -13,6 +13,11 @@ schema_file_path <- function() {
 }
 
 #' Load and parse the management-event schema
+#'
+#' Every property is registered once per event type (and subtype) it appears
+#' in. Its registry key is also its unique input ID in the form, so a property
+#' shared by several event types (e.g. mgmt_event_long_notes) gets a separate
+#' widget per event type.
 #' @return A list with components: raw (the full parsed schema), event_registry,
 #'   property_registry, common_properties, event_type_choices
 load_schema <- function() {
@@ -123,8 +128,11 @@ load_schema <- function() {
     }
     
     # Register event-level properties (excluding mgmt_operations_event const 
-    # and properties that only belong to subtypes)
+    # and properties that only belong to subtypes). An event can redefine a
+    # common property (e.g. grazing's date is its start date); the common
+    # widget is then relabelled instead of adding a second widget.
     event_prop_names <- character(0)
+    common_overrides <- list()
     for (pn in names(event_props)) {
       if (pn == "mgmt_operations_event") next
       p <- event_props[[pn]]
@@ -138,6 +146,10 @@ load_schema <- function() {
                                          required = is_req,
                                          event_type = event_const,
                                          is_array_item = FALSE)
+      if (pn %in% common_prop_names) {
+        common_overrides[[pn]] <- desc
+        next
+      }
       # Use a unique key to avoid collision between events sharing property names
       reg_key <- paste0(pn, REGISTRY_KEY_SEP, event_const)
       property_registry[[reg_key]] <- desc
@@ -151,28 +163,51 @@ load_schema <- function() {
       required = event_required,
       has_subtypes = has_subtypes,
       subtype_discriminator = subtype_discriminator,
-      subtypes = subtype_registry
+      subtype_discriminator_id = if (!is.null(subtype_discriminator)) {
+        paste0(subtype_discriminator, REGISTRY_KEY_SEP, event_const)
+      },
+      subtypes = subtype_registry,
+      common_overrides = common_overrides
     )
   }
   
-  # Build reverse-lookup index: bare prop_name -> first matching registry key.
-  # Avoids linear scan in find_any_property_desc().
-  property_reverse_index <- list()
+  # The registry key is the property's input ID. x-ui conditions refer to
+  # other properties by name, so point them at the IDs in the same event type.
   for (key in names(property_registry)) {
-    bare_name <- sub(paste0(REGISTRY_KEY_SEP, ".*"), "", key)
-    if (is.null(property_reverse_index[[bare_name]])) {
-      property_reverse_index[[bare_name]] <- key
+    desc <- property_registry[[key]]
+    desc$id <- key
+    if (!is.null(desc$xui$condition)) {
+      desc$condition <- condition_to_field_ids(
+        desc$xui$condition, property_registry, desc$event_type, desc$subtype)
     }
+    property_registry[[key]] <- desc
   }
 
   list(
     raw = raw,
     event_registry = event_registry,
     property_registry = property_registry,
-    property_reverse_index = property_reverse_index,
     common_properties = common_prop_names,
     event_type_choices = event_type_choices
   )
+}
+
+#' Point the input references of an x-ui condition at field IDs
+#' @param condition A condition such as "input.chemical_type == 'x'"
+#' @param registry The property registry
+#' @param event_type Event type of the property the condition belongs to
+#' @param subtype Subtype of that property (or NULL)
+#' @return The condition with each input.name replaced by input.id
+condition_to_field_ids <- function(condition, registry, event_type, subtype) {
+  names_used <- unique(regmatches(
+    condition, gregexpr("(?<=input\\.)\\w+", condition, perl = TRUE))[[1]])
+  for (name in names_used) {
+    key <- lookup_property_key(registry, name, event_type, subtype)
+    if (is.null(key)) next
+    condition <- gsub(paste0("input\\.", name, "\\b"), paste0("input.", key),
+                      condition, perl = TRUE)
+  }
+  condition
 }
 
 #' Resolve $ref and allOf in a property definition
@@ -240,12 +275,26 @@ merge_lists <- function(a, b) {
   a
 }
 
+# Titles are only used as UI labels, so they are shown in sentence case here
+# rather than changing the (all lowercase) titles in the schema itself
 extract_titles <- function(node) {
   list(
-    en = node$title %||% "",
-    fi = node$title_fi %||% "",
-    sv = node$title_sv %||% ""
+    en = to_sentence_case(node$title %||% ""),
+    fi = to_sentence_case(node$title_fi %||% ""),
+    sv = to_sentence_case(node$title_sv %||% "")
   )
+}
+
+#' Capitalise the first letter of a label
+#'
+#' Labels whose first word already contains capitals (e.g. "pH after the
+#' application") are left as they are.
+#' @param x A character string
+#' @return x with its first letter in upper case
+to_sentence_case <- function(x) {
+  first_word <- sub(" .*", "", x)
+  if (!identical(first_word, tolower(first_word))) return(x)
+  paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
 }
 
 #' Determine the Shiny widget type from a schema property
@@ -322,21 +371,6 @@ build_property_descriptor <- function(name, prop, required, event_type,
   
   titles <- extract_titles(prop)
   
-  # Unitless titles for table column headers
-  unitless_titles <- NULL
-  if (!is.null(xui)) {
-    ut_en <- xui$unitless_title %||% xui$unitless_title2
-    ut_fi <- xui$unitless_title_fi %||% xui$unitless_title2_fi
-    ut_sv <- xui$unitless_title_sv %||% xui$unitless_title2_sv
-    if (!is.null(ut_en) || !is.null(ut_fi) || !is.null(ut_sv)) {
-      unitless_titles <- list(
-        en = ut_en %||% "",
-        fi = ut_fi %||% "",
-        sv = ut_sv %||% ""
-      )
-    }
-  }
-  
   placeholders <- NULL
   if (!is.null(xui)) {
     ph_en <- xui[["form-placeholder"]] %||% xui[["placeholder"]]
@@ -361,7 +395,6 @@ build_property_descriptor <- function(name, prop, required, event_type,
     name = name,
     type = widget_type,
     titles = titles,
-    unitless_titles = unitless_titles,
     choices = choices,
     required = required,
     minimum = prop$minimum,
@@ -451,19 +484,38 @@ schema_get_choices <- function(choices, language) {
 #' @return The property descriptor, or NULL
 lookup_property <- function(registry, prop_name, event_type = NULL,
                             subtype = NULL) {
-  # Try subtype-specific key first
-  if (!is.null(subtype) && !is.null(event_type)) {
-    key <- paste0(prop_name, REGISTRY_KEY_SEP, event_type, REGISTRY_KEY_SEP, subtype)
-    if (!is.null(registry[[key]])) return(registry[[key]])
+  key <- lookup_property_key(registry, prop_name, event_type, subtype)
+  if (is.null(key)) NULL else registry[[key]]
+}
+
+#' Find the registry key (input ID) of a property
+#' @inheritParams lookup_property
+#' @return The most specific matching key, or NULL
+lookup_property_key <- function(registry, prop_name, event_type = NULL,
+                                subtype = NULL) {
+  candidates <- c(
+    if (!is.null(event_type) && !is.null(subtype)) {
+      paste0(prop_name, REGISTRY_KEY_SEP, event_type, REGISTRY_KEY_SEP, subtype)
+    },
+    if (!is.null(event_type)) paste0(prop_name, REGISTRY_KEY_SEP, event_type),
+    prop_name
+  )
+  for (key in candidates) {
+    if (!is.null(registry[[key]])) return(key)
   }
-  # Try event-specific key
-  if (!is.null(event_type)) {
-    key <- paste0(prop_name, REGISTRY_KEY_SEP, event_type)
-    if (!is.null(registry[[key]])) return(registry[[key]])
-  }
-  # Try common property
-  if (!is.null(registry[[prop_name]])) return(registry[[prop_name]])
   NULL
+}
+
+#' Find a property by name in any event type
+#'
+#' For display purposes where the event type is not known (e.g. event list
+#' column headers). Returns the first matching descriptor.
+#' @param schema The loaded schema (from load_schema)
+#' @param prop_name Property name
+#' @return The property descriptor, or NULL
+find_property_by_name <- function(schema, prop_name) {
+  Find(function(desc) identical(desc$name, prop_name),
+       schema$property_registry)
 }
 
 #' Get properties relevant to the currently selected event/subtype
@@ -493,4 +545,21 @@ get_relevant_properties <- function(schema, event_type, subtype = NULL) {
     subtype_props = subtype_props,
     all = unique(c(common, event_props, subtype_props))
   )
+}
+
+#' Get the fields shown for the selected event type and subtype
+#'
+#' Common properties are not included, they have their own widgets.
+#' @param schema The loaded schema (from load_schema)
+#' @param event_type The selected event type const
+#' @param subtype The selected subtype const (or NULL)
+#' @return A list of property descriptors, event-level fields first
+get_relevant_fields <- function(schema, event_type, subtype = NULL) {
+  relevant <- get_relevant_properties(schema, event_type, subtype)
+  fields <- lapply(c(relevant$event_props, relevant$subtype_props),
+                   function(pn) {
+                     lookup_property(schema$property_registry, pn, event_type,
+                                     subtype)
+                   })
+  Filter(Negate(is.null), fields)
 }

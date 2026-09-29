@@ -12,16 +12,6 @@ json_file_base_folder <- function() golem::get_golem_options("json_file_path")
 # consumers that validate events against this schema.
 schema_url <- "https://raw.githubusercontent.com/hamk-uas/fieldobservatory-data-schemas/main/management-event.schema.json"
 
-# Legacy property name mapping for backward-compatible reading
-legacy_name_map <- c(
-  "mgmt_event_notes" = "mgmt_event_short_notes",
-  "planting_notes" = "mgmt_event_long_notes",
-  "harvest_comments" = "mgmt_event_long_notes",
-  "fertilizer_comments" = "mgmt_event_long_notes",
-  "tillage_notes" = "mgmt_event_long_notes",
-  "chemical_notes" = "mgmt_event_long_notes"
-)
-
 #' Create a folder for a site-block combination
 #'
 #' Given a site and a block on that site, create a folder under
@@ -41,7 +31,7 @@ create_file_folder <- function(site, block,
   # if the events directory (stored in json_file_base_folder) doesn't exist,
   # stop
   if (!dir.exists(base_folder)) {
-    stop(glue("Could not find folder {json_file_base_folder}"))
+    stop(glue("Could not find folder {base_folder}"))
   }
   
   folder_path <- file.path(base_folder, site, block)
@@ -64,34 +54,16 @@ write_json_file <- function(site, block, event_list, rotation_list,
                             base_folder = json_file_base_folder()) {
 
   # this ensures that the folder to store this file exists
-  create_file_folder(site, block)
+  create_file_folder(site, block, base_folder)
 
   file_path <- file.path(base_folder, site, block, "events.json")
 
-  # if there are events in the list, do the following:
-  # - erase block information in each event
-  # - apply other exceptions
-  if (length(event_list) > 0) {
-    for (i in 1:length(event_list)) {
-      event_list[[i]]$block <- NULL
-      
-      # Add $schema field
-      event_list[[i]][["$schema"]] <- schema_url
-      
-      ##### EXCEPTIONS
-      event <- event_list[[i]]
-      
-      # if the event type is fertilizer application and the fertilizer
-      # type is organic, change mgmt_operations_event to organic_material
-      # to conform to the ICASA standard
-      if (identical(event$mgmt_operations_event, "fertilizer") &&
-          identical(event$fertilizer_type, "fertilizer_type_organic")) {
-        event_list[[i]]$mgmt_operations_event <- "organic_material"    
-      }
-      
-      #####
-    }
-  }
+  # the block is implied by the file location
+  event_list <- lapply(event_list, function(event) {
+    event$block <- NULL
+    event[["$schema"]] <- schema_url
+    drop_empty_values(event)
+  })
 
   # If rotations on the list --> erase the block information like with events
   if (length(rotation_list) > 0) {
@@ -148,21 +120,10 @@ read_json_file <- function(site, block,
     return(list())
   }
 
-  # add block information and apply exceptions to each event
+  # add block information and upgrade legacy events to the canonical format
   for (i in 1:length(events)) {
     events[[i]]$block <- block
-    
-    ##### EXCEPTIONS
-    
-    # if mgmt_operations_event is organic_material, change it to fertilizer
-    if (identical(events[[i]]$mgmt_operations_event, "organic_material")) {
-      events[[i]]$mgmt_operations_event <- "fertilizer"
-    }
-    
-    # Normalize legacy property names
     events[[i]] <- normalize_legacy_event(events[[i]])
-    
-    #####
   }
 
   # add block info for rotations
@@ -178,20 +139,6 @@ read_json_file <- function(site, block,
   management$rotation <- rotation
   
   return(management)
-}
-
-#' Normalize a legacy event to use schema property names
-#' @param event An event list
-#' @return The event with legacy names mapped to schema names
-normalize_legacy_event <- function(event) {
-  for (old_name in names(legacy_name_map)) {
-    new_name <- legacy_name_map[[old_name]]
-    if (!is.null(event[[old_name]]) && is.null(event[[new_name]])) {
-      event[[new_name]] <- event[[old_name]]
-      event[[old_name]] <- NULL
-    }
-  }
-  event
 }
 
 #' Copy a file related to an event and name it appropriately
@@ -222,7 +169,7 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
                       filepath_is_relative = FALSE, delete_original = FALSE,
                       base_folder = json_file_base_folder()) {
   # ensures the folder for this site-block combo is there
-  create_file_folder(site, block)
+  create_file_folder(site, block, base_folder)
 
   # add json_file_base_folder to filepath if requested
   if (filepath_is_relative) {

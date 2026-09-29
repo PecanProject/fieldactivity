@@ -3,8 +3,8 @@
 # - shows the correct widgets depending on the user's choices
 # - allows prefilling the widgets with the desired values
 # - verifies that the information has been supplied correctly
-# - returns the values to the main app in the format they will be saved (e.g. 
-#   "" replaced with missingval)
+# - returns the values to the main app in the format they will be saved
+#   (nested array properties, empty values left out)
 # - contains the save, cancel and delete buttons and sends their signals to
 #   the main app
 
@@ -57,9 +57,7 @@ mod_form_ui <- function(id){
              dateInput(
                ns("date"),
                format = "dd/mm/yyyy",
-               label = schema_get_title(
-                 lookup_property(mgmt_schema$property_registry, "date")$titles,
-                 iso, "date"),
+               label = common_field_label(mgmt_schema, "date", NULL, iso),
                max = Sys.Date(),
                value = Sys.Date(),
                weekstart = 1
@@ -99,6 +97,11 @@ mod_form_ui <- function(id){
     
 #' form Server Functions
 #'
+#' Each schema property has one widget per event type (and subtype) it appears
+#' in, identified by the property's registry key (desc$id). The widgets of the
+#' selected event type and subtype are the relevant ones: they are validated
+#' and their values are saved under the property name (desc$name).
+#'
 #' @param id The id of the corresponding UI element
 #' @param site A reactive expression holding the current site name
 #' @param set_values Changing the value of this reactive expression sets the
@@ -112,95 +115,106 @@ mod_form_ui <- function(id){
 #'
 #' @import shinyvalidate
 #' @noRd
-mod_form_server <- function(id, site, set_values, reset_values, edit_mode, 
+mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                             language, init_signal) {
-  
+
   stopifnot(is.reactive(site))
   stopifnot(is.reactive(set_values))
   stopifnot(is.reactive(reset_values))
   stopifnot(is.reactive(edit_mode))
   stopifnot(is.reactive(language))
   stopifnot(is.reactive(init_signal))
-  
+
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-    
     if (dp()) message("Initialising form server function")
-    
+
     schema <- mgmt_schema
     er <- schema$event_registry
     pr <- schema$property_registry
-    
+
+    # the widgets of event and subtype properties, and the tables among them
+    event_fields <- Filter(function(desc) {
+      desc$event_type != "__common__" && desc$type != "const"
+    }, pr)
+    input_fields <- Filter(function(desc) desc$type != "dataTable",
+                           event_fields)
+    table_fields <- Filter(function(desc) desc$type == "dataTable",
+                           event_fields)
+
+    # keys the schema knows about. Other keys of an edited event are kept as
+    # they are when it is saved, so that no data is lost
+    known_names <- c(vapply(pr, function(desc) desc$name, character(1)),
+                     "block", "$schema")
+    unknown_values <- reactiveVal(list())
+
+    # the selected event type and subtype
+    current_context <- reactive({
+      event_type <- input$mgmt_operations_event
+      if (!isTruthy(event_type) || is.null(er[[event_type]])) return(NULL)
+      list(event_type = event_type,
+           subtype = get_current_subtype(input, er[[event_type]]))
+    })
+
+    # The fields of the selected event type and subtype that are visible,
+    # i.e. whose x-ui condition (if any) is met. These are the ones validated
+    # and saved.
+    relevant_fields <- reactive({
+      context <- current_context()
+      if (is.null(context)) return(list())
+      fields <- get_relevant_fields(schema, context$event_type,
+                                    context$subtype)
+      Filter(function(desc) {
+        desc$type != "const" && (is.null(desc$condition) ||
+                                   isTRUE(evaluate_condition(desc$condition,
+                                                             session)))
+      }, fields)
+    })
+    relevant_ids <- reactive({
+      vapply(relevant_fields(), function(desc) desc$id, character(1))
+    })
+
+    date_required <- reactive({
+      context <- current_context()
+      !is.null(context) && "date" %in% er[[context$event_type]]$required
+    })
+
     # add input validators
-    # the idea is that each widget has its own validator. This validator is
-    # active whenever that widget is in relevant variables. These individual
-    # validators are then added as subvalidators to main_iv
+    # each widget has its own validator, which is active whenever that widget
+    # is relevant. These individual validators are added as subvalidators to
+    # main_iv
     main_iv <- InputValidator$new()
 
-    all_props <- get_all_schema_properties(schema)
-    for (prop_name in all_props) {
-      # Try to find descriptor from any event/subtype context
-      desc <- find_any_property_desc(pr, prop_name, schema$property_reverse_index)
-      if (is.null(desc)) next
-      if (desc$type %in% c("const", "dataTable")) next
+    common_iv <- InputValidator$new()
+    common_iv$add_rule("mgmt_operations_event",
+                       sv_required(message = "Required"))
+    common_iv$add_rule("block", sv_required(message = "Required"))
+    main_iv$add_validator(common_iv)
 
-      iv <- InputValidator$new()
-      added_rules <- FALSE
+    date_iv <- InputValidator$new()
+    date_iv$add_rule("date", sv_required(message = "Required"))
+    date_iv$condition(date_required)
+    main_iv$add_validator(date_iv)
 
-      # add required rule
-      if (isTRUE(desc$required)) {
-        iv$add_rule(prop_name, sv_required(message = "Required"))
-        added_rules <- TRUE
-      }
-
-      # add minimum rule
-      if (!is.null(desc$minimum)) {
-        iv$add_rule(prop_name, sv_gte(desc$minimum, allow_na = TRUE,
-                                       message_fmt = "Must be >= {rhs}"))
-        added_rules <- TRUE
-      }
-
-      # add maximum rule
-      if (!is.null(desc$maximum)) {
-        iv$add_rule(prop_name, sv_lte(desc$maximum, allow_na = TRUE,
-                                       message_fmt = "Must be <= {rhs}"))
-        added_rules <- TRUE
-      }
-
-      # add integer rule
-      if (isTRUE(desc$is_integer)) {
-        iv$add_rule(prop_name, function(value) {
-          if (is.null(value) || is.na(value)) return(NULL)
-          if (value != floor(value)) return("Must be a whole number")
-          NULL
-        })
-        added_rules <- TRUE
-      }
-      
-      if (added_rules) {
-        # the validator is only active when it is in the current list of
-        # relevant, regular widgets
-        local({
-          local_prop <- prop_name
-          iv$condition(reactive({
-            local_prop %in% relevant_variables()$regular
-          }))
-        })
-        # add widget validator to main validator
-        main_iv$add_validator(iv)
-      }
+    for (desc in input_fields) {
+      iv <- field_validator(desc)
+      if (is.null(iv)) next
+      local({
+        field_id <- desc$id
+        iv$condition(reactive(field_id %in% relevant_ids()))
+      })
+      main_iv$add_validator(iv)
     }
     # start showing validation messages
     main_iv$enable()
-    
+
     # when site setting is changed, update the block choices on the form
     observeEvent(site(), ignoreNULL = FALSE, {
       if (!isTruthy(site())) {
         shinyjs::disable("block")
         shinyjs::disable("save")
         return()
-      } 
-      
+      }
+
       shinyjs::enable("block")
       shinyjs::enable("save")
 
@@ -208,81 +222,44 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
       block_choices <- subset(sites, sites$site == site())$blocks[[1]]
       updateSelectInput(session, "block", choices = block_choices)
     })
-    
-    # when set_values is changed, update the values in the form
-    observeEvent(set_values(), {
-      if (dp()) message("Filling the form with values")
-      
-      values <- set_values()
-      iso <- lang_to_iso(language())
 
-      # populate the input widgets with the values corresponding to the
-      # event, and clear others
-      relevant <- get_relevant_properties(
-        schema, 
-        values$mgmt_operations_event %||% "",
-        get_subtype_value(values, er)
-      )
-      
-      for (prop_name in relevant$all) {
-        desc <- lookup_property(
-          pr, prop_name, 
-          values$mgmt_operations_event, 
-          get_subtype_value(values, er))
-        if (is.null(desc)) next
-        if (desc$type %in% c("const", "dataTable")) next
-        
-        value <- values[[prop_name]]
-        # Handle legacy property name mapping
-        if (is.null(value)) {
-          value <- get_legacy_value(values, prop_name)
-        }
-        
-        if (is.null(value)) {
-          clear_schema_value(session, prop_name, desc)
-        } else {
-          update_schema_value(session, prop_name, desc, value)
-        }
-      }
-      
-      # Handle array/table data (event-level and subtype-level)
-      subtype_val <- get_subtype_value(values, er)
-      for (prop_name in c(relevant$event_props, relevant$subtype_props)) {
-        desc <- lookup_property(pr, prop_name,
-                                              values$mgmt_operations_event,
-                                              subtype_val)
-        if (!is.null(desc) && desc$type == "dataTable") {
-          table_name <- paste0(prop_name, "_table")
-          if (!is.null(tables[[table_name]])) {
-            tables[[table_name]]$set_values(values)
-          }
-        }
-      }
-      
-      # Also set common fields explicitly
+    # Fill the form with the values of an event and clear all other fields, so
+    # that nothing is left over from a previously edited event (empty values
+    # are not saved, so a missing value means an empty field). A new event is
+    # dated today, as when the form is first shown.
+    fill_form <- function(values) {
+      event_type <- values$mgmt_operations_event
+      subtype <- get_subtype_value(values, er)
+      values$date <- values$date %||% format(Sys.Date(), date_format_json)
+
       if (!is.null(values$block)) {
         updateSelectInput(session, "block", selected = values$block)
       }
-      if (!is.null(values$mgmt_operations_event)) {
-        updateSelectInput(session, "mgmt_operations_event", 
-                          selected = values$mgmt_operations_event)
+      for (prop_name in schema$common_properties) {
+        update_schema_value(session, pr[[prop_name]], values[[prop_name]])
       }
-      if (!is.null(values$date)) {
-        date_val <- tryCatch(as.Date(values$date, format = date_format_json),
-                             warning = function(cnd) NULL)
-        updateDateInput(session, "date", value = date_val)
+      event_ids <- if (!is.null(event_type)) {
+        vapply(get_relevant_fields(schema, event_type, subtype),
+               function(desc) desc$id, character(1))
       }
-      if (!is.null(values$mgmt_event_short_notes)) {
-        updateTextAreaInput(session, "mgmt_event_short_notes", 
-                            value = values$mgmt_event_short_notes)
+      for (desc in input_fields) {
+        value <- if (desc$id %in% event_ids) values[[desc$name]]
+        update_schema_value(session, desc, value)
       }
-      # Handle legacy field name for short notes
-      if (!is.null(values$mgmt_event_notes) && 
-          is.null(values$mgmt_event_short_notes)) {
-        updateTextAreaInput(session, "mgmt_event_short_notes", 
-                            value = values$mgmt_event_notes)
+      for (desc in table_fields) {
+        rows <- if (desc$id %in% event_ids) values[[desc$name]]
+        tables[[desc$id]]$set_values(rows %||% list())
       }
-      
+
+      unknown_values(values[setdiff(names(values), known_names)])
+      summed_ids <<- character(0)
+    }
+
+    # when set_values is changed, update the values in the form
+    observeEvent(set_values(), {
+      if (dp()) message("Filling the form with values")
+      fill_form(set_values())
+
       # change set_values back to NULL so that we can catch the next time its
       # value is changed. This doesn't re-trigger this observeEvent as
       # observeEvent ignores NULL values by default
@@ -293,44 +270,30 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     observeEvent(reset_values(), {
       if (identical(reset_values(), FALSE)) return()
       if (dp()) message("Resetting form values")
-      
-      # Reset common properties
-      for (pn in schema$common_properties) {
-        desc <- lookup_property(pr, pn)
-        if (!is.null(desc)) clear_schema_value(session, pn, desc)
-      }
-      
-      # Reset all event properties
-      all_props <- get_all_schema_properties(schema)
-      for (pn in all_props) {
-        desc <- find_any_property_desc(pr, pn, schema$property_reverse_index)
-        if (!is.null(desc) && !(desc$type %in% c("const", "dataTable"))) {
-          clear_schema_value(session, pn, desc)
-        }
-      }
-      
+      fill_form(list())
+
       # Reset fileInput fields separately
       for (fileInput_code_name in fileInput_code_names) {
         files[[fileInput_code_name]]$reset_path(TRUE)
       }
-      
+
       reset_values(FALSE)
     })
-    
+
     # show Delete button depending on edit mode
     observeEvent(edit_mode(), ignoreNULL = FALSE, {
       shinyjs::toggle("delete", condition = edit_mode())
     })
-    
+
     # update each of the text outputs automatically, including language changes
     # and the dynamic updating in editing table title etc.
     lapply(text_output_code_names, FUN = function(text_output_code_name) {
       # render text
       output[[text_output_code_name]] <- renderText({
         if (dp()) message(glue("Rendering text for {text_output_code_name}"))
-        
+
         text_to_show <- get_disp_name(text_output_code_name, language())
-        
+
         #get element from the UI structure lookup list
         element <- structure_lookup_list[[text_output_code_name]]
         #if the text should be updated dynamically, do that
@@ -347,83 +310,55 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         text_to_show
       })
     })
-    
+
+    # the date label depends on the event type (e.g. the start date of
+    # grazing) and whether the event type requires a date
+    observe({
+      updateDateInput(session, "date", label = common_field_label(
+        schema, "date", input$mgmt_operations_event, lang_to_iso(language())))
+    })
+
     # Language switching for schema-driven form fields
     observeEvent(language(), ignoreInit = TRUE, {
       iso <- lang_to_iso(language())
-      
+
       # Update event type selector
-      event_choices <- build_event_type_choices(schema, iso)
-      current_event <- input[["mgmt_operations_event"]]
       updateSelectInput(session, "mgmt_operations_event",
                         label = schema_get_title(
-                          lookup_property(pr, "mgmt_operations_event")$titles, 
-                          iso, "event"),
-                        choices = event_choices,
-                        selected = current_event)
-      
-      # Update date label
-      updateDateInput(session, "date",
-                      label = schema_get_title(
-                        lookup_property(pr, "date")$titles, iso, "date"))
-      
+                          pr$mgmt_operations_event$titles, iso, "event"),
+                        choices = build_event_type_choices(schema, iso),
+                        selected = input$mgmt_operations_event)
+
       # Update short notes
-      short_notes_desc <- lookup_property(pr, "mgmt_event_short_notes")
+      short_notes_desc <- pr$mgmt_event_short_notes
       updateTextAreaInput(session, "mgmt_event_short_notes",
                           label = schema_get_title(
                             short_notes_desc$titles, iso, "description"),
                           placeholder = schema_get_title(
                             short_notes_desc$placeholders, iso, ""))
-      
-      # Update all event-type properties
-      for (ec in names(er)) {
-        event_entry <- er[[ec]]
-        for (pn in event_entry$property_names) {
-          desc <- lookup_property(pr, pn, ec)
-          if (is.null(desc)) next
-          if (desc$type %in% c("const", "dataTable")) next
-          update_schema_widget(session, pn, desc, iso, input)
+
+      # Update all event and subtype fields
+      for (desc in input_fields) {
+        subtype_choices <- if (desc$is_discriminator) {
+          build_subtype_choices(er[[desc$event_type]], iso)
         }
-        
-        if (event_entry$has_subtypes) {
-          # Update subtype discriminator choices
-          disc <- event_entry$subtype_discriminator
-          disc_desc <- lookup_property(pr, disc, ec)
-          if (!is.null(disc_desc)) {
-            sub_choices <- build_subtype_choices(event_entry, iso)
-            current_sub <- input[[disc]]
-            updateSelectInput(session, disc,
-                              label = schema_get_title(
-                                disc_desc$titles, iso, disc),
-                              choices = sub_choices,
-                              selected = current_sub)
-          }
-          
-          for (sc in names(event_entry$subtypes)) {
-            sub <- event_entry$subtypes[[sc]]
-            for (spn in sub$property_names) {
-              sdesc <- lookup_property(pr, spn, ec, sc)
-              if (is.null(sdesc)) next
-              if (sdesc$type %in% c("const", "dataTable")) next
-              update_schema_widget(session, spn, sdesc, iso, input)
-            }
-          }
-        }
+        update_schema_widget(session, desc, iso, input,
+                             override_choices = subtype_choices)
       }
-      
+
       # Update app chrome (block label, save/cancel/delete buttons)
       for (code_name in names(reactiveValuesToList(input))) {
         element <- structure_lookup_list[[code_name]]
         if (is.null(element$type)) next
         label <- get_disp_name(element$label, language())
-        
+
         if (element$type == "selectInput") {
           choices <- get_selectInput_choices(code_name, language())
           current_value <- input[[code_name]]
           if (is.null(choices)) {
             updateSelectInput(session, code_name,
                               label = ifelse(is.null(label), "", label),
-                              selected = current_value) 
+                              selected = current_value)
           } else {
             updateSelectInput(session, code_name,
                               label = ifelse(is.null(label), "", label),
@@ -435,109 +370,69 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
         }
       }
     })
-    
-    # Initialise table and fileInput module servers on first use
-    tables <- list()
-    files <- sapply(fileInput_code_names, USE.NAMES = TRUE, simplify = FALSE, 
+
+    # Table and fileInput module servers are started on first use. The
+    # reactiveVals for setting table values exist from the start.
+    tables <- lapply(table_fields, function(desc) {
+      list(set_values = reactiveVal())
+    })
+    files <- sapply(fileInput_code_names, USE.NAMES = TRUE, simplify = FALSE,
                     FUN = function(fileInput_code_name) {
                       set_path <- reactiveVal()
                       reset_path <- reactiveVal()
                       list(set_path = set_path, reset_path = reset_path)
                     })
-    
-    # Build the tables list with set_values reactiveVals for each array table
-    schema_table_names <- get_schema_table_names(schema)
-    for (tn in schema_table_names) {
-      set_values_rv <- reactiveVal()
-      tables[[tn]] <- list(set_values = set_values_rv)
-    }
-    
-    observeEvent(init_signal(), {
+
+    observeEvent(init_signal(), once = TRUE, {
       if (dp()) message("Initialising table and fileInput server functions")
-      
-      for (tn in schema_table_names) {
-        # Find the array property this table corresponds to
-        array_prop_name <- sub("_table$", "", tn)
-        # Find which event/subtype this belongs to
-        found <- FALSE
-        for (ec in names(er)) {
-          # Check event-level properties
-          desc <- lookup_property(pr, array_prop_name, ec)
-          if (!is.null(desc) && desc$type == "dataTable") {
-            tables[[tn]]$result <<-
-              mod_table_server_schema(tn, array_prop_name, desc, schema,
-                                      language,
-                                      tables[[tn]]$set_values,
-                                      input, main_iv, ns)
-            found <- TRUE
-            break
-          }
-          # Check subtype-level properties
-          if (er[[ec]]$has_subtypes) {
-            for (sc in names(er[[ec]]$subtypes)) {
-              desc <- lookup_property(pr, array_prop_name, ec, sc)
-              if (!is.null(desc) && desc$type == "dataTable") {
-                tables[[tn]]$result <<-
-                  mod_table_server_schema(tn, array_prop_name, desc, schema,
-                                          language,
-                                          tables[[tn]]$set_values,
-                                          input, main_iv, ns)
-                found <- TRUE
-                break
-              }
-            }
-          }
-          if (found) break
-        }
+
+      for (desc in table_fields) {
+        tables[[desc$id]]$result <<- mod_table_server_schema(
+          schema_table_id(desc), desc, language, tables[[desc$id]]$set_values)
       }
-      
+
       # start server for all fileInput modules
       sapply(fileInput_code_names, FUN = function(fileInput_code_name) {
-        files[[fileInput_code_name]]$value <<-  
-          mod_fileInput_server(id = fileInput_code_name, 
+        files[[fileInput_code_name]]$value <<-
+          mod_fileInput_server(id = fileInput_code_name,
                                language = language,
                                set_path = files[[fileInput_code_name]]$set_path,
                                reset_path = files[[fileInput_code_name]]$reset_path)
       })
     })
-    
-    # Auto-sum: update total fields from table column values
+
+    # Auto-sum: update total fields from table column values. A total is only
+    # computed when the table has values to sum, so a total entered without
+    # per-item values (as in many legacy events) is kept. summed_ids holds the
+    # totals currently computed from the tables.
+    summed_ids <- character(0)
     observe({
-      event_type <- input[["mgmt_operations_event"]]
-      if (!isTruthy(event_type)) return()
+      context <- current_context()
+      if (is.null(context)) return()
 
-      event_entry <- er[[event_type]]
-      if (is.null(event_entry)) return()
+      for (desc in relevant_fields()) {
+        if (is.null(desc$total_of)) next
+        table_id <- lookup_property_key(pr, desc$total_of$list_name,
+                                        context$event_type, context$subtype)
+        table <- tables[[table_id %||% ""]]$result
+        if (is.null(table)) next
 
-      # Collect all property names including subtypes
-      subtype <- get_current_subtype(input, er)
-      all_props <- event_entry$property_names
-      if (event_entry$has_subtypes && !is.null(subtype) &&
-          !is.null(event_entry$subtypes[[subtype]])) {
-        all_props <- c(all_props, event_entry$subtypes[[subtype]]$property_names)
-      }
-
-      for (pn in all_props) {
-        desc <- lookup_property(pr, pn, event_type, subtype)
-        if (is.null(desc) || is.null(desc$total_of)) next
-
-        list_name <- desc$total_of$list_name
         prop_to_sum <- desc$total_of$property_name
-        tn <- paste0(list_name, "_table")
-
-        if (is.null(tables[[tn]]$result)) next
-
-        col_values <- tables[[tn]]$result$values()[[prop_to_sum]]
-        if (is.null(col_values) || all(is.na(col_values))) {
-          total <- NA
-        } else {
-          nums <- suppressWarnings(as.numeric(col_values))
-          total <- sum(nums, na.rm = TRUE)
-          if (total == 0 && all(is.na(nums))) total <- NA
+        nums <- suppressWarnings(as.numeric(unlist(
+          lapply(table$values(), function(row) row[[prop_to_sum]] %||% NA))))
+        if (all(is.na(nums))) {
+          # the values it was computed from have been removed
+          if (desc$id %in% summed_ids) {
+            updateNumericInput(session, desc$id, value = NA)
+            summed_ids <<- setdiff(summed_ids, desc$id)
+          }
+          shinyjs::enable(desc$id)
+          next
         }
 
-        updateNumericInput(session, pn, value = total)
-        shinyjs::disable(pn)
+        updateNumericInput(session, desc$id, value = sum(nums, na.rm = TRUE))
+        shinyjs::disable(desc$id)
+        summed_ids <<- union(summed_ids, desc$id)
       }
     })
 
@@ -545,51 +440,40 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
     form_data <- reactive({
       if (dp()) message("Calculating form data")
 
-      relevant <- relevant_variables()
-
-      relevant_table <- NULL
-      if (length(relevant$table_name) > 0 && !is.null(tables[[relevant$table_name]])) {
-        relevant_table <- tables[[relevant$table_name]]$result
-      }
+      fields <- relevant_fields()
+      is_table <- vapply(fields, function(desc) desc$type == "dataTable",
+                         logical(1))
+      relevant_tables <- lapply(fields[is_table], function(desc) {
+        tables[[desc$id]]$result
+      })
+      names(relevant_tables) <- vapply(fields[is_table],
+                                       function(desc) desc$name, character(1))
+      relevant_tables <- Filter(Negate(is.null), relevant_tables)
 
       # check that the form and table validation rules have been met
-      if (!main_iv$is_valid() ||
-          (!is.null(relevant_table) && !relevant_table$valid())) {
+      tables_valid <- vapply(relevant_tables, function(t) isTRUE(t$valid()),
+                             logical(1))
+      if (!main_iv$is_valid() || !all(tables_valid)) {
         return(NULL)
       }
-      
+
       event <- list()
       # fill information
-      event$mgmt_operations_event <- input[["mgmt_operations_event"]]
-      event$date <- tryCatch(
-        format(input[["date"]], date_format_json),
-        error = function(cnd) ""
-      )
-      event$mgmt_event_short_notes <- trimws(input[["mgmt_event_short_notes"]] %||% "")
-      event$block <- input[["block"]]
-      
-      for (prop_name in relevant$regular) {
-        if (prop_name %in% c("mgmt_operations_event", "date", 
-                              "mgmt_event_short_notes", "block")) next
-        
-        desc <- lookup_property(
-          pr, prop_name, 
-          input[["mgmt_operations_event"]],
-          get_current_subtype(input, er))
-        if (is.null(desc)) next
-        if (desc$type == "const") next
-        
-        is_fileInput <- !is.null(structure_lookup_list[[prop_name]]) &&
-          identical(structure_lookup_list[[prop_name]]$type, "fileInput")
-        
+      event$mgmt_operations_event <- input$mgmt_operations_event
+      event$date <- tryCatch(format(input$date, date_format_json),
+                             error = function(cnd) "")
+      event$mgmt_event_short_notes <- input$mgmt_event_short_notes
+      event$block <- input$block
+
+      for (desc in fields[!is_table]) {
+        is_fileInput <- !is.null(structure_lookup_list[[desc$name]]) &&
+          identical(structure_lookup_list[[desc$name]]$type, "fileInput")
+
         value <- if (is_fileInput) {
-          files[[prop_name]]$value()
+          files[[desc$name]]$value()
         } else {
-          input[[prop_name]]
+          input[[desc$id]]
         }
-        
-        # if value is character, trim any whitespace around it
-        if (is.character(value)) value <- trimws(value)
 
         # format Date value to character string and replace with "" if that
         # fails for some reason
@@ -598,144 +482,53 @@ mod_form_server <- function(id, site, set_values, reset_values, edit_mode,
                             error = function(cnd) "")
         }
 
-        # if the value is not defined or empty, replace with missingval
-        if (length(value) == 0) {
-          value <- missingval
-        } else {
-          missing_indexes <- is.na(value) | value == ""
-          if (any(missing_indexes)) {
-            value[missing_indexes] <- missingval
-          }
-        }
-        
-        event[[prop_name]] <- value
+        event[[desc$name]] <- value
       }
-      
-      if (!is.null(relevant_table)) {
-        table_values <- relevant_table$values()
-        for (vn in names(table_values)) {
-          val <- table_values[[vn]]
-          if (length(val) == 0) {
-            val <- missingval
-          } else {
-            missing_indexes <- is.na(val) | val == ""
-            if (any(missing_indexes)) val[missing_indexes] <- missingval
-          }
-          event[[vn]] <- val
-        }
+
+      # each table is saved as an array of row objects under its property
+      for (array_prop_name in names(relevant_tables)) {
+        event[[array_prop_name]] <- relevant_tables[[array_prop_name]]$values()
       }
-      
-      # Replace empty common fields
-      for (fn in c("mgmt_event_short_notes")) {
-        if (is.null(event[[fn]]) || identical(event[[fn]], "")) {
-          event[[fn]] <- missingval
-        }
-      }
-      
-      # return event data
+
+      # trim whitespace from text and leave out empty values
+      event <- drop_empty_values(
+        rapply(event, trimws, classes = "character", how = "replace"))
+
+      # keep the values of the edited event that the form doesn't know about
+      # as they are
+      unknown <- unknown_values()
+      event[names(unknown)] <- unknown
       event
     })
 
-    # When requested, calculate a vector with the names of relevant variables. A
-    # variable is relevant when it is visible in some form, either as a regular
-    # widget or in a table module. Relevant variables are ones which we want to
-    # save to a json file given the current choices of the user. For example,
-    # when the user is making a soil observation event, the variables related
-    # to that are relevant while other observation variables are not.
-    # This only works when the form is already open.
-    relevant_variables <- reactive({
-      if (dp()) message("Calculating relevant variables")
-      
-      event_type <- input[["mgmt_operations_event"]]
-      if (!isTruthy(event_type)) {
-        return(list(regular = character(0), table = character(0), 
-                    table_name = character(0)))
-      }
-      
-      event_entry <- er[[event_type]]
-      if (is.null(event_entry)) {
-        return(list(regular = character(0), table = character(0), 
-                    table_name = character(0)))
-      }
-      
-      subtype <- get_current_subtype(input, er)
-      relevant <- get_relevant_properties(schema, event_type, subtype)
-      
-      regular_props <- character(0)
-      table_props <- character(0)
-      table_name <- character(0)
-      
-      for (pn in relevant$all) {
-        desc <- lookup_property(pr, pn, event_type, subtype)
-        if (is.null(desc)) next
-        if (desc$type == "const") next
-        
-        # Skip fields whose x-ui condition evaluates to FALSE
-        if (!is.null(desc$xui$condition)) {
-          cond_result <- evaluate_condition(desc$xui$condition, session)
-          if (is.null(cond_result) || !isTRUE(cond_result)) next
-        }
-
-        if (desc$type == "dataTable") {
-          tn <- paste0(pn, "_table")
-          table_name <- c(table_name, tn)
-          # Get the table column names
-          if (!is.null(desc$array_columns)) {
-            table_props <- c(table_props, names(desc$array_columns))
-          }
-        } else {
-          regular_props <- c(regular_props, pn)
-        }
-      }
-      
-      list(
-        regular = regular_props,
-        table = table_props,
-        table_name = if (length(table_name) > 0) table_name[1] else character(0)
-      )
-    })
-    
     ################## RETURN VALUE
-    
+
     list(
       data = form_data,
       save = reactive(input$save),
       cancel = reactive(input$cancel),
       delete = reactive(input$delete)
     )
-    
+
   })
-  
+
 }
 
-# Helper: find a property descriptor trying multiple contexts.
-# Uses the reverse index (built in load_schema) for O(1) lookup instead of
-# scanning every registry key.
-find_any_property_desc <- function(pr, prop_name, reverse_index = NULL) {
-  # Direct common lookup
-  if (!is.null(pr[[prop_name]])) return(pr[[prop_name]])
-  # Use reverse index if available (O(1) instead of O(n))
-  if (!is.null(reverse_index) && !is.null(reverse_index[[prop_name]])) {
-    return(pr[[reverse_index[[prop_name]]]])
-  }
-  # Fallback: linear scan (for callers without the index)
-  for (key in names(pr)) {
-    if (startsWith(key, paste0(prop_name, REGISTRY_KEY_SEP))) {
-      return(pr[[key]])
-    }
-  }
-  NULL
+# Helper: label of a common property for the selected event type. An event
+# type can retitle a common property (e.g. grazing's date is its start date)
+# and require it.
+common_field_label <- function(schema, prop_name, event_type, iso) {
+  entry <- if (isTruthy(event_type)) schema$event_registry[[event_type]]
+  desc <- entry$common_overrides[[prop_name]] %||%
+    schema$property_registry[[prop_name]]
+  make_required_label(schema_get_title(desc$titles, iso, prop_name),
+                      prop_name %in% entry$required)
 }
 
-# Helper: get the current subtype from input
-get_current_subtype <- function(input, er) {
-  event_type <- input[["mgmt_operations_event"]]
-  if (!isTruthy(event_type)) return(NULL)
-  event_entry <- er[[event_type]]
-  if (is.null(event_entry) || !event_entry$has_subtypes) return(NULL)
-  disc <- event_entry$subtype_discriminator
-  if (is.null(disc)) return(NULL)
-  sub_val <- input[[disc]]
+# Helper: get the selected subtype of an event type from input
+get_current_subtype <- function(input, event_entry) {
+  if (!isTRUE(event_entry$has_subtypes)) return(NULL)
+  sub_val <- input[[event_entry$subtype_discriminator_id]]
   if (!isTruthy(sub_val)) return(NULL)
   sub_val
 }
@@ -749,40 +542,4 @@ get_subtype_value <- function(values, er) {
   disc <- event_entry$subtype_discriminator
   if (is.null(disc)) return(NULL)
   values[[disc]]
-}
-
-# Helper: get schema table names
-get_schema_table_names <- function(schema) {
-  er <- schema$event_registry
-  pr <- schema$property_registry
-  table_names <- character(0)
-  for (ec in names(er)) {
-    event_entry <- er[[ec]]
-    for (pn in event_entry$property_names) {
-      desc <- lookup_property(pr, pn, ec)
-      if (!is.null(desc) && desc$type == "dataTable") {
-        table_names <- c(table_names, paste0(pn, "_table"))
-      }
-    }
-    # Also check subtype properties (e.g. soil_layer_list in observation_type_soil)
-    if (event_entry$has_subtypes) {
-      for (sc in names(event_entry$subtypes)) {
-        for (spn in event_entry$subtypes[[sc]]$property_names) {
-          sdesc <- lookup_property(pr, spn, ec, sc)
-          if (!is.null(sdesc) && sdesc$type == "dataTable") {
-            table_names <- c(table_names, paste0(spn, "_table"))
-          }
-        }
-      }
-    }
-  }
-  unique(table_names)
-}
-
-get_legacy_value <- function(values, schema_prop_name) {
-  legacy_names <- names(legacy_name_map)[legacy_name_map == schema_prop_name]
-  for (ln in legacy_names) {
-    if (!is.null(values[[ln]])) return(values[[ln]])
-  }
-  NULL
 }

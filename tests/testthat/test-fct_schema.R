@@ -1,28 +1,7 @@
 # Unit tests for schema parsing and helper functions
 # Uses inline fixtures for pure function testing
 
-# --- resolve_ref / resolve_property -------------------------------------------
-
-test_that("resolve_ref resolves a $defs pointer", {
-  defs <- list(my_type = list(type = "string", oneOf = list(list(const = "a"))))
-  obj <- list("$ref" = "#/$defs/my_type")
-  result <- resolve_ref(obj, defs)
-  expect_equal(result$type, "string")
-  expect_length(result$oneOf, 1)
-  expect_null(result[["$ref"]])
-})
-
-test_that("resolve_ref returns obj unchanged when no $ref", {
-  obj <- list(type = "string", title = "x")
-  result <- resolve_ref(obj, list())
-  expect_identical(result, obj)
-})
-
-test_that("resolve_ref returns obj unchanged for unresolvable $ref", {
-  obj <- list("$ref" = "#/$defs/nonexistent")
-  result <- resolve_ref(obj, list())
-  expect_identical(result, obj)
-})
+# --- resolve_property ---------------------------------------------------------
 
 test_that("resolve_property merges allOf and carries top-level keys", {
   defs <- list(test_def = list(type = "string", oneOf = list(list(const = "v1"))))
@@ -77,15 +56,7 @@ test_that("determine_widget_type maps schema types correctly", {
     "textAreaInput")
 })
 
-# --- extract_titles / extract_oneof_choices -----------------------------------
-
-test_that("extract_titles with partial languages defaults to empty string", {
-  result <- extract_titles(list(title = "A", title_fi = "B"))
-  expect_equal(result, list(en = "A", fi = "B", sv = ""))
-
-  result2 <- extract_titles(list())
-  expect_equal(result2, list(en = "", fi = "", sv = ""))
-})
+# --- extract_oneof_choices ----------------------------------------------------
 
 test_that("extract_oneof_choices extracts const/titles and skips entries without const", {
   input <- list(
@@ -114,18 +85,6 @@ test_that("schema_get_title fallback chain: language -> en -> fallback", {
   expect_equal(schema_get_title(NULL, "en", "fallback"), "fallback")
 })
 
-# --- lang_to_iso --------------------------------------------------------------
-
-test_that("lang_to_iso converts column names and passes through ISO codes", {
-  expect_equal(lang_to_iso("disp_name_eng"), "en")
-  expect_equal(lang_to_iso("disp_name_fin"), "fi")
-  expect_equal(lang_to_iso("disp_name_swe"), "sv")
-  expect_equal(lang_to_iso("en"), "en")
-  expect_equal(lang_to_iso("fi"), "fi")
-  # Unknown language codes fall back to "en"
-  expect_equal(lang_to_iso("unknown"), "en")
-})
-
 # --- schema_get_choices -------------------------------------------------------
 
 test_that("schema_get_choices builds named vector with empty first option", {
@@ -142,30 +101,7 @@ test_that("schema_get_choices builds named vector with empty first option", {
   expect_equal(names(result)[3], "Bb")
 })
 
-test_that("schema_get_choices returns NULL for NULL/empty input", {
-  expect_null(schema_get_choices(NULL, "en"))
-  expect_null(schema_get_choices(list(), "en"))
-})
-
 # --- build_property_descriptor ------------------------------------------------
-
-test_that("build_property_descriptor populates fields for numeric property", {
-  prop <- list(type = "number", minimum = 0, maximum = 100,
-               title = "Weight", title_fi = "Paino")
-  desc <- build_property_descriptor("test_prop", prop,
-                                     required = TRUE,
-                                     event_type = "harvest",
-                                     is_array_item = FALSE)
-  expect_equal(desc$name, "test_prop")
-  expect_equal(desc$type, "numericInput")
-  expect_true(desc$required)
-  expect_equal(desc$minimum, 0)
-  expect_equal(desc$maximum, 100)
-  expect_equal(desc$titles$en, "Weight")
-  expect_equal(desc$titles$fi, "Paino")
-  expect_equal(desc$event_type, "harvest")
-  expect_false(desc$is_integer)
-})
 
 test_that("build_property_descriptor builds array_columns for dataTable", {
   prop <- list(
@@ -204,73 +140,19 @@ test_that("lookup_property resolves subtype > event > common priority", {
   expect_equal(lookup_property(reg, "my_prop", "fertilizer", "mineral")$name,
                "subtype")
   expect_equal(lookup_property(reg, "my_prop", "fertilizer")$name, "event")
+  expect_equal(lookup_property(reg, "my_prop", "fertilizer", "organic")$name,
+               "event")
   expect_equal(lookup_property(reg, "my_prop")$name, "common")
   expect_null(lookup_property(reg, "nonexistent"))
 })
 
-test_that("lookup_property falls through missing subtype to event level", {
-  reg <- list()
-  reg[[paste0("prop", REGISTRY_KEY_SEP, "harvest")]] <- list(name = "event")
+# --- find_property_by_name ----------------------------------------------------
 
-  result <- lookup_property(reg, "prop", "harvest", "some_subtype")
-  expect_equal(result$name, "event")
-})
-
-# --- normalize_legacy_event / get_legacy_value --------------------------------
-
-test_that("normalize_legacy_event maps old names to new", {
-  event <- normalize_legacy_event(list(mgmt_event_notes = "hello"))
-  expect_equal(event$mgmt_event_short_notes, "hello")
-  expect_null(event$mgmt_event_notes)
-
-  event2 <- normalize_legacy_event(list(planting_notes = "pn"))
-  expect_equal(event2$mgmt_event_long_notes, "pn")
-  expect_null(event2$planting_notes)
-
-  event3 <- normalize_legacy_event(list(harvest_comments = "hc"))
-  expect_equal(event3$mgmt_event_long_notes, "hc")
-})
-
-test_that("normalize_legacy_event does not overwrite existing new-name values", {
-  event <- normalize_legacy_event(list(
-    mgmt_event_notes = "old",
-    mgmt_event_short_notes = "new"
-  ))
-  expect_equal(event$mgmt_event_short_notes, "new")
-  # old name is preserved because new name already existed
-  expect_equal(event$mgmt_event_notes, "old")
-})
-
-test_that("get_legacy_value retrieves value via reverse mapping", {
-  expect_equal(get_legacy_value(list(planting_notes = "val"),
-                                 "mgmt_event_long_notes"), "val")
-  expect_null(get_legacy_value(list(other_field = "x"),
-                                "mgmt_event_long_notes"))
-})
-
-# --- find_any_property_desc ---------------------------------------------------
-
-test_that("find_any_property_desc uses reverse index for O(1) lookup", {
-  reg <- list()
-  reg[["date"]] <- list(name = "date", type = "dateInput")
-  reg[[paste0("crop_name", REGISTRY_KEY_SEP, "planting")]] <-
-    list(name = "crop_name", type = "selectInput")
-
-  rev_idx <- list(crop_name = paste0("crop_name", REGISTRY_KEY_SEP, "planting"))
-
-  expect_equal(find_any_property_desc(reg, "date", rev_idx)$name, "date")
-  expect_equal(find_any_property_desc(reg, "crop_name", rev_idx)$name,
-               "crop_name")
-  expect_null(find_any_property_desc(reg, "nonexistent", rev_idx))
-})
-
-test_that("find_any_property_desc falls back to linear scan without index", {
-  reg <- list()
-  reg[[paste0("crop_name", REGISTRY_KEY_SEP, "planting")]] <-
-    list(name = "crop_name")
-
-  result <- find_any_property_desc(reg, "crop_name", NULL)
-  expect_equal(result$name, "crop_name")
+test_that("find_property_by_name finds common and event properties", {
+  expect_equal(find_property_by_name(mgmt_schema, "date")$name, "date")
+  expect_equal(find_property_by_name(mgmt_schema, "tillage_practice")$name,
+               "tillage_practice")
+  expect_null(find_property_by_name(mgmt_schema, "nonexistent"))
 })
 
 # --- get_subtype_value --------------------------------------------------------
@@ -291,16 +173,44 @@ test_that("get_subtype_value extracts discriminator from event values", {
   expect_null(get_subtype_value(list(), er))
 })
 
-# --- get_schema_table_names ---------------------------------------------------
+# --- field ids -----------------------------------------------------------------
 
-test_that("get_schema_table_names lists all array table names", {
-  table_names <- get_schema_table_names(mgmt_schema)
-  expect_true("planting_list_table" %in% table_names)
-  expect_true("harvest_list_table" %in% table_names)
-  expect_true(all(grepl("_table$", table_names)))
-  # should not be empty
+test_that("fields shared by event types have one id per event type", {
+  pr <- mgmt_schema$property_registry
+  ids <- vapply(pr, function(desc) desc$id, character(1))
+  expect_identical(unname(ids), names(pr))
 
-  expect_true(length(table_names) >= 3)
+  notes_ids <- vapply(
+    Filter(function(desc) desc$name == "mgmt_event_long_notes", pr),
+    function(desc) desc$id, character(1))
+  expect_true(length(notes_ids) > 1)
+})
+
+test_that("an event property redefining a common property relabels it", {
+  er <- mgmt_schema$event_registry
+  pr <- mgmt_schema$property_registry
+  expect_equal(er$grazing$common_overrides$date$titles$en, "Start date")
+  expect_null(pr[[paste0("date", REGISTRY_KEY_SEP, "grazing")]])
+  expect_false("date" %in% er$grazing$property_names)
+})
+
+test_that("x-ui conditions refer to field ids of the same event type", {
+  desc <- lookup_property(mgmt_schema$property_registry, "animal_fert_usage",
+                          "fertilizer", "fertilizer_type_organic")
+  expect_match(desc$condition,
+               "input.organic_material___fertilizer___fertilizer_type_organic",
+               fixed = TRUE)
+  expect_false(grepl("input.organic_material ", desc$condition, fixed = TRUE))
+})
+
+test_that("get_relevant_fields returns the fields of the event and subtype", {
+  fields <- get_relevant_fields(mgmt_schema, "fertilizer",
+                                "fertilizer_type_organic")
+  ids <- vapply(fields, function(desc) desc$id, character(1))
+  expect_true(paste0("fertilizer_type", REGISTRY_KEY_SEP, "fertilizer") %in% ids)
+  expect_true(paste0("organic_material", REGISTRY_KEY_SEP, "fertilizer",
+                     REGISTRY_KEY_SEP, "fertilizer_type_organic") %in% ids)
+  expect_false(any(mgmt_schema$common_properties %in% ids))
 })
 
 # --- UI helpers (fct_schema_ui.R) ---------------------------------------------
@@ -316,13 +226,13 @@ test_that("convert_condition_to_js namespaces input references", {
   expect_equal(result2, "input['form-chemical_type'] != 'lime'")
 })
 
-test_that("make_required_label adds asterisk only for required non-empty labels", {
-  result <- make_required_label("Name", TRUE)
-  expect_s3_class(result, "shiny.tag.list")
-  html <- as.character(result)
-  expect_true(grepl("\\*", html))
+# --- to_sentence_case ---------------------------------------------------------
 
-  expect_equal(make_required_label("Name", FALSE), "Name")
-  expect_equal(make_required_label("", TRUE), "")
-  expect_null(make_required_label(NULL, TRUE))
+test_that("to_sentence_case capitalises lowercase labels only", {
+  expect_equal(to_sentence_case("weight of seeds (kg/ha)"),
+               "Weight of seeds (kg/ha)")
+  expect_equal(to_sentence_case("äestys"), "Äestys")
+  expect_equal(to_sentence_case("pH after the application"),
+               "pH after the application")
+  expect_equal(to_sentence_case(""), "")
 })

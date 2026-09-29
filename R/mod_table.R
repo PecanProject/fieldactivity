@@ -113,21 +113,16 @@ build_remove_row_button <- function(ns, iso, row_idx, can_remove) {
 #' Schema-driven table server module
 #'
 #' @param id Module ID (must match the table_id used in render_array_table)
-#' @param array_prop_name The property name of the array in the schema
 #' @param desc The property descriptor for the array
-#' @param schema The loaded schema
 #' @param language Reactive language value
-#' @param override_values ReactiveVal for setting table values
-#' @param parent_input The parent module's input
-#' @param parent_iv The parent module's InputValidator
-#' @param parent_ns The parent module's namespace function
+#' @param override_values ReactiveVal for setting table values, as a list of
+#'   rows (named lists keyed by column name)
 #'
-#' @return A list with values() and valid() reactives
+#' @return A list with values() and valid() reactives. values() holds the
+#'   table contents as a list of rows (named lists keyed by column name)
 #' @import shinyvalidate
 #' @noRd
-mod_table_server_schema <- function(id, array_prop_name, desc, schema,
-                                     language, override_values,
-                                     parent_input, parent_iv, parent_ns) {
+mod_table_server_schema <- function(id, desc, language, override_values) {
 
   stopifnot(is.reactive(language))
   stopifnot(is.reactive(override_values))
@@ -156,32 +151,16 @@ mod_table_server_schema <- function(id, array_prop_name, desc, schema,
         # Extract the row number from the widget name (e.g. "crop_name_2" -> 2)
         row_num <- as.integer(sub(paste0("^", variables[i], "_"), "", widget_name))
 
-        child_iv <- InputValidator$new()
+        child_iv <- field_validator(col_desc, widget_name)
+        if (is.null(child_iv)) return()
 
-        if (isTRUE(col_desc$required)) {
-          child_iv$add_rule(widget_name, sv_required(message = "Required"))
-        }
-        if (!is.null(col_desc$minimum)) {
-          child_iv$add_rule(widget_name, sv_gte(col_desc$minimum, allow_na = TRUE,
-                                           message_fmt = "Must be >= {rhs}"))
-        }
-        if (!is.null(col_desc$maximum)) {
-          child_iv$add_rule(widget_name, sv_lte(col_desc$maximum, allow_na = TRUE,
-                                           message_fmt = "Must be <= {rhs}"))
-        }
-        if (isTRUE(col_desc$is_integer)) {
-          child_iv$add_rule(widget_name, function(value) {
-            if (is.null(value) || is.na(value)) return(NULL)
-            if (value != floor(value)) return("Must be a whole number")
-            NULL
-          })
-        }
-
-        # Only validate when this row still exists
+        # Only validate when this row is displayed. Widgets are numbered by
+        # display position, so compare with the number of rows rather than
+        # with the (stable) row ids
         local({
           local_row <- row_num
           child_iv$condition(reactive({
-            local_row %in% dynamic_rows()
+            local_row <= length(dynamic_rows())
           }))
         })
         iv$add_validator(child_iv)
@@ -190,6 +169,8 @@ mod_table_server_schema <- function(id, array_prop_name, desc, schema,
     }
 
     n_cols <- length(column_names)
+    # the latest entered rows and their dynamic row ids, used to keep the
+    # entered values when the table is re-rendered
     old_values <- reactiveVal()
     table_values <- reactiveVal()
     rendered <- reactiveVal(FALSE)
@@ -217,14 +198,7 @@ mod_table_server_schema <- function(id, array_prop_name, desc, schema,
       values <- override_values()
       if (is.null(values)) return()
 
-      # Determine rows from the data
-      first_col <- column_names[1]
-      col_data <- values[[first_col]]
-      if (!is.null(col_data) && length(col_data) > 0) {
-        dynamic_rows(as.integer(seq_along(col_data)))
-      } else {
-        dynamic_rows(1L)
-      }
+      dynamic_rows(if (length(values) > 0) seq_along(values) else 1L)
       override_trigger(override_trigger() + 1)
     })
 
@@ -306,11 +280,11 @@ mod_table_server_schema <- function(id, array_prop_name, desc, schema,
           col_desc <- columns[[variable]]
 
           value <- if (do_override) {
-            override_vals[[variable]][row_idx]
+            override_vals[[row_idx]][[variable]]
           } else {
-            old_row_number <- which(
-              isolate(old_values())[["DYNAMIC_ROWS"]] == rows[current_row])
-            isolate(old_values())[[variable]][old_row_number]
+            old <- isolate(old_values())
+            old_row_number <- match(row_idx, old$row_ids)
+            if (!is.na(old_row_number)) old$rows[[old_row_number]][[variable]]
           }
 
           cell <- build_schema_cell_widget(variable, col_desc, ns, iso,
@@ -338,14 +312,9 @@ mod_table_server_schema <- function(id, array_prop_name, desc, schema,
       if (nrow(table_to_display) == 0) return()
 
       iso <- lang_to_iso(language())
-      # Use unitless titles or regular titles for column headers
+      # full titles, as they include the unit
       col_labels <- vapply(column_names, function(cn) {
-        col_desc <- columns[[cn]]
-        if (!is.null(col_desc$unitless_titles)) {
-          schema_get_title(col_desc$unitless_titles, iso, cn)
-        } else {
-          schema_get_title(col_desc$titles, iso, cn)
-        }
+        schema_get_title(columns[[cn]]$titles, iso, cn)
       }, character(1))
       names(table_to_display) <- c(col_labels, "")
 
@@ -380,10 +349,8 @@ mod_table_server_schema <- function(id, array_prop_name, desc, schema,
     }, server = FALSE)
 
     observe({
-      value_list <- list()
-
       if (!rendered()) {
-        table_values(value_list)
+        table_values(list())
         return()
       }
 
@@ -391,25 +358,21 @@ mod_table_server_schema <- function(id, array_prop_name, desc, schema,
 
       rows <- dynamic_rows()
       if (is.null(rows) || length(rows) == 0) {
-        table_values(value_list)
+        table_values(list())
         return()
       }
 
-      row_numbers <- seq_along(rows)
+      # widgets are numbered by display position, not by dynamic row id
+      row_values <- lapply(seq_along(rows), function(row_number) {
+        row <- lapply(column_names, function(variable) {
+          input[[paste(variable, row_number, sep = "_")]]
+        })
+        names(row) <- column_names
+        row
+      })
 
-      for (variable in column_names) {
-        values <- NULL
-        for (row_number in row_numbers) {
-          element_name <- paste(variable, row_number, sep = "_")
-          values <- c(values, input[[element_name]])
-        }
-        value_list[[variable]] <- values
-      }
-
-      table_values(value_list)
-
-      value_list <- c(value_list, list(DYNAMIC_ROWS = isolate(dynamic_rows())))
-      old_values(value_list)
+      table_values(row_values)
+      old_values(list(rows = row_values, row_ids = rows))
     })
 
     list(
