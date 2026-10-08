@@ -79,9 +79,10 @@ write_json_file <- function(site, block, event_list, rotation_list,
   experiment$management$events <- event_list
   
 
-  # create file
+  # create file. digits = NA keeps full precision (the default rounds to four
+  # decimals)
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-                       null = "list", auto_unbox = TRUE)
+                       null = "list", auto_unbox = TRUE, digits = NA)
 }
 
 #' Read the events from the events.json file
@@ -138,6 +139,22 @@ read_json_file <- function(site, block,
   management$rotation <- rotation
   
   return(management)
+}
+
+#' Write the events of a block and read them back
+#'
+#' find_event_index matches the in-memory copy of an event against the file
+#' exactly, so after a write the in-memory copy must be what is read back, not
+#' what was written: writing adds $schema and drops empty values, and numbers
+#' may come back as integers.
+#'
+#' @inheritParams write_json_file
+#'
+#' @return The events of the block as read back from the events.json file
+save_block_events <- function(site, block, event_list, rotation_list,
+                              base_folder = json_file_base_folder()) {
+  write_json_file(site, block, event_list, rotation_list, base_folder)
+  read_json_file(site, block, base_folder)$events
 }
 
 #' Copy a file related to an event and name it appropriately

@@ -175,6 +175,7 @@ mod_fileInput_server <- function(id, desc, language, set_path, reset_path) {
     # when reset_path is signaled, do it
     observeEvent(reset_path(), {
       current_path(NULL)
+      new_file(FALSE)
       reset_path(FALSE)
     })
     

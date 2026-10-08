@@ -322,8 +322,9 @@ app_server <- function(input, output, session) {
         # handled later.
         if (event$block != orig_event$block) {
           orig_block_data[event_index] <- NULL
-          write_json_file(input$site, orig_event$block, orig_block_data, orig_block_data_rotation)
-          events$by_block[[orig_event$block]] <- orig_block_data
+          events$by_block[[orig_event$block]] <- save_block_events(
+            input$site, orig_event$block, orig_block_data,
+            orig_block_data_rotation)
         }
         
       }
@@ -502,12 +503,10 @@ app_server <- function(input, output, session) {
         new_block_data_rotation <- list()
       }
       
-      # save changes
-      write_json_file(input$site, event$block, new_block_data, new_block_data_rotation)
+      # save changes and update events$by_block
+      events$by_block[[event$block]] <- save_block_events(
+        input$site, event$block, new_block_data, new_block_data_rotation)
       showNotification("Saved successfully.", type = "message")
-      
-      # update events$by_block
-      events$by_block[[event$block]] <- new_block_data
       
       # exit sidebar mode
       if (editing) {
@@ -564,12 +563,10 @@ app_server <- function(input, output, session) {
         block_data_rotation <- list()
       }
       
-      # write changes to json
-      write_json_file(input$site, event$block, block_data, block_data_rotation)
+      # write changes to json and update events list
+      events$by_block[[event$block]] <- save_block_events(
+        input$site, event$block, block_data, block_data_rotation)
       showNotification("Entry deleted.", type = "message")
-      
-      # update events list
-      events$by_block[[event$block]] <- block_data
       
       # exit edit mode
       event_to_edit(NULL)
@@ -640,12 +637,10 @@ app_server <- function(input, output, session) {
       block_data_rotation <- list()
     }
     
-    # save changes
-    write_json_file(input$site, event$block, block_data, block_data_rotation)
+    # save changes and update events data
+    events$by_block[[event$block]] <- save_block_events(
+      input$site, event$block, block_data, block_data_rotation)
     showNotification("Cloned successfully.", type = "message")
-    
-    # update events data
-    events$by_block[[event$block]] <- block_data
   })
   
   # load the site event data into memory (events$by_block)
