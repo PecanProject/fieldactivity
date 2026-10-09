@@ -63,3 +63,16 @@ Links that might interest you:
 
 - [Webpage](https://pecanproject.github.io/fieldactivity/)
 - [Issues](https://github.com/PecanProject/fieldactivity/issues)
+
+
+## Contributions
+
+We acknowledge the following substantial contributions to the development of this application:
+
+- **[Pratik Pakhale](https://github.com/pratikpakhale):**
+  Implementation of schema-based management event handling,
+  including support for legacy data formats and improvements
+  to the management UI.
+
+- **[Olli Niemitalo](https://github.com/olli4):**
+  Maintaining and creating the management schema
