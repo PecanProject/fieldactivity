@@ -20,8 +20,6 @@ mod_rotation_cycle_ui <- function(id){
 #' rotation_cycle Server Functions
 #'
 #' @noRd 
-#' 
-#' @import ggplot2
 mod_rotation_cycle_server <- function(id, rotation, site, block){ # site needs to be added at some point
   
   stopifnot(is.reactive(rotation))

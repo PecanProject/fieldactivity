@@ -10,19 +10,14 @@ Description: An app for keeping track of field activity in the Field
   ICASA standards for agricultural data.
 License: BSD_3_clause + file LICENSE
 Imports: 
-    attempt,
     bslib,
     callr,
     config (>= 0.3.1),
     DT (>= 0.25),
-    ggplot2,
     glue,
     golem (>= 0.3.1),
     htmlwidgets,
     jsonlite,
-    methods,
-    pkgload,
-    processx,
     rmarkdown,
     shiny (>= 1.6.0),
     shinyjs,
@@ -36,7 +31,8 @@ LazyData: true
 RoxygenNote: 7.3.3
 URL: https://github.com/PecanProject/fieldactivity
 BugReports: https://github.com/PecanProject/fieldactivity/issues
-Suggests: 
+Suggests:
+    jsonvalidate,
     spelling,
     testthat (>= 3.0.0),
     shinytest,

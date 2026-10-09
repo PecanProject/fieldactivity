@@ -97,22 +97,33 @@ get_disp_name <- function(code_name, language = NULL,
 #'   replaced with display names
 replace_with_display_names <- function(events_with_code_names, language) {
   events_with_display_names <- events_with_code_names
+  iso <- lang_to_iso(language)
   
   for (variable_name in names(events_with_code_names)) {
-    # determine the type of element the variable corresponds to
+    # determine the type of element the variable corresponds to: an app
+    # chrome element or a schema property
     element <- structure_lookup_list[[variable_name]]
+    desc <- if (is.null(element$type)) {
+      find_property_by_name(mgmt_schema, variable_name)
+    }
+    type <- element$type %||% desc$type
     
-    if (is.null(element$type)) {
+    if (is.null(type)) {
       # this could be e.g. the date_ordering or event column
       next
     }
     
-    if (element$type == "selectInput") {
+    if (type == "selectInput") {
       # the pasting is done to ensure we get a nicely formatted name
       # when x is a character vector
       events_with_display_names[[variable_name]] <-
         sapply(events_with_code_names[[variable_name]],
                FUN = function(x) {
+                 choice <- Find(function(ch) identical(ch$value, x),
+                                desc$choices)
+                 if (!is.null(choice)) {
+                   return(schema_get_title(choice$titles, iso, x))
+                 }
                  name <- get_disp_name(x, language = language)
                  if (length(name) > 1) {
                    name <- paste(ifelse(name=="", "-", name), 
@@ -120,7 +131,7 @@ replace_with_display_names <- function(events_with_code_names, language) {
                  }
                  name
                })
-    } else if (element$type %in% 
+    } else if (type %in% 
                c("textAreaInput", "textInput", "numericInput")) {
       events_with_display_names[[variable_name]] <-
         sapply(events_with_code_names[[variable_name]],
@@ -132,7 +143,7 @@ replace_with_display_names <- function(events_with_code_names, language) {
                    ifelse(x==missingval,"",x)
                  }
                })
-    } else if (element$type %in% c("dateInput", "dateRangeInput")) {
+    } else if (type %in% c("dateInput", "dateRangeInput")) {
       events_with_display_names[[variable_name]] <-
         sapply(events_with_code_names[[variable_name]], 
                FUN = function(x) { 
@@ -169,6 +180,15 @@ set_login_language <- function(language) {
       "Password:" = "Salasana",
       "Login" = "Kirjaudu",
       "Logout" = "Kirjaudu ulos"
+    )
+  } else if (identical(language, "disp_name_swe")) {
+    shinymanager::set_labels(
+      language = "en",
+      "Please authenticate" = "Logga in f\U00f6r att registrera h\U00e4ndelser",
+      "Username:" = "Plats",
+      "Password:" = "L\U00f6senord",
+      "Login" = "Logga in",
+      "Logout" = "Logga ut"
     )
   } else if (identical(language, "disp_name_eng")) {
     shinymanager::set_labels(

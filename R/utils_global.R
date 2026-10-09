@@ -1,3 +1,6 @@
+# null-coalescing operator (not importing rlang just for this)
+`%||%` <- function(a, b) if (!is.null(a)) a else b
+
 # missing value in the ICASA standard
 missingval <- "-99.0"
 date_format_json <- "%Y-%m-%d"
@@ -21,8 +24,20 @@ sites$blocks <- sapply(sites$blocks, blocks_to_vector)
 # rather than the values will be displayed
 # the \U codes are UTF-8 flag emojis
 languages <- c("English \U0001f1ec\U0001f1e7" = "disp_name_eng",
-               "suomi \U0001f1eb\U0001f1ee" = "disp_name_fin")
+               "suomi \U0001f1eb\U0001f1ee" = "disp_name_fin",
+               "svenska \U0001f1f8\U0001f1ea" = "disp_name_swe")
 init_lang <- languages[1]
+
+# Load and parse the management-event schema at package load time. The form
+# is built from it, so the app cannot run without it.
+mgmt_schema <- load_schema()
+
+# the variables holding a file (image). The main app saves the uploaded files
+# and stores their paths under these names
+fileInput_code_names <- unique(vapply(
+  Filter(function(desc) desc$type == "fileInput",
+         mgmt_schema$property_registry),
+  function(desc) desc$name, character(1)))
 
 # whether to print debug information (short for debug print)
 # set the boolean value below to FALSE to suppress prints

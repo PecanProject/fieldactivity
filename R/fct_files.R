@@ -5,6 +5,10 @@
 # path to json file folder
 json_file_base_folder <- function() golem::get_golem_options("json_file_path")
 
+# the schema the saved events follow, written as "$schema" in every event.
+# Update it together with the bundled management-event.schema.json
+schema_url <- "https://raw.githubusercontent.com/hamk-uas/fieldobservatory-data-schemas/main/management-event.schema.json"
+
 #' Create a folder for a site-block combination
 #'
 #' Given a site and a block on that site, create a folder under
@@ -24,7 +28,7 @@ create_file_folder <- function(site, block,
   # if the events directory (stored in json_file_base_folder) doesn't exist,
   # stop
   if (!dir.exists(base_folder)) {
-    stop(glue("Could not find folder {json_file_base_folder}"))
+    stop(glue("Could not find folder {base_folder}"))
   }
   
   folder_path <- file.path(base_folder, site, block)
@@ -47,38 +51,21 @@ write_json_file <- function(site, block, event_list, rotation_list,
                             base_folder = json_file_base_folder()) {
   
   # this ensures that the folder to store this file exists
-  create_file_folder(site, block)
+  create_file_folder(site, block, base_folder)
   
   file_path <- file.path(base_folder, site, block, "events.json")
   
-  # if there are events in the list, do the following:
-  # - erase block information in each event
-  # - apply other exceptions
-  if (length(event_list) > 0) {
-    for (i in 1:length(event_list)) {
-      event_list[[i]]$block <- NULL
-      
-      ##### EXCEPTIONS
-      event <- event_list[[i]]
-      
-      # if the event type is fertilizer application and the fertilizer
-      # type is organic, change mgmt_operations_event to organic_material
-      # to conform to the ICASA standard
-      if (identical(event$mgmt_operations_event, "fertilizer") &&
-          identical(event$fertilizer_type, "fertilizer_type_organic")) {
-        event_list[[i]]$mgmt_operations_event <- "organic_material"    
-      }
-      
-      #####
-    }
-  }
+  # the block is implied by the file location
+  event_list <- lapply(event_list, function(event) {
+    event$block <- NULL
+    event[["$schema"]] <- schema_url
+    drop_empty_values(event)
+  })
   
   # If rotations on the list --> erase the block information like with events
   if (length(rotation_list) > 0) {
     for (j in 1:length(rotation_list)) {
       rotation_list[[j]]$block <- NULL
-      
-      rotation <- rotation_list[[j]]
     }
   }
   
@@ -92,23 +79,24 @@ write_json_file <- function(site, block, event_list, rotation_list,
   experiment$management$events <- event_list
   
 
-  # create file
+  # create file. digits = NA keeps full precision (the default rounds to four
+  # decimals)
   jsonlite::write_json(experiment, path = file_path, pretty = TRUE, 
-                       null = "list", auto_unbox = TRUE)
+                       null = "list", auto_unbox = TRUE, digits = NA)
 }
 
 #' Read the events from the events.json file
 #' 
 #' Reads the events from the events.json file specific to this site and block
-#' combination and returns as a list of events.
+#' combination and returns as a list of events. Applies backward-compatible
+#' normalization for legacy events.
 #' 
 #' @param site The site to read from
 #' @param block The block to read from
 #' @param base_folder Included for testing reasons, the default value should
 #'   otherwise be used
 #'   
-#' @return A list of events, which are themselves lists. If the corresponding
-#'   file does not exist or there are no events, returns an empty list.
+#' @return A list with $events and $rotation components.
 read_json_file <- function(site, block, 
                            base_folder = json_file_base_folder()) {
   
@@ -132,23 +120,10 @@ read_json_file <- function(site, block,
     return(list())
   }
   
-  # # if there are no rotation, return an empty list
-  # if (length(rotation) == 0) {
-  #   return(list())
-  # }
-  
-  # add block information and apply exceptions to each event
+  # add block information and upgrade legacy events to the canonical format
   for (i in 1:length(events)) {
     events[[i]]$block <- block
-    
-    ##### EXCEPTIONS
-    
-    # if mgmt_operations_event is organic_material, change it to fertilizer
-    if (identical(events[[i]]$mgmt_operations_event, "organic_material")) {
-      events[[i]]$mgmt_operations_event <- "fertilizer"
-    }
-    
-    #####
+    events[[i]] <- normalize_legacy_event(events[[i]])
   }
   
   # add block info for rotations
@@ -164,6 +139,22 @@ read_json_file <- function(site, block,
   management$rotation <- rotation
   
   return(management)
+}
+
+#' Write the events of a block and read them back
+#'
+#' find_event_index matches the in-memory copy of an event against the file
+#' exactly, so after a write the in-memory copy must be what is read back, not
+#' what was written: writing adds $schema and drops empty values, and numbers
+#' may come back as integers.
+#'
+#' @inheritParams write_json_file
+#'
+#' @return The events of the block as read back from the events.json file
+save_block_events <- function(site, block, event_list, rotation_list,
+                              base_folder = json_file_base_folder()) {
+  write_json_file(site, block, event_list, rotation_list, base_folder)
+  read_json_file(site, block, base_folder)$events
 }
 
 #' Copy a file related to an event and name it appropriately
@@ -198,7 +189,7 @@ copy_file <- function(orig_filepath, variable_name, site, block, date,
                       filepath_is_relative = FALSE, delete_original = FALSE,
                       base_folder = json_file_base_folder()) {
   # ensures the folder for this site-block combo is there
-  create_file_folder(site, block)
+  create_file_folder(site, block, base_folder)
   
   # add json_file_base_folder to filepath if requested
   if (filepath_is_relative) {

@@ -13,6 +13,7 @@ mgmt_operations_event_choice,bed_prep,raised bed preparation,kasvatuslaatikoiden
 mgmt_operations_event_choice,inorg_mulch,placement of mulch,katteen levitys
 mgmt_operations_event_choice,Inorg_mul_rem,removal of mulch,katteen poisto
 #   mgmt_operations_event_choice,organic_material,organic material application,eloperäisen aineen levitys
+mgmt_operations_event_choice,measurement,measurement,mittaus
 mgmt_operations_event_choice,other,other,muu
 #
 # the following are the “all” choices for frontpage table filters

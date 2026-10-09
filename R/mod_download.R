@@ -43,8 +43,6 @@ mod_download_server_inst <- function(id) {
       # Name for the downloaded file
       filename = "guideFieldactivity.html",
       content = function(file) {
-        params <- list(n = input$n)
-        
         if(dp()) message("Copying instructions to temp file")
         
         # Paths to the rendered document + used images
@@ -63,19 +61,12 @@ mod_download_server_inst <- function(id) {
         file.copy(system.file("user_doc/images_user_instructions", "Addevent.png", package = "fieldactivity"), report_img_4, overwrite = TRUE)
         file.copy(system.file("user_doc/images_user_instructions", "eventexample_1.png", package = "fieldactivity"), report_img_5, overwrite = TRUE)
         
-        # id <- showNotification(
-        #   "Rendering report...",
-        #   duration = 8,
-        #   closeButton = FALSE
-        # )
-        # on.exit(removeNotification(id), add = TRUE)
-        
         if (dp()) message("Moving to rendering the .md file")
         
         # Path to the instructions .md which will be rendered
         callr::r(
           render_report,
-          list(input = report_path, output = file, params = params)
+          list(input = report_path, output = file, params = list())
         )
       }
     )
@@ -124,6 +115,10 @@ mod_download_json <- function(id, label) {
 
 #' Server side for downloading the csv export
 #'
+#' @param id Internal parameters for {shiny}
+#' @param user_auth Site name in order to download correct site files
+#' @param base_folder Location of directories in server
+#'
 #' @noRd
 #'
 #' @importFrom utils write.csv
@@ -140,48 +135,28 @@ mod_download_server_table <- function(id, user_auth, base_folder = json_file_bas
       filename = "event_table_fa.csv",
       
       content = function(file) {
+        if(dp()) message("Creating an export of the events")
         
-        if(dp()) message("Fetching the event table observations")
-        #user <- NULL
-        if (golem::app_dev()) {
-          if(dp()) message("Development state")
-          file_path <- "dev/dev_events"
-          user <- "qvidja"
-          
-        } else {
-          if(dp()) message("Data path on production")
-          file_path <- base_folder
-          
-          if(dp()) message("Checking current user")
-            user <- user_auth()
+        site <- user_auth()
+        blocks <- if (isTruthy(site)) {
+          list.files(file.path(base_folder, site))
         }
-        # Create the file path based on the production status and the user
-        file_path <- file.path(file_path, user)
-        events_file <- NULL
-        if(length(list.files(file_path)) != 0){
-          for(i in list.files(file_path)){
-            jsontable <- jsonlite::read_json(file.path(file_path, i, "events.json"), simplifyVector = TRUE)[[1]]$events
-            if(is.null(events_file)){
-              if(!identical(list(), jsontable)){
-                events_file <- as.data.frame(cbind(block = i, jsontable))
-              }
-            } else {
-              events_file <- merge(events_file,as.data.frame(cbind(block = i,jsontable)),all = T)
-            }
+        # events are read the same way as in the app, so legacy events are
+        # exported in the canonical format too
+        events <- unlist(lapply(blocks, function(block) {
+          read_json_file(site, block, base_folder = base_folder)$events
+        }), recursive = FALSE)
+          
+        if (length(events) == 0) {
+          write.csv("Seems that there isn't any data? Try to create a management event.",
+                    file, row.names = FALSE)
+          return()
           }
           
-          # Flattening the lists and removing extra "," that can cause parsing issues
-          events_file <- as.data.frame(lapply(events_file, as.character))
-          # Might not be suitable, if there are only simple event management stored,
-          # so only try this modification.
-          events_file <- try(as.data.frame(lapply(events_file, function(x) gsub(",", " ", x))))
-          
-          if (dp()) message("Creating an export of the events")
-          write.csv(events_file, file, row.names = FALSE, quote=FALSE)
-        } else {
-          write.csv("Error with a file path. Have you stored field management events? If yes, then this error should not occur.", file, row.names = FALSE, quote = FALSE)
-        }
-        
+        events_table <- events_to_table(events)
+        # block first, as in the event list
+        events_table <- events_table[c("block", setdiff(names(events_table), "block"))]
+        write.csv(events_table, file, row.names = FALSE, na = "")
       }
     )
   }) #Moduleserver close
@@ -212,71 +187,32 @@ mod_download_server_json <- function(id, user_auth, base_folder = json_file_base
       },
       
       content = function(file) {
+        if(dp()) message("Creating a zip file of the json files")
         
-        if(dp()) message("Fetching the event table observations (for json export)")
+        # a fresh directory for each download, so no files are left over from
+        # an earlier one
+        zip_root <- tempfile()
+        tmpdrjson <- file.path(zip_root, "json")
+        dir.create(tmpdrjson, recursive = TRUE)
+        on.exit(unlink(zip_root, recursive = TRUE), add = TRUE)
         
-        if (golem::app_dev()) {
-          if(dp()) message("Development state")
-          file_path <- "dev/dev_events"
-          user <- "qvidja"
-          
-        } else {
-          if(dp()) message("Data path on production")
-          file_path <- base_folder
-          
-          if(dp()) message("Checking current user")
-          user <- user_auth()
+        site <- user_auth()
+        blocks <- if (isTruthy(site)) {
+          list.files(file.path(base_folder, site))
         }
-        # Create the file path based on the production status and the user
-        file_path <- file.path(file_path, user)
-        # tmp directory with sub directory for json files
-        tmpdr <- tempdir()
-        if(!file.exists(file.path(tmpdr, "json"))){
-          dir.create(paste0(tmpdr, "/json"))
+        for (block_name in blocks) {
+          file.copy(file.path(base_folder, site, block_name, "events.json"),
+                    file.path(tmpdrjson, paste0("events_", block_name, ".json")))
         } 
         
-        # Path to subdirectory
-        tmpdrjson <- file.path(tmpdr, "json")
-        
-        if(length(list.files(file_path)) != 0){
-          for(block_name in list.files(file_path)){
-            block_json <- file.path(tmpdrjson, paste0("events_", block_name, ".json"))
-            file.copy(file.path(file_path, block_name, "events.json"), block_json)
-          }
-          
-          if (dp()) message("Creating a zip file of the json files")
-          zip::zip(zipfile=file, files="json", root = tmpdr)
-        } else {
-          #emptydir <- file.path(tmpdr, "Invalid_path.csv")
+        if (length(list.files(tmpdrjson)) == 0) {
           if(dp()) message("Return a csv with an error")
-          write.csv("Seems that there isn't any data? Try to create a management event.", file.path(tmpdrjson, "Error.csv"), row.names = FALSE)
-          zip::zip(zipfile=file, files="json", root = tmpdr)
-        }
+          write.csv("Seems that there isn't any data? Try to create a management event.",
+                    file.path(tmpdrjson, "Error.csv"), row.names = FALSE)
+          }
+        zip::zip(zipfile = file, files = "json", root = zip_root)
       },
       contentType = "application/zip"
     )
   }) #Moduleserver close
 }
-
-
-
-
-
-#' download Server Function
-#'
-#' @noRd
-# mod_download_serverxx <- function(input, output, session){
-#   ns <- session$ns
-#   data_xi <- "string"
-#   
-#   output$report <- downloadHandler(
-#     
-#     filename = function(){
-#       paste("sitemxt", "csv", sep = ".")
-#     },
-#     
-#     content = function(file){
-#       write.csv(data_xi, file)
-#     }
-#   )
-# }

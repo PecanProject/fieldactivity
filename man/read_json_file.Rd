@@ -15,10 +15,10 @@ read_json_file(site, block, base_folder = json_file_base_folder())
 otherwise be used}
 }
 \value{
-A list of events, which are themselves lists. If the corresponding
-  file does not exist or there are no events, returns an empty list.
+A list with $events and $rotation components.
 }
 \description{
 Reads the events from the events.json file specific to this site and block
-combination and returns as a list of events.
+combination and returns as a list of events. Applies backward-compatible
+normalization for legacy events.
 }
