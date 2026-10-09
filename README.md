@@ -19,8 +19,7 @@ mostly follow the ICASA standards for agricultural data.
 ## Installation
 
 <!-- You can install the released version of fieldactivity from [CRAN](https://CRAN.R-project.org) with:
-
-``` r
+&#10;``` r
 install.packages("fieldactivity")
 ``` 
 -->
@@ -69,5 +68,17 @@ Modify `dev/run_dev.R` if necessary, this is the file which
 
 Links that might interest you:
 
--   [Webpage](https://pecanproject.github.io/fieldactivity/)
--   [Issues](https://github.com/PecanProject/fieldactivity/issues)
+- [Webpage](https://pecanproject.github.io/fieldactivity/)
+- [Issues](https://github.com/PecanProject/fieldactivity/issues)
+
+## Contributions
+
+We acknowledge the following substantial contributions to the
+development of this application:
+
+- **[Pratik Pakhale](https://github.com/pratikpakhale):** Implementation
+  of schema-based management event handling, including support for
+  legacy data formats and improvements to the management UI.
+
+- **[Olli Niemitalo](https://github.com/olli4):** Maintaining and
+  creating the management schema
