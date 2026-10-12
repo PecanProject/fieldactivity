@@ -656,14 +656,14 @@
                                 "unit": "%"
                             },
                             "type": "number",
-                            "min" : 0,
-                            "max" : 100
+                            "minimum" : 0,
+                            "maximum" : 100
                         },
                         "org_material_c_to_n": {
                             "title": "C:N ratio in material",
                             "title_fi": "C:N suhde aineessa",
                             "type": "number",
-                            "min": 0
+                            "minimum": 0
                         },
                         "fertilizer_material_source" : {
                             "title": "fertilizer material source",
@@ -680,7 +680,8 @@
                             "type": "string",
                             "x-ui": {
                                 "placeholder": "which animal fertilizer, e.g. pig, horse, cow",
-                                "placeholder_fi": "minkä eläimen lannoitetta, esim. sika, hevonen, lehmä"
+                                "placeholder_fi": "minkä eläimen lannoitetta, esim. sika, hevonen, lehmä",
+                                "condition": "input.organic_material == 'RE003' || input.organic_material == 'RE004'"
                             }
                         }
                     }
