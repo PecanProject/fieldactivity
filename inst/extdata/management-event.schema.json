@@ -656,14 +656,14 @@
                                 "unit": "%"
                             },
                             "type": "number",
-                            "minimum" : 0,
-                            "maximum" : 100
+                            "min" : 0,
+                            "max" : 100
                         },
                         "org_material_c_to_n": {
                             "title": "C:N ratio in material",
                             "title_fi": "C:N suhde aineessa",
                             "type": "number",
-                            "minimum": 0
+                            "min": 0
                         },
                         "fertilizer_material_source" : {
                             "title": "fertilizer material source",
@@ -680,8 +680,7 @@
                             "type": "string",
                             "x-ui": {
                                 "placeholder": "which animal fertilizer, e.g. pig, horse, cow",
-                                "placeholder_fi": "minkä eläimen lannoitetta, esim. sika, hevonen, lehmä",
-                                "condition": "input.organic_material == 'RE003' || input.organic_material == 'RE004'"
+                                "placeholder_fi": "minkä eläimen lannoitetta, esim. sika, hevonen, lehmä"
                             }
                         }
                     }
@@ -1252,9 +1251,6 @@
                     "title": "list of active substances in chemical",
                     "title_fi": "lista kemikaalin tehoaineista",
                     "type": "array",
-                    "x-ui": {
-                        "condition": "input.chemical_type != 'chemical_type_lime_application'"
-                    },
                     "items": {
                         "type": "object",
                         "properties": {
@@ -2344,20 +2340,14 @@
                     "title_fi" : "pH ennen toimenpidettä",
                     "type": "number",
                     "minimum" : 0,
-                    "maximum" : 14,
-                    "x-ui": {
-                        "condition": "input.chemical_type == 'chemical_type_lime_application'"
-                    }
+                    "maximum" : 14
                 },
                 "application_ph_end" : {
                     "title": "pH after the application",
                     "title_fi": "pH jälkeen toimenpiteen",
                     "type": "number",
                     "minimum" : 0,
-                    "maximum" : 14,
-                    "x-ui": {
-                        "condition": "input.chemical_type == 'chemical_type_lime_application'"
-                    }
+                    "maximum" : 14
                 },
                 "mgmt_event_long_notes": {
                     "title": "chemical application notes",
@@ -2553,6 +2543,28 @@
                         "unit": "ha",
                         "unitless_title": "grazing area",
                         "unitless_title_fi": "laidunnettava ala"
+                    }
+                },
+                "grazing_carbon_removed": {
+                    "title": "removed carbon (C) from grazing (kg/ha)",
+                    "title_fi": "poistunut hiilenmäärä (C) laidunnuksesta (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "removed carbon from grazing",
+                        "unitless_title_fi": "poistunut hiilenmäärä laidunnuksesta"
+                    }
+                },
+                "grazing_carbon_input": {
+                    "title": "added carbon (C) from grazing (kg/ha)",
+                    "title_fi": "lisätty hiilenmäärä (C) laidunnuksesta (kg/ha)",
+                    "type": "number",
+                    "minimum": 0,
+                    "x-ui": {
+                        "unit": "kg/ha",
+                        "unitless_title": "added carbon from grazing",
+                        "unitless_title_fi": "lisätty hiilenmäärä laidunnuksesta"
                     }
                 },
                 "grazing_material_removed_prop": {
@@ -2780,38 +2792,6 @@
                         "unitless_title_fi": "leikkuukorkeus"
                     }
                 },
-                "mowing_method": {
-                    "title": "mowing method",
-                    "title_fi": "leikkuutapa",
-                    "type": "string",
-                    "oneOf": [
-                        {
-                            "title": "rotary mower",
-                            "title_fi": "pyöröleikkuri",
-                            "const": "mowing_method_rotary"
-                        },
-                        {
-                            "title": "flail mower",
-                            "title_fi": "kelamurskain",
-                            "const": "mowing_method_flail"
-                        },
-                        {
-                            "title": "disc mower",
-                            "title_fi": "lautasniittokone",
-                            "const": "mowing_method_disc"
-                        },
-                        {
-                            "title": "sickle bar mower",
-                            "title_fi": "sorminiittokone",
-                            "const": "mowing_method_sickle_bar"
-                        },
-                        {
-                            "title": "other",
-                            "title_fi": "muu",
-                            "const": "mowing_method_other"
-                        }
-                    ]
-                },
                 "mgmt_event_long_notes": {
                     "title": "mowing notes",
                     "title_fi": "muistiinpanot leikkuusta",
@@ -2851,10 +2831,7 @@
                 "mgmt_event_long_notes": {
                     "title": "observations",
                     "title_fi": "havainnot",
-                    "type": "string",
-                    "x-ui": {
-                        "form-type": "textAreaInput"
-                    }
+                    "type": "string"
                 }
             },
             "required": [
@@ -3067,15 +3044,6 @@
                             "title_fi": "lierojen lukumäärä",
                             "type": "integer",
                             "minimum": 0
-                        },
-                        "soil_image": {
-                            "title": "photo of soil",
-                            "title_fi": "kuva maaperästä",
-                            "type": "string",
-                            "x-ui": {
-                                "form-type": "fileInput",
-                                "accept": "image/*"
-                            }
                         }
                     }
                 },
@@ -3234,15 +3202,6 @@
                             "title_fi": "canopeo-lukema",
                             "type": "number",
                             "minimum": 0
-                        },
-                        "canopeo_image": {
-                            "title": "canopeo image",
-                            "title_fi": "canopeo-kuva",
-                            "type": "string",
-                            "x-ui": {
-                                "form-type": "fileInput",
-                                "accept": "image/*"
-                            }
                         }
                     }
                 },
@@ -3581,10 +3540,7 @@
                 "mgmt_event_long_notes": {
                     "title": "notes",
                     "title_fi": "muistiinpanot",
-                    "type": "string",
-                    "x-ui": {
-                        "form-type": "textAreaInput"
-                    }
+                    "type": "string"
                 }
             },
             "required": [
