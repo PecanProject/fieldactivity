@@ -140,6 +140,19 @@
                                     "unitless_title_sv": "vikt av sådd material"
                                 }
                             },
+                            "planting_density": {
+                                "title": "sowing density (plants/m²)",
+                                "title_fi": "kylvötiheys (kasveja/m²)",
+                                "title_sv": "utsädestäthet (plantor/m²)",
+                                "type": "number",
+                                "minimum": 0,
+                                "x-ui": {
+                                    "unit": "m⁻²",
+                                    "unitless_title": "sowing density",
+                                    "unitless_title_fi": "kylvötiheys",
+                                    "unitless_title_sv": "utsädestäthet"
+                                }
+                            },
                             "planting_depth": {
                                 "title": "sowing depth (mm)",
                                 "title2": "planting depth (mm)",
