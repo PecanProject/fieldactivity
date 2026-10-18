@@ -30,6 +30,7 @@ variable_name,date,Date,Päivä
 variable_name,mgmt_event_notes,Description,Kuvaus
 variable_name,planted_crop,Planted crop,Kylvetty laji
 variable_name,planting_material_weight,Weight of seeds (kg/ha), Siementen määrä (kg/ha)
+variable_name,planting_density,Sowing density (plants/m²),Kylvötiheys (kasveja/m²)
 variable_name,planting_depth,Sowing depth (mm),Kylvösyvyys (mm)
 variable_name,planting_material_source,Source of seeds,Siementen alkuperä
 variable_name,planting_notes,Sowing notes,Kylvömuistiinpanoja
